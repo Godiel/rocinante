@@ -1,0 +1,51 @@
+/* Walking skeleton only. The real design system arrives in step 8 of the plan. */
+:root {
+  --paper: #f6f1e7;
+  --ink: #23201b;
+  --rubric: #8c2a1c;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.skeleton header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.skeleton button {
+  font: inherit;
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  padding: 0.15rem 0.5rem;
+  cursor: pointer;
+}
+
+.page {
+  max-width: 38rem;
+  margin: 3rem auto;
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.page .ProseMirror {
+  outline: none;
+  min-height: 60vh;
+}
+.page .ProseMirror ::selection {
+  background: color-mix(in srgb, var(--rubric) 20%, transparent);
+}
