@@ -1,0 +1,30 @@
+# .NET
+bin/
+obj/
+*.user
+TestResults/
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Rust / Tauri
+target/
+src/host/binaries/
+src/core/publish/
+src/host/gen/
+
+# Editores y sistema
+.vs/
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# Datos locales
+*.rocinante
+*.rocinante-wal
+*.rocinante-shm
+*.log
