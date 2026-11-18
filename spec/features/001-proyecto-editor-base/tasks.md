@@ -44,11 +44,11 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Documentar el formato en `docs/format/`.
 
 ## 6. Casos de uso y servidor
-- [ ] Proyecto: crear, abrir, cerrar, guardar como.
-- [ ] Documentos: listar, crear, renombrar, reordenar, convertir, eliminar, restaurar, guardar contenido.
-- [ ] Versiones: crear, listar, leer, restaurar.
-- [ ] Notas: crear, editar, eliminar, listar por documento.
-- [ ] Notificación por cada cambio; tests de cada caso de uso.
+- [x] Proyecto: crear, abrir, cerrar, guardar como (y renombrar).
+- [x] Documentos: listar (el índice va en `project.get`), crear, renombrar, reordenar y convertir (`document.move`), eliminar, restaurar, leer y guardar contenido.
+- [x] Versiones: crear, listar, leer, restaurar.
+- [x] Notas: crear, editar, eliminar, listar por documento.
+- [x] Notificación por cada cambio; tests de cada caso de uso y una sesión completa por el protocolo que valida todas las respuestas y notificaciones.
 
 ## 7. Configuración de la app
 - [ ] Proyectos recientes, último proyecto, documento y posición del cursor.
