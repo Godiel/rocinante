@@ -1,0 +1,123 @@
+{
+  "name": "rocinante-core",
+  "protocolVersion": 1,
+  "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs.",
+  "errorCodes": {
+    "ParseError": -32700,
+    "InvalidRequest": -32600,
+    "MethodNotFound": -32601,
+    "InvalidParams": -32602,
+    "InternalError": -32603,
+    "CoreUnavailable": -32000
+  },
+  "methods": {
+    "system.info": {
+      "description": "Identifies the core and the protocol version it speaks.",
+      "params": null,
+      "result": {
+        "type": "object",
+        "required": ["protocolVersion", "coreVersion"],
+        "additionalProperties": false,
+        "properties": {
+          "protocolVersion": { "type": "integer", "minimum": 1 },
+          "coreVersion": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "system.ping": {
+      "description": "Liveness check.",
+      "params": null,
+      "result": { "const": "pong" }
+    },
+    "document.get": {
+      "description": "Returns the current document. Walking-skeleton method, replaced by the project API in step 6.",
+      "params": null,
+      "result": {
+        "type": "object",
+        "required": ["content", "revision"],
+        "additionalProperties": false,
+        "properties": {
+          "content": { "anyOf": [{ "$ref": "#/$defs/TipTapDocument" }, { "type": "null" }] },
+          "revision": { "$ref": "#/$defs/Revision" }
+        }
+      }
+    },
+    "document.save": {
+      "description": "Replaces the document content. Broadcasts document.changed to every window.",
+      "params": {
+        "type": "object",
+        "required": ["content", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "content": { "$ref": "#/$defs/TipTapDocument" },
+          "origin": { "$ref": "#/$defs/WindowLabel" }
+        }
+      },
+      "result": {
+        "type": "object",
+        "required": ["revision"],
+        "additionalProperties": false,
+        "properties": {
+          "revision": { "$ref": "#/$defs/Revision" }
+        }
+      }
+    }
+  },
+  "notifications": {
+    "document.changed": {
+      "description": "The document changed; windows other than the origin should reload it.",
+      "params": {
+        "type": "object",
+        "required": ["content", "revision", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "content": { "$ref": "#/$defs/TipTapDocument" },
+          "revision": { "$ref": "#/$defs/Revision" },
+          "origin": { "$ref": "#/$defs/WindowLabel" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Revision": {
+      "description": "Monotonic counter, incremented on every saved change. 0 means never saved.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "WindowLabel": {
+      "description": "Label of the window that originated a change.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "TipTapDocument": {
+      "description": "Root of a TipTap/ProseMirror document as produced by editor.getJSON().",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "doc" },
+        "content": { "type": "array", "items": { "$ref": "#/$defs/TipTapNode" } }
+      }
+    },
+    "TipTapNode": {
+      "description": "Any TipTap node. Node-specific shapes are validated by the editor schema, not here.",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "attrs": { "type": "object" },
+        "content": { "type": "array", "items": { "$ref": "#/$defs/TipTapNode" } },
+        "marks": { "type": "array", "items": { "$ref": "#/$defs/TipTapMark" } },
+        "text": { "type": "string" }
+      }
+    },
+    "TipTapMark": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "attrs": { "type": "object" }
+      }
+    }
+  }
+}

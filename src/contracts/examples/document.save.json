@@ -1,0 +1,27 @@
+{
+  "valid": [
+    {
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              { "type": "text", "text": "En un lugar de la " },
+              { "type": "text", "text": "Mancha", "marks": [{ "type": "italic" }] }
+            ]
+          }
+        ]
+      },
+      "origin": "main"
+    },
+    { "content": { "type": "doc" }, "origin": "window-1" }
+  ],
+  "invalid": [
+    { "origin": "main" },
+    { "content": { "type": "doc" } },
+    { "content": { "type": "paragraph" }, "origin": "main" },
+    { "content": { "type": "doc" }, "origin": "" },
+    { "content": { "type": "doc" }, "origin": "main", "unexpected": true }
+  ]
+}

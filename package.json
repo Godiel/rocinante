@@ -7,10 +7,13 @@
   ],
   "scripts": {
     "core:build": "node scripts/build-core.mjs",
+    "contracts:generate": "node scripts/generate-contracts.mjs",
+    "contracts:check": "node scripts/generate-contracts.mjs --check",
     "dev": "tauri dev",
     "build": "tauri build"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.12.5"
+    "@tauri-apps/cli": "^2.12.5",
+    "json-schema-to-typescript": "^16.0.0"
   }
 }
