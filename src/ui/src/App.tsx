@@ -1,20 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { onNotification, request } from "./bridge/core";
+import { ensureCompatibleCore, onNotification, request } from "./bridge/core";
+import { toTipTapDocument } from "./bridge/document";
 
 // Walking skeleton for feature 001: one document shared live across windows.
-
-interface DocumentState {
-  content: JSONContent | null;
-  revision: number;
-}
-
-interface DocumentChanged extends DocumentState {
-  origin: string;
-}
 
 const SAVE_DELAY_MS = 300;
 const windowLabel = getCurrentWebviewWindow().label;
@@ -22,6 +14,7 @@ const windowLabel = getCurrentWebviewWindow().label;
 export default function App() {
   const [revision, setRevision] = useState(0);
   const [latency, setLatency] = useState<string>("—");
+  const [problem, setProblem] = useState<string | null>(null);
   const saveTimer = useRef<number | undefined>(undefined);
 
   const editor = useEditor({
@@ -30,8 +23,8 @@ export default function App() {
     onUpdate: ({ editor: current }) => {
       window.clearTimeout(saveTimer.current);
       saveTimer.current = window.setTimeout(() => {
-        void request<{ revision: number }>("document.save", {
-          content: current.getJSON(),
+        void request("document.save", {
+          content: toTipTapDocument(current.getJSON()),
           origin: windowLabel,
         }).then((result) => setRevision(result.revision));
       }, SAVE_DELAY_MS);
@@ -41,16 +34,20 @@ export default function App() {
   useEffect(() => {
     if (!editor) return;
 
-    void request<DocumentState>("document.get").then((state) => {
-      if (state.content) editor.commands.setContent(state.content, { emitUpdate: false });
-      setRevision(state.revision);
-    });
+    void ensureCompatibleCore()
+      .then(() => request("document.get"))
+      .then((state) => {
+        if (state.content) editor.commands.setContent(state.content, { emitUpdate: false });
+        setRevision(state.revision);
+      })
+      .catch((error: unknown) => {
+        console.error(error);
+        setProblem("No se pudo conectar con el núcleo de Rocinante.");
+      });
 
-    const unlisten = onNotification((notification) => {
-      if (notification.method !== "document.changed") return;
-      const change = notification.params as DocumentChanged;
+    const unlisten = onNotification("document.changed", (change) => {
       setRevision(change.revision);
-      if (change.origin !== windowLabel && change.content) {
+      if (change.origin !== windowLabel) {
         editor.commands.setContent(change.content, { emitUpdate: false });
       }
     });
@@ -82,6 +79,7 @@ export default function App() {
         <button onClick={() => void measureLatency()}>Medir latencia</button>
         <span>{latency}</span>
       </header>
+      {problem && <p role="alert">{problem}</p>}
       <EditorContent editor={editor} className="page" />
     </main>
   );
