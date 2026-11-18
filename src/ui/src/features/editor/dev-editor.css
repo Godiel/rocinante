@@ -1,0 +1,48 @@
+.dev-editor-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-caption);
+  color: var(--color-ink-soft);
+}
+
+.dev-editor-bar nav {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.dev-editor-count {
+  font-variant: normal;
+  letter-spacing: 0;
+  font-style: italic;
+}
+
+.dev-editor-problem {
+  max-width: var(--measure);
+  margin: 0 auto;
+  font-style: italic;
+  color: var(--color-rubric);
+}
+
+.dev-editor-page {
+  max-width: var(--measure);
+  margin: var(--space-5) auto var(--space-6);
+  padding: 0 var(--space-4);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+
+.dev-editor-page .ProseMirror {
+  outline: none;
+  min-height: 60vh;
+  hyphens: auto;
+}
+
+.dev-editor-page .ProseMirror p {
+  margin: 0;
+}
+
+.dev-editor-page .ProseMirror p + p {
+  text-indent: 1.5em;
+}
