@@ -62,14 +62,14 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Pantalla de bienvenida (recientes, nuevo, abrir) con los diálogos del sistema y mensajes de error en español.
 
 ## 9. Editor
-- [ ] Papel sin bordes con ancho de columna y márgenes de la constitución.
-- [ ] Formato: negrita, cursiva, subrayado, títulos, citas, listas.
-- [ ] Extensiones propias: sangría, separador de escena, notas al pie.
-- [ ] Notas ancladas: crear en punto o pasaje, marca discreta, ver, editar y eliminar.
-- [ ] Menú flotante al seleccionar y atajos de teclado.
-- [ ] Desplazamiento tipo rodillo, desactivable.
-- [ ] Cursor de máquina de escribir con tiempo acotado; **si da problemas, avisar al autor** antes de descartarlo.
-- [ ] Tests de las extensiones propias.
+- [x] Papel sin bordes con ancho de columna y márgenes de la constitución.
+- [x] Formato: negrita, cursiva, subrayado, títulos, citas, listas.
+- [x] Extensiones propias: sangría, separador de escena, notas al pie (su texto cuenta como parte de la obra).
+- [x] Notas ancladas: crear en punto o pasaje, marca discreta, ver, editar y eliminar; las sueltas se listan bajo el texto.
+- [x] Menú flotante al seleccionar y atajos de teclado.
+- [x] Desplazamiento tipo rodillo, desactivable.
+- [x] Cursor de máquina de escribir: barra gruesa dibujada sobre el texto, que cede el sitio al cursor del sistema al seleccionar y mientras un método de entrada compone.
+- [x] Tests de las extensiones propias.
 
 ## 10. Índice
 - [ ] Vista con capítulos y cajón de fragmentos, anclable o flotante, con atajo para abrir y cerrar.

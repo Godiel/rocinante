@@ -37,7 +37,7 @@ Mientras el proyecto está abierto, junto al archivo pueden verse `obra.rocinant
 | Fechas | Entero, milisegundos Unix en UTC. |
 | Booleanos | Entero `0` o `1`, con `CHECK`. |
 | Enumeraciones | Texto en `snake_case` (`chapter`, `before_restore`), con `CHECK`. |
-| Texto de la obra | JSON de TipTap tal como lo produce el editor (`{"type":"doc",…}`). |
+| Texto de la obra | JSON de TipTap tal como lo produce el editor (`{"type":"doc",…}`). Además de los nodos estándar, Rocinante usa `sceneBreak` (cambio de escena), `footnote` (nota al pie, con su texto en `attrs.text`, que cuenta como texto de la obra), la marca `noteAnchor` y el nodo `notePoint` (anclas de notas), y el atributo `indent` (0–4) en párrafos y títulos. |
 | Nombres | Tablas y columnas en `snake_case`, en inglés. |
 
 Todas las tablas son `STRICT`: SQLite rechaza valores del tipo equivocado.
@@ -101,7 +101,7 @@ Instantáneas completas del texto. Nunca se modifican.
 Índice `document_version_by_document (document_id, created_at)`.
 
 ### `note`
-Notas del autor sobre un documento. Su texto vive aquí y **nunca** dentro de `document.content`: el documento solo guarda un ancla (marca o nodo `noteAnchor` con el atributo `noteId`). Así las notas no cuentan como texto de la obra ni salen en las exportaciones.
+Notas del autor sobre un documento. Su texto vive aquí y **nunca** dentro de `document.content`: el documento solo guarda un ancla con el atributo `noteId`: la marca `noteAnchor` sobre un pasaje o el nodo en línea `notePoint` en un punto. Así las notas no cuentan como texto de la obra ni salen en las exportaciones.
 
 | Columna | Tipo | |
 |---|---|---|
