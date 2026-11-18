@@ -1,0 +1,20 @@
+{
+  "valid": [
+    { "changes": { "theme": "candlelight" }, "origin": "main" },
+    {
+      "changes": {
+        "outline": "floating",
+        "counterVisible": false,
+        "typewriterScrolling": false
+      },
+      "origin": "window-1"
+    }
+  ],
+  "invalid": [
+    { "changes": {}, "origin": "main" },
+    { "changes": { "theme": "neon" }, "origin": "main" },
+    { "changes": { "font": "Comic Sans" }, "origin": "main" },
+    { "changes": { "counterVisible": "no" }, "origin": "main" },
+    { "changes": { "theme": "paper" } }
+  ]
+}

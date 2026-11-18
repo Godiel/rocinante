@@ -32,7 +32,7 @@ La lista completa está en `$defs.ErrorReason`; un test del núcleo comprueba qu
 
 ## Notificaciones
 
-Cada método que cambia algo recibe la ventana de origen (`origin`) y lo anuncia a todas las ventanas. La ventana de origen ya muestra el cambio y puede ignorar el aviso; las demás se ponen al día.
+Cada método que cambia algo recibe la ventana de origen (`origin`) y lo anuncia a todas las ventanas. La ventana de origen ya muestra el cambio y puede ignorar el aviso; las demás se ponen al día. La excepción es `place.save`: cada ventana tiene su propio cursor, así que la posición se recuerda sin anunciarla.
 
 ## Cambiar el contrato
 

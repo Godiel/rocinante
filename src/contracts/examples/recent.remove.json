@@ -1,0 +1,13 @@
+{
+  "valid": [
+    {
+      "path": "C:/Users/autor/Documents/Rocinante/Don Quijote.rocinante",
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    { "origin": "main" },
+    { "path": "", "origin": "main" },
+    { "path": "obra.rocinante" }
+  ]
+}

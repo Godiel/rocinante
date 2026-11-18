@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 2,
+  "protocolVersion": 3,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -38,6 +38,109 @@
       "params": null,
       "result": {
         "const": "pong"
+      }
+    },
+    "app.start": {
+      "description": "What a window shows when it starts. The first window opens the file the app was launched with, or the project left open last time; later windows get the project already open. If that project cannot be opened, problem says why and the window shows the welcome screen.",
+      "params": {
+        "type": "object",
+        "required": ["origin"],
+        "additionalProperties": false,
+        "properties": {
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/StartState"
+      }
+    },
+    "preferences.update": {
+      "description": "Changes some of the writer's preferences; omitted ones stay as they are. Broadcasts preferences.changed.",
+      "params": {
+        "type": "object",
+        "required": ["changes", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "changes": {
+            "$ref": "#/$defs/PreferencesChange"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/Preferences"
+      }
+    },
+    "recent.list": {
+      "description": "Recently opened projects, most recent first.",
+      "params": null,
+      "result": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/RecentProject"
+        }
+      }
+    },
+    "recent.remove": {
+      "description": "Removes a project from the recent list; the file is not touched. Broadcasts recent.changed.",
+      "params": {
+        "type": "object",
+        "required": ["path", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "$ref": "#/$defs/FilePath"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/RecentProject"
+        }
+      }
+    },
+    "place.get": {
+      "description": "Where the writer left the open project: document and selection. Null if unknown or that document is no longer in the work.",
+      "params": null,
+      "result": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Place"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "place.save": {
+      "description": "Remembers where the writer is in the open project, to come back to it next time. Not broadcast: each window keeps its own cursor.",
+      "params": {
+        "type": "object",
+        "required": ["documentId", "anchor", "head"],
+        "additionalProperties": false,
+        "properties": {
+          "documentId": {
+            "$ref": "#/$defs/Id"
+          },
+          "anchor": {
+            "$ref": "#/$defs/Position"
+          },
+          "head": {
+            "$ref": "#/$defs/Position"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
       }
     },
     "project.create": {
@@ -579,6 +682,41 @@
           }
         }
       }
+    },
+    "preferences.changed": {
+      "description": "The writer's preferences changed; every window applies them.",
+      "params": {
+        "type": "object",
+        "required": ["preferences", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "preferences": {
+            "$ref": "#/$defs/Preferences"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
+    },
+    "recent.changed": {
+      "description": "The recent project list changed.",
+      "params": {
+        "type": "object",
+        "required": ["recent", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "recent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/RecentProject"
+            }
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -669,6 +807,159 @@
           "$ref": "#/$defs/ErrorReason"
         }
       }
+    },
+    "Theme": {
+      "description": "paper: ivory paper. candlelight: warm dark.",
+      "enum": ["paper", "candlelight"]
+    },
+    "OutlineMode": {
+      "description": "Whether the index is docked to the side or floats over the text.",
+      "enum": ["docked", "floating"]
+    },
+    "Preferences": {
+      "type": "object",
+      "required": ["theme", "outline", "counterVisible", "typewriterScrolling"],
+      "additionalProperties": false,
+      "properties": {
+        "theme": {
+          "$ref": "#/$defs/Theme"
+        },
+        "outline": {
+          "$ref": "#/$defs/OutlineMode"
+        },
+        "counterVisible": {
+          "type": "boolean"
+        },
+        "typewriterScrolling": {
+          "type": "boolean"
+        }
+      }
+    },
+    "PreferencesChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "theme": {
+          "$ref": "#/$defs/Theme"
+        },
+        "outline": {
+          "$ref": "#/$defs/OutlineMode"
+        },
+        "counterVisible": {
+          "type": "boolean"
+        },
+        "typewriterScrolling": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Place": {
+      "description": "A document and a ProseMirror selection in it.",
+      "type": "object",
+      "required": ["documentId", "anchor", "head"],
+      "additionalProperties": false,
+      "properties": {
+        "documentId": {
+          "$ref": "#/$defs/Id"
+        },
+        "anchor": {
+          "$ref": "#/$defs/Position"
+        },
+        "head": {
+          "$ref": "#/$defs/Position"
+        }
+      }
+    },
+    "RecentProject": {
+      "type": "object",
+      "required": ["path", "title", "lastOpenedAt", "exists"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/FilePath"
+        },
+        "title": {
+          "$ref": "#/$defs/Title"
+        },
+        "lastOpenedAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "exists": {
+          "type": "boolean",
+          "description": "Whether the file is still there; the welcome screen dims missing ones."
+        }
+      }
+    },
+    "StartProblem": {
+      "type": "object",
+      "required": ["path", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/FilePath"
+        },
+        "reason": {
+          "$ref": "#/$defs/ErrorReason"
+        }
+      }
+    },
+    "StartState": {
+      "type": "object",
+      "required": [
+        "project",
+        "place",
+        "problem",
+        "recent",
+        "preferences",
+        "defaultFolder"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "project": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProjectState"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "place": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Place"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "problem": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StartProblem"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recent": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RecentProject"
+          }
+        },
+        "preferences": {
+          "$ref": "#/$defs/Preferences"
+        },
+        "defaultFolder": {
+          "$ref": "#/$defs/FilePath"
+        }
+      },
+      "description": "defaultFolder is where new projects are proposed: Documents/Rocinante."
     },
     "Statistics": {
       "description": "Counts shown to the writer. Notes never count.",

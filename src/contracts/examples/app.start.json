@@ -1,0 +1,8 @@
+{
+  "valid": [{ "origin": "main" }],
+  "invalid": [
+    {},
+    { "origin": "" },
+    { "origin": "main", "file": "obra.rocinante" }
+  ]
+}
