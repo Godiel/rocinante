@@ -39,7 +39,7 @@ Son dos procesos. Tauri abre las ventanas y aloja la interfaz. El núcleo .NET s
   - **Contrato interfaz ↔ núcleo:** un esquema JSON compartido de los mensajes, validado en TypeScript y en C#. Si un lado cambia sin el otro, CI falla.
   - **De extremo a extremo:** Playwright sobre la interfaz con el núcleo real, para los flujos completos.
   - **Rust:** `cargo test` para los comandos que existan.
-  - **Cobertura:** 80 % o más en el dominio del núcleo. En la interfaz se prueba el comportamiento, sin porcentaje obligatorio.
+  - **Cobertura:** 80 % o más de líneas y de ramas en el dominio del núcleo, medida con coverlet (MIT) y exigida en cada ejecución de los tests. En la interfaz se prueba el comportamiento, sin porcentaje obligatorio.
 - **Distribución:** instaladores para Windows, macOS y Linux (feature 012).
 
 ## Licencia

@@ -22,4 +22,4 @@
 ## Consecuencias
 
 - Antes de añadir una dependencia se revisa su licencia.
-- La cobertura del dominio del núcleo debe ser del 80 % o más.
+- La cobertura del dominio del núcleo debe ser del 80 % o más de líneas y de ramas. La mide coverlet (MIT) y el proyecto de tests la exige en cada ejecución, en local y en CI.

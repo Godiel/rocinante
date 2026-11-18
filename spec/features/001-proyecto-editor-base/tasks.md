@@ -30,11 +30,11 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Pruebas de contrato en TypeScript y en C#, con ejemplos compartidos en `src/contracts/examples/`.
 
 ## 4. Dominio
-- [ ] `Project`, `Document` (`Chapter` / `Fragment`), `DocumentVersion` y `Note`.
-- [ ] Reglas: orden de capítulos, conversión fragmento ↔ capítulo, eliminación recuperable.
-- [ ] Reglas de versiones: automática cada 10 min de escritura con cambios, manual con nombre, restaurar guarda antes lo actual.
-- [ ] Reglas de notas: anclada o suelta; pasa a suelta si desaparece su pasaje.
-- [ ] Tests del dominio con cobertura ≥ 80 %.
+- [x] `Project`, `Document` (`Chapter` / `Fragment`), `DocumentVersion` y `Note`.
+- [x] Reglas: orden de capítulos, conversión fragmento ↔ capítulo, eliminación recuperable.
+- [x] Reglas de versiones: automática cada 10 min de escritura con cambios, manual con nombre opcional, restaurar guarda antes lo actual.
+- [x] Reglas de notas: anclada o suelta; pasa a suelta si desaparece su pasaje y vuelve a anclarse si reaparece.
+- [x] Tests del dominio con cobertura ≥ 80 % de líneas y ramas, exigida en cada ejecución.
 
 ## 5. Persistencia
 - [ ] Esquema SQLite v1: `meta`, `project`, `document`, `document_version`, `note`.
