@@ -1,0 +1,31 @@
+.writing-bar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-caption);
+  color: var(--color-ink-soft);
+  background: var(--color-paper);
+}
+
+.writing-bar nav {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.writing-count {
+  font-variant: normal;
+  letter-spacing: 0;
+  font-style: italic;
+}
+
+.writing-problem {
+  max-width: var(--measure);
+  margin: var(--space-3) auto 0;
+  padding: 0 var(--space-4);
+  font-style: italic;
+  color: var(--color-rubric);
+}

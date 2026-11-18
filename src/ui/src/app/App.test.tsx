@@ -15,8 +15,8 @@ vi.mock("../bridge/core", async (importOriginal) => ({
   },
 }));
 // The writing view has its own tests in block 9; here it only needs to say what it shows.
-vi.mock("../features/editor/DevEditor", () => ({
-  DevEditor: ({ project }: { project: ProjectState }) => <p>Escribiendo en {project.title}</p>,
+vi.mock("../features/editor/WritingView", () => ({
+  WritingView: ({ project }: { project: ProjectState }) => <p>Escribiendo en {project.title}</p>,
 }));
 
 import { messages } from "./messages";

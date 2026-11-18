@@ -9,8 +9,15 @@ import type {
 } from "../bridge/generated/protocol";
 import { applyTheme } from "../design/themes";
 import { Welcome, type Pickers } from "../features/welcome/Welcome";
-import { DevEditor } from "../features/editor/DevEditor";
+import { WritingView } from "../features/editor/WritingView";
 import { messageFor, messages } from "./messages";
+
+const DEFAULT_PREFERENCES: Preferences = {
+  theme: "paper",
+  outline: "docked",
+  counterVisible: true,
+  typewriterScrolling: true,
+};
 
 type Screen =
   | { kind: "starting" }
@@ -100,11 +107,11 @@ export function App({ origin, pickers }: AppProps) {
       );
     case "writing":
       return (
-        <DevEditor
+        <WritingView
           key={screen.project.path}
           project={screen.project}
           place={screen.place}
-          theme={preferences?.theme ?? "paper"}
+          preferences={preferences ?? DEFAULT_PREFERENCES}
           origin={origin}
         />
       );
