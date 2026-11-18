@@ -1,3 +1,4 @@
+using Rocinante.Application.Ports;
 using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
@@ -5,7 +6,7 @@ using Rocinante.Domain.Documents;
 namespace Rocinante.Infrastructure.Persistence;
 
 /// <summary>Stores the text of each document: the text columns of <c>document</c>.</summary>
-public sealed class DocumentRepository(ProjectDatabase database)
+public sealed class DocumentRepository(ProjectDatabase database) : IDocumentRepository
 {
     public Document Load(DocumentId id)
     {

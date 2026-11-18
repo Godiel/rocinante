@@ -149,7 +149,7 @@ public sealed class RepositoriesTests : IDisposable
         document.Save(Paragraphs("texto nuevo"), Moments.At(7));
         documents.Save(document);
 
-        var read = new VersionRepository(_fixture.Reopen()).Get(saved.Id);
+        var read = new VersionRepository(_fixture.Reopen()).Load(saved.Id);
         var reloaded = new DocumentRepository(_fixture.Database).Load(_fixture.First.Id);
         var before = reloaded.Restore(read, Moments.At(8)).ShouldNotBeNull();
 
@@ -160,7 +160,7 @@ public sealed class RepositoriesTests : IDisposable
         reloaded.Content.ShouldBe(Paragraphs("versión antigua"));
         before.Kind.ShouldBe(VersionKind.BeforeRestore);
         new VersionRepository(_fixture.Database).Add(before);
-        new VersionRepository(_fixture.Database).Get(before.Id).Kind.ShouldBe(VersionKind.BeforeRestore);
+        new VersionRepository(_fixture.Database).Load(before.Id).Kind.ShouldBe(VersionKind.BeforeRestore);
     }
 
     [Fact]
@@ -175,13 +175,13 @@ public sealed class RepositoriesTests : IDisposable
 
         versions.Add(automatic);
 
-        versions.Get(automatic.Id).Kind.ShouldBe(VersionKind.Automatic);
+        versions.Load(automatic.Id).Kind.ShouldBe(VersionKind.Automatic);
     }
 
     [Fact]
     public void Unknown_versions_are_reported()
     {
-        Should.Throw<DomainException>(() => new VersionRepository(_fixture.Database).Get(VersionId.New(Moments.Start)))
+        Should.Throw<DomainException>(() => new VersionRepository(_fixture.Database).Load(VersionId.New(Moments.Start)))
             .Error.ShouldBe(DomainError.VersionNotFound);
     }
 
@@ -203,7 +203,7 @@ public sealed class RepositoriesTests : IDisposable
         var reopened = new NoteRepository(_fixture.Reopen());
         var listed = reopened.ListByDocument(_fixture.First.Id);
         listed.Select(note => note.Id).ShouldBe([first.Id, second.Id]);
-        var updated = reopened.Get(first.Id);
+        var updated = reopened.Load(first.Id);
         updated.Text.ShouldBe("revisar la fecha de la batalla");
         updated.IsAnchored.ShouldBeFalse();
         updated.CreatedAt.ShouldBe(Moments.At(1));
@@ -212,7 +212,7 @@ public sealed class RepositoriesTests : IDisposable
         reopened.Delete(second.Id).ShouldBeTrue();
         reopened.Delete(second.Id).ShouldBeFalse();
         reopened.ListByDocument(_fixture.First.Id).ShouldHaveSingleItem().Id.ShouldBe(first.Id);
-        Should.Throw<DomainException>(() => reopened.Get(second.Id)).Error.ShouldBe(DomainError.NoteNotFound);
+        Should.Throw<DomainException>(() => reopened.Load(second.Id)).Error.ShouldBe(DomainError.NoteNotFound);
     }
 
     [Fact]

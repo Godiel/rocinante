@@ -1,14 +1,12 @@
+using Rocinante.Application.Ports;
 using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Versions;
 
 namespace Rocinante.Infrastructure.Persistence;
 
-/// <summary>A version as listed to the writer, without its text.</summary>
-public sealed record VersionSummary(VersionId Id, VersionKind Kind, string? Name, DateTimeOffset CreatedAt, TextStatistics Statistics);
-
 /// <summary>Stores document versions in <c>document_version</c>. Versions are only added, never changed.</summary>
-public sealed class VersionRepository(ProjectDatabase database)
+public sealed class VersionRepository(ProjectDatabase database) : IVersionRepository
 {
     public void Add(DocumentVersion version)
     {
@@ -48,6 +46,7 @@ public sealed class VersionRepository(ProjectDatabase database)
         {
             versions.Add(new VersionSummary(
                 new VersionId(reader.GetId(0)),
+                documentId,
                 reader.GetVersionKind(1),
                 reader.GetNullableString(2),
                 reader.GetTime(3),
@@ -57,7 +56,7 @@ public sealed class VersionRepository(ProjectDatabase database)
         return versions;
     }
 
-    public DocumentVersion Get(VersionId id)
+    public DocumentVersion Load(VersionId id)
     {
         using var command = database.Command(
             "SELECT document_id, kind, name, created_at, content FROM document_version WHERE id = $id;",

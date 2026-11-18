@@ -1,11 +1,12 @@
 using Microsoft.Data.Sqlite;
+using Rocinante.Application.Ports;
 using Rocinante.Domain;
 using Rocinante.Domain.Notes;
 
 namespace Rocinante.Infrastructure.Persistence;
 
 /// <summary>Stores notes in <c>note</c>.</summary>
-public sealed class NoteRepository(ProjectDatabase database)
+public sealed class NoteRepository(ProjectDatabase database) : INoteRepository
 {
     /// <summary>Inserts a new note or updates an existing one.</summary>
     public void Save(Note note)
@@ -29,7 +30,7 @@ public sealed class NoteRepository(ProjectDatabase database)
             ("$updatedAt", Columns.Time(note.UpdatedAt))));
     }
 
-    public Note Get(NoteId id)
+    public Note Load(NoteId id)
     {
         using var command = database.Command(
             "SELECT id, document_id, text, anchored, created_at, updated_at FROM note WHERE id = $id;",

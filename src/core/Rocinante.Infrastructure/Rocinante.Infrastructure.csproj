@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rocinante.Domain\Rocinante.Domain.csproj" />
+    <ProjectReference Include="..\Rocinante.Application\Rocinante.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

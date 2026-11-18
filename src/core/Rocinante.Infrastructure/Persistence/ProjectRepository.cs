@@ -1,3 +1,4 @@
+using Rocinante.Application.Ports;
 using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Projects;
@@ -5,7 +6,7 @@ using Rocinante.Domain.Projects;
 namespace Rocinante.Infrastructure.Persistence;
 
 /// <summary>Stores the project and its index: the <c>project</c> row and the index columns of <c>document</c>.</summary>
-public sealed class ProjectRepository(ProjectDatabase database)
+public sealed class ProjectRepository(ProjectDatabase database) : IProjectRepository
 {
     public Project Load()
     {
