@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Permissions for every Rocinante window. The UI only reaches the core through the relay commands; it cannot spawn processes or touch the file system.",
+  "description": "Permissions for every Rocinante window. The UI only reaches the core through the relay commands; it cannot spawn processes or touch the file system. It may show the system dialog to pick a project file or a folder: the writer chooses, and the path goes to the core.",
   "windows": ["main", "window-*"],
-  "permissions": ["core:default"]
+  "permissions": ["core:default", "dialog:allow-open"]
 }
