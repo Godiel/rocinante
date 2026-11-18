@@ -2,42 +2,51 @@ import { useEffect, useRef, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { invoke } from "@tauri-apps/api/core";
-import { appDataDir, join } from "@tauri-apps/api/path";
+import { join } from "@tauri-apps/api/path";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { CoreError, ensureCompatibleCore, onNotification, request } from "./bridge/core";
 import { toTipTapDocument } from "./bridge/document";
-import type { ProjectState } from "./bridge/generated/protocol";
+import type { Place, ProjectState, StartState } from "./bridge/generated/protocol";
 
-// Development shell until the welcome screen (block 8) and the editor (block 9) exist: it opens a
-// development project in the app data folder and edits its first chapter, live across windows.
+// Development shell until the welcome screen (block 8) and the editor (block 9) exist. It starts
+// the way the app will: the project left open last time, or the one the app was launched with.
+// Without one, it opens a development project in Documents/Rocinante. It returns to the chapter
+// and cursor where the writer left off.
 
 const SAVE_DELAY_MS = 300;
+const PLACE_DELAY_MS = 1000;
 const DEVELOPMENT_PROJECT = "desarrollo.rocinante";
 const windowLabel = getCurrentWebviewWindow().label;
 
-/** The open project, or the development one, created on first use. */
-async function developmentProject(): Promise<ProjectState> {
-  try {
-    return await request("project.get");
-  } catch (error) {
-    if (!(error instanceof CoreError) || error.reason !== "projectNotOpen") throw error;
-  }
+interface Opened {
+  project: ProjectState;
+  place: Place | null;
+}
 
-  const path = await join(await appDataDir(), DEVELOPMENT_PROJECT);
+/** The project to work on: the one the core opened on start, or the development one. */
+async function openProject(start: StartState): Promise<Opened> {
+  if (start.project) return { project: start.project, place: start.place };
+  if (start.problem)
+    console.warn(`could not reopen ${start.problem.path}: ${start.problem.reason}`);
+
+  const path = await join(start.defaultFolder, DEVELOPMENT_PROJECT);
   try {
-    return await request("project.open", { path, origin: windowLabel });
+    const project = await request("project.open", { path, origin: windowLabel });
+    return { project, place: await request("place.get") };
   } catch (error) {
     if (!(error instanceof CoreError) || error.reason !== "notFound") throw error;
-    return request("project.create", {
+    const project = await request("project.create", {
       path,
       title: "Proyecto de desarrollo",
       origin: windowLabel,
     });
+    return { project, place: null };
   }
 }
 
-/** The first chapter of the project, created if there is none. */
-async function firstChapter(project: ProjectState): Promise<string> {
+/** The document to show: where the writer left off, or the first chapter (created if none). */
+async function documentToShow({ project, place }: Opened): Promise<string> {
+  if (place) return place.documentId;
   const chapter = project.index.chapters[0];
   if (chapter) return chapter.id;
   const created = await request("document.create", {
@@ -54,6 +63,7 @@ export default function App() {
   const [latency, setLatency] = useState<string>("—");
   const [problem, setProblem] = useState<string | null>(null);
   const saveTimer = useRef<number | undefined>(undefined);
+  const placeTimer = useRef<number | undefined>(undefined);
   const documentRef = useRef<string | null>(null);
 
   const editor = useEditor({
@@ -73,19 +83,38 @@ export default function App() {
         );
       }, SAVE_DELAY_MS);
     },
+    onSelectionUpdate: ({ editor: current }) => {
+      const id = documentRef.current;
+      if (!id) return;
+      const { anchor, head } = current.state.selection;
+      window.clearTimeout(placeTimer.current);
+      placeTimer.current = window.setTimeout(() => {
+        void request("place.save", { documentId: id, anchor, head });
+      }, PLACE_DELAY_MS);
+    },
   });
 
   useEffect(() => {
     if (!editor) return;
 
     void ensureCompatibleCore()
-      .then(developmentProject)
-      .then(firstChapter)
-      .then(async (id) => {
+      .then(() => request("app.start", { origin: windowLabel }))
+      .then(openProject)
+      .then(async (opened) => {
+        const id = await documentToShow(opened);
         const document = await request("document.get", { id });
         documentRef.current = id;
         setDocumentId(id);
         editor.commands.setContent(document.content, { emitUpdate: false });
+        const place = opened.place?.documentId === id ? opened.place : null;
+        if (place) {
+          const end = editor.state.doc.content.size;
+          editor.commands.setTextSelection({
+            from: Math.min(place.anchor, end),
+            to: Math.min(place.head, end),
+          });
+        }
+        editor.commands.focus();
         setStatus(`revisión ${document.revision} · ${document.statistics.words} palabras`);
       })
       .catch((error: unknown) => {
