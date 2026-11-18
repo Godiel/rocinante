@@ -39,8 +39,8 @@ async fn open_window(app: AppHandle) -> Result<(), String> {
 }
 
 fn start_core(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
-    let project = app.path().app_data_dir()?.join("skeleton.rocinante");
-    let (mut events, child) = app.shell().sidecar(CORE_SIDECAR)?.arg(project).spawn()?;
+    // The core starts with no project open: the UI creates or opens one.
+    let (mut events, child) = app.shell().sidecar(CORE_SIDECAR)?.spawn()?;
 
     app.manage(Relay::new(child));
 
