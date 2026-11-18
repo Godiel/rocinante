@@ -5,6 +5,7 @@ import {
   PROTOCOL_VERSION,
   type CoreMethods,
   type CoreNotifications,
+  type ErrorReason,
 } from "./generated/protocol";
 
 export type MethodName = keyof CoreMethods;
@@ -15,22 +16,32 @@ export type NotificationName = keyof CoreNotifications;
 /** Arguments of `request`: methods without params take none. */
 type RequestArgs<M extends MethodName> = Params<M> extends undefined ? [] : [params: Params<M>];
 
-/** An error returned by the core, following the JSON-RPC error object. */
+/**
+ * An error returned by the core, following the JSON-RPC error object. Expected failures carry a
+ * `reason` (see `ErrorReason` in the contract) that the UI turns into a message in Spanish.
+ */
 export class CoreError extends Error {
   readonly code: number;
+  readonly reason: ErrorReason | undefined;
 
-  constructor(code: number, message: string) {
+  constructor(code: number, message: string, reason?: ErrorReason) {
     super(message);
     this.name = "CoreError";
     this.code = code;
+    this.reason = reason;
   }
 
   static from(value: unknown): CoreError {
     if (typeof value === "object" && value !== null && "code" in value && "message" in value) {
-      return new CoreError(Number(value.code), String(value.message));
+      return new CoreError(Number(value.code), String(value.message), reasonOf(value));
     }
     return new CoreError(ErrorCodes.CoreUnavailable, String(value));
   }
+}
+
+function reasonOf(error: object): ErrorReason | undefined {
+  if (!("data" in error) || typeof error.data !== "object" || error.data === null) return undefined;
+  return "reason" in error.data ? (error.data.reason as ErrorReason) : undefined;
 }
 
 /** Event name used by the host relay to broadcast core notifications. */

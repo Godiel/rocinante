@@ -2,31 +2,75 @@ import { useEffect, useRef, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { invoke } from "@tauri-apps/api/core";
+import { appDataDir, join } from "@tauri-apps/api/path";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { ensureCompatibleCore, onNotification, request } from "./bridge/core";
+import { CoreError, ensureCompatibleCore, onNotification, request } from "./bridge/core";
 import { toTipTapDocument } from "./bridge/document";
+import type { ProjectState } from "./bridge/generated/protocol";
 
-// Walking skeleton for feature 001: one document shared live across windows.
+// Development shell until the welcome screen (block 8) and the editor (block 9) exist: it opens a
+// development project in the app data folder and edits its first chapter, live across windows.
 
 const SAVE_DELAY_MS = 300;
+const DEVELOPMENT_PROJECT = "desarrollo.rocinante";
 const windowLabel = getCurrentWebviewWindow().label;
 
+/** The open project, or the development one, created on first use. */
+async function developmentProject(): Promise<ProjectState> {
+  try {
+    return await request("project.get");
+  } catch (error) {
+    if (!(error instanceof CoreError) || error.reason !== "projectNotOpen") throw error;
+  }
+
+  const path = await join(await appDataDir(), DEVELOPMENT_PROJECT);
+  try {
+    return await request("project.open", { path, origin: windowLabel });
+  } catch (error) {
+    if (!(error instanceof CoreError) || error.reason !== "notFound") throw error;
+    return request("project.create", {
+      path,
+      title: "Proyecto de desarrollo",
+      origin: windowLabel,
+    });
+  }
+}
+
+/** The first chapter of the project, created if there is none. */
+async function firstChapter(project: ProjectState): Promise<string> {
+  const chapter = project.index.chapters[0];
+  if (chapter) return chapter.id;
+  const created = await request("document.create", {
+    kind: "chapter",
+    title: "Capítulo primero",
+    origin: windowLabel,
+  });
+  return created.id;
+}
+
 export default function App() {
-  const [revision, setRevision] = useState(0);
+  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [status, setStatus] = useState("—");
   const [latency, setLatency] = useState<string>("—");
   const [problem, setProblem] = useState<string | null>(null);
   const saveTimer = useRef<number | undefined>(undefined);
+  const documentRef = useRef<string | null>(null);
 
   const editor = useEditor({
     extensions: [StarterKit],
     content: "",
     onUpdate: ({ editor: current }) => {
+      const id = documentRef.current;
+      if (!id) return;
       window.clearTimeout(saveTimer.current);
       saveTimer.current = window.setTimeout(() => {
         void request("document.save", {
+          id,
           content: toTipTapDocument(current.getJSON()),
           origin: windowLabel,
-        }).then((result) => setRevision(result.revision));
+        }).then((saved) =>
+          setStatus(`revisión ${saved.revision} · ${saved.statistics.words} palabras`),
+        );
       }, SAVE_DELAY_MS);
     },
   });
@@ -35,20 +79,27 @@ export default function App() {
     if (!editor) return;
 
     void ensureCompatibleCore()
-      .then(() => request("document.get"))
-      .then((state) => {
-        if (state.content) editor.commands.setContent(state.content, { emitUpdate: false });
-        setRevision(state.revision);
+      .then(developmentProject)
+      .then(firstChapter)
+      .then(async (id) => {
+        const document = await request("document.get", { id });
+        documentRef.current = id;
+        setDocumentId(id);
+        editor.commands.setContent(document.content, { emitUpdate: false });
+        setStatus(`revisión ${document.revision} · ${document.statistics.words} palabras`);
       })
       .catch((error: unknown) => {
         console.error(error);
-        setProblem("No se pudo conectar con el núcleo de Rocinante.");
+        setProblem("No se pudo abrir el proyecto de desarrollo.");
       });
 
     const unlisten = onNotification("document.changed", (change) => {
-      setRevision(change.revision);
+      if (change.document.id !== documentRef.current) return;
+      setStatus(
+        `revisión ${change.document.revision} · ${change.document.statistics.words} palabras`,
+      );
       if (change.origin !== windowLabel) {
-        editor.commands.setContent(change.content, { emitUpdate: false });
+        editor.commands.setContent(change.document.content, { emitUpdate: false });
       }
     });
 
@@ -73,7 +124,7 @@ export default function App() {
     <main className="skeleton">
       <header>
         <span>
-          Ventana «{windowLabel}» · revisión {revision}
+          Ventana «{windowLabel}» · {documentId ? status : "abriendo…"}
         </span>
         <button onClick={() => void invoke("open_window")}>Abrir otra ventana</button>
         <button onClick={() => void measureLatency()}>Medir latencia</button>

@@ -23,11 +23,13 @@ describe("bridge to the core", () => {
   });
 
   it("sends the method and params through the relay command", async () => {
-    invoke.mockResolvedValue({ revision: 3 });
-    const params = { content: { type: "doc" as const }, origin: "main" };
+    invoke.mockResolvedValue({ id: "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b" });
+    const params = { kind: "chapter" as const, title: "Capítulo primero", origin: "main" };
 
-    await expect(request("document.save", params)).resolves.toEqual({ revision: 3 });
-    expect(invoke).toHaveBeenCalledWith("core_request", { method: "document.save", params });
+    await expect(request("document.create", params)).resolves.toEqual({
+      id: "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+    });
+    expect(invoke).toHaveBeenCalledWith("core_request", { method: "document.create", params });
   });
 
   it("sends null params for methods without params", async () => {
@@ -47,6 +49,22 @@ describe("bridge to the core", () => {
 
     expect(error.code).toBe(ErrorCodes.InvalidParams);
     expect(error.message).toBe("Invalid params");
+    expect(error.reason).toBeUndefined();
+  });
+
+  it("keeps the reason of an expected failure", async () => {
+    invoke.mockImplementation(() =>
+      Promise.reject({
+        code: ErrorCodes.ProjectFileProblem,
+        message: "The file is not a SQLite database.",
+        data: { reason: "notAProject" },
+      }),
+    );
+
+    const error = await failureOf(request("project.open", { path: "carta.txt", origin: "main" }));
+
+    expect(error.code).toBe(ErrorCodes.ProjectFileProblem);
+    expect(error.reason).toBe("notAProject");
   });
 
   it("reports an unreachable core as CoreUnavailable", async () => {
