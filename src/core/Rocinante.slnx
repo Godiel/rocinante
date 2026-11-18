@@ -1,4 +1,10 @@
 <Solution>
-  <Project Path="../../tests/core/Rocinante.Sidecar.Tests/Rocinante.Sidecar.Tests.csproj" />
-  <Project Path="Rocinante.Sidecar/Rocinante.Sidecar.csproj" />
+  <Folder Name="/src/">
+    <Project Path="Rocinante.Domain/Rocinante.Domain.csproj" />
+    <Project Path="Rocinante.Sidecar/Rocinante.Sidecar.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="../../tests/core/Rocinante.Domain.Tests/Rocinante.Domain.Tests.csproj" />
+    <Project Path="../../tests/core/Rocinante.Sidecar.Tests/Rocinante.Sidecar.Tests.csproj" />
+  </Folder>
 </Solution>
