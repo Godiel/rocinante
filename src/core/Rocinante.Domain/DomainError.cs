@@ -17,4 +17,6 @@ public enum DomainError
     DocumentIsNotDeleted,
     PositionOutOfRange,
     VersionOfAnotherDocument,
+    VersionNotFound,
+    NoteNotFound,
 }
