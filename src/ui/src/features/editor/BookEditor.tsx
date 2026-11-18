@@ -3,9 +3,10 @@ import type { Editor } from "@tiptap/core";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import { onNotification, request } from "../../bridge/core";
 import { toTipTapDocument } from "../../bridge/document";
-import type { DocumentState, Note, Place } from "../../bridge/generated/protocol";
+import type { DocumentKind, DocumentState, Note, Place } from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
 import { bookExtensions, footnotesOf } from "../../editor/extensions";
+import { registerPendingSave } from "../../editor/pending-saves";
 import { platenScroll } from "../../editor/typewriter";
 import { BubbleToolbar } from "./BubbleToolbar";
 import { TextPopover } from "./TextPopover";
@@ -33,6 +34,8 @@ type Slip =
 
 export interface BookEditorProps {
   document: DocumentState;
+  /** Chapter or fragment, for the name screen readers give the text. */
+  kind: DocumentKind;
   /** Where the writer left off in this document, if known. */
   place: Place | null;
   origin: string;
@@ -48,6 +51,7 @@ export interface BookEditorProps {
  */
 export function BookEditor({
   document,
+  kind,
   place,
   origin,
   typewriterScrolling,
@@ -57,6 +61,13 @@ export function BookEditor({
   const frame = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | undefined>(undefined);
   const placeTimer = useRef<number | undefined>(undefined);
+  const pendingSave = useRef<(() => Promise<void>) | null>(null);
+  const savePending = useRef(() => {
+    window.clearTimeout(saveTimer.current);
+    const save = pendingSave.current;
+    pendingSave.current = null;
+    return save ? save() : Promise.resolve();
+  }).current;
   const pointer = useRef(false);
   const platen = useRef(typewriterScrolling);
   platen.current = typewriterScrolling;
@@ -76,7 +87,11 @@ export function BookEditor({
     extensions: bookExtensions(),
     content: document.content,
     editorProps: {
-      attributes: { "aria-label": "Texto del capítulo", spellcheck: "true", lang: "es" },
+      attributes: {
+        "aria-label": kind === "chapter" ? "Texto del capítulo" : "Texto del fragmento",
+        spellcheck: "true",
+        lang: "es",
+      },
       handleKeyDown: (_, event) => {
         pointer.current = false;
         const chord = (event.ctrlKey || event.metaKey) && event.altKey;
@@ -93,7 +108,7 @@ export function BookEditor({
     },
     onUpdate: ({ editor: current }) => {
       window.clearTimeout(saveTimer.current);
-      saveTimer.current = window.setTimeout(() => {
+      pendingSave.current = () =>
         request("document.save", {
           id: document.id,
           content: toTipTapDocument(current.getJSON()),
@@ -104,7 +119,7 @@ export function BookEditor({
             callbacks.current.onProblem(null);
           })
           .catch((error: unknown) => callbacks.current.onProblem(messageFor(error)));
-      }, SAVE_DELAY_MS);
+      saveTimer.current = window.setTimeout(() => void savePending(), SAVE_DELAY_MS);
     },
     onSelectionUpdate: ({ editor: current }) => {
       const { anchor, head } = current.state.selection;
@@ -128,6 +143,15 @@ export function BookEditor({
     },
   });
 
+  // What is pending is saved when asked for, and when the editor leaves (another document).
+  useEffect(() => {
+    const unregister = registerPendingSave(savePending);
+    return () => {
+      unregister();
+      void savePending();
+    };
+  }, [savePending]);
+
   // Back to where the writer left off, once the text is there.
   useEffect(() => {
     if (!editor) return;
@@ -138,7 +162,13 @@ export function BookEditor({
         to: Math.min(place.head, end),
       });
     }
-    editor.commands.focus(undefined, { scrollIntoView: true });
+    // The keyboard comes to the text, unless the writer is typing somewhere else (a new title).
+    const busy = window.document.activeElement;
+    if (busy instanceof HTMLInputElement || busy instanceof HTMLTextAreaElement) {
+      editor.commands.scrollIntoView();
+    } else {
+      editor.commands.focus(undefined, { scrollIntoView: true });
+    }
     // Only when the editor first appears; later the writer moves the cursor.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [editor]);

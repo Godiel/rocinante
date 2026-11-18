@@ -1,18 +1,34 @@
+.writing-view {
+  --bar-height: 3rem;
+  min-height: 100%;
+}
+
+/* With the index docked, it takes a column on the left and the text keeps its own. */
+.writing-view-docked {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+}
+
 .writing-bar {
   position: sticky;
   top: 0;
   z-index: 3;
+  grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  padding: var(--space-3) var(--space-4);
+  align-items: center;
+  height: var(--bar-height);
+  padding: 0 var(--space-4);
   font-size: var(--text-caption);
   color: var(--color-ink-soft);
   background: var(--color-paper);
 }
 
+.writing-bar-start,
 .writing-bar nav {
   display: flex;
+  align-items: baseline;
   gap: var(--space-4);
 }
 
@@ -22,10 +38,25 @@
   font-style: italic;
 }
 
-.writing-problem {
+.writing-main {
+  min-width: 0;
+}
+
+.writing-problem,
+.writing-empty {
   max-width: var(--measure);
   margin: var(--space-3) auto 0;
   padding: 0 var(--space-4);
   font-style: italic;
+}
+
+.writing-problem {
   color: var(--color-rubric);
+}
+
+.writing-empty {
+  margin-top: var(--space-6);
+  font-size: var(--text-body);
+  text-align: center;
+  color: var(--color-ink-soft);
 }

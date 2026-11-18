@@ -1,0 +1,248 @@
+/* The index: a narrow column of titles on the left, like the table of contents of a book. */
+
+.outline {
+  width: 17rem;
+  padding: var(--space-3) var(--space-4) var(--space-5);
+  font-size: var(--text-ui);
+  overflow-y: auto;
+}
+
+/* Docked: part of the window, beside the text. */
+.outline-docked {
+  position: sticky;
+  top: var(--bar-height);
+  align-self: start;
+  height: calc(100vh - var(--bar-height));
+  border-right: var(--hairline) solid var(--color-rule);
+}
+
+/* Floating: a sheet over the text that goes away when the writer returns to it. */
+.outline-floating {
+  position: fixed;
+  z-index: 4;
+  top: calc(var(--bar-height) + var(--space-2));
+  left: var(--space-3);
+  max-height: calc(100vh - var(--bar-height) - var(--space-4));
+  background: var(--color-paper-shade);
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.12);
+}
+
+.outline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-3);
+  font-size: var(--text-caption);
+  color: var(--color-ink-soft);
+}
+
+.outline-title {
+  margin: 0;
+  font-size: inherit;
+  font-weight: 400;
+}
+
+.outline-controls {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.outline-section {
+  margin-bottom: var(--space-4);
+}
+
+.outline-section-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  color: var(--color-ink-faint);
+}
+
+.outline-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-height: var(--space-4);
+  border-radius: var(--radius);
+  transition: background var(--fade);
+}
+
+.outline-list-over {
+  background: var(--color-selection);
+}
+
+.outline-empty {
+  padding: var(--space-1) 0 var(--space-2);
+  font-style: italic;
+  color: var(--color-ink-faint);
+}
+
+.outline-entry {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  touch-action: none;
+}
+
+.outline-entry-dragging {
+  z-index: 1;
+  opacity: 0.55;
+}
+
+.outline-handle {
+  width: 0.8em;
+  color: var(--color-ink-faint);
+  opacity: 0;
+  cursor: grab;
+  transition: opacity var(--fade);
+}
+
+.outline-numeral {
+  min-width: 1.6em;
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-small-caps);
+  color: var(--color-ink-faint);
+  text-align: right;
+}
+
+.outline-open {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-ink-soft);
+  transition: color var(--fade);
+}
+
+.outline-open:hover,
+.outline-entry-current .outline-open {
+  color: var(--color-ink);
+}
+
+/* The open document: a rubric mark in the margin, as a reader's pencil would leave. */
+.outline-entry-current::before {
+  content: "";
+  position: absolute;
+  left: -0.75rem;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-rubric);
+}
+
+.outline-more {
+  color: var(--color-ink-faint);
+  letter-spacing: 0.05em;
+  opacity: 0;
+  transition: opacity var(--fade);
+}
+
+.outline-entry:hover .outline-handle,
+.outline-entry:hover .outline-more,
+.outline-entry:focus-within .outline-handle,
+.outline-entry:focus-within .outline-more,
+.outline-more[aria-expanded="true"] {
+  opacity: 1;
+}
+
+.outline-menu-root {
+  position: relative;
+}
+
+.outline-menu {
+  position: absolute;
+  z-index: 5;
+  top: 100%;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 12rem;
+  padding: var(--space-1) 0;
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.1);
+}
+
+.outline-menu-item {
+  padding: var(--space-1) var(--space-3);
+  text-align: left;
+}
+
+.outline-menu-item:hover,
+.outline-menu-item:focus-visible {
+  background: var(--color-paper-shade);
+  outline: none;
+}
+
+.outline-rename {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-rubric);
+  outline: none;
+}
+
+.outline-confirm {
+  flex: 1;
+  padding: var(--space-2) 0;
+}
+
+.outline-confirm-text {
+  margin: 0 0 var(--space-2);
+  font-style: italic;
+}
+
+.outline-confirm-actions,
+.outline-trash-entry {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.outline-add {
+  margin-top: var(--space-2);
+  font-size: var(--text-caption);
+  color: var(--color-ink-soft);
+}
+
+.outline-trash summary {
+  cursor: pointer;
+}
+
+.outline-trash-entry {
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--space-1) 0;
+}
+
+.outline-trash-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-ink-faint);
+}
+
+.undo-notice {
+  position: fixed;
+  z-index: 6;
+  bottom: var(--space-4);
+  left: 50%;
+  display: flex;
+  gap: var(--space-4);
+  align-items: baseline;
+  padding: var(--space-2) var(--space-4);
+  transform: translateX(-50%);
+  background: var(--color-paper-shade);
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: var(--radius);
+  font-style: italic;
+}
