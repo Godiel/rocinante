@@ -1,3 +1,4 @@
+using Rocinante.Application.Settings;
 using Rocinante.Infrastructure.Persistence;
 
 namespace Rocinante.Application.Tests;
@@ -9,21 +10,30 @@ internal sealed class AppFixture : IDisposable
 
     private readonly Workspace _workspace = new();
 
-    public AppFixture()
+    public AppFixture(string? launchFile = null, AppSettings? settings = null)
     {
         Folder = Directory.CreateTempSubdirectory("rocinante-app-tests-").FullName;
+        Store = new MemorySettingsStore(settings);
+        Settings = new WriterSettings(Store);
         var files = new SqliteProjectFiles();
-        Projects = new ProjectUseCases(_workspace, files, Notifier, Clock);
+        Projects = new ProjectUseCases(_workspace, files, Settings, Notifier, Clock);
         Documents = new DocumentUseCases(_workspace, Notifier, Clock);
         Versions = new VersionUseCases(_workspace, Notifier, Clock);
         Notes = new NoteUseCases(_workspace, Notifier, Clock);
+        App = new SettingsUseCases(_workspace, Projects, Settings, Notifier, DefaultFolder, launchFile);
     }
 
     public string Folder { get; }
 
+    public string DefaultFolder => System.IO.Path.Combine(Folder, "Documentos", "Rocinante");
+
     public ManualClock Clock { get; } = new(new DateTimeOffset(2026, 3, 14, 9, 0, 0, TimeSpan.Zero));
 
     public RecordingNotifier Notifier { get; } = new();
+
+    public MemorySettingsStore Store { get; }
+
+    public WriterSettings Settings { get; }
 
     public ProjectUseCases Projects { get; }
 
@@ -32,6 +42,8 @@ internal sealed class AppFixture : IDisposable
     public VersionUseCases Versions { get; }
 
     public NoteUseCases Notes { get; }
+
+    public SettingsUseCases App { get; }
 
     public string PathOf(string name) => System.IO.Path.Combine(Folder, name);
 
@@ -42,6 +54,9 @@ internal sealed class AppFixture : IDisposable
         Notifier.Clear();
         return snapshot;
     }
+
+    /// <summary>Closes the workspace as quitting the app does: without forgetting the last project.</summary>
+    public void Quit() => _workspace.Close();
 
     public void Dispose()
     {

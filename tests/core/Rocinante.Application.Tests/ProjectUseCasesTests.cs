@@ -21,7 +21,7 @@ public sealed class ProjectUseCasesTests : IDisposable
         snapshot.Project.CreatedAt.ShouldBe(_app.Clock.GetUtcNow());
         snapshot.Work.Words.ShouldBe(0);
         File.Exists(path).ShouldBeTrue();
-        _app.Notifier.Events.ShouldBe(["project.opened:window-1"]);
+        _app.Notifier.Events.ShouldBe(["recent.changed:window-1", "project.opened:window-1"]);
         _app.Projects.Current().Path.ShouldBe(snapshot.Path);
     }
 
@@ -41,7 +41,7 @@ public sealed class ProjectUseCasesTests : IDisposable
         var reopened = _app.Projects.Open(first.Path, AppFixture.Main);
 
         reopened.Project.Title.ShouldBe("Primera");
-        _app.Notifier.Events.ShouldBe(["project.opened:main"]);
+        _app.Notifier.Events.ShouldBe(["recent.changed:main", "project.opened:main"]);
         File.Move(_app.PathOf("segunda.rocinante"), _app.PathOf("movida.rocinante"));
     }
 
@@ -64,7 +64,7 @@ public sealed class ProjectUseCasesTests : IDisposable
 
         _app.Projects.Rename("Don Quijote de la Mancha", AppFixture.Main).Project.Title.ShouldBe("Don Quijote de la Mancha");
 
-        _app.Notifier.Events.ShouldBe(["project.changed:main"]);
+        _app.Notifier.Events.ShouldBe(["recent.changed:main", "project.changed:main"]);
         _app.Projects.Close(AppFixture.Main);
         _app.Projects.Open(created.Path, AppFixture.Main).Project.Title.ShouldBe("Don Quijote de la Mancha");
     }
@@ -90,7 +90,7 @@ public sealed class ProjectUseCasesTests : IDisposable
         _app.Projects.Rename("Solo en la copia", AppFixture.Main);
 
         copy.Path.ShouldBe(Path.GetFullPath(copyPath));
-        _app.Notifier.Events.ShouldBe(["project.opened:main", "project.changed:main"]);
+        _app.Notifier.Events.ShouldBe(["recent.changed:main", "project.opened:main", "recent.changed:main", "project.changed:main"]);
         _app.Projects.Open(original.Path, AppFixture.Main).Project.Title.ShouldBe("El ingenioso hidalgo");
         _app.Projects.Open(copyPath, AppFixture.Main).Project.Title.ShouldBe("Solo en la copia");
     }

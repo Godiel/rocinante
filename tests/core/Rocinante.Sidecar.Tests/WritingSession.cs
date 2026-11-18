@@ -17,6 +17,8 @@ internal sealed class WritingSession(ServerHarness harness)
     {
         harness.Call("system.info");
         harness.Call("system.ping");
+        harness.Call("app.start", Params(("origin", Main)));
+        harness.Call("preferences.update", Params(("changes", JsonNode.Parse("""{ "theme": "candlelight", "outline": "floating" }""")), ("origin", Main)));
 
         var original = harness.PathOf("quijote.rocinante");
         harness.Call("project.create", Params(("path", original), ("title", "El ingenioso hidalgo"), ("origin", Main)));
@@ -34,6 +36,8 @@ internal sealed class WritingSession(ServerHarness harness)
         var note = Id(harness.Call("note.create", Params(("documentId", first), ("text", "Revisar esta fecha"), ("anchored", true), ("origin", Main))));
         harness.Call("document.save", Params(("id", first), ("content", JsonNode.Parse(TipTap.Anchored("En un lugar de la Mancha", Guid.Parse(note)))), ("origin", Main)));
         harness.Call("document.get", Params(("id", first)));
+        harness.Call("place.save", Params(("documentId", first), ("anchor", 5), ("head", 12)));
+        harness.Call("place.get");
         var version = Id(harness.Call("version.create", Params(("documentId", first), ("name", "Primer borrador"), ("origin", Main))));
 
         harness.Clock.AdvanceMinutes(1);
@@ -49,6 +53,8 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("project.saveAs", Params(("path", harness.PathOf("copias/quijote-copia.rocinante")), ("origin", Main)));
         harness.Call("project.open", Params(("path", original), ("origin", Main)));
         harness.Call("project.close", Params(("origin", Main)));
+        harness.Call("recent.list");
+        harness.Call("recent.remove", Params(("path", original), ("origin", Main)));
     }
 
     private static string Id(JsonNode? result) => result!["id"]!.GetValue<string>();

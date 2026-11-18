@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using Rocinante.Infrastructure.Persistence;
+using Rocinante.Infrastructure.Settings;
 
 namespace Rocinante.Sidecar.Tests;
 
@@ -10,10 +11,16 @@ internal sealed class ServerHarness : IDisposable
     private readonly Core _core;
     private int _nextId = 1;
 
-    public ServerHarness()
+    public ServerHarness(string? launchFile = null)
     {
         Folder = Directory.CreateTempSubdirectory("rocinante-sidecar-tests-").FullName;
-        _core = new Core(_output, Log, new SqliteProjectFiles(), Clock, Contract);
+        var options = new CoreOptions(
+            new SqliteProjectFiles(),
+            new JsonSettingsStore(PathOf("datos"), Log),
+            Clock,
+            PathOf("Documentos/Rocinante"),
+            launchFile);
+        _core = new Core(_output, Log, options, Contract);
     }
 
     public static ProtocolContract Contract { get; } = ProtocolContract.LoadEmbedded();

@@ -1,5 +1,6 @@
 using Rocinante.Application;
 using Rocinante.Application.Ports;
+using Rocinante.Application.Settings;
 using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
@@ -29,6 +30,10 @@ internal sealed class RecordingNotifier : IChangeNotifier
         LastNotes = notes;
         Events.Add($"notes.changed:{origin}");
     }
+
+    public void PreferencesChanged(Preferences preferences, string origin) => Events.Add($"preferences.changed:{origin}");
+
+    public void RecentChanged(IReadOnlyList<RecentProjectView> recent, string origin) => Events.Add($"recent.changed:{origin}");
 
     public void Clear() => Events.Clear();
 }
