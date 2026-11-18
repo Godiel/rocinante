@@ -56,10 +56,10 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Abrir un `.rocinante` recibido como argumento al arrancar.
 
 ## 8. Base visual
-- [ ] Tokens de color de «papel» y «luz de vela», con contraste WCAG AA comprobado.
-- [ ] Escalas tipográfica y de espaciado; EB Garamond incluida en la app.
-- [ ] Florones y ornamentos en SVG.
-- [ ] Pantalla de bienvenida (recientes, nuevo, abrir).
+- [x] Tokens de color de «papel» y «luz de vela», con contraste WCAG AA comprobado por un test sobre los mismos valores que pinta la app.
+- [x] Escalas tipográfica y de espaciado; EB Garamond incluida en la app (solo latín y latín extendido).
+- [x] Florones y ornamentos en SVG.
+- [x] Pantalla de bienvenida (recientes, nuevo, abrir) con los diálogos del sistema y mensajes de error en español.
 
 ## 9. Editor
 - [ ] Papel sin bordes con ancho de columna y márgenes de la constitución.
