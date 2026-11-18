@@ -21,7 +21,21 @@ internal sealed record VersionSummaryDto(Guid Id, Guid DocumentId, string Kind, 
 
 internal sealed record NoteDto(Guid Id, Guid DocumentId, string Text, bool Anchored, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt);
 
+internal sealed record PreferencesDto(string Theme, string Outline, bool CounterVisible, bool TypewriterScrolling);
+
+internal sealed record PreferencesChangeDto(string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling);
+
+internal sealed record PlaceDto(Guid DocumentId, int Anchor, int Head);
+
+internal sealed record RecentProjectDto(string Path, string Title, DateTimeOffset LastOpenedAt, bool Exists);
+
+internal sealed record StartProblemDto(string Path, string Reason);
+
+internal sealed record StartStateDto(ProjectStateDto? Project, PlaceDto? Place, StartProblemDto? Problem, IReadOnlyList<RecentProjectDto> Recent, PreferencesDto Preferences, string DefaultFolder);
+
 // Params.
+internal sealed record UpdatePreferencesParams(PreferencesChangeDto Changes, string Origin);
+
 internal sealed record OriginParams(string Origin);
 
 internal sealed record PathParams(string Path, string Origin);
@@ -60,6 +74,10 @@ internal sealed record VersionDetailResult(VersionSummaryDto Version, JsonNode C
 internal sealed record VersionRestoredResult(DocumentStateDto Document, VersionSummaryDto? Before);
 
 // Notifications.
+internal sealed record PreferencesChangedNotification(PreferencesDto Preferences, string Origin);
+
+internal sealed record RecentChangedNotification(IReadOnlyList<RecentProjectDto> Recent, string Origin);
+
 internal sealed record ProjectNotification(ProjectStateDto Project, string Origin);
 
 internal sealed record ProjectClosedNotification(string Origin);
@@ -79,6 +97,13 @@ internal sealed record NotesChangedNotification(Guid DocumentId, IReadOnlyList<N
     DefaultIgnoreCondition = JsonIgnoreCondition.Never,
     RespectNullableAnnotations = true)]
 [JsonSerializable(typeof(OriginParams))]
+[JsonSerializable(typeof(UpdatePreferencesParams))]
+[JsonSerializable(typeof(PlaceDto))]
+[JsonSerializable(typeof(PreferencesDto))]
+[JsonSerializable(typeof(StartStateDto))]
+[JsonSerializable(typeof(IReadOnlyList<RecentProjectDto>))]
+[JsonSerializable(typeof(PreferencesChangedNotification))]
+[JsonSerializable(typeof(RecentChangedNotification))]
 [JsonSerializable(typeof(PathParams))]
 [JsonSerializable(typeof(CreateProjectParams))]
 [JsonSerializable(typeof(TitleParams))]

@@ -1,7 +1,16 @@
 using Rocinante.Application;
 using Rocinante.Application.Ports;
+using Rocinante.Application.Settings;
 
 namespace Rocinante.Sidecar;
+
+/// <summary>What the core needs from the outside world.</summary>
+/// <param name="Files">Where projects are created and opened.</param>
+/// <param name="Settings">Where the app settings live.</param>
+/// <param name="Clock">The time.</param>
+/// <param name="DefaultFolder">Where new projects are proposed.</param>
+/// <param name="LaunchFile">A project the app was launched with, to open in the first window.</param>
+internal sealed record CoreOptions(IProjectFiles Files, ISettingsStore Settings, TimeProvider Clock, string DefaultFolder, string? LaunchFile);
 
 /// <summary>
 /// Composition root: wires the use cases to the project files, the clock and the JSON-RPC
@@ -12,15 +21,20 @@ internal sealed class Core : IDisposable
     private readonly Workspace _workspace = new();
     private readonly JsonRpcServer _server;
 
-    public Core(TextWriter output, TextWriter log, IProjectFiles files, TimeProvider clock, ProtocolContract contract)
+    public Core(TextWriter output, TextWriter log, CoreOptions options, ProtocolContract contract)
     {
+        ArgumentNullException.ThrowIfNull(options);
+
         var writer = new MessageWriter(output);
         var notifier = new JsonRpcNotifier(writer);
+        var settings = new WriterSettings(options.Settings);
+        var projects = new ProjectUseCases(_workspace, options.Files, settings, notifier, options.Clock);
         var services = new CoreServices(
-            new ProjectUseCases(_workspace, files, notifier, clock),
-            new DocumentUseCases(_workspace, notifier, clock),
-            new VersionUseCases(_workspace, notifier, clock),
-            new NoteUseCases(_workspace, notifier, clock));
+            projects,
+            new DocumentUseCases(_workspace, notifier, options.Clock),
+            new VersionUseCases(_workspace, notifier, options.Clock),
+            new NoteUseCases(_workspace, notifier, options.Clock),
+            new SettingsUseCases(_workspace, projects, settings, notifier, options.DefaultFolder, options.LaunchFile));
 
         _server = new JsonRpcServer(writer, contract, CoreMethods.Create(contract, services), log);
     }

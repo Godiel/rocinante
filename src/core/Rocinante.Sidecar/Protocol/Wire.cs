@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 using Rocinante.Application;
 using Rocinante.Application.Ports;
+using Rocinante.Application.Settings;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
 using Rocinante.Domain.Notes;
@@ -57,4 +58,34 @@ internal static class Wire
         new(note.Id.Value, note.DocumentId.Value, note.Text, note.IsAnchored, note.CreatedAt, note.UpdatedAt);
 
     public static JsonNode Content(DocumentContent content) => JsonNode.Parse(content.Json)!;
+
+    public static PreferencesDto Of(Preferences preferences) =>
+        new(
+            preferences.Theme == Theme.Candlelight ? "candlelight" : "paper",
+            preferences.Outline == OutlineMode.Floating ? "floating" : "docked",
+            preferences.CounterVisible,
+            preferences.TypewriterScrolling);
+
+    public static PreferencesChange ToChange(PreferencesChangeDto change) =>
+        new(
+            change.Theme switch { null => null, "candlelight" => Theme.Candlelight, _ => Theme.Paper },
+            change.Outline switch { null => null, "floating" => OutlineMode.Floating, _ => OutlineMode.Docked },
+            change.CounterVisible,
+            change.TypewriterScrolling);
+
+    public static PlaceDto Of(Place place) => new(place.DocumentId.Value, place.Anchor, place.Head);
+
+    public static Place ToPlace(PlaceDto place) => new(new Domain.DocumentId(place.DocumentId), place.Anchor, place.Head);
+
+    public static IReadOnlyList<RecentProjectDto> Of(IReadOnlyList<RecentProjectView> recent) =>
+        [.. recent.Select(entry => new RecentProjectDto(entry.Path, entry.Title, entry.LastOpenedAt, entry.Exists))];
+
+    public static StartStateDto Of(StartState state) =>
+        new(
+            state.Project is { } project ? Of(project) : null,
+            state.Place is { } place ? Of(place) : null,
+            state.Problem is { } problem ? new StartProblemDto(problem.Path, JsonRpcServer.Reason(problem.Error.ToString())) : null,
+            Of(state.Recent),
+            Of(state.Preferences),
+            state.DefaultFolder);
 }

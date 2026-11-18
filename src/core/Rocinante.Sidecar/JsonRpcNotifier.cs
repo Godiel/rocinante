@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Rocinante.Application;
 using Rocinante.Application.Ports;
+using Rocinante.Application.Settings;
 using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
@@ -35,6 +36,12 @@ internal sealed class JsonRpcNotifier(MessageWriter writer) : IChangeNotifier
             "notes.changed",
             new NotesChangedNotification(documentId.Value, [.. notes.Select(Wire.Of)], origin),
             WireJson.Default.NotesChangedNotification);
+
+    public void PreferencesChanged(Preferences preferences, string origin) =>
+        Send("preferences.changed", new PreferencesChangedNotification(Wire.Of(preferences), origin), WireJson.Default.PreferencesChangedNotification);
+
+    public void RecentChanged(IReadOnlyList<RecentProjectView> recent, string origin) =>
+        Send("recent.changed", new RecentChangedNotification(Wire.Of(recent), origin), WireJson.Default.RecentChangedNotification);
 
     private void Send<T>(string method, T payload, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T> type) =>
         writer.Notification(method, JsonSerializer.SerializeToNode(payload, type));

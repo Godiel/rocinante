@@ -9,7 +9,7 @@ using Rocinante.Sidecar.Protocol;
 namespace Rocinante.Sidecar;
 
 /// <summary>The use cases behind each method of the contract.</summary>
-internal sealed record CoreServices(ProjectUseCases Projects, DocumentUseCases Documents, VersionUseCases Versions, NoteUseCases Notes);
+internal sealed record CoreServices(ProjectUseCases Projects, DocumentUseCases Documents, VersionUseCases Versions, NoteUseCases Notes, SettingsUseCases Settings);
 
 /// <summary>
 /// Binds every method of the contract to a use case: params come in already validated against the
@@ -24,6 +24,14 @@ internal static class CoreMethods
 
         table.On("system.info", json.SystemInfoResult, () => new SystemInfoResult(contract.ProtocolVersion, CoreVersion()));
         table.On("system.ping", () => JsonValue.Create("pong"));
+
+        table.On("app.start", json.OriginParams, json.StartStateDto, p => Wire.Of(core.Settings.Start(p.Origin)));
+        table.On("preferences.update", json.UpdatePreferencesParams, json.PreferencesDto, p =>
+            Wire.Of(core.Settings.UpdatePreferences(Wire.ToChange(p.Changes), p.Origin)));
+        table.On("recent.list", json.IReadOnlyListRecentProjectDto, () => Wire.Of(core.Settings.Recent()));
+        table.On("recent.remove", json.PathParams, json.IReadOnlyListRecentProjectDto, p => Wire.Of(core.Settings.RemoveRecent(p.Path, p.Origin)));
+        table.On("place.get", () => core.Settings.CurrentPlace() is { } place ? JsonSerializer.SerializeToNode(Wire.Of(place), json.PlaceDto) : null);
+        table.On("place.save", json.PlaceDto, p => core.Settings.SavePlace(Wire.ToPlace(p)));
 
         table.On("project.create", json.CreateProjectParams, json.ProjectStateDto, p => Wire.Of(core.Projects.Create(p.Path, p.Title, p.Origin)));
         table.On("project.open", json.PathParams, json.ProjectStateDto, p => Wire.Of(core.Projects.Open(p.Path, p.Origin)));
