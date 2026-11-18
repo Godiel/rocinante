@@ -11,8 +11,14 @@ namespace Rocinante.Domain.Content;
 /// </summary>
 public sealed class DocumentContent : IEquatable<DocumentContent>
 {
-    /// <summary>Node or mark type the editor uses to anchor a note; its <c>noteId</c> attribute names the note.</summary>
+    /// <summary>Mark the editor puts over a passage to anchor a note; its <c>noteId</c> attribute names the note.</summary>
     public const string NoteAnchorType = "noteAnchor";
+
+    /// <summary>Inline node the editor puts at a point to anchor a note; its <c>noteId</c> attribute names the note.</summary>
+    public const string NotePointType = "notePoint";
+
+    /// <summary>Inline node of a footnote; its <c>text</c> attribute is part of the work and is counted.</summary>
+    public const string FootnoteType = "footnote";
 
     private const string EmptyJson = """{"type":"doc","content":[{"type":"paragraph"}]}""";
 
@@ -98,6 +104,9 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
                 case "hardBreak":
                     block?.Append('\n');
                     return;
+                case FootnoteType:
+                    CountFootnote(node);
+                    return;
             }
 
             if (node["content"] is not JsonArray children)
@@ -118,7 +127,7 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
             }
         }
 
-        private static bool IsInline(JsonObject node) => TypeOf(node) is "text" or "hardBreak";
+        private static bool IsInline(JsonObject node) => TypeOf(node) is "text" or "hardBreak" or FootnoteType or NotePointType;
 
         private void VisitAll(JsonArray children, StringBuilder? block)
         {
@@ -143,7 +152,7 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
 
         private void CollectAnchor(JsonObject nodeOrMark, string? type)
         {
-            if (type == NoteAnchorType
+            if (type is NoteAnchorType or NotePointType
                 && nodeOrMark["attrs"]?["noteId"] is JsonValue value
                 && value.TryGetValue(out string? id)
                 && Guid.TryParse(id, out var guid))
@@ -159,10 +168,22 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
                 return;
             }
 
-            var characters = new StringInfo(text.Replace("\n", string.Empty, StringComparison.Ordinal))
-                .LengthInTextElements;
-            Statistics += new TextStatistics(CountWords(text), characters, Paragraphs: 1);
+            Statistics += new TextStatistics(CountWords(text), Characters(text), Paragraphs: 1);
         }
+
+        // A footnote's words belong to the work, but it is not a paragraph of its own.
+        private void CountFootnote(JsonObject footnote)
+        {
+            if (footnote["attrs"]?["text"] is JsonValue value
+                && value.TryGetValue(out string? text)
+                && !string.IsNullOrWhiteSpace(text))
+            {
+                Statistics += new TextStatistics(CountWords(text), Characters(text), Paragraphs: 0);
+            }
+        }
+
+        private static int Characters(string text) =>
+            new StringInfo(text.Replace("\n", string.Empty, StringComparison.Ordinal)).LengthInTextElements;
 
         private static int CountWords(string text)
         {

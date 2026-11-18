@@ -136,6 +136,22 @@ public sealed class DocumentContentTests
     }
 
     [Fact]
+    public void Footnotes_count_as_words_of_the_work_but_not_as_paragraphs()
+    {
+        var content = Doc(Block("paragraph", Text("Rocinante"), Footnote("Rocín antes, ahora primero."), Text(" y Sancho")));
+
+        content.Statistics.ShouldBe(new TextStatistics(Words: 7, Characters: 45, Paragraphs: 1));
+    }
+
+    [Fact]
+    public void A_paragraph_with_only_a_point_anchor_or_a_blank_footnote_is_not_counted()
+    {
+        var content = Doc(Block("paragraph", AnchorNode(NoteId.New(Moments.Start))), Block("paragraph", Footnote("   ")));
+
+        content.Statistics.ShouldBe(TextStatistics.Zero);
+    }
+
+    [Fact]
     public void Ignores_anchors_without_a_valid_note_id()
     {
         var broken = new System.Text.Json.Nodes.JsonObject

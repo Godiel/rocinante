@@ -31,7 +31,11 @@ internal static class Contents
 
     /// <summary>A point anchor: an inline node with no text.</summary>
     public static JsonObject AnchorNode(NoteId id) =>
-        new() { ["type"] = DocumentContent.NoteAnchorType, ["attrs"] = new JsonObject { ["noteId"] = id.ToString() } };
+        new() { ["type"] = DocumentContent.NotePointType, ["attrs"] = new JsonObject { ["noteId"] = id.ToString() } };
+
+    /// <summary>A footnote: an inline node whose text lives in its attributes.</summary>
+    public static JsonObject Footnote(string text) =>
+        new() { ["type"] = DocumentContent.FootnoteType, ["attrs"] = new JsonObject { ["text"] = text } };
 
     public static JsonObject HardBreak() => new() { ["type"] = "hardBreak" };
 }
