@@ -23,11 +23,11 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] ADR iniciales en `docs/adr/`: arquitectura en tres capas, Tauri + sidecar, React, TipTap, SQLite, licencias.
 
 ## 3. Contrato de mensajes
-- [ ] Definir en `src/contracts` el sobre JSON-RPC y la versión del protocolo.
-- [ ] Esquemas de peticiones, respuestas y notificaciones de la 001.
-- [ ] Generar tipos TypeScript desde los esquemas.
-- [ ] Validar en el núcleo los mensajes entrantes contra los esquemas.
-- [ ] Pruebas de contrato en TypeScript y en C#.
+- [x] Definir en `src/contracts` el sobre JSON-RPC y la versión del protocolo.
+- [x] Esquemas de los métodos y notificaciones existentes (`system.*`, `document.*` del esqueleto). Los de proyecto, documentos, versiones y notas se añaden al contrato junto a su caso de uso en el bloque 6, siempre antes que el código.
+- [x] Generar tipos TypeScript desde los esquemas (`npm run contracts:generate`; CI comprueba que estén al día).
+- [x] Validar en el núcleo los mensajes entrantes contra los esquemas.
+- [x] Pruebas de contrato en TypeScript y en C#, con ejemplos compartidos en `src/contracts/examples/`.
 
 ## 4. Dominio
 - [ ] `Project`, `Document` (`Chapter` / `Fragment`), `DocumentVersion` y `Note`.

@@ -40,10 +40,9 @@ src/
 │   ├── Rocinante.Application/      casos de uso y puertos (interfaces)
 │   ├── Rocinante.Infrastructure/   SQLite, archivos, logs, configuración
 │   └── Rocinante.Sidecar/          punto de entrada: servidor JSON-RPC por stdio
-└── contracts/                  esquemas JSON de los mensajes (fuente única)
+└── contracts/                  protocol.json (fuente única) y examples/ compartidos
 tests/
-├── core/                       Rocinante.*.Tests (xUnit)
-├── contracts/                  pruebas de contrato
+├── core/                       Rocinante.*.Tests (xUnit), incluidas las pruebas de contrato del núcleo
 └── e2e/                        Playwright
 docs/
 ├── adr/                        decisiones de arquitectura
@@ -51,7 +50,7 @@ docs/
 .github/workflows/              CI
 ```
 
-Los tests de la interfaz viven junto a su archivo (`Counter.tsx` + `Counter.test.tsx`).
+Los tests de la interfaz viven junto a su archivo (`Counter.tsx` + `Counter.test.tsx`); sus pruebas de contrato están en `src/ui/src/bridge/`.
 
 ## Implementación
 
