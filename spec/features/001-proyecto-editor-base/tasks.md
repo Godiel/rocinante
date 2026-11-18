@@ -37,11 +37,11 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests del dominio con cobertura ≥ 80 % de líneas y ramas, exigida en cada ejecución.
 
 ## 5. Persistencia
-- [ ] Esquema SQLite v1: `meta`, `project`, `document`, `document_version`, `note`.
-- [ ] Sistema de migraciones versionado y comprobación de integridad al abrir.
-- [ ] Modo WAL y transacciones en toda escritura; identificadores UUID v7.
-- [ ] Repositorios con tests contra SQLite real (archivo temporal).
-- [ ] Documentar el formato en `docs/format/`.
+- [x] Esquema SQLite v1: `meta`, `project`, `document`, `document_version`, `note`.
+- [x] Sistema de migraciones versionado y comprobación de integridad al abrir.
+- [x] Modo WAL con `synchronous = FULL` y transacciones en toda escritura; identificadores UUID v7.
+- [x] Repositorios con tests contra SQLite real (archivo temporal).
+- [x] Documentar el formato en `docs/format/`.
 
 ## 6. Casos de uso y servidor
 - [ ] Proyecto: crear, abrir, cerrar, guardar como.
