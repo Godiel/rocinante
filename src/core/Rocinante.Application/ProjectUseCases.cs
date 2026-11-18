@@ -1,10 +1,11 @@
 using Rocinante.Application.Ports;
+using Rocinante.Application.Settings;
 using Rocinante.Domain.Projects;
 
 namespace Rocinante.Application;
 
 /// <summary>Creating, opening, renaming, copying and closing the project.</summary>
-public sealed class ProjectUseCases(Workspace workspace, IProjectFiles files, IChangeNotifier notifier, TimeProvider clock)
+public sealed class ProjectUseCases(Workspace workspace, IProjectFiles files, WriterSettings settings, IChangeNotifier notifier, TimeProvider clock)
 {
     public ProjectSnapshot Create(string path, string title, string origin)
     {
@@ -24,6 +25,7 @@ public sealed class ProjectUseCases(Workspace workspace, IProjectFiles files, IC
             return project;
         });
         var snapshot = workspace.Snapshot();
+        Remember(snapshot, origin);
         notifier.ProjectChanged(snapshot, origin);
         return snapshot;
     }
@@ -43,6 +45,7 @@ public sealed class ProjectUseCases(Workspace workspace, IProjectFiles files, IC
         }
 
         workspace.Close();
+        settings.ForgetLastProject();
         notifier.ProjectClosed(origin);
     }
 
@@ -59,7 +62,15 @@ public sealed class ProjectUseCases(Workspace workspace, IProjectFiles files, IC
         }
 
         var snapshot = workspace.Snapshot();
+        Remember(snapshot, origin);
         notifier.ProjectOpened(snapshot, origin);
         return snapshot;
+    }
+
+    /// <summary>The project goes first in the recent list and will reopen when the app starts.</summary>
+    private void Remember(ProjectSnapshot snapshot, string origin)
+    {
+        settings.Remember(snapshot.Path, snapshot.Project.Title, clock.GetUtcNow());
+        notifier.RecentChanged(RecentProjectView.Of(settings), origin);
     }
 }

@@ -1,3 +1,4 @@
+using Rocinante.Application.Settings;
 using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
@@ -24,4 +25,8 @@ public interface IChangeNotifier
     void VersionsChanged(DocumentId documentId, string origin);
 
     void NotesChanged(DocumentId documentId, IReadOnlyList<Note> notes, string origin);
+
+    void PreferencesChanged(Preferences preferences, string origin);
+
+    void RecentChanged(IReadOnlyList<RecentProjectView> recent, string origin);
 }
