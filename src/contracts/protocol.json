@@ -1,14 +1,17 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 1,
-  "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs.",
+  "protocolVersion": 2,
+  "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
     "InvalidRequest": -32600,
     "MethodNotFound": -32601,
     "InvalidParams": -32602,
     "InternalError": -32603,
-    "CoreUnavailable": -32000
+    "CoreUnavailable": -32000,
+    "ProjectNotOpen": -32001,
+    "RuleViolated": -32002,
+    "ProjectFileProblem": -32003
   },
   "methods": {
     "system.info": {
@@ -19,68 +22,605 @@
         "required": ["protocolVersion", "coreVersion"],
         "additionalProperties": false,
         "properties": {
-          "protocolVersion": { "type": "integer", "minimum": 1 },
-          "coreVersion": { "type": "string", "minLength": 1 }
+          "protocolVersion": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "coreVersion": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     },
     "system.ping": {
       "description": "Liveness check.",
       "params": null,
-      "result": { "const": "pong" }
-    },
-    "document.get": {
-      "description": "Returns the current document. Walking-skeleton method, replaced by the project API in step 6.",
-      "params": null,
       "result": {
+        "const": "pong"
+      }
+    },
+    "project.create": {
+      "description": "Creates a new project file and opens it. Fails if a file already exists at the path. Broadcasts project.opened.",
+      "params": {
         "type": "object",
-        "required": ["content", "revision"],
+        "required": ["path", "title", "origin"],
         "additionalProperties": false,
         "properties": {
-          "content": { "anyOf": [{ "$ref": "#/$defs/TipTapDocument" }, { "type": "null" }] },
-          "revision": { "$ref": "#/$defs/Revision" }
+          "path": {
+            "$ref": "#/$defs/FilePath"
+          },
+          "title": {
+            "$ref": "#/$defs/Title"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
         }
+      },
+      "result": {
+        "$ref": "#/$defs/ProjectState"
+      }
+    },
+    "project.open": {
+      "description": "Opens an existing project file, closing the current one. Broadcasts project.opened.",
+      "params": {
+        "type": "object",
+        "required": ["path", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "$ref": "#/$defs/FilePath"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/ProjectState"
+      }
+    },
+    "project.get": {
+      "description": "The open project, for a window that has just started. Fails with ProjectNotOpen if there is none.",
+      "params": null,
+      "result": {
+        "$ref": "#/$defs/ProjectState"
+      }
+    },
+    "project.rename": {
+      "description": "Changes the title of the work. Broadcasts project.changed.",
+      "params": {
+        "type": "object",
+        "required": ["title", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "$ref": "#/$defs/Title"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/ProjectState"
+      }
+    },
+    "project.saveAs": {
+      "description": "Writes a copy of the project to a new file and continues working on the copy. Broadcasts project.opened.",
+      "params": {
+        "type": "object",
+        "required": ["path", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "$ref": "#/$defs/FilePath"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/ProjectState"
+      }
+    },
+    "project.close": {
+      "description": "Closes the open project. Broadcasts project.closed.",
+      "params": {
+        "type": "object",
+        "required": ["origin"],
+        "additionalProperties": false,
+        "properties": {
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
+      }
+    },
+    "document.create": {
+      "description": "Adds an empty chapter or fragment at a position (or at the end). Broadcasts project.changed.",
+      "params": {
+        "type": "object",
+        "required": ["kind", "title", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "$ref": "#/$defs/DocumentKind"
+          },
+          "title": {
+            "$ref": "#/$defs/Title"
+          },
+          "position": {
+            "$ref": "#/$defs/Position"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/DocumentEntry"
+      }
+    },
+    "document.rename": {
+      "description": "Changes the title of a chapter or fragment. Broadcasts project.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "title", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "title": {
+            "$ref": "#/$defs/Title"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/DocumentEntry"
+      }
+    },
+    "document.move": {
+      "description": "Places a document at a position among the chapters or the fragments: reorders it, or converts it if the kind changes. Broadcasts project.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "kind", "position", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "kind": {
+            "$ref": "#/$defs/DocumentKind"
+          },
+          "position": {
+            "$ref": "#/$defs/Position"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/ProjectIndex"
+      }
+    },
+    "document.delete": {
+      "description": "Sends a document to the trash, keeping its text, versions and notes. Broadcasts project.changed.",
+      "params": {
+        "$ref": "#/$defs/DocumentChange"
+      },
+      "result": {
+        "$ref": "#/$defs/ProjectIndex"
+      }
+    },
+    "document.restore": {
+      "description": "Brings a document back from the trash to the place it had. Broadcasts project.changed.",
+      "params": {
+        "$ref": "#/$defs/DocumentChange"
+      },
+      "result": {
+        "$ref": "#/$defs/ProjectIndex"
+      }
+    },
+    "document.get": {
+      "description": "The text of a document.",
+      "params": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/DocumentState"
       }
     },
     "document.save": {
-      "description": "Replaces the document content. Broadcasts document.changed to every window.",
+      "description": "Replaces the text of a document. Saving the same text changes nothing and broadcasts nothing. Otherwise broadcasts document.changed, plus versions.changed if an automatic version became due and notes.changed if notes were anchored or loosened.",
       "params": {
         "type": "object",
-        "required": ["content", "origin"],
+        "required": ["id", "content", "origin"],
         "additionalProperties": false,
         "properties": {
-          "content": { "$ref": "#/$defs/TipTapDocument" },
-          "origin": { "$ref": "#/$defs/WindowLabel" }
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "content": {
+            "$ref": "#/$defs/TipTapDocument"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
         }
       },
       "result": {
         "type": "object",
-        "required": ["revision"],
+        "required": [
+          "changed",
+          "revision",
+          "statistics",
+          "work",
+          "automaticVersion"
+        ],
         "additionalProperties": false,
         "properties": {
-          "revision": { "$ref": "#/$defs/Revision" }
+          "changed": {
+            "type": "boolean"
+          },
+          "revision": {
+            "$ref": "#/$defs/Revision"
+          },
+          "statistics": {
+            "$ref": "#/$defs/Statistics"
+          },
+          "work": {
+            "$ref": "#/$defs/Statistics"
+          },
+          "automaticVersion": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/VersionSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "version.create": {
+      "description": "Saves a version of the current text, with an optional name. Broadcasts versions.changed.",
+      "params": {
+        "type": "object",
+        "required": ["documentId", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "documentId": {
+            "$ref": "#/$defs/Id"
+          },
+          "name": {
+            "$ref": "#/$defs/VersionName"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/VersionSummary"
+      }
+    },
+    "version.list": {
+      "description": "Versions of a document, newest first, without their text.",
+      "params": {
+        "$ref": "#/$defs/DocumentReference"
+      },
+      "result": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/VersionSummary"
+        }
+      }
+    },
+    "version.get": {
+      "description": "A version with its text, to read it or compare it with the current one.",
+      "params": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      },
+      "result": {
+        "type": "object",
+        "required": ["version", "content"],
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "$ref": "#/$defs/VersionSummary"
+          },
+          "content": {
+            "$ref": "#/$defs/TipTapDocument"
+          }
+        }
+      }
+    },
+    "version.restore": {
+      "description": "Brings back the text of a version. The current text is saved first as a beforeRestore version (null if the text already matched). Broadcasts document.changed and versions.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "object",
+        "required": ["document", "before"],
+        "additionalProperties": false,
+        "properties": {
+          "document": {
+            "$ref": "#/$defs/DocumentState"
+          },
+          "before": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/VersionSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "note.create": {
+      "description": "Creates a note on a document. An anchored note expects the editor to place its anchor in the text with the returned id. Broadcasts notes.changed.",
+      "params": {
+        "type": "object",
+        "required": ["documentId", "text", "anchored", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "documentId": {
+            "$ref": "#/$defs/Id"
+          },
+          "text": {
+            "$ref": "#/$defs/NoteText"
+          },
+          "anchored": {
+            "type": "boolean"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/Note"
+      }
+    },
+    "note.update": {
+      "description": "Changes the text of a note. Broadcasts notes.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "text", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "text": {
+            "$ref": "#/$defs/NoteText"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/Note"
+      }
+    },
+    "note.delete": {
+      "description": "Deletes a note for good. Broadcasts notes.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
+      }
+    },
+    "note.list": {
+      "description": "Notes of a document, in the order they were written.",
+      "params": {
+        "$ref": "#/$defs/DocumentReference"
+      },
+      "result": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/Note"
         }
       }
     }
   },
   "notifications": {
-    "document.changed": {
-      "description": "The document changed; windows other than the origin should reload it.",
+    "project.opened": {
+      "description": "A project was created, opened or saved under a new path. Every window switches to it.",
       "params": {
         "type": "object",
-        "required": ["content", "revision", "origin"],
+        "required": ["project", "origin"],
         "additionalProperties": false,
         "properties": {
-          "content": { "$ref": "#/$defs/TipTapDocument" },
-          "revision": { "$ref": "#/$defs/Revision" },
-          "origin": { "$ref": "#/$defs/WindowLabel" }
+          "project": {
+            "$ref": "#/$defs/ProjectState"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
+    },
+    "project.changed": {
+      "description": "The title or the index of the open project changed.",
+      "params": {
+        "type": "object",
+        "required": ["project", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "$ref": "#/$defs/ProjectState"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
+    },
+    "project.closed": {
+      "description": "The open project was closed. Every window returns to the welcome screen.",
+      "params": {
+        "type": "object",
+        "required": ["origin"],
+        "additionalProperties": false,
+        "properties": {
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
+    },
+    "document.changed": {
+      "description": "The text of a document changed; windows other than the origin showing it should reload it.",
+      "params": {
+        "type": "object",
+        "required": ["document", "work", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "document": {
+            "$ref": "#/$defs/DocumentState"
+          },
+          "work": {
+            "$ref": "#/$defs/Statistics"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
+    },
+    "versions.changed": {
+      "description": "A version of a document was added.",
+      "params": {
+        "type": "object",
+        "required": ["documentId", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "documentId": {
+            "$ref": "#/$defs/Id"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
+    },
+    "notes.changed": {
+      "description": "The notes of a document changed: created, edited, deleted, anchored or loosened.",
+      "params": {
+        "type": "object",
+        "required": ["documentId", "notes", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "documentId": {
+            "$ref": "#/$defs/Id"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Note"
+            }
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
         }
       }
     }
   },
   "$defs": {
+    "Id": {
+      "description": "UUID v7 in canonical lowercase form.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "Timestamp": {
+      "description": "ISO 8601 date and time with offset.",
+      "type": "string",
+      "minLength": 1
+    },
+    "FilePath": {
+      "description": "Absolute or relative path of a project file on this computer.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "Title": {
+      "description": "Title of a project, chapter or fragment. Surrounding spaces are trimmed; blank titles are refused with titleRequired.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "VersionName": {
+      "description": "Optional name of a manual version. Blank means no name.",
+      "type": ["string", "null"],
+      "maxLength": 120
+    },
+    "NoteText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10000
+    },
+    "Position": {
+      "description": "Zero-based place among the documents of one kind.",
+      "type": "integer",
+      "minimum": 0
+    },
     "Revision": {
-      "description": "Monotonic counter, incremented on every saved change. 0 means never saved.",
+      "description": "Monotonic counter, incremented on every change to a document's text. 0 means never edited.",
       "type": "integer",
       "minimum": 0
     },
@@ -90,13 +630,278 @@
       "minLength": 1,
       "maxLength": 64
     },
+    "DocumentKind": {
+      "enum": ["chapter", "fragment"]
+    },
+    "VersionKind": {
+      "enum": ["automatic", "manual", "beforeRestore"]
+    },
+    "ErrorReason": {
+      "description": "Value of error.data.reason for ProjectNotOpen, RuleViolated and ProjectFileProblem errors. The UI turns each one into a message in Spanish.",
+      "enum": [
+        "projectNotOpen",
+        "titleRequired",
+        "titleTooLong",
+        "versionNameTooLong",
+        "noteTextRequired",
+        "noteTextTooLong",
+        "invalidContent",
+        "documentNotFound",
+        "documentIsDeleted",
+        "documentIsNotDeleted",
+        "positionOutOfRange",
+        "versionOfAnotherDocument",
+        "versionNotFound",
+        "noteNotFound",
+        "notFound",
+        "alreadyExists",
+        "notAProject",
+        "newerVersion",
+        "corrupted"
+      ]
+    },
+    "ErrorData": {
+      "type": "object",
+      "required": ["reason"],
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "$ref": "#/$defs/ErrorReason"
+        }
+      }
+    },
+    "Statistics": {
+      "description": "Counts shown to the writer. Notes never count.",
+      "type": "object",
+      "required": ["words", "characters", "paragraphs"],
+      "additionalProperties": false,
+      "properties": {
+        "words": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "characters": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "paragraphs": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "DocumentEntry": {
+      "description": "A chapter or fragment as the index shows it.",
+      "type": "object",
+      "required": ["id", "kind", "title", "position", "createdAt", "deletedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "$ref": "#/$defs/DocumentKind"
+        },
+        "title": {
+          "$ref": "#/$defs/Title"
+        },
+        "position": {
+          "$ref": "#/$defs/Position"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "deletedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "ProjectIndex": {
+      "description": "Chapters in reading order, fragments in drawer order, and the trash, most recent first.",
+      "type": "object",
+      "required": ["chapters", "fragments", "trash"],
+      "additionalProperties": false,
+      "properties": {
+        "chapters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentEntry"
+          }
+        },
+        "fragments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentEntry"
+          }
+        },
+        "trash": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentEntry"
+          }
+        }
+      }
+    },
+    "ProjectState": {
+      "type": "object",
+      "required": ["id", "path", "title", "createdAt", "index", "work"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "path": {
+          "$ref": "#/$defs/FilePath"
+        },
+        "title": {
+          "$ref": "#/$defs/Title"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "index": {
+          "$ref": "#/$defs/ProjectIndex"
+        },
+        "work": {
+          "$ref": "#/$defs/Statistics"
+        }
+      },
+      "description": "The open project: its file, title, index, and the counts of every chapter outside the trash (work)."
+    },
+    "DocumentState": {
+      "type": "object",
+      "required": ["id", "content", "revision", "statistics", "updatedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "content": {
+          "$ref": "#/$defs/TipTapDocument"
+        },
+        "revision": {
+          "$ref": "#/$defs/Revision"
+        },
+        "statistics": {
+          "$ref": "#/$defs/Statistics"
+        },
+        "updatedAt": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "VersionSummary": {
+      "description": "A version as listed, without its text.",
+      "type": "object",
+      "required": [
+        "id",
+        "documentId",
+        "kind",
+        "name",
+        "createdAt",
+        "statistics"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "documentId": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "$ref": "#/$defs/VersionKind"
+        },
+        "name": {
+          "type": ["string", "null"]
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "statistics": {
+          "$ref": "#/$defs/Statistics"
+        }
+      }
+    },
+    "Note": {
+      "type": "object",
+      "required": [
+        "id",
+        "documentId",
+        "text",
+        "anchored",
+        "createdAt",
+        "updatedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "documentId": {
+          "$ref": "#/$defs/Id"
+        },
+        "text": {
+          "$ref": "#/$defs/NoteText"
+        },
+        "anchored": {
+          "type": "boolean",
+          "description": "False when the anchored passage was deleted: the note is loose."
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updatedAt": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "DocumentChange": {
+      "description": "Params of a change to one document of the index.",
+      "type": "object",
+      "required": ["id", "origin"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "origin": {
+          "$ref": "#/$defs/WindowLabel"
+        }
+      }
+    },
+    "DocumentReference": {
+      "description": "Params of a query about one document.",
+      "type": "object",
+      "required": ["documentId"],
+      "additionalProperties": false,
+      "properties": {
+        "documentId": {
+          "$ref": "#/$defs/Id"
+        }
+      }
+    },
     "TipTapDocument": {
       "description": "Root of a TipTap/ProseMirror document as produced by editor.getJSON().",
       "type": "object",
       "required": ["type"],
       "properties": {
-        "type": { "const": "doc" },
-        "content": { "type": "array", "items": { "$ref": "#/$defs/TipTapNode" } }
+        "type": {
+          "const": "doc"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TipTapNode"
+          }
+        }
       }
     },
     "TipTapNode": {
@@ -104,19 +909,41 @@
       "type": "object",
       "required": ["type"],
       "properties": {
-        "type": { "type": "string", "minLength": 1 },
-        "attrs": { "type": "object" },
-        "content": { "type": "array", "items": { "$ref": "#/$defs/TipTapNode" } },
-        "marks": { "type": "array", "items": { "$ref": "#/$defs/TipTapMark" } },
-        "text": { "type": "string" }
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attrs": {
+          "type": "object"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TipTapNode"
+          }
+        },
+        "marks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TipTapMark"
+          }
+        },
+        "text": {
+          "type": "string"
+        }
       }
     },
     "TipTapMark": {
       "type": "object",
       "required": ["type"],
       "properties": {
-        "type": { "type": "string", "minLength": 1 },
-        "attrs": { "type": "object" }
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attrs": {
+          "type": "object"
+        }
       }
     }
   }

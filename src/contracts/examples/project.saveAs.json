@@ -1,0 +1,10 @@
+{
+  "valid": [
+    { "path": "D:/Copias/Don Quijote (copia).rocinante", "origin": "main" }
+  ],
+  "invalid": [
+    { "origin": "main" },
+    { "path": "", "origin": "main" },
+    { "path": "copia.rocinante", "origin": "" }
+  ]
+}

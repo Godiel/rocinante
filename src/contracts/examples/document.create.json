@@ -1,0 +1,22 @@
+{
+  "valid": [
+    { "kind": "chapter", "title": "Capítulo primero", "origin": "main" },
+    {
+      "kind": "fragment",
+      "title": "La aventura de los molinos",
+      "position": 0,
+      "origin": "window-1"
+    }
+  ],
+  "invalid": [
+    { "kind": "scene", "title": "Escena", "origin": "main" },
+    { "kind": "chapter", "origin": "main" },
+    {
+      "kind": "chapter",
+      "title": "Negativo",
+      "position": -1,
+      "origin": "main"
+    },
+    { "kind": "chapter", "title": "Decimal", "position": 1.5, "origin": "main" }
+  ]
+}

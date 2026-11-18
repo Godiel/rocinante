@@ -18,7 +18,23 @@ const pascal = (name) =>
 
 // Every named type becomes a definition, so json-schema-to-typescript emits it.
 const definitions = {};
+const aliases = [];
 const methodLines = [];
+
+// A payload that is only a reference to a shared definition becomes a type alias;
+// compiling it as its own schema would emit a duplicate interface.
+const refName = (schema) => {
+  const keys = Object.keys(schema);
+  return keys.length === 1 && typeof schema.$ref === "string" && schema.$ref.startsWith("#/$defs/")
+    ? schema.$ref.slice("#/$defs/".length)
+    : undefined;
+};
+
+const declare = (name, schema) => {
+  const target = refName(schema);
+  if (target) aliases.push(`export type ${name} = ${target};`);
+  else definitions[name] = schema;
+};
 const notificationLines = [];
 
 for (const [name, definition] of Object.entries(protocol.$defs)) {
@@ -30,15 +46,15 @@ for (const [method, { params, result }] of Object.entries(protocol.methods)) {
   let paramsType = "undefined";
   if (params !== null) {
     paramsType = `${base}Params`;
-    definitions[paramsType] = params;
+    declare(paramsType, params);
   }
-  definitions[`${base}Result`] = result;
+  declare(`${base}Result`, result);
   methodLines.push(`  "${method}": { params: ${paramsType}; result: ${base}Result };`);
 }
 
 for (const [notification, { params }] of Object.entries(protocol.notifications)) {
   const type = `${pascal(notification)}Notification`;
-  definitions[type] = params;
+  declare(type, params);
   notificationLines.push(`  "${notification}": ${type};`);
 }
 
@@ -71,6 +87,8 @@ export const PROTOCOL_VERSION = ${protocol.protocolVersion} as const;
 export const ErrorCodes = ${JSON.stringify(protocol.errorCodes, null, 2)} as const;
 
 ${namedTypes}
+
+${aliases.join("\n")}
 
 /** Every request the core understands, with its params and result types. */
 export interface CoreMethods {

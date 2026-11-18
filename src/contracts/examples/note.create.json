@@ -1,0 +1,30 @@
+{
+  "valid": [
+    {
+      "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "text": "Revisar esta fecha",
+      "anchored": true,
+      "origin": "main"
+    },
+    {
+      "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "text": "Aquí Antonio aún no conoce a Claudio",
+      "anchored": false,
+      "origin": "window-1"
+    }
+  ],
+  "invalid": [
+    {
+      "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "text": "",
+      "anchored": true,
+      "origin": "main"
+    },
+    {
+      "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "text": "Sin anclar",
+      "origin": "main"
+    },
+    { "text": "Sin documento", "anchored": false, "origin": "main" }
+  ]
+}

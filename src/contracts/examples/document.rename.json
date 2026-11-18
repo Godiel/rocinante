@@ -1,0 +1,22 @@
+{
+  "valid": [
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "title": "Capítulo segundo",
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    { "id": "capitulo-1", "title": "Id inválido", "origin": "main" },
+    {
+      "id": "0196A3B2-7C4D-7E8F-9A0B-1C2D3E4F5A6B",
+      "title": "Id en mayúsculas",
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "title": "",
+      "origin": "main"
+    }
+  ]
+}
