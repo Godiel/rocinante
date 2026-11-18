@@ -1,0 +1,11 @@
+<Project>
+  <!-- Test projects share the core's compiler and analyzer settings. -->
+  <Import Project="..\..\src\core\Directory.Build.props" />
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- xUnit test names describe behaviour with underscores. -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
+  </PropertyGroup>
+</Project>

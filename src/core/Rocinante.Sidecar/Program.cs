@@ -13,7 +13,7 @@ Console.InputEncoding = new UTF8Encoding(false);
 var output = new StreamWriter(Console.OpenStandardOutput(), new UTF8Encoding(false)) { AutoFlush = true };
 
 using var store = SkeletonDocumentStore.Open(args[0]);
-var server = new JsonRpcServer(output, store);
+var server = new JsonRpcServer(output, store, ProtocolContract.LoadEmbedded());
 
 string? line;
 while ((line = Console.In.ReadLine()) is not null)

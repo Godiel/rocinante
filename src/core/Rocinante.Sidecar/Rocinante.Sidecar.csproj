@@ -7,7 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="JsonSchema.Net" Version="9.7.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The protocol contract is the single source of truth shared with the UI. -->
+    <EmbeddedResource Include="..\..\contracts\protocol.json" LogicalName="protocol.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Rocinante.Sidecar.Tests" />
   </ItemGroup>
 
 </Project>
