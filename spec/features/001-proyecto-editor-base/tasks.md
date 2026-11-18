@@ -51,9 +51,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Notificación por cada cambio; tests de cada caso de uso y una sesión completa por el protocolo que valida todas las respuestas y notificaciones.
 
 ## 7. Configuración de la app
-- [ ] Proyectos recientes, último proyecto, documento y posición del cursor.
-- [ ] Preferencias: tema, índice anclado o flotante, contador visible, desplazamiento tipo rodillo.
-- [ ] Abrir un `.rocinante` recibido como argumento al arrancar.
+- [x] Proyectos recientes (los 10 últimos), último proyecto, documento y posición del cursor.
+- [x] Preferencias: tema, índice anclado o flotante, contador visible, desplazamiento tipo rodillo (la interfaz las aplica en los bloques 8 a 11).
+- [x] Abrir un `.rocinante` recibido como argumento al arrancar.
 
 ## 8. Base visual
 - [ ] Tokens de color de «papel» y «luz de vela», con contraste WCAG AA comprobado.

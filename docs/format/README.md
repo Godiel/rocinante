@@ -115,7 +115,7 @@ Notas del autor sobre un documento. Su texto vive aquí y **nunca** dentro de `d
 
 ## Qué no está en el archivo
 
-La configuración del escritor (proyectos recientes, último capítulo abierto, posición del cursor, tema, preferencias) vive en la carpeta de datos de la app, no en el proyecto. Al compartir un `.rocinante` solo se comparte la obra.
+La configuración del escritor (proyectos recientes, último capítulo abierto, posición del cursor, tema, preferencias) vive en `settings.json`, en la carpeta de datos de la app, no en el proyecto. Al compartir un `.rocinante` solo se comparte la obra.
 
 ## Migraciones
 
