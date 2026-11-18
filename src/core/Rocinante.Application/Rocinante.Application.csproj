@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Use cases of the core and the ports they need. Knows the domain, not SQLite nor JSON-RPC. -->
+  <PropertyGroup>
+    <RootNamespace>Rocinante.Application</RootNamespace>
+    <IsTrimmable>true</IsTrimmable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rocinante.Domain\Rocinante.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
