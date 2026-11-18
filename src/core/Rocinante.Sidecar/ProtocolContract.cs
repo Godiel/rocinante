@@ -17,11 +17,13 @@ public sealed class ProtocolContract
     private readonly Dictionary<string, JsonSchema> _params = [];
     private readonly Dictionary<string, JsonSchema> _results = [];
     private readonly Dictionary<string, JsonSchema> _notifications = [];
+    private readonly JsonObject _definitions;
 
     private ProtocolContract(JsonObject manifest)
     {
         ProtocolVersion = manifest["protocolVersion"]!.GetValue<int>();
         var definitions = manifest["$defs"]!.AsObject();
+        _definitions = definitions;
         var options = new BuildOptions { SchemaRegistry = new SchemaRegistry() };
 
         foreach (var (method, entry) in manifest["methods"]!.AsObject())
@@ -68,6 +70,13 @@ public sealed class ProtocolContract
     /// <summary>Validates a notification payload. Returns null when valid, or the first problem.</summary>
     public string? ValidateNotification(string notification, JsonNode? parameters) =>
         Validate(_notifications[notification], parameters);
+
+    /// <summary>Validates a value against one of the shared definitions in <c>$defs</c>.</summary>
+    public string? ValidateDefinition(string name, JsonNode? instance)
+    {
+        var schema = Build(new JsonObject { ["$ref"] = $"#/$defs/{name}" }, _definitions, new BuildOptions { SchemaRegistry = new SchemaRegistry() }, $"definition:{name}");
+        return Validate(schema, instance);
+    }
 
     private static JsonSchema Build(JsonNode schema, JsonObject definitions, BuildOptions options, string name)
     {

@@ -1,27 +1,20 @@
 using System.Text;
+using Rocinante.Infrastructure.Persistence;
 using Rocinante.Sidecar;
 
-// Walking skeleton for feature 001: a JSON-RPC 2.0 server over stdin/stdout.
-// stdout carries protocol messages only; diagnostics go to stderr.
-if (args.Length != 1)
-{
-    Console.Error.WriteLine("usage: Rocinante.Sidecar <project-file>");
-    return 2;
-}
-
+// The Rocinante core: a JSON-RPC 2.0 server over stdin/stdout, started by the Tauri host.
+// stdout carries protocol messages only; diagnostics go to stderr. It starts with no project
+// open: the UI creates or opens one.
 Console.InputEncoding = new UTF8Encoding(false);
 var output = new StreamWriter(Console.OpenStandardOutput(), new UTF8Encoding(false)) { AutoFlush = true };
 
-using var store = SkeletonDocumentStore.Open(args[0]);
-var server = new JsonRpcServer(output, store, ProtocolContract.LoadEmbedded());
+using var core = new Core(output, Console.Error, new SqliteProjectFiles(), TimeProvider.System, ProtocolContract.LoadEmbedded());
 
 string? line;
 while ((line = Console.In.ReadLine()) is not null)
 {
     if (line.Length > 0)
     {
-        server.Handle(line);
+        core.Handle(line);
     }
 }
-
-return 0;

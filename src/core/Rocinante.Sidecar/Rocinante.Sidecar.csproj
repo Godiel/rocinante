@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Entry point of the core: a JSON-RPC 2.0 server over stdin/stdout, started by the Tauri host. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Rocinante.Sidecar</RootNamespace>
@@ -7,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Rocinante.Infrastructure\Rocinante.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="JsonSchema.Net" Version="9.7.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.15" />
   </ItemGroup>
 
   <ItemGroup>

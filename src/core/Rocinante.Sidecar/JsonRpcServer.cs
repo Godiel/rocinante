@@ -1,42 +1,41 @@
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Rocinante.Application;
+using Rocinante.Domain;
+using Rocinante.Infrastructure.Persistence;
 
 namespace Rocinante.Sidecar;
 
 /// <summary>
 /// Line-delimited JSON-RPC 2.0 dispatcher. Every request is checked against the
-/// <see cref="ProtocolContract"/> before it reaches a handler, gets exactly one
-/// response, and state changes are broadcast as notifications so every window
-/// stays in sync.
+/// <see cref="ProtocolContract"/> before it reaches a handler and gets exactly one response.
+/// Expected failures (a broken rule, a file that is not a project) come back with a code and a
+/// <c>data.reason</c> the UI turns into a message in Spanish; anything else is an internal error.
 /// </summary>
-public sealed class JsonRpcServer
+internal sealed class JsonRpcServer
 {
     private const int ParseError = -32700;
     private const int InvalidRequest = -32600;
     private const int MethodNotFound = -32601;
     private const int InvalidParams = -32602;
     private const int InternalError = -32603;
+    private const int ProjectNotOpen = -32001;
+    private const int RuleViolated = -32002;
+    private const int ProjectFileProblem = -32003;
 
-    private readonly TextWriter _output;
-    private readonly SkeletonDocumentStore _store;
+    private readonly MessageWriter _writer;
     private readonly ProtocolContract _contract;
-    private readonly Dictionary<string, Func<JsonNode?, JsonNode?>> _handlers;
+    private readonly IReadOnlyDictionary<string, Func<JsonNode?, JsonNode?>> _handlers;
+    private readonly TextWriter _log;
 
-    public JsonRpcServer(TextWriter output, SkeletonDocumentStore store, ProtocolContract contract)
+    public JsonRpcServer(MessageWriter writer, ProtocolContract contract, IReadOnlyDictionary<string, Func<JsonNode?, JsonNode?>> handlers, TextWriter log)
     {
-        _output = output;
-        _store = store;
+        _writer = writer;
         _contract = contract;
-        _handlers = new()
-        {
-            ["system.info"] = _ => GetInfo(),
-            ["system.ping"] = _ => JsonValue.Create("pong"),
-            ["document.get"] = _ => GetDocument(),
-            ["document.save"] = SaveDocument,
-        };
+        _handlers = handlers;
+        _log = log;
 
-        var unhandled = contract.Methods.Except(_handlers.Keys).ToList();
+        var unhandled = contract.Methods.Except(handlers.Keys).ToList();
         if (unhandled.Count > 0)
         {
             throw new InvalidOperationException($"No handler for contract methods: {string.Join(", ", unhandled)}");
@@ -54,87 +53,56 @@ public sealed class JsonRpcServer
         }
         catch (JsonException)
         {
-            WriteError(null, ParseError, "Parse error");
+            _writer.Error(null, ParseError, "Parse error");
             return;
         }
 
         var id = request["id"]?.DeepClone();
         if (!IsString(request["jsonrpc"], "2.0") || !TryGetString(request["method"], out var method))
         {
-            WriteError(id, InvalidRequest, "Invalid request");
+            _writer.Error(id, InvalidRequest, "Invalid request");
             return;
         }
 
         if (!_contract.Defines(method) || !_handlers.TryGetValue(method, out var handler))
         {
-            WriteError(id, MethodNotFound, $"Method not found: {method}");
+            _writer.Error(id, MethodNotFound, $"Method not found: {method}");
             return;
         }
 
         var parameters = request["params"];
         if (_contract.ValidateParams(method, parameters) is { } problem)
         {
-            WriteError(id, InvalidParams, $"Invalid params: {problem}");
+            _writer.Error(id, InvalidParams, $"Invalid params: {problem}");
             return;
         }
 
         try
         {
-            Write(new JsonObject { ["jsonrpc"] = "2.0", ["id"] = id, ["result"] = handler(parameters) });
+            _writer.Result(id, handler(parameters));
+        }
+        catch (ProjectNotOpenException exception)
+        {
+            _writer.Error(id, ProjectNotOpen, exception.Message, "projectNotOpen");
+        }
+        catch (DomainException exception)
+        {
+            _writer.Error(id, RuleViolated, exception.Message, Reason(exception.Error.ToString()));
+        }
+        catch (ProjectFileException exception)
+        {
+            _writer.Error(id, ProjectFileProblem, exception.Message, Reason(exception.Error.ToString()));
         }
         catch (Exception exception)
         {
-            Console.Error.WriteLine($"error handling {method}: {exception}");
-            WriteError(id, InternalError, "Internal error");
+            // Exception messages never carry the writer's text: only ids, paths and SQLite codes.
+            _log.WriteLine($"error handling {method}: {exception}");
+            _writer.Error(id, InternalError, "Internal error");
         }
     }
 
-    private JsonObject GetInfo() => new()
-    {
-        ["protocolVersion"] = _contract.ProtocolVersion,
-        ["coreVersion"] = typeof(JsonRpcServer).Assembly
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown",
-    };
-
-    private JsonObject GetDocument()
-    {
-        var (content, revision) = _store.Read();
-        return new JsonObject
-        {
-            ["content"] = content is null ? null : JsonNode.Parse(content),
-            ["revision"] = revision,
-        };
-    }
-
-    // Params are already validated against the contract, so their shape is guaranteed.
-    private JsonObject SaveDocument(JsonNode? parameters)
-    {
-        var content = parameters!["content"]!.AsObject();
-        var origin = parameters["origin"]!.GetValue<string>();
-
-        var revision = _store.Save(content.ToJsonString());
-
-        Notify("document.changed", new JsonObject
-        {
-            ["content"] = content.DeepClone(),
-            ["revision"] = revision,
-            ["origin"] = origin,
-        });
-
-        return new JsonObject { ["revision"] = revision };
-    }
-
-    private void Notify(string method, JsonObject parameters) =>
-        Write(new JsonObject { ["jsonrpc"] = "2.0", ["method"] = method, ["params"] = parameters });
-
-    private void WriteError(JsonNode? id, int code, string message) => Write(new JsonObject
-    {
-        ["jsonrpc"] = "2.0",
-        ["id"] = id,
-        ["error"] = new JsonObject { ["code"] = code, ["message"] = message },
-    });
-
-    private void Write(JsonObject message) => _output.WriteLine(message.ToJsonString());
+    /// <summary>The wire name of an error reason: the enum member in camelCase.</summary>
+    internal static string Reason(string name) => char.ToLowerInvariant(name[0]) + name[1..];
 
     private static bool IsString(JsonNode? node, string expected) =>
         TryGetString(node, out var value) && value == expected;
