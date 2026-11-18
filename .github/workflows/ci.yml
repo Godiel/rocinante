@@ -31,6 +31,13 @@ jobs:
         run: dotnet build src/core/Rocinante.slnx --configuration Release
       - name: Tests
         run: dotnet test --solution src/core/Rocinante.slnx --configuration Release --no-build
+      - name: Informe de cobertura del dominio
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-dominio
+          path: TestResults/coverage.cobertura.*.xml
+          if-no-files-found: error
 
   ui:
     name: Interfaz React
