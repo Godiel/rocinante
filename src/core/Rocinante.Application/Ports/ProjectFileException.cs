@@ -1,4 +1,4 @@
-namespace Rocinante.Infrastructure.Persistence;
+namespace Rocinante.Application.Ports;
 
 /// <summary>Why a project file could not be created or opened.</summary>
 public enum ProjectFileError

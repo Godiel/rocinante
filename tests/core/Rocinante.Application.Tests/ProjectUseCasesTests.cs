@@ -1,3 +1,4 @@
+using Rocinante.Application.Ports;
 using Rocinante.Infrastructure.Persistence;
 
 namespace Rocinante.Application.Tests;

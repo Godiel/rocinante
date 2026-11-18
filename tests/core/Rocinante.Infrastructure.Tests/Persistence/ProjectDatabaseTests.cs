@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.Data.Sqlite;
+using Rocinante.Application.Ports;
 using Rocinante.Domain.Projects;
 using Rocinante.Infrastructure.Persistence;
 
