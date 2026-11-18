@@ -1,37 +1,43 @@
 using System.Text.Json.Nodes;
-using Microsoft.Data.Sqlite;
+using Rocinante.Infrastructure.Persistence;
 
 namespace Rocinante.Sidecar.Tests;
 
-/// <summary>Runs a real <see cref="JsonRpcServer"/> over a temporary project file.</summary>
+/// <summary>Runs the real core, wired as in production, over a temporary folder.</summary>
 internal sealed class ServerHarness : IDisposable
 {
-    private readonly string _directory;
-    private readonly SkeletonDocumentStore _store;
     private readonly StringWriter _output = new();
-    private readonly JsonRpcServer _server;
+    private readonly Core _core;
     private int _nextId = 1;
 
     public ServerHarness()
     {
-        _directory = Path.Combine(Path.GetTempPath(), "rocinante-tests", Guid.NewGuid().ToString("N"));
-        ProjectPath = Path.Combine(_directory, "test.rocinante");
-        _store = SkeletonDocumentStore.Open(ProjectPath);
-        _server = new JsonRpcServer(_output, _store, Contract);
+        Folder = Directory.CreateTempSubdirectory("rocinante-sidecar-tests-").FullName;
+        _core = new Core(_output, Log, new SqliteProjectFiles(), Clock, Contract);
     }
 
     public static ProtocolContract Contract { get; } = ProtocolContract.LoadEmbedded();
 
-    public string ProjectPath { get; }
+    public string Folder { get; }
+
+    public ManualClock Clock { get; } = new(new DateTimeOffset(2026, 3, 14, 9, 0, 0, TimeSpan.Zero));
+
+    /// <summary>What the core wrote to stderr.</summary>
+    public StringWriter Log { get; } = new();
 
     /// <summary>Every notification the server has emitted so far.</summary>
     public List<JsonObject> Notifications { get; } = [];
+
+    /// <summary>Every (method, response) pair, to check results against the contract.</summary>
+    public List<(string Method, JsonObject Response)> Responses { get; } = [];
+
+    public string PathOf(string name) => Path.Combine(Folder, name);
 
     /// <summary>Sends a raw line and returns every message the server wrote in reply.</summary>
     public List<JsonObject> SendRaw(string line)
     {
         _output.GetStringBuilder().Clear();
-        _server.Handle(line);
+        _core.Handle(line);
 
         var messages = _output.ToString()
             .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -51,16 +57,22 @@ internal sealed class ServerHarness : IDisposable
             request["params"] = parameters.DeepClone();
         }
 
-        return SendRaw(request.ToJsonString()).Single(message => message["id"]?.GetValue<int>() == id);
+        var response = SendRaw(request.ToJsonString()).Single(message => message["id"]?.GetValue<int>() == id);
+        Responses.Add((method, response));
+        return response;
+    }
+
+    /// <summary>Sends a request that must succeed and returns its result.</summary>
+    public JsonNode? Call(string method, JsonNode? parameters = null)
+    {
+        var response = Request(method, parameters);
+        response["error"].ShouldBeNull($"{method} failed: {response["error"]?.ToJsonString()}");
+        return response["result"];
     }
 
     public void Dispose()
     {
-        _store.Dispose();
-        SqliteConnection.ClearAllPools();
-        if (Directory.Exists(_directory))
-        {
-            Directory.Delete(_directory, recursive: true);
-        }
+        _core.Dispose();
+        Directory.Delete(Folder, recursive: true);
     }
 }

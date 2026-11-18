@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\*.cs" LinkBase="Shared" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Rocinante.Tests.Shared" />
     <Using Include="Shouldly" />
     <Using Include="Xunit" />
   </ItemGroup>
