@@ -72,8 +72,8 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de las extensiones propias.
 
 ## 10. Índice
-- [ ] Vista con capítulos y cajón de fragmentos, anclable o flotante, con atajo para abrir y cerrar.
-- [ ] Reordenar arrastrando; crear, renombrar, convertir y eliminar con confirmación y deshacer.
+- [x] Vista con capítulos y cajón de fragmentos, anclable o flotante, con atajo para abrir y cerrar.
+- [x] Reordenar arrastrando; crear, renombrar, convertir y eliminar con confirmación y deshacer.
 
 ## 11. Guardado automático y contador
 - [ ] Guardado tras ≤ 1 s de pausa, al cambiar de documento y al cerrar.
