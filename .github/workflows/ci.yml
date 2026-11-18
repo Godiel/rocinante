@@ -30,7 +30,7 @@ jobs:
       - name: Compilar
         run: dotnet build src/core/Rocinante.slnx --configuration Release
       - name: Tests
-        run: dotnet test src/core/Rocinante.slnx --configuration Release --no-build
+        run: dotnet test --solution src/core/Rocinante.slnx --configuration Release --no-build
 
   ui:
     name: Interfaz React
@@ -42,10 +42,14 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
+      - name: Contrato generado al día
+        run: npm run contracts:check
       - name: Formato
         run: npm run format:check -w @rocinante/ui
       - name: Lint
         run: npm run lint -w @rocinante/ui
+      - name: Tests
+        run: npm test -w @rocinante/ui
       - name: Tipos y compilación
         run: npm run build -w @rocinante/ui
 
