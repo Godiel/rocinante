@@ -14,6 +14,7 @@ import type {
   ProjectState,
 } from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
+import { LogFolderButton } from "../../app/Trouble";
 import { savePendingNow } from "../../editor/pending-saves";
 import { isOutlineShortcut } from "../outline/shortcut";
 import { Outline } from "../outline/Outline";
@@ -292,7 +293,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
       <main className="writing-main">
         {problem && (
           <p className="writing-problem" role="alert">
-            {problem}
+            {problem} <LogFolderButton />
           </p>
         )}
         {isEmpty && (

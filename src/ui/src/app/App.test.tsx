@@ -13,7 +13,13 @@ vi.mock("../bridge/core", async (importOriginal) => ({
     listeners.set(method, handler);
     return Promise.resolve(() => listeners.delete(method));
   },
+  onHostEvent: (name: string, handler: () => void) => {
+    listeners.set(name, handler);
+    return Promise.resolve(() => listeners.delete(name));
+  },
 }));
+const savePendingNow = vi.hoisted(() => vi.fn(() => Promise.resolve()));
+vi.mock("../editor/pending-saves", () => ({ savePendingNow }));
 // The writing view has its own tests in block 9; here it only needs to say what it shows.
 vi.mock("../features/editor/WritingView", () => ({
   WritingView: ({ project }: { project: ProjectState }) => <p>Escribiendo en {project.title}</p>,
@@ -138,5 +144,30 @@ describe("app window", () => {
     render(<App origin="main" pickers={pickers} />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Algo no ha ido bien");
+  });
+
+  it("after the core falls and starts again, reopens the project and saves what was pending", async () => {
+    startWith(start({ project }));
+    await screen.findByText("Escribiendo en Don Quijote");
+    request.mockClear();
+
+    await act(async () => listeners.get("core://restarted")?.(undefined));
+
+    expect(request).toHaveBeenCalledWith("app.start", { origin: "main" });
+    expect(savePendingNow).toHaveBeenCalled();
+    expect(screen.getByText("Escribiendo en Don Quijote")).toBeInTheDocument();
+  });
+
+  it("says so over the page, with the way to the log, when the core keeps falling", async () => {
+    startWith(start({ project }));
+    await screen.findByText("Escribiendo en Don Quijote");
+
+    act(() => listeners.get("core://failed")?.(undefined));
+
+    expect(screen.getByRole("alert")).toHaveTextContent("ha fallado varias veces seguidas");
+    expect(screen.getByText("Escribiendo en Don Quijote")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Abrir la carpeta de registros" }),
+    ).toBeInTheDocument();
   });
 });

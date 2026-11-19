@@ -1,4 +1,5 @@
 import { CoreError } from "../bridge/core";
+import { reportProblem } from "./diagnostics";
 import { ErrorCodes, type ErrorReason } from "../bridge/generated/protocol";
 
 /**
@@ -35,8 +36,11 @@ export function messageFor(error: unknown): string {
   if (error instanceof CoreError) {
     if (error.reason) return messages[error.reason];
     if (error.code === ErrorCodes.CoreUnavailable) {
-      return "Rocinante no responde. Cierra la app y vuelve a abrirla; lo guardado está a salvo.";
+      return "Rocinante se está recuperando de un fallo. Lo escrito sigue en pantalla y se guardará en cuanto pueda.";
     }
+  } else {
+    // The core logs its own failures; anything else that lands here is news for the log.
+    reportProblem(error);
   }
   return "Algo no ha ido bien. Vuelve a intentarlo; lo guardado está a salvo.";
 }

@@ -44,6 +44,10 @@ function reasonOf(error: object): ErrorReason | undefined {
   return "reason" in error.data ? (error.data.reason as ErrorReason) : undefined;
 }
 
+/** Sent by the host when it had to start the core again after it stopped, and when it gave up. */
+export const CORE_RESTARTED = "core://restarted";
+export const CORE_FAILED = "core://failed";
+
 /** Event name used by the host relay to broadcast core notifications. */
 export const NOTIFICATION_EVENT = "core://notification";
 
@@ -74,6 +78,11 @@ export function onNotification<N extends NotificationName>(
       handler(event.payload.params as CoreNotifications[N]);
     }
   });
+}
+
+/** Subscribes to an event of the host itself (`CORE_RESTARTED`, `CORE_FAILED`). */
+export function onHostEvent(name: string, handler: () => void): Promise<UnlistenFn> {
+  return listen(name, () => handler());
 }
 
 /** Fails if the running core speaks a different protocol version than this UI. */

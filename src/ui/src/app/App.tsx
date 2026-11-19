@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { ensureCompatibleCore, onNotification, request } from "../bridge/core";
+import {
+  CORE_FAILED,
+  CORE_RESTARTED,
+  ensureCompatibleCore,
+  onHostEvent,
+  onNotification,
+  request,
+} from "../bridge/core";
 import type {
   Place,
   Preferences,
@@ -11,6 +18,11 @@ import { applyTheme } from "../design/themes";
 import { Welcome, type Pickers } from "../features/welcome/Welcome";
 import { WritingView } from "../features/editor/WritingView";
 import { messageFor, messages } from "./messages";
+import { LogFolderButton, Trouble } from "./Trouble";
+import { savePendingNow } from "../editor/pending-saves";
+
+const HALTED =
+  "Rocinante ha fallado varias veces seguidas y se ha detenido. Lo que aún no se haya guardado sigue en pantalla: cópialo antes de cerrar la app y volver a abrirla.";
 
 const DEFAULT_PREFERENCES: Preferences = {
   theme: "paper",
@@ -48,6 +60,8 @@ export function App({ origin, pickers }: AppProps) {
   const [recent, setRecent] = useState<RecentProject[]>([]);
   const [defaultFolder, setDefaultFolder] = useState("");
   const [preferences, setPreferences] = useState<Preferences | null>(null);
+  // Set when the core stopped for good: said over the page, which is left as it is.
+  const [halted, setHalted] = useState<string | null>(null);
 
   useEffect(() => {
     const applyPreferences = (next: Preferences) => {
@@ -79,6 +93,15 @@ export function App({ origin, pickers }: AppProps) {
       onNotification("project.closed", () => setScreen({ kind: "welcome", notice: null })),
       onNotification("recent.changed", ({ recent: next }) => setRecent(next)),
       onNotification("preferences.changed", ({ preferences: next }) => applyPreferences(next)),
+      // A new core took over after the old one fell: it reopens the project the writer had
+      // open (the first window to ask does it) and the text not yet saved goes to it.
+      onHostEvent(CORE_RESTARTED, () => {
+        void request("app.start", { origin })
+          .then(() => savePendingNow())
+          .catch((error: unknown) => setHalted(messageFor(error)));
+      }),
+      // The page stays, so whatever could not be saved can still be copied.
+      onHostEvent(CORE_FAILED, () => setHalted(HALTED)),
     ];
 
     return () => {
@@ -86,34 +109,45 @@ export function App({ origin, pickers }: AppProps) {
     };
   }, [origin]);
 
-  switch (screen.kind) {
-    case "starting":
-      return null;
-    case "failed":
-      return (
-        <p className="app-failed" role="alert">
-          {screen.message}
-        </p>
-      );
-    case "welcome":
-      return (
-        <Welcome
-          recent={recent}
-          defaultFolder={defaultFolder}
-          notice={screen.notice}
-          origin={origin}
-          pickers={pickers}
-        />
-      );
-    case "writing":
-      return (
-        <WritingView
-          key={screen.project.path}
-          project={screen.project}
-          place={screen.place}
-          preferences={preferences ?? DEFAULT_PREFERENCES}
-          origin={origin}
-        />
-      );
+  return (
+    <>
+      {halted && (
+        <div className="halted" role="alert">
+          <p>{halted}</p>
+          <LogFolderButton />
+        </div>
+      )}
+      {screenOf()}
+    </>
+  );
+
+  function screenOf() {
+    switch (screen.kind) {
+      case "starting":
+        // Something in the root says the interface is running (see public/boot-check.js).
+        return <div className="app-starting" aria-busy="true" />;
+      case "failed":
+        return <Trouble message={screen.message} />;
+      case "welcome":
+        return (
+          <Welcome
+            recent={recent}
+            defaultFolder={defaultFolder}
+            notice={screen.notice}
+            origin={origin}
+            pickers={pickers}
+          />
+        );
+      case "writing":
+        return (
+          <WritingView
+            key={screen.project.path}
+            project={screen.project}
+            place={screen.place}
+            preferences={preferences ?? DEFAULT_PREFERENCES}
+            origin={origin}
+          />
+        );
+    }
   }
 }

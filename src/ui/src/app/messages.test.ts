@@ -23,8 +23,10 @@ describe("messages for the writer", () => {
     expect(messageFor(error)).toBe(messages.notAProject);
   });
 
-  it("say the core is not answering when the relay cannot reach it", () => {
-    expect(messageFor(new CoreError(ErrorCodes.CoreUnavailable, "gone"))).toContain("no responde");
+  it("say the core is recovering when the relay cannot reach it", () => {
+    expect(messageFor(new CoreError(ErrorCodes.CoreUnavailable, "gone"))).toContain(
+      "se está recuperando",
+    );
   });
 
   it("never show technical details otherwise", () => {

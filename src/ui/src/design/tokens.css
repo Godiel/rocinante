@@ -134,11 +134,52 @@ textarea {
   }
 }
 
-.app-failed {
+/* The core stopped for good: said over the page, which stays so it can be copied. */
+.halted {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 50%;
+  max-width: min(40rem, calc(100% - 2 * var(--space-4)));
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  transform: translateX(-50%);
+  background: var(--color-paper-shade);
+  border: 1px solid var(--color-rubric);
+  border-radius: var(--radius);
+  font-style: italic;
+  text-align: center;
+}
+
+.halted p {
+  margin: 0 0 var(--space-1);
+}
+
+/* When the window cannot go on: what happened, and the way out. */
+.trouble {
   max-width: var(--measure);
   margin: var(--space-6) auto;
   padding: 0 var(--space-4);
+  text-align: center;
+}
+
+.trouble-fleuron {
+  color: var(--color-ink-faint);
+}
+
+.trouble-message {
   font-size: var(--text-body);
   font-style: italic;
-  text-align: center;
+}
+
+.trouble-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.trouble-note {
+  font-style: italic;
+  color: var(--color-rubric);
 }
