@@ -13,6 +13,7 @@
 @import "@fontsource/eb-garamond/latin-ext-500.css";
 @import "@fontsource/eb-garamond/latin-400-italic.css";
 @import "@fontsource/eb-garamond/latin-ext-400-italic.css";
+@import "./typefaces.css";
 
 :root {
   --font-book: "EB Garamond", Garamond, "Times New Roman", serif;
