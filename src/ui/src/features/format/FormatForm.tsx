@@ -74,13 +74,15 @@ export interface FormatFormProps {
   value: WorkFormat;
   /** Called with every change that the core would accept; a change with problems waits. */
   onChange(format: WorkFormat): void;
+  /** Told whether what is shown can be sent, after every change. */
+  onValidity?(valid: boolean): void;
 }
 
 /**
  * Every setting of the format of a work: the page and its margins, the type, the paragraphs. Used
  * by the format sheet and by the step that follows the title of a new work.
  */
-export function FormatForm({ value, onChange }: FormatFormProps) {
+export function FormatForm({ value, onChange, onValidity }: FormatFormProps) {
   const id = useId();
   const [unit, setUnit] = useState<Unit>(() => unitOf(value));
   const [texts, setTexts] = useState<Texts>(() => textsOf(value, unitOf(value)));
@@ -110,6 +112,7 @@ export function FormatForm({ value, onChange }: FormatFormProps) {
     setChoices(nextChoices);
     setTexts(nextTexts);
     setProblems(found);
+    onValidity?.(Object.keys(found).length === 0);
     if (Object.keys(found).length === 0) {
       sent.current = format;
       onChange(format);
@@ -194,7 +197,7 @@ export function FormatForm({ value, onChange }: FormatFormProps) {
             <option value="custom">A medida</option>
           </select>
         </p>
-        <p className="format-field format-units" role="radiogroup" aria-label="Unidad">
+        <p className="format-field" role="radiogroup" aria-label="Unidad">
           {(["cm", "in"] as const).map((option) => (
             <label key={option} className="format-choice">
               <input

@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { RecentProject } from "../../bridge/generated/protocol";
+import type { RecentProject, WorkFormat } from "../../bridge/generated/protocol";
 
 const request = vi.hoisted(() => vi.fn());
 vi.mock("../../bridge/core", async (importOriginal) => ({
@@ -16,6 +16,19 @@ import { Welcome, type Pickers } from "./Welcome";
 
 const FOLDER = "C:\\Users\\autor\\Documents\\Rocinante";
 const today = new Date().toISOString();
+
+const trade: WorkFormat = {
+  pageSize: "trade",
+  pageWidth: 152.4,
+  pageHeight: 228.6,
+  margins: { top: 19, bottom: 23, inside: 22, outside: 16 },
+  typeface: "literata",
+  bodySize: 10.5,
+  leading: 1.4,
+  firstLineIndent: true,
+  justified: true,
+  dropCap: true,
+};
 
 const quijote: RecentProject = {
   path: `${FOLDER}\\Don Quijote.rocinante`,
@@ -42,6 +55,7 @@ function renderWelcome(
     <Welcome
       recent={options.recent ?? [quijote, lost]}
       defaultFolder={FOLDER}
+      suggestedFormat={trade}
       notice={options.notice ?? null}
       origin="main"
       pickers={pickers}
@@ -112,7 +126,8 @@ describe("welcome screen", () => {
     await user.click(screen.getByRole("button", { name: "Nuevo proyecto" }));
     await user.type(screen.getByLabelText("Título de la obra"), "  El licenciado: Vidriera ");
     expect(screen.getByText(`${FOLDER}\\El licenciado Vidriera.rocinante`)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Crear" }));
+    await user.click(screen.getByRole("button", { name: "Seguir" }));
+    await user.click(screen.getByRole("button", { name: "Omitir" }));
 
     expect(request).toHaveBeenCalledWith("project.create", {
       path: `${FOLDER}\\El licenciado Vidriera.rocinante`,
@@ -128,12 +143,14 @@ describe("welcome screen", () => {
     await user.click(screen.getByRole("button", { name: "Nuevo proyecto" }));
     await user.type(screen.getByLabelText("Título de la obra"), "La Galatea");
     await user.click(screen.getByRole("button", { name: "Elegir otra carpeta" }));
-    await user.click(screen.getByRole("button", { name: "Crear" }));
+    await user.click(screen.getByRole("button", { name: "Seguir" }));
+    await user.click(screen.getByRole("button", { name: "Crear con este formato" }));
 
     expect(chooseFolder).toHaveBeenCalledWith(FOLDER);
     expect(request).toHaveBeenCalledWith("project.create", {
       path: "E:\\Obras\\La Galatea.rocinante",
       title: "La Galatea",
+      format: trade,
       origin: "main",
     });
   });
@@ -143,7 +160,7 @@ describe("welcome screen", () => {
 
     await user.click(screen.getByRole("button", { name: "Nuevo proyecto" }));
     await user.type(screen.getByLabelText("Título de la obra"), "   ");
-    await user.click(screen.getByRole("button", { name: "Crear" }));
+    await user.click(screen.getByRole("button", { name: "Seguir" }));
 
     expect(screen.getByRole("alert")).toHaveTextContent("Escribe un título.");
     expect(screen.getByLabelText("Título de la obra")).toHaveAttribute("aria-invalid", "true");
@@ -158,12 +175,69 @@ describe("welcome screen", () => {
 
     await user.click(screen.getByRole("button", { name: "Nuevo proyecto" }));
     await user.type(screen.getByLabelText("Título de la obra"), "Don Quijote");
-    await user.click(screen.getByRole("button", { name: "Crear" }));
+    await user.click(screen.getByRole("button", { name: "Seguir" }));
+    await user.click(screen.getByRole("button", { name: "Omitir" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Ya hay un archivo con ese nombre");
+    await user.click(screen.getByRole("button", { name: "Volver" }));
+    expect(screen.getByLabelText("Título de la obra")).toHaveValue("Don Quijote");
     await user.click(screen.getByRole("button", { name: "Volver" }));
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Nuevo proyecto" })).toBeInTheDocument();
+  });
+
+  it("after the title, offers the format filled in with the suggestion", async () => {
+    const { user } = renderWelcome();
+
+    await user.click(screen.getByRole("button", { name: "Nuevo proyecto" }));
+    await user.type(screen.getByLabelText("Título de la obra"), "Persiles{Enter}");
+
+    expect(screen.getByRole("heading", { name: "Formato de «Persiles»" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Tamaño")).toHaveValue("trade");
+    expect(screen.getByLabelText("Tipografía")).toHaveValue("literata");
+    expect(screen.getByLabelText("Capitular al empezar cada capítulo")).toBeChecked();
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it("creates the work with the format the writer set up", async () => {
+    const { user } = renderWelcome();
+
+    await user.click(screen.getByRole("button", { name: "Nuevo proyecto" }));
+    await user.type(screen.getByLabelText("Título de la obra"), "Persiles{Enter}");
+    await user.selectOptions(screen.getByLabelText("Tamaño"), "pocket");
+    await user.selectOptions(screen.getByLabelText("Tipografía"), "courierPrime");
+    await user.click(screen.getByRole("button", { name: "Crear con este formato" }));
+
+    expect(request).toHaveBeenCalledWith("project.create", {
+      path: `${FOLDER}\\Persiles.rocinante`,
+      title: "Persiles",
+      format: {
+        ...trade,
+        pageSize: "pocket",
+        pageWidth: 110,
+        pageHeight: 170,
+        margins: { top: 14, bottom: 18, inside: 16, outside: 12 },
+        typeface: "courierPrime",
+      },
+      origin: "main",
+    });
+  });
+
+  it("cannot create with a format that has a problem, but can skip it", async () => {
+    const { user } = renderWelcome();
+
+    await user.click(screen.getByRole("button", { name: "Nuevo proyecto" }));
+    await user.type(screen.getByLabelText("Título de la obra"), "Persiles{Enter}");
+    await user.clear(screen.getByLabelText("Cuerpo"));
+    await user.type(screen.getByLabelText("Cuerpo"), "40");
+
+    expect(screen.getByRole("button", { name: "Crear con este formato" })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Omitir" }));
+    expect(request).toHaveBeenCalledWith("project.create", {
+      path: `${FOLDER}\\Persiles.rocinante`,
+      title: "Persiles",
+      origin: "main",
+    });
   });
 
   it("shows why the last project could not be reopened", () => {

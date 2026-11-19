@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
   CoreNotifications,
@@ -127,6 +128,21 @@ describe("app window", () => {
 
     announce("project.closed", { origin: "window-1" });
     expect(await screen.findByRole("button", { name: "Nuevo proyecto" })).toBeInTheDocument();
+  });
+
+  it("back home, offers the format the writer used last for the next work", async () => {
+    startWith(start({ project }));
+    await screen.findByText("Escribiendo en Don Quijote");
+    const pocket: WorkFormat = { ...a5, pageSize: "pocket", pageWidth: 110, pageHeight: 170 };
+    request.mockImplementation((method: string) =>
+      Promise.resolve(method === "app.start" ? start({ suggestedFormat: pocket }) : null),
+    );
+
+    announce("project.closed", { origin: "window-1" });
+    await userEvent.click(await screen.findByRole("button", { name: "Nuevo proyecto" }));
+    await userEvent.type(screen.getByLabelText("Título de la obra"), "Persiles{Enter}");
+
+    expect(screen.getByLabelText("Tamaño")).toHaveValue("pocket");
   });
 
   it("paints the theme of the writer's preferences and follows changes", async () => {

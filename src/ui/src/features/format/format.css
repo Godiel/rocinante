@@ -78,8 +78,10 @@
   color: var(--color-ink-faint);
 }
 
-.format-units {
+/* Choices stay together, whatever the width of the form. */
+.format-field[role="radiogroup"] {
   justify-content: flex-start;
+  gap: var(--space-1) var(--space-4);
 }
 
 .format-choice {
