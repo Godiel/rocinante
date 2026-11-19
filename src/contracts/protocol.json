@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 4,
+  "protocolVersion": 5,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -173,7 +173,7 @@
       }
     },
     "project.create": {
-      "description": "Creates a new project file and opens it. Fails if a file already exists at the path. Broadcasts project.opened.",
+      "description": "Creates a new project file and opens it. Fails if a file already exists at the path. Broadcasts project.opened. Without format, the work takes suggestedFormat. The format chosen becomes the suggestion for the next work.",
       "params": {
         "type": "object",
         "required": ["path", "title", "origin"],
@@ -184,6 +184,9 @@
           },
           "title": {
             "$ref": "#/$defs/Title"
+          },
+          "format": {
+            "$ref": "#/$defs/WorkFormat"
           },
           "origin": {
             "$ref": "#/$defs/WindowLabel"
@@ -237,6 +240,32 @@
       },
       "result": {
         "$ref": "#/$defs/ProjectState"
+      }
+    },
+    "project.setFormat": {
+      "description": "Changes the format of the work. It becomes the suggestion for the next new work. Broadcasts project.changed.",
+      "params": {
+        "type": "object",
+        "required": ["format", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "format": {
+            "$ref": "#/$defs/WorkFormat"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/ProjectState"
+      }
+    },
+    "project.manuscript": {
+      "description": "The chapters of the work in reading order, with their text, for the page view.",
+      "params": null,
+      "result": {
+        "$ref": "#/$defs/Manuscript"
       }
     },
     "project.saveAs": {
@@ -820,6 +849,8 @@
         "versionOfAnotherDocument",
         "versionNotFound",
         "noteNotFound",
+        "formatOutOfRange",
+        "textAreaTooSmall",
         "notFound",
         "alreadyExists",
         "notAProject",
@@ -941,7 +972,8 @@
         "problem",
         "recent",
         "preferences",
-        "defaultFolder"
+        "defaultFolder",
+        "suggestedFormat"
       ],
       "additionalProperties": false,
       "properties": {
@@ -986,9 +1018,12 @@
         },
         "defaultFolder": {
           "$ref": "#/$defs/FilePath"
+        },
+        "suggestedFormat": {
+          "$ref": "#/$defs/WorkFormat"
         }
       },
-      "description": "defaultFolder is where new projects are proposed: Documents/Rocinante."
+      "description": "defaultFolder is where new projects are proposed: Documents/Rocinante. suggestedFormat is the format of the last work the writer set up, or the default one, offered for the next new work."
     },
     "Statistics": {
       "description": "Counts shown to the writer. Notes never count.",
@@ -1071,7 +1106,15 @@
     },
     "ProjectState": {
       "type": "object",
-      "required": ["id", "path", "title", "createdAt", "index", "work"],
+      "required": [
+        "id",
+        "path",
+        "title",
+        "createdAt",
+        "index",
+        "work",
+        "format"
+      ],
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -1091,9 +1134,12 @@
         },
         "work": {
           "$ref": "#/$defs/Statistics"
+        },
+        "format": {
+          "$ref": "#/$defs/WorkFormat"
         }
       },
-      "description": "The open project: its file, title, index, and the counts of every chapter outside the trash (work)."
+      "description": "The open project: its file, title, index, format, and the counts of every chapter outside the trash (work)."
     },
     "DocumentState": {
       "type": "object",
@@ -1272,6 +1318,141 @@
     },
     "DiagnosticLevel": {
       "enum": ["warning", "error"]
+    },
+    "PageSize": {
+      "description": "The named sizes the writer can pick, or custom. pocket: 11 × 17 cm. digest: 5.5 × 8.5 in. trade: 6 × 9 in. The name is a label: the measures are always in the format.",
+      "enum": ["pocket", "a5", "digest", "trade", "a4", "letter", "custom"]
+    },
+    "Typeface": {
+      "description": "The typefaces bundled with the app for the text of the work.",
+      "enum": [
+        "ebGaramond",
+        "literata",
+        "crimsonPro",
+        "sourceSerif4",
+        "libreBaskerville",
+        "courierPrime"
+      ]
+    },
+    "Millimetres": {
+      "description": "A length on the page, in millimetres.",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 300
+    },
+    "PageMargins": {
+      "type": "object",
+      "required": ["top", "bottom", "inside", "outside"],
+      "additionalProperties": false,
+      "properties": {
+        "top": {
+          "$ref": "#/$defs/Millimetres"
+        },
+        "bottom": {
+          "$ref": "#/$defs/Millimetres"
+        },
+        "inside": {
+          "$ref": "#/$defs/Millimetres",
+          "description": "Next to the spine."
+        },
+        "outside": {
+          "$ref": "#/$defs/Millimetres"
+        }
+      }
+    },
+    "WorkFormat": {
+      "description": "How the work is set: the page of the book it will be, its margins and its type. Pages are 70 to 300 mm a side, the body 8 to 16 pt and the leading 1 to 2 (formatOutOfRange), and the margins must leave a text area of at least 40 × 60 mm (textAreaTooSmall).",
+      "type": "object",
+      "required": [
+        "pageSize",
+        "pageWidth",
+        "pageHeight",
+        "margins",
+        "typeface",
+        "bodySize",
+        "leading",
+        "firstLineIndent",
+        "justified",
+        "dropCap"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pageSize": {
+          "$ref": "#/$defs/PageSize"
+        },
+        "pageWidth": {
+          "description": "Width of the page, in millimetres.",
+          "type": "number",
+          "minimum": 70,
+          "maximum": 300
+        },
+        "pageHeight": {
+          "description": "Height of the page, in millimetres.",
+          "type": "number",
+          "minimum": 70,
+          "maximum": 300
+        },
+        "margins": {
+          "$ref": "#/$defs/PageMargins"
+        },
+        "typeface": {
+          "$ref": "#/$defs/Typeface"
+        },
+        "bodySize": {
+          "description": "Size of the text, in points.",
+          "type": "number",
+          "minimum": 8,
+          "maximum": 16
+        },
+        "leading": {
+          "description": "Line height as a multiple of the body size.",
+          "type": "number",
+          "minimum": 1,
+          "maximum": 2
+        },
+        "firstLineIndent": {
+          "description": "Indent the first line of each paragraph that follows another.",
+          "type": "boolean"
+        },
+        "justified": {
+          "description": "Justified text; otherwise aligned to the left.",
+          "type": "boolean"
+        },
+        "dropCap": {
+          "description": "A drop cap at the start of each chapter.",
+          "type": "boolean"
+        }
+      }
+    },
+    "ManuscriptChapter": {
+      "type": "object",
+      "required": ["id", "title", "content"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "title": {
+          "$ref": "#/$defs/Title"
+        },
+        "content": {
+          "$ref": "#/$defs/TipTapDocument"
+        }
+      }
+    },
+    "Manuscript": {
+      "description": "The text of the book: the chapters in reading order. Fragments and the trash are not part of it.",
+      "type": "object",
+      "required": ["chapters"],
+      "additionalProperties": false,
+      "properties": {
+        "chapters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ManuscriptChapter"
+          }
+        }
+      }
     }
   }
 }

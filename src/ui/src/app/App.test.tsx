@@ -1,7 +1,12 @@
 // @vitest-environment jsdom
 import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { CoreNotifications, ProjectState, StartState } from "../bridge/generated/protocol";
+import type {
+  CoreNotifications,
+  ProjectState,
+  StartState,
+  WorkFormat,
+} from "../bridge/generated/protocol";
 
 const request = vi.hoisted(() => vi.fn());
 const listeners = vi.hoisted(() => new Map<string, (params: unknown) => void>());
@@ -28,6 +33,19 @@ vi.mock("../features/editor/WritingView", () => ({
 import { messages } from "./messages";
 import { App } from "./App";
 
+const a5: WorkFormat = {
+  pageSize: "a5",
+  pageWidth: 148,
+  pageHeight: 210,
+  margins: { top: 18, bottom: 22, inside: 20, outside: 15 },
+  typeface: "ebGaramond",
+  bodySize: 11,
+  leading: 1.35,
+  firstLineIndent: true,
+  justified: true,
+  dropCap: false,
+};
+
 const project: ProjectState = {
   id: "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
   path: "C:\\Obras\\Don Quijote.rocinante",
@@ -35,6 +53,7 @@ const project: ProjectState = {
   createdAt: "2026-03-14T09:00:00+00:00",
   index: { chapters: [], fragments: [], trash: [] },
   work: { words: 0, characters: 0, paragraphs: 0 },
+  format: a5,
 };
 
 const start = (overrides: Partial<StartState> = {}): StartState => ({
@@ -49,6 +68,7 @@ const start = (overrides: Partial<StartState> = {}): StartState => ({
     typewriterScrolling: true,
   },
   defaultFolder: "C:\\Users\\autor\\Documents\\Rocinante",
+  suggestedFormat: a5,
   ...overrides,
 });
 

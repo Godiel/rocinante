@@ -1,0 +1,168 @@
+{
+  "valid": [
+    {
+      "format": {
+        "pageSize": "a5",
+        "pageWidth": 148,
+        "pageHeight": 210,
+        "margins": {
+          "top": 18,
+          "bottom": 22,
+          "inside": 20,
+          "outside": 15
+        },
+        "typeface": "ebGaramond",
+        "bodySize": 11,
+        "leading": 1.35,
+        "firstLineIndent": true,
+        "justified": true,
+        "dropCap": false
+      },
+      "origin": "main"
+    },
+    {
+      "format": {
+        "pageSize": "custom",
+        "pageWidth": 130,
+        "pageHeight": 200,
+        "margins": {
+          "top": 19,
+          "bottom": 22,
+          "inside": 22,
+          "outside": 16
+        },
+        "typeface": "literata",
+        "bodySize": 10.5,
+        "leading": 1.4,
+        "firstLineIndent": false,
+        "justified": false,
+        "dropCap": true
+      },
+      "origin": "window-1"
+    }
+  ],
+  "invalid": [
+    {
+      "format": {
+        "pageSize": "a5",
+        "pageWidth": 148,
+        "pageHeight": 210,
+        "margins": {
+          "top": 18,
+          "bottom": 22,
+          "inside": 20,
+          "outside": 15
+        },
+        "typeface": "ebGaramond",
+        "bodySize": 11,
+        "leading": 1.35,
+        "firstLineIndent": true,
+        "justified": true,
+        "dropCap": false
+      }
+    },
+    {
+      "origin": "main"
+    },
+    {
+      "format": {
+        "pageSize": "a5",
+        "pageWidth": 148,
+        "pageHeight": 210,
+        "margins": {
+          "top": 18,
+          "bottom": 22,
+          "inside": 20,
+          "outside": 15
+        },
+        "typeface": "comicSans",
+        "bodySize": 11,
+        "leading": 1.35,
+        "firstLineIndent": true,
+        "justified": true,
+        "dropCap": false
+      },
+      "origin": "main"
+    },
+    {
+      "format": {
+        "pageSize": "a5",
+        "pageWidth": 148,
+        "pageHeight": 210,
+        "margins": {
+          "top": 18,
+          "bottom": 22,
+          "inside": 20,
+          "outside": 15
+        },
+        "typeface": "ebGaramond",
+        "bodySize": 30,
+        "leading": 1.35,
+        "firstLineIndent": true,
+        "justified": true,
+        "dropCap": false
+      },
+      "origin": "main"
+    },
+    {
+      "format": {
+        "pageSize": "a5",
+        "pageWidth": 148,
+        "pageHeight": 210,
+        "margins": {
+          "top": 18,
+          "bottom": 22,
+          "inside": 20,
+          "outside": 15
+        },
+        "typeface": "ebGaramond",
+        "bodySize": 11,
+        "leading": 0.8,
+        "firstLineIndent": true,
+        "justified": true,
+        "dropCap": false
+      },
+      "origin": "main"
+    },
+    {
+      "format": {
+        "pageSize": "a5",
+        "pageWidth": 148,
+        "pageHeight": 210,
+        "margins": {
+          "top": 18,
+          "bottom": 22,
+          "inside": 20
+        },
+        "typeface": "ebGaramond",
+        "bodySize": 11,
+        "leading": 1.35,
+        "firstLineIndent": true,
+        "justified": true,
+        "dropCap": false
+      },
+      "origin": "main"
+    },
+    {
+      "format": {
+        "pageSize": "a5",
+        "pageWidth": 148,
+        "pageHeight": 210,
+        "margins": {
+          "top": 18,
+          "bottom": 22,
+          "inside": 20,
+          "outside": 15
+        },
+        "typeface": "ebGaramond",
+        "bodySize": 11,
+        "leading": 1.35,
+        "firstLineIndent": true,
+        "justified": true,
+        "dropCap": false,
+        "columns": 2
+      },
+      "origin": "main"
+    }
+  ]
+}

@@ -9,18 +9,76 @@
       "path": "/home/autor/Documentos/Rocinante/galatea.rocinante",
       "title": "La Galatea",
       "origin": "window-1"
+    },
+    {
+      "path": "C:/Users/autor/Documents/Rocinante/Novelas ejemplares.rocinante",
+      "title": "Novelas ejemplares",
+      "format": {
+        "pageSize": "a5",
+        "pageWidth": 148,
+        "pageHeight": 210,
+        "margins": {
+          "top": 18,
+          "bottom": 22,
+          "inside": 20,
+          "outside": 15
+        },
+        "typeface": "ebGaramond",
+        "bodySize": 11,
+        "leading": 1.35,
+        "firstLineIndent": true,
+        "justified": true,
+        "dropCap": false
+      },
+      "origin": "main"
     }
   ],
   "invalid": [
-    { "title": "Sin ruta", "origin": "main" },
-    { "path": "", "title": "Ruta vacía", "origin": "main" },
-    { "path": "obra.rocinante", "title": "", "origin": "main" },
-    { "path": "obra.rocinante", "title": "Sin ventana" },
+    {
+      "title": "Sin ruta",
+      "origin": "main"
+    },
+    {
+      "path": "",
+      "title": "Ruta vacía",
+      "origin": "main"
+    },
+    {
+      "path": "obra.rocinante",
+      "title": "",
+      "origin": "main"
+    },
+    {
+      "path": "obra.rocinante",
+      "title": "Sin ventana"
+    },
     {
       "path": "obra.rocinante",
       "title": "Extra",
       "origin": "main",
       "template": "novela"
+    },
+    {
+      "path": "obra.rocinante",
+      "title": "Hoja diminuta",
+      "format": {
+        "pageSize": "a5",
+        "pageWidth": 50,
+        "pageHeight": 210,
+        "margins": {
+          "top": 18,
+          "bottom": 22,
+          "inside": 20,
+          "outside": 15
+        },
+        "typeface": "ebGaramond",
+        "bodySize": 11,
+        "leading": 1.35,
+        "firstLineIndent": true,
+        "justified": true,
+        "dropCap": false
+      },
+      "origin": "main"
     }
   ]
 }
