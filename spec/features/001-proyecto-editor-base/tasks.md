@@ -76,9 +76,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Reordenar arrastrando; crear, renombrar, convertir y eliminar con confirmación y deshacer.
 
 ## 11. Guardado automático y contador
-- [ ] Guardado tras ≤ 1 s de pausa, al cambiar de documento y al cerrar.
-- [ ] Indicador discreto de estado de guardado.
-- [ ] Contador de palabras, caracteres, párrafos y capítulos (documento y obra), en una esquina, atenuado al escribir y ocultable.
+- [x] Guardado tras ≤ 1 s de pausa, al cambiar de documento y al cerrar.
+- [x] Indicador discreto de estado de guardado.
+- [x] Contador de palabras, caracteres, párrafos y capítulos (documento y obra), en una esquina, atenuado al escribir y ocultable.
 
 ## 12. Versiones
 - [ ] Lista de versiones de un documento; guardar versión manual con nombre.
