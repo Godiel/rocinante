@@ -85,10 +85,10 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Ver una versión, compararla con la actual y restaurarla.
 
 ## 13. Errores y logs
-- [ ] Serilog a archivo con rotación en la carpeta de datos de la app.
-- [ ] Errores de la interfaz y de Tauri al mismo registro; nunca texto de la obra ni claves.
-- [ ] Mensajes de error claros en español; opción para abrir la carpeta de logs.
-- [ ] Reinicio automático del sidecar si cae, sin perder lo escrito.
+- [x] Serilog a archivo con rotación en la carpeta de datos de la app.
+- [x] Errores de la interfaz y de Tauri al mismo registro; nunca texto de la obra ni claves.
+- [x] Mensajes de error claros en español; opción para abrir la carpeta de logs.
+- [x] Reinicio automático del sidecar si cae, sin perder lo escrito.
 
 ## 14. Pruebas de extremo a extremo y rendimiento
 - [ ] Relé de pruebas (Node) que conecta la interfaz en navegador con el sidecar real.
