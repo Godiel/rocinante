@@ -3,29 +3,29 @@
 Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests en verde, y con una comprobación en la app real cuando toca la interfaz, antes de pasar al siguiente. Rama: `feature/002-hoja-de-escritura`.
 
 ## 1. Contrato de mensajes (versión 5)
-- [ ] `WorkFormat` en `protocol.json`: tamaño (`pocket`, `a5`, `digest`, `trade`, `a4`, `letter`, `custom`), ancho y alto, cuatro márgenes, tipografía, cuerpo, interlineado, sangría, justificado y capitular.
-- [ ] `ProjectState.format`, `StartState.suggestedFormat` y `format` opcional en `project.create`.
-- [ ] `project.setFormat` (difunde `project.changed`) y `project.manuscript` (capítulos en orden con su texto).
-- [ ] Motivos de error nuevos para un formato imposible; ejemplos válidos e inválidos de cada método.
-- [ ] Regenerar los tipos de TypeScript y subir `protocolVersion` a 5.
+- [x] `WorkFormat` en `protocol.json`: tamaño (`pocket`, `a5`, `digest`, `trade`, `a4`, `letter`, `custom`), ancho y alto, cuatro márgenes, tipografía, cuerpo, interlineado, sangría, justificado y capitular.
+- [x] `ProjectState.format`, `StartState.suggestedFormat` y `format` opcional en `project.create`.
+- [x] `project.setFormat` (difunde `project.changed`) y `project.manuscript` (capítulos en orden con su texto).
+- [x] Motivos de error nuevos para un formato imposible; ejemplos válidos e inválidos de cada método.
+- [x] Regenerar los tipos de TypeScript y subir `protocolVersion` a 5.
 
 ## 2. Dominio
-- [ ] `WorkFormat` en `Rocinante.Domain/Formats`, con sus límites: hoja de 70 a 300 mm, márgenes ≥ 0, caja de texto mínima de 40 × 60 mm, cuerpo de 8 a 16 pt e interlineado de 1,0 a 2,0.
-- [ ] `WorkFormat.Default`: A5 de novela.
-- [ ] `Project` lleva su formato; cambiarlo valida antes de aceptar.
-- [ ] Tests del dominio, con cobertura ≥ 80 %.
+- [x] `WorkFormat` en `Rocinante.Domain/Formats`, con sus límites: hoja de 70 a 300 mm, márgenes ≥ 0, caja de texto mínima de 40 × 60 mm, cuerpo de 8 a 16 pt e interlineado de 1,0 a 2,0.
+- [x] `WorkFormat.Default`: A5 de novela.
+- [x] `Project` lleva su formato; cambiarlo valida antes de aceptar.
+- [x] Tests del dominio, con cobertura ≥ 80 %.
 
 ## 3. Persistencia
-- [ ] Migración `0002-work-format.sql`: tabla `work_format` `STRICT` de una fila, con `CHECK` por columna.
-- [ ] Las obras creadas con la 001 reciben el formato por defecto al migrar, sin perder nada.
-- [ ] Leer y guardar el formato en `ProjectRepository`; `Manuscript` en `DocumentRepository`.
-- [ ] Tests: migración de un archivo de la versión 1, ida y vuelta del formato y rechazo de valores imposibles.
-- [ ] `docs/format`: versión 2 del esquema.
+- [x] Migración `0002-work-format.sql`: tabla `work_format` `STRICT` de una fila, con `CHECK` por columna.
+- [x] Las obras creadas con la 001 reciben el formato por defecto al migrar, sin perder nada.
+- [x] Leer y guardar el formato en `ProjectRepository`.
+- [x] Tests: migración de un archivo de la versión 1, ida y vuelta del formato y rechazo de valores imposibles.
+- [x] `docs/format`: versión 2 del esquema.
 
 ## 4. Casos de uso y ajustes del escritor
-- [ ] `ProjectUseCases`: crear con formato (o con la sugerencia), `SetFormat` y `Manuscript`.
-- [ ] `WriterSettings.LastFormat` en `settings.json`, actualizado al crear o cambiar el formato; `suggestedFormat` en `app.start`.
-- [ ] Métodos JSON-RPC y notificaciones; el escenario `WritingSession` de las pruebas de contrato los usa todos.
+- [x] `ProjectUseCases`: crear con formato (o con la sugerencia), `SetFormat` y `Manuscript`.
+- [x] `WriterSettings.LastFormat` en `settings.json`, actualizado al crear o cambiar el formato; `suggestedFormat` en `app.start`.
+- [x] Métodos JSON-RPC y notificaciones; el escenario `WritingSession` de las pruebas de contrato los usa todos.
 
 ## 5. Tipografías
 - [ ] Añadir Fontsource de Literata, Crimson Pro, Source Serif 4, Libre Baskerville y Courier Prime, y EB Garamond 700. Solo los subconjuntos latino y latino extendido, en 400, 400 cursiva, 700 y 700 cursiva.

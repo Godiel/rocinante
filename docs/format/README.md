@@ -2,7 +2,7 @@
 
 Un proyecto de Rocinante es **un único archivo** que contiene la obra completa: capítulos, fragmentos, papelera, versiones y notas. Por dentro es una base de datos [SQLite 3](https://sqlite.org/fileformat.html), así que se puede abrir con cualquier herramienta de SQLite para inspeccionarla o recuperar el texto sin depender de la app.
 
-Este documento describe la **versión 1 del esquema**. La fuente de verdad es [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql).
+Este documento describe la **versión 2 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql) y [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql).
 
 ## Cómo se reconoce
 
@@ -113,9 +113,25 @@ Notas del autor sobre un documento. Su texto vive aquí y **nunca** dentro de `d
 
 Índice `note_by_document (document_id, created_at)`.
 
+### `work_format`
+_Desde la versión 2._ Cómo se compone la obra: la hoja del libro que será, sus márgenes y su letra. Exactamente una fila, como `project`. Las obras creadas con la versión 1 reciben al migrar el formato por defecto: A5 de novela.
+
+| Columna | Tipo | |
+|---|---|---|
+| `singleton` | INTEGER, PK | Siempre 1 |
+| `page_size` | TEXT | `pocket` (11 × 17 cm), `a5`, `digest` (5,5 × 8,5 in), `trade` (6 × 9 in), `a4`, `letter` o `custom`. Es solo el nombre: las medidas son las columnas siguientes |
+| `page_width`, `page_height` | REAL, 70–300 | Tamaño de la hoja, en milímetros |
+| `margin_top`, `margin_bottom`, `margin_inside`, `margin_outside` | REAL ≥ 0 | Márgenes en milímetros; el interior es el del lomo |
+| `typeface` | TEXT | `eb_garamond`, `literata`, `crimson_pro`, `source_serif_4`, `libre_baskerville` o `courier_prime` |
+| `body_size` | REAL, 8–16 | Cuerpo del texto, en puntos |
+| `leading` | REAL, 1–2 | Interlineado, como múltiplo del cuerpo |
+| `first_line_indent`, `justified`, `drop_cap` | INTEGER 0/1 | Sangría de primera línea, texto justificado y capitular |
+
+Dos `CHECK` de tabla exigen que los márgenes dejen una caja de texto de al menos 40 × 60 mm.
+
 ## Qué no está en el archivo
 
-La configuración del escritor (proyectos recientes, último capítulo abierto, posición del cursor, tema, preferencias) vive en `settings.json`, en la carpeta de datos de la app, no en el proyecto. Al compartir un `.rocinante` solo se comparte la obra.
+La configuración del escritor (proyectos recientes, último capítulo abierto, posición del cursor, tema, preferencias y el formato que se sugiere para la próxima obra) vive en `settings.json`, en la carpeta de datos de la app, no en el proyecto. Al compartir un `.rocinante` solo se comparte la obra.
 
 ## Migraciones
 
