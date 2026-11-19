@@ -1,9 +1,11 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Rocinante.Application;
 using Rocinante.Application.Ports;
 using Rocinante.Application.Settings;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
+using Rocinante.Domain.Formats;
 using Rocinante.Domain.Notes;
 using Rocinante.Domain.Projects;
 using Rocinante.Domain.Versions;
@@ -46,7 +48,39 @@ internal static class Wire
             snapshot.Project.Title,
             snapshot.Project.CreatedAt,
             IndexOf(snapshot.Project),
-            Of(snapshot.Work));
+            Of(snapshot.Work),
+            Of(snapshot.Project.Format));
+
+    /// <summary>Enum members go on the wire in camelCase: <c>A5</c> is <c>a5</c>, <c>EbGaramond</c> is <c>ebGaramond</c>.</summary>
+    public static WorkFormatDto Of(WorkFormat format) =>
+        new(
+            JsonNamingPolicy.CamelCase.ConvertName(format.PageSize.ToString()),
+            format.PageWidth,
+            format.PageHeight,
+            new PageMarginsDto(format.Margins.Top, format.Margins.Bottom, format.Margins.Inside, format.Margins.Outside),
+            JsonNamingPolicy.CamelCase.ConvertName(format.Typeface.ToString()),
+            format.BodySize,
+            format.Leading,
+            format.FirstLineIndent,
+            format.Justified,
+            format.DropCap);
+
+    /// <summary>The contract has already checked the names; the domain checks the measures.</summary>
+    public static WorkFormat ToFormat(WorkFormatDto format) =>
+        WorkFormat.Create(
+            Enum.Parse<PageSize>(format.PageSize, ignoreCase: true),
+            format.PageWidth,
+            format.PageHeight,
+            new PageMargins(format.Margins.Top, format.Margins.Bottom, format.Margins.Inside, format.Margins.Outside),
+            Enum.Parse<Typeface>(format.Typeface, ignoreCase: true),
+            format.BodySize,
+            format.Leading,
+            format.FirstLineIndent,
+            format.Justified,
+            format.DropCap);
+
+    public static ManuscriptDto Of(IReadOnlyList<ManuscriptChapter> chapters) =>
+        new([.. chapters.Select(chapter => new ManuscriptChapterDto(chapter.Id.Value, chapter.Title, Content(chapter.Content)))]);
 
     public static DocumentStateDto Of(Document document) =>
         new(document.Id.Value, Content(document.Content), document.Revision, Of(document.Content.Statistics), document.UpdatedAt);
@@ -87,5 +121,6 @@ internal static class Wire
             state.Problem is { } problem ? new StartProblemDto(problem.Path, JsonRpcServer.Reason(problem.Error.ToString())) : null,
             Of(state.Recent),
             Of(state.Preferences),
-            state.DefaultFolder);
+            state.DefaultFolder,
+            Of(state.SuggestedFormat));
 }

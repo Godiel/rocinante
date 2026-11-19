@@ -34,10 +34,12 @@ internal static class CoreMethods
         table.On("place.get", () => core.Settings.CurrentPlace() is { } place ? JsonSerializer.SerializeToNode(Wire.Of(place), json.PlaceDto) : null);
         table.On("place.save", json.PlaceDto, p => core.Settings.SavePlace(Wire.ToPlace(p)));
 
-        table.On("project.create", json.CreateProjectParams, json.ProjectStateDto, p => Wire.Of(core.Projects.Create(p.Path, p.Title, p.Origin)));
+        table.On("project.create", json.CreateProjectParams, json.ProjectStateDto, p => Wire.Of(core.Projects.Create(p.Path, p.Title, p.Format is { } format ? Wire.ToFormat(format) : null, p.Origin)));
         table.On("project.open", json.PathParams, json.ProjectStateDto, p => Wire.Of(core.Projects.Open(p.Path, p.Origin)));
         table.On("project.get", json.ProjectStateDto, () => Wire.Of(core.Projects.Current()));
         table.On("project.rename", json.TitleParams, json.ProjectStateDto, p => Wire.Of(core.Projects.Rename(p.Title, p.Origin)));
+        table.On("project.setFormat", json.SetFormatParams, json.ProjectStateDto, p => Wire.Of(core.Projects.SetFormat(Wire.ToFormat(p.Format), p.Origin)));
+        table.On("project.manuscript", json.ManuscriptDto, () => Wire.Of(core.Projects.Manuscript()));
         table.On("project.saveAs", json.PathParams, json.ProjectStateDto, p => Wire.Of(core.Projects.SaveAs(p.Path, p.Origin)));
         table.On("project.close", json.OriginParams, p => core.Projects.Close(p.Origin));
 

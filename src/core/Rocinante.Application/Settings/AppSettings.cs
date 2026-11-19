@@ -1,4 +1,5 @@
 using Rocinante.Domain;
+using Rocinante.Domain.Formats;
 
 namespace Rocinante.Application.Settings;
 
@@ -47,12 +48,14 @@ public sealed record RecentProject(string Path, string Title, DateTimeOffset Las
 
 /// <summary>
 /// Everything the app remembers between sessions, kept in the app data folder and never in the
-/// project: preferences, recent projects, and the project to reopen on start.
+/// project: preferences, recent projects, the project to reopen on start, and the format to suggest
+/// for the next new work.
 /// </summary>
 /// <param name="Preferences">How the writer likes to work.</param>
 /// <param name="Recent">Recently opened projects, most recent first.</param>
 /// <param name="LastProject">The project that was open when the app quit; null if the writer closed it.</param>
-public sealed record AppSettings(Preferences Preferences, IReadOnlyList<RecentProject> Recent, string? LastProject)
+/// <param name="LastFormat">The format of the last work the writer set up; null if there is none yet.</param>
+public sealed record AppSettings(Preferences Preferences, IReadOnlyList<RecentProject> Recent, string? LastProject, WorkFormat? LastFormat = null)
 {
     public static AppSettings Empty { get; } = new(Preferences.Default, [], LastProject: null);
 }

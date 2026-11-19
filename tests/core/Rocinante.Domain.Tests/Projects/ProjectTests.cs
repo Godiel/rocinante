@@ -1,3 +1,4 @@
+using Rocinante.Domain.Formats;
 using Rocinante.Domain.Projects;
 
 namespace Rocinante.Domain.Tests.Projects;
@@ -16,6 +17,28 @@ public sealed class ProjectTests
         project.Chapters.ShouldBeEmpty();
         project.Fragments.ShouldBeEmpty();
         project.Trash.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void A_new_project_takes_the_format_it_is_given_or_the_default()
+    {
+        var pocket = WorkFormat.Create(
+            PageSize.Pocket, 110, 170, new PageMargins(14, 18, 16, 12), Typeface.Literata, 10, 1.3, true, true, false);
+
+        Project.Create("Novelas ejemplares", Moments.Start, pocket).Format.ShouldBe(pocket);
+        _project.Format.ShouldBe(WorkFormat.Default);
+    }
+
+    [Fact]
+    public void Its_format_can_be_changed()
+    {
+        var letter = WorkFormat.Create(
+            PageSize.Letter, 215.9, 279.4, new PageMargins(25, 25, 25, 25), Typeface.SourceSerif4, 12, 1.5, false, false, true);
+
+        _project.ChangeFormat(letter);
+
+        _project.Format.ShouldBe(letter);
+        Should.Throw<ArgumentNullException>(() => _project.ChangeFormat(null!));
     }
 
     [Fact]

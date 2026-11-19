@@ -1,7 +1,9 @@
+using Rocinante.Domain.Formats;
+
 namespace Rocinante.Domain.Projects;
 
 /// <summary>
-/// A work: its title and the index of its documents. Chapters keep the reading order, fragments
+/// A work: its title, its format and the index of its documents. Chapters keep the reading order, fragments
 /// wait in the drawer, and deleted documents stay in the trash until restored.
 /// </summary>
 public sealed class Project
@@ -10,11 +12,12 @@ public sealed class Project
     private readonly List<DocumentEntry> _fragments = [];
     private readonly List<DocumentEntry> _trash = [];
 
-    private Project(ProjectId id, string title, DateTimeOffset createdAt)
+    private Project(ProjectId id, string title, DateTimeOffset createdAt, WorkFormat format)
     {
         Id = id;
         Title = title;
         CreatedAt = createdAt;
+        Format = format;
     }
 
     public ProjectId Id { get; }
@@ -22,6 +25,9 @@ public sealed class Project
     public string Title { get; private set; }
 
     public DateTimeOffset CreatedAt { get; }
+
+    /// <summary>How the work is set: page, margins and type. A <see cref="WorkFormat"/> is always valid.</summary>
+    public WorkFormat Format { get; private set; }
 
     /// <summary>Chapters in reading order.</summary>
     public IReadOnlyList<DocumentEntry> Chapters => _chapters;
@@ -32,18 +38,24 @@ public sealed class Project
     /// <summary>Deleted documents, most recent first.</summary>
     public IReadOnlyList<DocumentEntry> Trash => _trash;
 
-    public static Project Create(string title, DateTimeOffset now) =>
-        new(ProjectId.New(now), Titles.Normalize(title), now);
+    /// <summary>A new work, with <paramref name="format"/> or the default one.</summary>
+    public static Project Create(string title, DateTimeOffset now, WorkFormat? format = null) =>
+        new(ProjectId.New(now), Titles.Normalize(title), now, format ?? WorkFormat.Default);
 
     /// <summary>
     /// Rebuilds a project from storage. Positions are trusted only for their order: gaps and
     /// duplicates are closed up.
     /// </summary>
-    public static Project Rehydrate(ProjectId id, string title, DateTimeOffset createdAt, IEnumerable<DocumentEntry> entries)
+    public static Project Rehydrate(
+        ProjectId id,
+        string title,
+        DateTimeOffset createdAt,
+        IEnumerable<DocumentEntry> entries,
+        WorkFormat? format = null)
     {
         ArgumentNullException.ThrowIfNull(entries);
 
-        var project = new Project(id, title, createdAt);
+        var project = new Project(id, title, createdAt, format ?? WorkFormat.Default);
         var all = entries.ToList();
 
         project._chapters.AddRange(Active(all, DocumentKind.Chapter));
@@ -60,6 +72,8 @@ public sealed class Project
     }
 
     public void Rename(string title) => Title = Titles.Normalize(title);
+
+    public void ChangeFormat(WorkFormat format) => Format = format ?? throw new ArgumentNullException(nameof(format));
 
     /// <summary>Adds a new chapter at <paramref name="index"/>, or at the end.</summary>
     public DocumentEntry AddChapter(string title, DateTimeOffset now, int? index = null) =>

@@ -19,4 +19,6 @@ public enum DomainError
     VersionOfAnotherDocument,
     VersionNotFound,
     NoteNotFound,
+    FormatOutOfRange,
+    TextAreaTooSmall,
 }

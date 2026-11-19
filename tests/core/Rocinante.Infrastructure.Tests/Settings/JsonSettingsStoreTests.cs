@@ -1,5 +1,6 @@
 using Rocinante.Application.Settings;
 using Rocinante.Domain;
+using Rocinante.Domain.Formats;
 using Rocinante.Infrastructure.Settings;
 
 namespace Rocinante.Infrastructure.Tests.Settings;
@@ -35,6 +36,36 @@ public sealed class JsonSettingsStoreTests : IDisposable
         loaded.Preferences.ShouldBe(settings.Preferences);
         loaded.LastProject.ShouldBe(settings.LastProject);
         loaded.Recent.ShouldBe(settings.Recent);
+    }
+
+    [Fact]
+    public void The_format_to_suggest_survives_a_round_trip()
+    {
+        var format = WorkFormat.Create(
+            PageSize.Digest, 139.7, 215.9, new PageMargins(16, 20, 18, 13), Typeface.SourceSerif4, 10.5, 1.4, true, false, true);
+
+        Store().Save(AppSettings.Empty with { LastFormat = format });
+
+        Store().Load().LastFormat.ShouldBe(format);
+        File.ReadAllText(Path.Combine(_folder.Path, JsonSettingsStore.FileName)).ShouldContain("\"typeface\": \"sourceSerif4\"");
+    }
+
+    [Theory]
+    [InlineData("\"pageSize\": \"a5\"", "\"pageSize\": \"folio\"")]
+    [InlineData("\"typeface\": \"ebGaramond\"", "\"typeface\": \"comicSans\"")]
+    [InlineData("\"bodySize\": 11", "\"bodySize\": 40")]
+    public void A_format_that_is_no_longer_valid_is_dropped_and_the_rest_kept(string written, string broken)
+    {
+        Store().Save(new AppSettings(Preferences.Default with { Theme = Theme.Candlelight }, [], LastProject: null, WorkFormat.Default));
+        var path = Path.Combine(_folder.Path, JsonSettingsStore.FileName);
+        var text = File.ReadAllText(path);
+        text.ShouldContain(written);
+        File.WriteAllText(path, text.Replace(written, broken, StringComparison.Ordinal));
+
+        var loaded = Store().Load();
+
+        loaded.LastFormat.ShouldBeNull();
+        loaded.Preferences.Theme.ShouldBe(Theme.Candlelight);
     }
 
     [Fact]
