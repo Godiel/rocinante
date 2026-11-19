@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Everything that touches the outside world: the .rocinante file, and later logs and settings. -->
+  <!-- Everything that touches the outside world: the .rocinante file, the settings and the log. -->
   <PropertyGroup>
     <RootNamespace>Rocinante.Infrastructure</RootNamespace>
     <IsTrimmable>true</IsTrimmable>
@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.15" />
+    <PackageReference Include="Serilog" Version="4.4.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>

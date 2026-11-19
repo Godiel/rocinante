@@ -9,7 +9,7 @@ using Rocinante.Sidecar.Protocol;
 namespace Rocinante.Sidecar;
 
 /// <summary>The use cases behind each method of the contract.</summary>
-internal sealed record CoreServices(ProjectUseCases Projects, DocumentUseCases Documents, VersionUseCases Versions, NoteUseCases Notes, SettingsUseCases Settings);
+internal sealed record CoreServices(ProjectUseCases Projects, DocumentUseCases Documents, VersionUseCases Versions, NoteUseCases Notes, SettingsUseCases Settings, IReportedProblems Problems);
 
 /// <summary>
 /// Binds every method of the contract to a use case: params come in already validated against the
@@ -24,6 +24,7 @@ internal static class CoreMethods
 
         table.On("system.info", json.SystemInfoResult, () => new SystemInfoResult(contract.ProtocolVersion, CoreVersion()));
         table.On("system.ping", () => JsonValue.Create("pong"));
+        table.On("diagnostics.report", json.ReportParams, p => core.Problems.Report(p.Source, p.Level, p.Message, p.Detail));
 
         table.On("app.start", json.OriginParams, json.StartStateDto, p => Wire.Of(core.Settings.Start(p.Origin)));
         table.On("preferences.update", json.UpdatePreferencesParams, json.PreferencesDto, p =>

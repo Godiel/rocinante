@@ -19,7 +19,8 @@ internal sealed class ServerHarness : IDisposable
             new JsonSettingsStore(PathOf("datos"), Log),
             Clock,
             PathOf("Documentos/Rocinante"),
-            launchFile);
+            launchFile,
+            Problems);
         _core = new Core(_output, Log, options, Contract);
     }
 
@@ -29,7 +30,10 @@ internal sealed class ServerHarness : IDisposable
 
     public ManualClock Clock { get; } = new(new DateTimeOffset(2026, 3, 14, 9, 0, 0, TimeSpan.Zero));
 
-    /// <summary>What the core wrote to stderr.</summary>
+    /// <summary>Problems the interface or the host reported through <c>diagnostics.report</c>.</summary>
+    public RecordedProblems Problems { get; } = new();
+
+    /// <summary>What the core wrote to its log.</summary>
     public StringWriter Log { get; } = new();
 
     /// <summary>Every notification the server has emitted so far.</summary>
@@ -82,4 +86,13 @@ internal sealed class ServerHarness : IDisposable
         _core.Dispose();
         Directory.Delete(Folder, recursive: true);
     }
+}
+
+/// <summary>Keeps every reported problem, to check what reached the log.</summary>
+internal sealed class RecordedProblems : IReportedProblems
+{
+    public List<(string Source, string Level, string Message, string? Detail)> Reports { get; } = [];
+
+    public void Report(string source, string level, string message, string? detail) =>
+        Reports.Add((source, level, message, detail));
 }

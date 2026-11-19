@@ -17,6 +17,7 @@ internal sealed class WritingSession(ServerHarness harness)
     {
         harness.Call("system.info");
         harness.Call("system.ping");
+        harness.Call("diagnostics.report", Params(("source", "interface"), ("level", "warning"), ("message", "A window started slowly")));
         harness.Call("app.start", Params(("origin", Main)));
         harness.Call("preferences.update", Params(("changes", JsonNode.Parse("""{ "theme": "candlelight", "outline": "floating" }""")), ("origin", Main)));
 

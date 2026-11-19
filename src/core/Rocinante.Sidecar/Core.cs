@@ -10,7 +10,8 @@ namespace Rocinante.Sidecar;
 /// <param name="Clock">The time.</param>
 /// <param name="DefaultFolder">Where new projects are proposed.</param>
 /// <param name="LaunchFile">A project the app was launched with, to open in the first window.</param>
-internal sealed record CoreOptions(IProjectFiles Files, ISettingsStore Settings, TimeProvider Clock, string DefaultFolder, string? LaunchFile);
+/// <param name="Problems">Where problems seen by the interface and the host are written.</param>
+internal sealed record CoreOptions(IProjectFiles Files, ISettingsStore Settings, TimeProvider Clock, string DefaultFolder, string? LaunchFile, IReportedProblems Problems);
 
 /// <summary>
 /// Composition root: wires the use cases to the project files, the clock and the JSON-RPC
@@ -34,7 +35,8 @@ internal sealed class Core : IDisposable
             new DocumentUseCases(_workspace, notifier, options.Clock),
             new VersionUseCases(_workspace, notifier, options.Clock),
             new NoteUseCases(_workspace, notifier, options.Clock),
-            new SettingsUseCases(_workspace, projects, settings, notifier, options.DefaultFolder, options.LaunchFile));
+            new SettingsUseCases(_workspace, projects, settings, notifier, options.DefaultFolder, options.LaunchFile),
+            options.Problems);
 
         _server = new JsonRpcServer(writer, contract, CoreMethods.Create(contract, services), log);
     }

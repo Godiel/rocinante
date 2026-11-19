@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 3,
+  "protocolVersion": 4,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -38,6 +38,35 @@
       "params": null,
       "result": {
         "const": "pong"
+      }
+    },
+    "diagnostics.report": {
+      "description": "Writes a problem seen by the interface or the host to the app's log. The message never carries the writer's text: only what failed and where.",
+      "params": {
+        "type": "object",
+        "required": ["source", "level", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "$ref": "#/$defs/DiagnosticSource"
+          },
+          "level": {
+            "$ref": "#/$defs/DiagnosticLevel"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "detail": {
+            "description": "A stack trace or similar, if there is one.",
+            "type": ["string", "null"],
+            "maxLength": 8000
+          }
+        }
+      },
+      "result": {
+        "type": "null"
       }
     },
     "app.start": {
@@ -1236,6 +1265,13 @@
           "type": "object"
         }
       }
+    },
+    "DiagnosticSource": {
+      "description": "Who saw the problem: the interface of a window, or the host that runs the windows and the core.",
+      "enum": ["interface", "host"]
+    },
+    "DiagnosticLevel": {
+      "enum": ["warning", "error"]
     }
   }
 }

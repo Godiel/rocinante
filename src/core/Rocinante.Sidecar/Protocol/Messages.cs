@@ -38,6 +38,8 @@ internal sealed record UpdatePreferencesParams(PreferencesChangeDto Changes, str
 
 internal sealed record OriginParams(string Origin);
 
+internal sealed record ReportParams(string Source, string Level, string Message, string? Detail);
+
 internal sealed record PathParams(string Path, string Origin);
 
 internal sealed record CreateProjectParams(string Path, string Title, string Origin);
@@ -97,6 +99,7 @@ internal sealed record NotesChangedNotification(Guid DocumentId, IReadOnlyList<N
     DefaultIgnoreCondition = JsonIgnoreCondition.Never,
     RespectNullableAnnotations = true)]
 [JsonSerializable(typeof(OriginParams))]
+[JsonSerializable(typeof(ReportParams))]
 [JsonSerializable(typeof(UpdatePreferencesParams))]
 [JsonSerializable(typeof(PlaceDto))]
 [JsonSerializable(typeof(PreferencesDto))]
