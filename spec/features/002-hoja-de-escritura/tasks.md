@@ -62,12 +62,12 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] ADR del paginador propio.
 
 ## 10. Vista de página
-- [ ] F5, botón de la barra y Escape la abren o la cierran.
-- [ ] `project.manuscript` → HTML estático con las extensiones del editor, sin las anclas de las notas del autor.
-- [ ] Hojas a tamaño real en milímetros, escaladas a la ventana; una página o dos enfrentadas.
-- [ ] Números de página; solo se dibujan las hojas visibles.
-- [ ] Se abre en la página del cursor; al cerrarla, el papel continuo sigue donde estaba.
-- [ ] Tests de comportamiento y comprobación en la app real.
+- [x] F5, botón de la barra y Escape la abren o la cierran.
+- [x] `project.manuscript` → HTML estático con las extensiones del editor, sin las anclas de las notas del autor.
+- [x] Hojas a tamaño real en milímetros, escaladas a la ventana; una página o dos enfrentadas.
+- [x] Números de página; solo se dibujan las hojas visibles.
+- [x] Se abre en la página del cursor; al cerrarla, el papel continuo sigue donde estaba.
+- [x] Tests de comportamiento y comprobación en la app real.
 
 ## 11. Pruebas de extremo a extremo y rendimiento
 - [ ] E2E: elegir un formato al crear una obra, reabrirla y verlo en el texto y en la vista de página.
