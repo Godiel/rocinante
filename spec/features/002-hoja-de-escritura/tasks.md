@@ -49,9 +49,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Accesible con teclado y lector de pantalla; tests de comportamiento.
 
 ## 8. Paso de formato al crear
-- [ ] Tras el título, el formulario del panel relleno con `suggestedFormat`.
-- [ ] «Crear con este formato» y «Omitir».
-- [ ] Tests de comportamiento.
+- [x] Tras el título, el formulario del panel relleno con `suggestedFormat`.
+- [x] «Crear con este formato» y «Omitir».
+- [x] Tests de comportamiento.
 
 ## 9. Paginador
 - [ ] `features/pages/layout.ts`: `layout(blocks, format, measure)` devuelve páginas como datos, con las posiciones de ProseMirror de cada trozo.
