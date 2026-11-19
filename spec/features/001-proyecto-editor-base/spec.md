@@ -1,6 +1,6 @@
 # 001 · Proyecto y editor base
 
-**Estado:** en revisión
+**Estado:** hecha
 
 ## Qué hace
 
@@ -77,8 +77,7 @@ Es la base de todo lo demás: sin un proyecto que se guarde de forma fiable y un
 - [x] El esquema SQLite del proyecto está documentado, versionado y tiene migraciones.
 - [x] Tests del dominio del núcleo con cobertura ≥ 80 %; tests de comportamiento de la interfaz; un test de extremo a extremo de «crear proyecto, escribir, cerrar, reabrir».
 - [x] Los errores quedan en el log local sin incluir texto de la obra.
-- [ ] CI compila y prueba en Windows, macOS y Linux.
-  _Pendiente: el flujo de CI cubre los tres sistemas, pero aún no ha corrido; se marca cuando el pull request pase en verde._
+- [x] CI compila y prueba en Windows, macOS y Linux.
 
 ## Fuera de alcance
 

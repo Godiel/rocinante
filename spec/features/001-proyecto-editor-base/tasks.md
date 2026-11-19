@@ -99,5 +99,5 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 ## 15. Cierre
 - [x] Completar en `tech-stack.md` las secciones «Archivos / módulos clave», «Comandos» y el esquema de datos.
 - [x] Validar contra los criterios de aceptación de [`spec.md`](spec.md) y marcarlos.
-- [ ] Pull request a `main` con CI en verde.
-- [ ] Mover la feature a «Hecho» en [`roadmap.md`](../../constitution/roadmap.md).
+- [x] Pull request a `main` con CI en verde.
+- [x] Mover la feature a «Hecho» en [`roadmap.md`](../../constitution/roadmap.md).
