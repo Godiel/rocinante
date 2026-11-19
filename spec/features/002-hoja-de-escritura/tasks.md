@@ -70,9 +70,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real.
 
 ## 11. Pruebas de extremo a extremo y rendimiento
-- [ ] E2E: elegir un formato al crear una obra, reabrirla y verlo en el texto y en la vista de página.
-- [ ] Rendimiento: la vista de página de una obra de 150 000 palabras se abre en menos de 2 s.
-- [ ] Rendimiento: escribir con el formato aplicado sigue con p95 < 50 ms.
+- [x] E2E: elegir un formato al crear una obra, reabrirla y verlo en el texto y en la vista de página.
+- [x] Rendimiento: la vista de página de una obra de 150 000 palabras se abre en menos de 2 s.
+- [x] Rendimiento: escribir con el formato aplicado sigue con p95 < 50 ms.
 
 ## 12. Cierre
 - [ ] `tech-stack.md`: tipografías incluidas y esquema versión 2.
