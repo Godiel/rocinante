@@ -1,23 +1,21 @@
+mod core;
 mod relay;
 
-use std::ffi::OsString;
 use std::path::Path;
+use std::process::Command;
+use std::sync::OnceLock;
 use std::sync::atomic::{AtomicU32, Ordering};
 
 use serde_json::Value;
-use tauri::{AppHandle, Manager, State, WebviewUrl, WebviewWindowBuilder};
-use tauri_plugin_shell::ShellExt;
-use tauri_plugin_shell::process::CommandEvent;
+use tauri::{AppHandle, Manager, RunEvent, State, WebviewUrl, WebviewWindowBuilder};
 
+use crate::core::Supervisor;
 use relay::Relay;
 
-/// Name of the .NET core sidecar declared in `tauri.conf.json` (`bundle.externalBin`).
-const CORE_SIDECAR: &str = "rocinante-core";
-
-/// Extension of project files.
-const PROJECT_EXTENSION: &str = "rocinante";
-
 static WINDOW_COUNTER: AtomicU32 = AtomicU32::new(1);
+
+/// The app, for the panic hook, which cannot be handed anything.
+static APP: OnceLock<AppHandle> = OnceLock::new();
 
 /// Forwards a request from any window to the core.
 #[tauri::command]
@@ -43,109 +41,63 @@ async fn open_window(app: AppHandle) -> Result<(), String> {
         .map_err(|error| error.to_string())
 }
 
-/// Arguments for the core: where the app keeps its settings and, if the app was launched with a
-/// project (double click on a `.rocinante`), that file, for the first window to open.
-fn core_args(data_dir: &Path, launch_args: impl IntoIterator<Item = OsString>) -> Vec<OsString> {
-    let mut args = vec![
-        OsString::from("--data-dir"),
-        data_dir.as_os_str().to_owned(),
-    ];
-    let project = launch_args.into_iter().find(|arg| {
-        Path::new(arg)
-            .extension()
-            .is_some_and(|extension| extension.eq_ignore_ascii_case(PROJECT_EXTENSION))
-    });
-    if let Some(project) = project {
-        args.push(OsString::from("--open"));
-        args.push(project);
-    }
-    args
+/// Shows the folder of the app's log in the system's file manager, so the writer
+/// can send it along when something went wrong.
+#[tauri::command]
+async fn open_log_folder(app: AppHandle) -> Result<(), String> {
+    let folder = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?
+        .join("logs");
+    std::fs::create_dir_all(&folder).map_err(|error| error.to_string())?;
+    show_folder(&folder).map_err(|error| error.to_string())
 }
 
-fn start_core(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
-    let args = core_args(&app.path().app_data_dir()?, std::env::args_os().skip(1));
-    let (mut events, child) = app.shell().sidecar(CORE_SIDECAR)?.args(args).spawn()?;
-
-    app.manage(Relay::new(child));
-
-    let app = app.clone();
-    tauri::async_runtime::spawn(async move {
-        while let Some(event) = events.recv().await {
-            match event {
-                CommandEvent::Stdout(line) => app.state::<Relay>().dispatch(&app, &line),
-                CommandEvent::Stderr(line) => eprintln!("core: {}", String::from_utf8_lossy(&line)),
-                CommandEvent::Terminated(status) => eprintln!("core terminated: {status:?}"),
-                _ => {}
-            }
-        }
-    });
-
-    Ok(())
+fn show_folder(folder: &Path) -> std::io::Result<()> {
+    let program = if cfg!(target_os = "windows") {
+        "explorer"
+    } else if cfg!(target_os = "macos") {
+        "open"
+    } else {
+        "xdg-open"
+    };
+    Command::new(program).arg(folder).spawn().map(|_| ())
 }
 
 pub fn run() {
+    let default_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        if let Some(app) = APP.get() {
+            core::report(app, "error", format!("host panicked: {info}"));
+        }
+        default_hook(info);
+    }));
+
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
+        .manage(Relay::new())
+        .manage(Supervisor::new())
         .setup(|app| {
-            start_core(app.handle())?;
+            let _ = APP.set(app.handle().clone());
+            core::start(app.handle(), true)?;
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![core_request, open_window])
-        .run(tauri::generate_context!())
-        .expect("error while running Rocinante");
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn args(values: &[&str]) -> Vec<OsString> {
-        values.iter().map(OsString::from).collect()
-    }
-
-    #[test]
-    fn the_core_always_gets_the_data_folder() {
-        let result = core_args(Path::new("/datos/rocinante"), args(&[]));
-
-        assert_eq!(result, args(&["--data-dir", "/datos/rocinante"]));
-    }
-
-    #[test]
-    fn a_project_the_app_was_launched_with_is_passed_on() {
-        let result = core_args(Path::new("/datos"), args(&["/obras/Don Quijote.rocinante"]));
-
-        assert_eq!(
-            result,
-            args(&[
-                "--data-dir",
-                "/datos",
-                "--open",
-                "/obras/Don Quijote.rocinante"
-            ])
-        );
-    }
-
-    #[test]
-    fn the_extension_is_matched_without_case_and_other_arguments_are_ignored() {
-        let result = core_args(
-            Path::new("/datos"),
-            args(&[
-                "--verbose",
-                "notas.txt",
-                "C:/Obras/GALATEA.ROCINANTE",
-                "otra.rocinante",
-            ]),
-        );
-
-        assert_eq!(
-            result,
-            args(&[
-                "--data-dir",
-                "/datos",
-                "--open",
-                "C:/Obras/GALATEA.ROCINANTE"
-            ])
-        );
-    }
+        .invoke_handler(tauri::generate_handler![
+            core_request,
+            open_window,
+            open_log_folder
+        ])
+        .build(tauri::generate_context!())
+        .expect("error while building Rocinante")
+        .run(|app, event| {
+            // From here on the core stopping is the app closing, not a fall.
+            if matches!(event, RunEvent::ExitRequested { .. } | RunEvent::Exit) {
+                app.state::<Supervisor>().exiting();
+            }
+            if matches!(event, RunEvent::Exit) {
+                core::set_aside(app);
+            }
+        });
 }
