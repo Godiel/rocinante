@@ -6,6 +6,8 @@ import type {
   DocumentEntry,
   DocumentKind,
   Statistics,
+  TipTapDocument,
+  VersionSummary,
   DocumentState,
   Place,
   Preferences,
@@ -17,8 +19,18 @@ import { isOutlineShortcut } from "../outline/shortcut";
 import { Outline } from "../outline/Outline";
 import { UndoNotice } from "../outline/UndoNotice";
 import { Counter, type SaveState } from "../counter/Counter";
+import { Versions } from "../versions/Versions";
+import { VersionView } from "../versions/VersionView";
+import { isSaveVersionShortcut, isVersionsShortcut } from "../versions/shortcuts";
 import { BookEditor } from "./BookEditor";
 import "./writing-view.css";
+
+/** A version shown in place of the page, with the text it is compared with. */
+interface Viewing {
+  version: VersionSummary;
+  content: TipTapDocument;
+  current: TipTapDocument;
+}
 
 interface WritingViewProps {
   project: ProjectState;
@@ -45,6 +57,9 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const [problem, setProblem] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(preferences.outline === "docked");
   const [deleted, setDeleted] = useState<DocumentEntry | null>(null);
+  const [versionsOpen, setVersionsOpen] = useState(false);
+  const [nameRequest, setNameRequest] = useState(0);
+  const [viewing, setViewing] = useState<Viewing | null>(null);
   // The project and place only matter when the view opens; later changes arrive as notifications.
   const opening = useRef({ project, place, origin });
   const mode = preferences.outline;
@@ -105,9 +120,17 @@ export function WritingView({ project, place, preferences, origin }: WritingView
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!isOutlineShortcut(event)) return;
-      event.preventDefault();
-      setOutlineOpen((open) => !open);
+      if (isOutlineShortcut(event)) {
+        event.preventDefault();
+        setOutlineOpen((open) => !open);
+      } else if (isVersionsShortcut(event)) {
+        event.preventDefault();
+        setVersionsOpen((open) => !open);
+      } else if (isSaveVersionShortcut(event)) {
+        event.preventDefault();
+        setVersionsOpen(true);
+        setNameRequest((asked) => asked + 1);
+      }
     };
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
@@ -137,6 +160,40 @@ export function WritingView({ project, place, preferences, origin }: WritingView
     void request("preferences.update", { changes, origin });
 
   const dismissDeleted = useCallback(() => setDeleted(null), []);
+
+  async function lookAt(version: VersionSummary) {
+    try {
+      // Compared with what is on the page now, the last words included.
+      await savePendingNow();
+      const [kept, now] = await Promise.all([
+        request("version.get", { id: version.id }),
+        request("document.get", { id: version.documentId }),
+      ]);
+      setViewing({ version, content: kept.content, current: now.content });
+      setProblem(null);
+    } catch (error) {
+      setProblem(messageFor(error));
+    }
+  }
+
+  async function restore(version: VersionSummary) {
+    try {
+      await savePendingNow();
+      const restored = await request("version.restore", { id: version.id, origin });
+      setViewing(null);
+      setDocument(restored.document);
+      setCounts({ id: restored.document.id, statistics: restored.document.statistics });
+      setProblem(null);
+    } catch (error) {
+      setProblem(messageFor(error));
+    }
+  }
+
+  function closeVersions() {
+    setVersionsOpen(false);
+    setViewing(null);
+    window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
+  }
   // Typing reports itself on every key; the view only changes when the state does.
   const onSaveState = useCallback(
     (next: SaveState) =>
@@ -147,11 +204,21 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const kindOf = (id: string | null): DocumentKind =>
     index.fragments.some((entry) => entry.id === id) ? "fragment" : "chapter";
 
+  const titleOf = (id: string) =>
+    [...index.chapters, ...index.fragments].find((entry) => entry.id === id)?.title ?? "";
+  // A version belongs to one document: switching documents leaves it.
+  const shownViewing = viewing && viewing.version.documentId === shownId ? viewing : null;
+
   const isEmpty = index.chapters.length === 0 && index.fragments.length === 0;
   const docked = outlineOpen && mode === "docked";
 
   return (
-    <div className={`writing-view${docked ? " writing-view-docked" : ""}`} onFocus={onFocusIn}>
+    <div
+      className={`writing-view${docked ? " writing-view-docked" : ""}${
+        versionsOpen ? " writing-view-versions" : ""
+      }`}
+      onFocus={onFocusIn}
+    >
       <header className="writing-bar small-caps">
         <span className="writing-bar-start">
           <button
@@ -187,6 +254,14 @@ export function WritingView({ project, place, preferences, origin }: WritingView
             onClick={() => update({ counterVisible: !preferences.counterVisible })}
           >
             Contador {preferences.counterVisible ? "sí" : "no"}
+          </button>
+          <button
+            className="action"
+            aria-expanded={versionsOpen}
+            title="Versiones (F6)"
+            onClick={() => (versionsOpen ? closeVersions() : setVersionsOpen(true))}
+          >
+            Versiones
           </button>
           <button className="action" onClick={() => void invoke("open_window")}>
             Otra ventana
@@ -225,23 +300,51 @@ export function WritingView({ project, place, preferences, origin }: WritingView
             La obra está vacía. Crea un capítulo o un fragmento desde el índice.
           </p>
         )}
-        {document && document.id === shownId && (
-          <BookEditor
-            key={document.id}
-            document={document}
-            kind={kindOf(document.id)}
-            place={place?.documentId === document.id ? place : null}
-            origin={origin}
-            typewriterScrolling={preferences.typewriterScrolling}
-            onCounts={(statistics, total) => {
-              setCounts({ id: document.id, statistics });
-              setWork({ value: total, base: project.work });
+        {shownViewing && (
+          <VersionView
+            key={shownViewing.version.id}
+            version={shownViewing.version}
+            content={shownViewing.content}
+            current={shownViewing.current}
+            onRestore={() => void restore(shownViewing.version)}
+            onBack={() => {
+              setViewing(null);
+              window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
             }}
-            onSaveState={onSaveState}
-            onProblem={setProblem}
           />
         )}
+        {document && document.id === shownId && (
+          <div hidden={!!shownViewing}>
+            <BookEditor
+              key={`${document.id}:${document.revision}`}
+              document={document}
+              kind={kindOf(document.id)}
+              place={place?.documentId === document.id ? place : null}
+              origin={origin}
+              typewriterScrolling={preferences.typewriterScrolling}
+              onCounts={(statistics, total) => {
+                setCounts({ id: document.id, statistics });
+                setWork({ value: total, base: project.work });
+              }}
+              onSaveState={onSaveState}
+              onProblem={setProblem}
+            />
+          </div>
+        )}
       </main>
+
+      {versionsOpen && shownId && (
+        <Versions
+          documentId={shownId}
+          title={titleOf(shownId)}
+          origin={origin}
+          selectedId={shownViewing?.version.id ?? null}
+          nameRequest={nameRequest}
+          onSelect={(version) => void lookAt(version)}
+          onClose={closeVersions}
+          onProblem={setProblem}
+        />
+      )}
 
       <Counter
         document={counts && counts.id === shownId ? counts.statistics : null}
