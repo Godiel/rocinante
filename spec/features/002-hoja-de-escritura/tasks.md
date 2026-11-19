@@ -75,7 +75,7 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Rendimiento: escribir con el formato aplicado sigue con p95 < 50 ms.
 
 ## 12. Cierre
-- [ ] `tech-stack.md`: tipografías incluidas y esquema versión 2.
-- [ ] Validar contra los criterios de aceptación de [`spec.md`](spec.md) y marcarlos.
+- [x] `tech-stack.md`: tipografías incluidas y esquema versión 2.
+- [x] Validar contra los criterios de aceptación de [`spec.md`](spec.md) y marcarlos.
 - [ ] Pull request a `main` con CI en verde.
 - [ ] Mover la feature a «Hecho» en [`roadmap.md`](../../constitution/roadmap.md).

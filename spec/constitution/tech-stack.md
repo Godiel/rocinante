@@ -68,8 +68,8 @@ Rocinante es código abierto y portafolio profesional, así que la calidad es pa
 | `src/host/src` | Anfitrión Tauri en Rust: `relay.rs` (relé entre ventanas y núcleo), `core.rs` (arranque, reinicio y registro de problemas) y `lib.rs` (ventanas y comandos). |
 | `src/ui/src/bridge` | Cliente tipado del contrato; `generated/protocol.ts` se genera desde `protocol.json`. |
 | `src/ui/src/editor` | Extensiones propias de TipTap (cambio de escena, notas al pie, anclas de notas, sangría), el desplazamiento tipo rodillo y los guardados pendientes. |
-| `src/ui/src/features` | Bienvenida, editor y vista de escritura, índice, contador y versiones. |
-| `src/ui/src/design` | Temas («papel», «luz de vela»), tokens CSS y ornamentos. |
+| `src/ui/src/features` | Bienvenida, editor y vista de escritura, índice, contador, versiones, formato de la obra (`format/`) y vista de página con su paginador (`pages/`, ver [ADR 0009](../../docs/adr/0009-paginador-propio.md)). |
+| `src/ui/src/design` | Temas («papel», «luz de vela»), tokens CSS, ornamentos y la lista de tipografías de la obra (`typefaces.ts`). |
 | `tests/core` | Tests del núcleo por capa (xUnit v3 y Shouldly), incluidas las pruebas de contrato. |
 | `tests/e2e` | Pruebas de extremo a extremo y de rendimiento con Playwright: la interfaz en un navegador y el núcleo real detrás de un relé de pruebas. |
 | `docs/adr`, `docs/format` | Decisiones de arquitectura y el formato `.rocinante`. |
@@ -108,7 +108,7 @@ Un proyecto `.rocinante` contiene todo lo que pertenece a la obra:
 
 Las preferencias personales que no dependen de la obra (tema, sonidos, proveedor de IA) se guardan en la configuración de la app, no en el proyecto. Las claves de API nunca se guardan en el proyecto.
 
-**Esquema (versión 1, feature 001).** El archivo es SQLite con `application_id` `ROCI`, modo WAL y `synchronous = FULL`. Sus tablas son `meta` (versión del esquema), `project` (una sola fila: título y fecha), `document` (capítulos y fragmentos: lugar en el índice, papelera, texto en JSON de TipTap y sus recuentos), `document_version` (versiones automáticas, a mano y «antes de restaurar») y `note` (notas del autor ancladas a un punto o pasaje, o sueltas). Cada cambio del esquema es una migración numerada en `src/core/Rocinante.Infrastructure/Persistence/Migrations/`. La descripción completa, columna a columna, está en [`docs/format`](../../docs/format/README.md). Elementos de la obra y notas enlazadas llegarán con las features 004 y 005.
+**Esquema (versión 2).** El archivo es SQLite con `application_id` `ROCI`, modo WAL y `synchronous = FULL`. Sus tablas son `meta` (versión del esquema), `project` (una sola fila: título y fecha), `document` (capítulos y fragmentos: lugar en el índice, papelera, texto en JSON de TipTap y sus recuentos), `document_version` (versiones automáticas, a mano y «antes de restaurar»), `note` (notas del autor ancladas a un punto o pasaje, o sueltas) y, desde la versión 2 (feature 002), `work_format` (una sola fila: la hoja, los márgenes y la letra de la obra). Cada cambio del esquema es una migración numerada en `src/core/Rocinante.Infrastructure/Persistence/Migrations/`. La descripción completa, columna a columna, está en [`docs/format`](../../docs/format/README.md). Elementos de la obra y notas enlazadas llegarán con las features 004 y 005.
 
 ## Convenciones
 
@@ -199,7 +199,7 @@ Pocos colores, todos cálidos, como papel y tinta. Se definen como tokens (varia
 
 Todas con licencias abiertas (SIL OFL), incluidas en la app y sin depender de internet.
 
-- **Texto de la obra:** serifas de libro. Candidatas: EB Garamond, Literata y Crimson Pro. El autor elige la suya.
+- **Texto de la obra:** serifas de libro, elegidas en el formato de cada obra: EB Garamond (la de por defecto), Literata, Crimson Pro, Source Serif 4 y Libre Baskerville. Van dentro de la app en latino y latino extendido, en redonda, cursiva y negrita, y la compilación copia su licencia OFL a `licenses/`.
 - **Interfaz:** la misma familia serif, en tamaños pequeños, versalitas y cursivas, para que la app entera parezca un libro y no un programa.
 - **Modo máquina de escribir:** Courier Prime, como opción del texto.
 - **Detalles tipográficos:** comillas españolas («»), rayas de diálogo (—), ligaduras y numerales de estilo antiguo donde la fuente los tenga.

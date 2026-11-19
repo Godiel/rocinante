@@ -1,6 +1,6 @@
 # 002 · Hoja de escritura
 
-**Estado:** propuesta
+**Estado:** en revisión
 
 ## Qué hace
 
@@ -46,36 +46,37 @@ Escribir un libro no es solo escribir texto: el escritor quiere ver cómo quedar
 ## Criterios de aceptación
 
 **Formato de la obra**
-- [ ] Se puede elegir cualquiera de los seis tamaños de lista o uno a medida en centímetros o pulgadas. Un tamaño o un margen imposible (negativo, o márgenes que no dejan sitio al texto) se rechaza con un mensaje claro.
-- [ ] Cada tamaño de lista propone sus márgenes, y se pueden cambiar uno a uno.
+- [x] Se puede elegir cualquiera de los seis tamaños de lista o uno a medida en centímetros o pulgadas. Un tamaño o un margen imposible (negativo, o márgenes que no dejan sitio al texto) se rechaza con un mensaje claro.
+- [x] Cada tamaño de lista propone sus márgenes, y se pueden cambiar uno a uno.
 - [ ] Se puede elegir entre las seis tipografías, que se ven igual con y sin internet en Windows, macOS y Linux.
-- [ ] Se pueden cambiar el cuerpo, el interlineado, la sangría de primera línea, el justificado y la capitular.
-- [ ] El formato se guarda en el archivo de la obra: al reabrirla, o al abrirla en otro equipo, se ve igual.
-- [ ] Una obra creada con la feature 001 se abre con un formato por defecto, sin perder nada.
+  _Pendiente: comprobado en Windows (Edge, sin acceso a internet). La misma prueba corre en la CI de macOS y Linux; se marca cuando el pull request pase en verde._
+- [x] Se pueden cambiar el cuerpo, el interlineado, la sangría de primera línea, el justificado y la capitular.
+- [x] El formato se guarda en el archivo de la obra: al reabrirla, o al abrirla en otro equipo, se ve igual.
+- [x] Una obra creada con la feature 001 se abre con un formato por defecto, sin perder nada.
 
 **Al crear una obra**
-- [ ] Tras el título se ofrece el paso de formato, relleno con el último formato usado (o con el de por defecto la primera vez).
-- [ ] Omitir el paso crea la obra con la sugerencia; aceptarlo, con lo elegido.
-- [ ] El formato elegido pasa a ser la sugerencia para la próxima obra.
+- [x] Tras el título se ofrece el paso de formato, relleno con el último formato usado (o con el de por defecto la primera vez).
+- [x] Omitir el paso crea la obra con la sugerencia; aceptarlo, con lo elegido.
+- [x] El formato elegido pasa a ser la sugerencia para la próxima obra.
 
 **Panel de formato y papel continuo**
-- [ ] Desde la barra de la obra se abre el panel de formato, y cada cambio se ve en el texto al momento.
-- [ ] El papel continuo usa la tipografía, el cuerpo, el interlineado, los párrafos y la capitular de la obra, y conserva su ancho de columna.
-- [ ] Escribir sigue siendo fluido (sin retraso perceptible al teclear) con cualquier tipografía y formato, en un capítulo de 20 000 palabras.
+- [x] Desde la barra de la obra se abre el panel de formato, y cada cambio se ve en el texto al momento.
+- [x] El papel continuo usa la tipografía, el cuerpo, el interlineado, los párrafos y la capitular de la obra, y conserva su ancho de columna.
+- [x] Escribir sigue siendo fluido (sin retraso perceptible al teclear) con cualquier tipografía y formato, en un capítulo de 20 000 palabras.
 
 **Vista de página**
-- [ ] F5 abre y cierra la vista de página; también se abre y se cierra desde la barra.
-- [ ] Las hojas tienen el tamaño y los márgenes de la obra, con proporciones correctas.
-- [ ] Cada capítulo empieza en página nueva; las páginas llevan su número.
-- [ ] Se puede pasar de una página a dos enfrentadas y volver; en las enfrentadas, los márgenes interior y exterior quedan a cada lado del lomo.
-- [ ] La vista se abre en la página del cursor; al cerrarla se vuelve al mismo punto del texto.
-- [ ] No se puede escribir en la vista de página. Las notas del autor no aparecen; los separadores de escena y las notas al pie sí.
-- [ ] En una obra de 150 000 palabras, la vista se abre en menos de 2 segundos y se desplaza con fluidez.
+- [x] F5 abre y cierra la vista de página; también se abre y se cierra desde la barra.
+- [x] Las hojas tienen el tamaño y los márgenes de la obra, con proporciones correctas.
+- [x] Cada capítulo empieza en página nueva; las páginas llevan su número.
+- [x] Se puede pasar de una página a dos enfrentadas y volver; en las enfrentadas, los márgenes interior y exterior quedan a cada lado del lomo.
+- [x] La vista se abre en la página del cursor; al cerrarla se vuelve al mismo punto del texto.
+- [x] No se puede escribir en la vista de página. Las notas del autor no aparecen; los separadores de escena y las notas al pie sí.
+- [x] En una obra de 150 000 palabras, la vista se abre en menos de 2 segundos y se desplaza con fluidez.
 
 **Calidad**
-- [ ] El formato de la obra forma parte del contrato de mensajes y del esquema del archivo, con su migración, pruebas de contrato y documentación en `docs/format`.
-- [ ] Las tipografías nuevas tienen licencia SIL OFL, que se incluye con la app.
-- [ ] Tests de comportamiento de la interfaz y una prueba de extremo a extremo: elegir un formato al crear una obra, reabrirla y verlo en la vista de página.
+- [x] El formato de la obra forma parte del contrato de mensajes y del esquema del archivo, con su migración, pruebas de contrato y documentación en `docs/format`.
+- [x] Las tipografías nuevas tienen licencia SIL OFL, que se incluye con la app.
+- [x] Tests de comportamiento de la interfaz y una prueba de extremo a extremo: elegir un formato al crear una obra, reabrirla y verlo en la vista de página.
 
 ## Fuera de alcance
 
