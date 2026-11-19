@@ -140,7 +140,7 @@ describe("looking at a version", () => {
 
   function renderView(content: TipTapDocument, current: TipTapDocument) {
     const handlers = { onRestore: vi.fn(), onBack: vi.fn() };
-    render(<VersionView version={list[1]} content={content} current={current} {...handlers} />);
+    render(<VersionView version={list[1]!} content={content} current={current} {...handlers} />);
     return { ...handlers, user: userEvent.setup() };
   }
 

@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type KeyboardEventHandler,
+  type PointerEventHandler,
+} from "react";
 import {
   closestCenter,
   DndContext,
@@ -340,7 +347,7 @@ function Entry(props: EntryProps) {
         transition,
       }}
       // The whole row can be dragged with the pointer; the keyboard drags from the handle.
-      onPointerDown={listeners?.onPointerDown}
+      onPointerDown={listeners?.onPointerDown as PointerEventHandler | undefined}
     >
       {isConfirming ? (
         <Confirm title={entry.title} onConfirmed={props.onConfirmed} onCancel={props.onCancel} />
@@ -352,7 +359,7 @@ function Entry(props: EntryProps) {
             className="outline-handle"
             aria-label={`Mover «${entry.title}»`}
             {...attributes}
-            onKeyDown={listeners?.onKeyDown}
+            onKeyDown={listeners?.onKeyDown as KeyboardEventHandler | undefined}
           >
             <span aria-hidden="true">⁞</span>
           </button>
