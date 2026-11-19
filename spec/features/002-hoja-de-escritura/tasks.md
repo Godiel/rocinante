@@ -77,5 +77,5 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 ## 12. Cierre
 - [x] `tech-stack.md`: tipografías incluidas y esquema versión 2.
 - [x] Validar contra los criterios de aceptación de [`spec.md`](spec.md) y marcarlos.
-- [ ] Pull request a `main` con CI en verde.
-- [ ] Mover la feature a «Hecho» en [`roadmap.md`](../../constitution/roadmap.md).
+- [x] Pull request a `main` con CI en verde.
+- [x] Mover la feature a «Hecho» en [`roadmap.md`](../../constitution/roadmap.md).

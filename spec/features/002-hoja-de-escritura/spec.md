@@ -1,6 +1,6 @@
 # 002 · Hoja de escritura
 
-**Estado:** en revisión
+**Estado:** hecha
 
 ## Qué hace
 
@@ -48,8 +48,7 @@ Escribir un libro no es solo escribir texto: el escritor quiere ver cómo quedar
 **Formato de la obra**
 - [x] Se puede elegir cualquiera de los seis tamaños de lista o uno a medida en centímetros o pulgadas. Un tamaño o un margen imposible (negativo, o márgenes que no dejan sitio al texto) se rechaza con un mensaje claro.
 - [x] Cada tamaño de lista propone sus márgenes, y se pueden cambiar uno a uno.
-- [ ] Se puede elegir entre las seis tipografías, que se ven igual con y sin internet en Windows, macOS y Linux.
-  _Pendiente: comprobado en Windows (Edge, sin acceso a internet). La misma prueba corre en la CI de macOS y Linux; se marca cuando el pull request pase en verde._
+- [x] Se puede elegir entre las seis tipografías, que se ven igual con y sin internet en Windows, macOS y Linux.
 - [x] Se pueden cambiar el cuerpo, el interlineado, la sangría de primera línea, el justificado y la capitular.
 - [x] El formato se guarda en el archivo de la obra: al reabrirla, o al abrirla en otro equipo, se ve igual.
 - [x] Una obra creada con la feature 001 se abre con un formato por defecto, sin perder nada.
