@@ -24,6 +24,7 @@ import { Versions } from "../versions/Versions";
 import { VersionView } from "../versions/VersionView";
 import { isSaveVersionShortcut, isVersionsShortcut } from "../versions/shortcuts";
 import { BookEditor } from "./BookEditor";
+import { workClasses, workStyle } from "../format/work-style";
 import "./writing-view.css";
 
 /** A version shown in place of the page, with the text it is compared with. */
@@ -215,9 +216,10 @@ export function WritingView({ project, place, preferences, origin }: WritingView
 
   return (
     <div
-      className={`writing-view${docked ? " writing-view-docked" : ""}${
-        versionsOpen ? " writing-view-versions" : ""
-      }`}
+      className={`writing-view ${workClasses(project.format)}${
+        docked ? " writing-view-docked" : ""
+      }${versionsOpen ? " writing-view-versions" : ""}`}
+      style={workStyle(project.format)}
       onFocus={onFocusIn}
     >
       <header className="writing-bar small-caps">

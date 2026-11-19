@@ -344,7 +344,7 @@ export function BookEditor({
       }}
       onClick={onClick}
     >
-      <EditorContent editor={editor} className="book-page" />
+      <EditorContent editor={editor} className={`book-page book-page-${kind}`} />
       <TypewriterCaret editor={editor} frame={frame} />
       <BubbleToolbar
         editor={editor}
