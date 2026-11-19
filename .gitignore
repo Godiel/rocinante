@@ -28,3 +28,7 @@ Thumbs.db
 *.rocinante-wal
 *.rocinante-shm
 *.log
+
+# Pruebas de extremo a extremo
+test-results/
+playwright-report/

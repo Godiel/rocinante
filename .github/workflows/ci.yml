@@ -101,3 +101,40 @@ jobs:
       - name: Tests
         working-directory: src/host
         run: cargo test --locked
+
+  e2e:
+    name: Extremo a extremo y rendimiento (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Compilar núcleo
+        run: dotnet build src/core/Rocinante.slnx --configuration Release
+      - name: Compilar interfaz
+        run: npm run build -w @rocinante/ui
+      - name: Tipos, lint y formato de las pruebas
+        working-directory: tests/e2e
+        run: |
+          npm run typecheck
+          npm run lint
+          npm run format:check
+      # Edge en Windows y Chrome en macOS y Linux ya vienen en los ejecutores: nada que descargar.
+      - name: Pruebas
+        run: npm test -w @rocinante/e2e
+      - name: Informe de las pruebas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-${{ matrix.os }}
+          path: tests/e2e/playwright-report

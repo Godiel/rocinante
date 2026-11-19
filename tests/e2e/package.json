@@ -1,0 +1,21 @@
+{
+  "name": "@rocinante/e2e",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "playwright test",
+    "typecheck": "tsc -p .",
+    "lint": "oxlint --deny-warnings",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/node": "^24.19.2",
+    "oxlint": "^1.94.0",
+    "prettier": "^3.10.1",
+    "typescript": "~7.0.2"
+  }
+}
