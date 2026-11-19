@@ -23,6 +23,8 @@ import "./book-editor.css";
 
 const SAVE_DELAY_MS = 300;
 const RETRY_DELAY_MS = 5000;
+/** The longest typed text waits unsaved, so a crash loses less than two seconds. */
+const MAX_UNSAVED_MS = 1000;
 const PLACE_DELAY_MS = 1000;
 const SLIP_WIDTH = 320;
 
@@ -73,10 +75,12 @@ export function BookEditor({
   const saveTimer = useRef<number | undefined>(undefined);
   const placeTimer = useRef<number | undefined>(undefined);
   const pendingSave = useRef<(() => Promise<void>) | null>(null);
+  const unsavedSince = useRef<number | null>(null);
   const savePending = useRef(() => {
     window.clearTimeout(saveTimer.current);
     const save = pendingSave.current;
     pendingSave.current = null;
+    unsavedSince.current = null;
     return save ? save() : Promise.resolve();
   }).current;
   const pointer = useRef(false);
@@ -143,8 +147,14 @@ export function BookEditor({
             callbacks.current.onSaveState({ kind: "failed", message: messageFor(error) });
           });
       };
+      // A writer who never pauses still gets saved: the wait never runs past MAX_UNSAVED_MS.
+      unsavedSince.current ??= Date.now();
+      const left = unsavedSince.current + MAX_UNSAVED_MS - Date.now();
       pendingSave.current = save;
-      saveTimer.current = window.setTimeout(() => void savePending(), SAVE_DELAY_MS);
+      saveTimer.current = window.setTimeout(
+        () => void savePending(),
+        Math.max(0, Math.min(SAVE_DELAY_MS, left)),
+      );
     },
     onSelectionUpdate: ({ editor: current }) => {
       const { anchor, head } = current.state.selection;
