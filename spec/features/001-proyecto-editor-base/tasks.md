@@ -97,7 +97,7 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Rendimiento: capítulo de 20 000 palabras y obra de 150 000 sin retraso al teclear.
 
 ## 15. Cierre
-- [ ] Completar en `tech-stack.md` las secciones «Archivos / módulos clave», «Comandos» y el esquema de datos.
-- [ ] Validar contra los criterios de aceptación de [`spec.md`](spec.md) y marcarlos.
+- [x] Completar en `tech-stack.md` las secciones «Archivos / módulos clave», «Comandos» y el esquema de datos.
+- [x] Validar contra los criterios de aceptación de [`spec.md`](spec.md) y marcarlos.
 - [ ] Pull request a `main` con CI en verde.
 - [ ] Mover la feature a «Hecho» en [`roadmap.md`](../../constitution/roadmap.md).

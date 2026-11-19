@@ -1,6 +1,6 @@
 # 001 · Proyecto y editor base
 
-**Estado:** propuesta
+**Estado:** en revisión
 
 ## Qué hace
 
@@ -40,43 +40,45 @@ Es la base de todo lo demás: sin un proyecto que se guarde de forma fiable y un
 ## Criterios de aceptación
 
 **Proyecto**
-- [ ] Se puede crear un proyecto nuevo; por defecto se propone `Documentos/Rocinante/<nombre>.rocinante` y se puede elegir otra carpeta.
+- [x] Se puede crear un proyecto nuevo; por defecto se propone `Documentos/Rocinante/<nombre>.rocinante` y se puede elegir otra carpeta.
 - [ ] Se puede abrir un proyecto desde la bienvenida, desde «Abrir proyecto» y con doble clic en el archivo (Windows, macOS y Linux).
-- [ ] La primera vez se muestra la bienvenida; las siguientes se abre el último proyecto en el mismo capítulo y posición del cursor.
-- [ ] Si el último proyecto ya no existe o no se puede abrir, se muestra la bienvenida con un mensaje claro, sin errores técnicos.
-- [ ] Abrir un archivo que no es un `.rocinante` válido muestra un mensaje claro y no daña el archivo.
+  _Pendiente: abrir un archivo recibido como argumento funciona y está comprobado en Windows; la asociación de `.rocinante` con la app llega con los instaladores (012), y macOS y Linux faltan por comprobar._
+- [x] La primera vez se muestra la bienvenida; las siguientes se abre el último proyecto en el mismo capítulo y posición del cursor.
+- [x] Si el último proyecto ya no existe o no se puede abrir, se muestra la bienvenida con un mensaje claro, sin errores técnicos.
+- [x] Abrir un archivo que no es un `.rocinante` válido muestra un mensaje claro y no daña el archivo.
 
 **Capítulos y fragmentos**
-- [ ] Se pueden crear, renombrar, reordenar arrastrando y eliminar capítulos y fragmentos.
-- [ ] Un fragmento se puede convertir en capítulo y un capítulo en fragmento sin perder su texto.
-- [ ] Eliminar un capítulo o fragmento pide confirmación y se puede deshacer.
-- [ ] El índice se abre y cierra con un atajo de teclado y puede quedar anclado o flotante; la preferencia se recuerda.
+- [x] Se pueden crear, renombrar, reordenar arrastrando y eliminar capítulos y fragmentos.
+- [x] Un fragmento se puede convertir en capítulo y un capítulo en fragmento sin perder su texto.
+- [x] Eliminar un capítulo o fragmento pide confirmación y se puede deshacer.
+- [x] El índice se abre y cierra con un atajo de teclado y puede quedar anclado o flotante; la preferencia se recuerda.
 
 **Editor**
-- [ ] El texto se escribe sobre papel sin bordes, con el ancho de columna y los márgenes de la constitución, en ambos temas.
-- [ ] El desplazamiento tipo rodillo mantiene la línea activa a la altura de los ojos; se puede desactivar.
-- [ ] El cursor tiene forma de máquina de escribir **o** el autor ha decidido descartarlo tras conocer el motivo.
-- [ ] Al seleccionar texto aparece el menú flotante; al deseleccionar desaparece.
-- [ ] Negrita, cursiva, subrayado, títulos, citas, listas, sangrías, separador de escena y notas al pie funcionan con el menú y con atajos.
-- [ ] Se puede anclar una nota en un punto o en un pasaje seleccionado, verla con su marca discreta, editarla y eliminarla.
-- [ ] Las notas no alteran el texto de la obra ni el contador.
-- [ ] Si se borra el pasaje donde estaba anclada, la nota se conserva como nota suelta del documento.
-- [ ] Deshacer y rehacer funcionan para todo cambio de texto y formato.
-- [ ] El contador muestra palabras, caracteres, párrafos y capítulos del capítulo actual y de la obra, y se actualiza mientras se escribe. Está en una esquina, se atenúa al escribir y se puede ocultar.
-- [ ] Escribir sigue siendo fluido (sin retraso perceptible al teclear) en un capítulo de 20 000 palabras y en una obra de 150 000 palabras.
+- [x] El texto se escribe sobre papel sin bordes, con el ancho de columna y los márgenes de la constitución, en ambos temas.
+- [x] El desplazamiento tipo rodillo mantiene la línea activa a la altura de los ojos; se puede desactivar.
+- [x] El cursor tiene forma de máquina de escribir **o** el autor ha decidido descartarlo tras conocer el motivo.
+- [x] Al seleccionar texto aparece el menú flotante; al deseleccionar desaparece.
+- [x] Negrita, cursiva, subrayado, títulos, citas, listas, sangrías, separador de escena y notas al pie funcionan con el menú y con atajos.
+- [x] Se puede anclar una nota en un punto o en un pasaje seleccionado, verla con su marca discreta, editarla y eliminarla.
+- [x] Las notas no alteran el texto de la obra ni el contador.
+- [x] Si se borra el pasaje donde estaba anclada, la nota se conserva como nota suelta del documento.
+- [x] Deshacer y rehacer funcionan para todo cambio de texto y formato.
+- [x] El contador muestra palabras, caracteres, párrafos y capítulos del capítulo actual y de la obra, y se actualiza mientras se escribe. Está en una esquina, se atenúa al escribir y se puede ocultar.
+- [x] Escribir sigue siendo fluido (sin retraso perceptible al teclear) en un capítulo de 20 000 palabras y en una obra de 150 000 palabras.
 
 **Guardado y versiones**
-- [ ] Todo cambio queda guardado en menos de 2 segundos sin ninguna acción del escritor.
-- [ ] Si la app se cierra de golpe (proceso terminado o corte de luz simulado), al reabrir el proyecto se pierde como máximo lo escrito en los últimos 2 segundos y el archivo nunca queda corrupto.
-- [ ] Se crean versiones automáticas periódicas y se puede guardar una versión a mano con nombre.
-- [ ] Se puede ver una versión anterior, compararla con la actual y restaurarla; restaurar crea a su vez una versión de lo que había, para que nada se pierda.
+- [x] Todo cambio queda guardado en menos de 2 segundos sin ninguna acción del escritor.
+- [x] Si la app se cierra de golpe (proceso terminado o corte de luz simulado), al reabrir el proyecto se pierde como máximo lo escrito en los últimos 2 segundos y el archivo nunca queda corrupto.
+- [x] Se crean versiones automáticas periódicas y se puede guardar una versión a mano con nombre.
+- [x] Se puede ver una versión anterior, compararla con la actual y restaurarla; restaurar crea a su vez una versión de lo que había, para que nada se pierda.
 
 **Calidad (constitución)**
-- [ ] La interfaz y el núcleo se comunican mediante el contrato de mensajes versionado, con pruebas de contrato en ambos lados.
-- [ ] El esquema SQLite del proyecto está documentado, versionado y tiene migraciones.
-- [ ] Tests del dominio del núcleo con cobertura ≥ 80 %; tests de comportamiento de la interfaz; un test de extremo a extremo de «crear proyecto, escribir, cerrar, reabrir».
-- [ ] Los errores quedan en el log local sin incluir texto de la obra.
+- [x] La interfaz y el núcleo se comunican mediante el contrato de mensajes versionado, con pruebas de contrato en ambos lados.
+- [x] El esquema SQLite del proyecto está documentado, versionado y tiene migraciones.
+- [x] Tests del dominio del núcleo con cobertura ≥ 80 %; tests de comportamiento de la interfaz; un test de extremo a extremo de «crear proyecto, escribir, cerrar, reabrir».
+- [x] Los errores quedan en el log local sin incluir texto de la obra.
 - [ ] CI compila y prueba en Windows, macOS y Linux.
+  _Pendiente: el flujo de CI cubre los tres sistemas, pero aún no ha corrido; se marca cuando el pull request pase en verde._
 
 ## Fuera de alcance
 

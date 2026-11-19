@@ -58,11 +58,40 @@ Rocinante es código abierto y portafolio profesional, así que la calidad es pa
 
 ## Archivos / módulos clave
 
-_Pendiente: se define al crear la estructura de `src/`._
+| Ruta | Qué hay |
+|---|---|
+| `src/contracts/protocol.json` | El contrato de mensajes entre interfaz y núcleo (JSON Schema, versionado). Cada método tiene ejemplos en `src/contracts/examples/`. |
+| `src/core/Rocinante.Domain` | Reglas de la obra sin dependencias: `Project` (índice de capítulos, fragmentos y papelera), `Document`, `DocumentContent` y `TextStatistics`, `DocumentVersion`, `Note`. |
+| `src/core/Rocinante.Application` | Casos de uso (`ProjectUseCases`, `DocumentUseCases`, `VersionUseCases`, `NoteUseCases`, `SettingsUseCases`), el `Workspace` compartido por todas las ventanas y los puertos que implementa la infraestructura. |
+| `src/core/Rocinante.Infrastructure` | SQLite (`Persistence/`, con las migraciones en `Persistence/Migrations/`), `settings.json` de la app (`Settings/`) y el registro con Serilog (`Logging/`). |
+| `src/core/Rocinante.Sidecar` | El proceso del núcleo: servidor JSON-RPC por stdin/stdout, validación contra el contrato y notificaciones a las ventanas. |
+| `src/host/src` | Anfitrión Tauri en Rust: `relay.rs` (relé entre ventanas y núcleo), `core.rs` (arranque, reinicio y registro de problemas) y `lib.rs` (ventanas y comandos). |
+| `src/ui/src/bridge` | Cliente tipado del contrato; `generated/protocol.ts` se genera desde `protocol.json`. |
+| `src/ui/src/editor` | Extensiones propias de TipTap (cambio de escena, notas al pie, anclas de notas, sangría), el desplazamiento tipo rodillo y los guardados pendientes. |
+| `src/ui/src/features` | Bienvenida, editor y vista de escritura, índice, contador y versiones. |
+| `src/ui/src/design` | Temas («papel», «luz de vela»), tokens CSS y ornamentos. |
+| `tests/core` | Tests del núcleo por capa (xUnit v3 y Shouldly), incluidas las pruebas de contrato. |
+| `tests/e2e` | Pruebas de extremo a extremo y de rendimiento con Playwright: la interfaz en un navegador y el núcleo real detrás de un relé de pruebas. |
+| `docs/adr`, `docs/format` | Decisiones de arquitectura y el formato `.rocinante`. |
 
 ## Comandos
 
-_Pendiente._
+Desde la raíz del repositorio:
+
+| Comando | Qué hace |
+|---|---|
+| `npm ci` | Instala las dependencias de la interfaz, de las pruebas E2E y de Tauri. |
+| `npm run dev` | Arranca la app en modo desarrollo (Vite, anfitrión Tauri y núcleo). |
+| `npm run core:build` | Publica el núcleo como ejecutable único en `src/host/binaries/`, donde Tauri lo busca. |
+| `npm run contracts:generate` | Regenera los tipos de TypeScript desde el contrato; `contracts:check` comprueba que estén al día. |
+| `npm run e2e` | Compila interfaz y núcleo y ejecuta las pruebas de extremo a extremo y de rendimiento. |
+| `dotnet build src/core/Rocinante.slnx -c Release` | Compila el núcleo. |
+| `dotnet test --solution src/core/Rocinante.slnx -c Release --no-build` | Tests del núcleo. |
+| `dotnet format src/core/Rocinante.slnx --verify-no-changes` | Comprueba el formato del núcleo. |
+| `npm test -w @rocinante/ui` | Tests de la interfaz (Vitest y Testing Library). |
+| `npm run build -w @rocinante/ui` | Comprueba los tipos (`tsc -b`) y compila la interfaz. |
+| `npm run lint -w @rocinante/ui`, `npm run format:check -w @rocinante/ui` | Lint (oxlint) y formato (Prettier) de la interfaz. |
+| `cargo test`, `cargo clippy --all-targets -- -D warnings`, `cargo fmt --check` | Tests, análisis y formato del anfitrión, desde `src/host`. |
 
 ## Modelo de datos / dominio
 
@@ -79,7 +108,7 @@ Un proyecto `.rocinante` contiene todo lo que pertenece a la obra:
 
 Las preferencias personales que no dependen de la obra (tema, sonidos, proveedor de IA) se guardan en la configuración de la app, no en el proyecto. Las claves de API nunca se guardan en el proyecto.
 
-_El esquema detallado se define en la feature 001 (proyecto y texto), la 004 (elementos de la obra) y la 005 (notas e ideas)._
+**Esquema (versión 1, feature 001).** El archivo es SQLite con `application_id` `ROCI`, modo WAL y `synchronous = FULL`. Sus tablas son `meta` (versión del esquema), `project` (una sola fila: título y fecha), `document` (capítulos y fragmentos: lugar en el índice, papelera, texto en JSON de TipTap y sus recuentos), `document_version` (versiones automáticas, a mano y «antes de restaurar») y `note` (notas del autor ancladas a un punto o pasaje, o sueltas). Cada cambio del esquema es una migración numerada en `src/core/Rocinante.Infrastructure/Persistence/Migrations/`. La descripción completa, columna a columna, está en [`docs/format`](../../docs/format/README.md). Elementos de la obra y notas enlazadas llegarán con las features 004 y 005.
 
 ## Convenciones
 
