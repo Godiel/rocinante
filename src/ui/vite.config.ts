@@ -1,10 +1,43 @@
 /// <reference types="vitest/config" />
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
+
+/**
+ * The SIL OFL asks for the licence to travel with the fonts. Every `@fontsource/*` dependency
+ * gets its LICENSE copied into the build as `licenses/<font>.txt`, so the list of fonts is
+ * package.json and nothing else.
+ */
+function fontLicences(): Plugin {
+  const require = createRequire(import.meta.url);
+  const manifest = JSON.parse(readFileSync(new URL("package.json", import.meta.url), "utf8")) as {
+    dependencies: Record<string, string>;
+  };
+  const fonts = Object.keys(manifest.dependencies).filter((name) =>
+    name.startsWith("@fontsource/"),
+  );
+
+  return {
+    name: "rocinante-font-licences",
+    apply: "build",
+    generateBundle() {
+      for (const font of fonts) {
+        const folder = dirname(require.resolve(`${font}/latin-400.css`));
+        this.emitFile({
+          type: "asset",
+          fileName: `licenses/${font.slice("@fontsource/".length)}.txt`,
+          source: readFileSync(join(folder, "LICENSE"), "utf8"),
+        });
+      }
+    },
+  };
+}
 
 // Tauri expects a fixed port and must not have its own output cleared by Vite.
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), fontLicences()],
   clearScreen: false,
   server: { port: 5173, strictPort: true },
   // A desktop app reads its code from the disk, not the network: one bundle of TipTap and

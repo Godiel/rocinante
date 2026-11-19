@@ -1,8 +1,9 @@
 import { useId, useState, type FormEvent } from "react";
 import { request } from "../../bridge/core";
-import type { RecentProject } from "../../bridge/generated/protocol";
+import type { RecentProject, WorkFormat } from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
 import { Fleuron, Rule } from "../../design/Ornaments";
+import { FormatForm } from "../format/FormatForm";
 import { lastOpened } from "./dates";
 import { folderOf, proposedPath } from "./paths";
 import "./welcome.css";
@@ -19,6 +20,8 @@ export interface WelcomeProps {
   recent: RecentProject[];
   /** Where new projects are proposed: Documentos/Rocinante. */
   defaultFolder: string;
+  /** The format offered for a new work: the last one the writer set up, or the default one. */
+  suggestedFormat: WorkFormat;
   /** Something to tell the writer on arrival, such as why the last project did not open. */
   notice: string | null;
   /** Label of this window, sent as the origin of every change. */
@@ -30,7 +33,14 @@ export interface WelcomeProps {
  * What the writer sees with no project open: recent projects, and the two ways in. When a
  * project opens, the core announces it to every window and the app leaves this screen.
  */
-export function Welcome({ recent, defaultFolder, notice, origin, pickers }: WelcomeProps) {
+export function Welcome({
+  recent,
+  defaultFolder,
+  suggestedFormat,
+  notice,
+  origin,
+  pickers,
+}: WelcomeProps) {
   const [creating, setCreating] = useState(false);
   const [problem, setProblem] = useState<string | null>(notice);
   const [missing, setMissing] = useState<string | null>(null);
@@ -61,13 +71,19 @@ export function Welcome({ recent, defaultFolder, notice, origin, pickers }: Welc
       <Page problem={problem}>
         <NewProject
           defaultFolder={defaultFolder}
+          suggestedFormat={suggestedFormat}
           pickers={pickers}
           onCancel={() => {
             setProblem(null);
             setCreating(false);
           }}
-          onCreate={(path, title) =>
-            attempt(() => request("project.create", { path, title, origin }))
+          onCreate={(path, title, format) =>
+            attempt(() =>
+              request(
+                "project.create",
+                format ? { path, title, format, origin } : { path, title, origin },
+              ),
+            )
           }
         />
       </Page>
@@ -141,15 +157,30 @@ function Page({ problem, children }: { problem: string | null; children: React.R
 
 interface NewProjectProps {
   defaultFolder: string;
+  suggestedFormat: WorkFormat;
   pickers: Pickers;
-  onCreate(path: string, title: string): Promise<void>;
+  /** With format null, the work takes the suggestion as it is. */
+  onCreate(path: string, title: string, format: WorkFormat | null): Promise<void>;
   onCancel(): void;
 }
 
-function NewProject({ defaultFolder, pickers, onCreate, onCancel }: NewProjectProps) {
+/**
+ * A new work in two steps: its title and where it goes, then its format. The format comes filled
+ * in with the suggestion and can be skipped.
+ */
+function NewProject({
+  defaultFolder,
+  suggestedFormat,
+  pickers,
+  onCreate,
+  onCancel,
+}: NewProjectProps) {
   const [title, setTitle] = useState("");
   const [folder, setFolder] = useState(defaultFolder);
   const [missingTitle, setMissingTitle] = useState(false);
+  const [step, setStep] = useState<"title" | "format">("title");
+  const [format, setFormat] = useState(suggestedFormat);
+  const [formatValid, setFormatValid] = useState(true);
   const titleId = useId();
 
   async function chooseFolder() {
@@ -164,7 +195,43 @@ function NewProject({ defaultFolder, pickers, onCreate, onCancel }: NewProjectPr
       setMissingTitle(true);
       return;
     }
-    await onCreate(proposedPath(folder, trimmed), trimmed);
+    setStep("format");
+  }
+
+  if (step === "format") {
+    const trimmed = title.trim();
+    return (
+      <section className="welcome-new welcome-format" aria-labelledby={`${titleId}-format`}>
+        <h2 id={`${titleId}-format`} className="welcome-label small-caps">
+          Formato de «{trimmed}»
+        </h2>
+        <p className="welcome-where">
+          La hoja, los márgenes y la letra del libro. Puedes cambiarlos cuando quieras desde la
+          barra de la obra.
+        </p>
+        <FormatForm value={format} onChange={setFormat} onValidity={setFormatValid} />
+        <div className="welcome-actions">
+          <button
+            type="button"
+            className="action action-main"
+            disabled={!formatValid}
+            onClick={() => void onCreate(proposedPath(folder, trimmed), trimmed, format)}
+          >
+            Crear con este formato
+          </button>
+          <button
+            type="button"
+            className="action"
+            onClick={() => void onCreate(proposedPath(folder, trimmed), trimmed, null)}
+          >
+            Omitir
+          </button>
+          <button type="button" className="action" onClick={() => setStep("title")}>
+            Volver
+          </button>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -198,7 +265,7 @@ function NewProject({ defaultFolder, pickers, onCreate, onCancel }: NewProjectPr
       </p>
       <div className="welcome-actions">
         <button type="submit" className="action action-main">
-          Crear
+          Seguir
         </button>
         <button type="button" className="action" onClick={onCancel}>
           Volver

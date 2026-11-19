@@ -1,4 +1,5 @@
 using Rocinante.Application.Ports;
+using Rocinante.Domain.Formats;
 
 namespace Rocinante.Application.Settings;
 
@@ -30,6 +31,9 @@ public sealed class WriterSettings
 
     public string? LastProject => _current.LastProject;
 
+    /// <summary>What a new work is offered: the last format the writer set up, or the default one.</summary>
+    public WorkFormat SuggestedFormat => _current.LastFormat ?? WorkFormat.Default;
+
     public Preferences Update(PreferencesChange change)
     {
         ArgumentNullException.ThrowIfNull(change);
@@ -43,6 +47,16 @@ public sealed class WriterSettings
         var place = Find(path)?.Place;
         var recent = _current.Recent.Where(entry => !Same(entry.Path, path)).Prepend(new RecentProject(path, title, now, place)).Take(MaxRecent);
         Save(_current with { Recent = [.. recent], LastProject = path });
+    }
+
+    /// <summary>The writer set up a work with <paramref name="format"/>: it is offered for the next one.</summary>
+    public void RememberFormat(WorkFormat format)
+    {
+        ArgumentNullException.ThrowIfNull(format);
+        if (format != _current.LastFormat)
+        {
+            Save(_current with { LastFormat = format });
+        }
     }
 
     /// <summary>The writer closed the project: next time the app starts on the welcome screen.</summary>

@@ -65,14 +65,18 @@ export class Desk {
   }
 }
 
-/** Creates a work from the welcome screen, in the desk's folder, and waits for its first chapter. */
+/**
+ * Creates a work from the welcome screen, in the desk's folder, with the suggested format, and
+ * waits for its first chapter.
+ */
 export async function createWork(desk: Desk, page: Page, title: string): Promise<void> {
   await page.getByRole("button", { name: "Nuevo proyecto" }).click();
   await page.getByLabel("Título de la obra").fill(title);
   await page.evaluate((folder) => window.__rocinanteE2E.picks.push(folder), desk.works);
   await page.getByRole("button", { name: "Elegir otra carpeta" }).click();
   await expect(page.locator(".welcome-path")).toContainText(desk.works);
-  await page.getByRole("button", { name: "Crear" }).click();
+  await page.getByRole("button", { name: "Seguir" }).click();
+  await page.getByRole("button", { name: "Omitir" }).click();
   await expect(chapterText(page)).toBeVisible();
 }
 

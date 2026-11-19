@@ -13,6 +13,15 @@ internal sealed class WritingSession(ServerHarness harness)
     private const string Main = "main";
     private const string Other = "window-1";
 
+    private const string Trade = """
+        {
+          "pageSize": "trade", "pageWidth": 152.4, "pageHeight": 228.6,
+          "margins": { "top": 19, "bottom": 22, "inside": 22, "outside": 16 },
+          "typeface": "literata", "bodySize": 10.5, "leading": 1.4,
+          "firstLineIndent": true, "justified": true, "dropCap": true
+        }
+        """;
+
     public void Run()
     {
         harness.Call("system.info");
@@ -25,6 +34,7 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("project.create", Params(("path", original), ("title", "El ingenioso hidalgo"), ("origin", Main)));
         harness.Call("project.get");
         harness.Call("project.rename", Params(("title", "Don Quijote de la Mancha"), ("origin", Main)));
+        harness.Call("project.setFormat", Params(("format", JsonNode.Parse(Trade)), ("origin", Other)));
 
         var first = Id(harness.Call("document.create", Params(("kind", "chapter"), ("title", "Capítulo primero"), ("origin", Main))));
         var second = Id(harness.Call("document.create", Params(("kind", "chapter"), ("title", "Capítulo segundo"), ("position", 1), ("origin", Main))));
@@ -37,6 +47,7 @@ internal sealed class WritingSession(ServerHarness harness)
         var note = Id(harness.Call("note.create", Params(("documentId", first), ("text", "Revisar esta fecha"), ("anchored", true), ("origin", Main))));
         harness.Call("document.save", Params(("id", first), ("content", JsonNode.Parse(TipTap.Anchored("En un lugar de la Mancha", Guid.Parse(note)))), ("origin", Main)));
         harness.Call("document.get", Params(("id", first)));
+        harness.Call("project.manuscript");
         harness.Call("place.save", Params(("documentId", first), ("anchor", 5), ("head", 12)));
         harness.Call("place.get");
         var version = Id(harness.Call("version.create", Params(("documentId", first), ("name", "Primer borrador"), ("origin", Main))));

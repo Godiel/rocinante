@@ -14,7 +14,7 @@ public sealed class ProjectUseCasesTests : IDisposable
     {
         var path = _app.PathOf("Rocinante/quijote.rocinante");
 
-        var snapshot = _app.Projects.Create(path, "  El ingenioso hidalgo  ", "window-1");
+        var snapshot = _app.Projects.Create(path, "  El ingenioso hidalgo  ", format: null, "window-1");
 
         snapshot.Path.ShouldBe(Path.GetFullPath(path));
         snapshot.Project.Title.ShouldBe("El ingenioso hidalgo");

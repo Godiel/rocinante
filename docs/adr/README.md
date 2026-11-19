@@ -12,6 +12,7 @@ Cada decisión relevante se registra en un archivo numerado. Las decisiones no s
 | [0006](0006-licencias-y-herramientas-de-test.md) | Licencia MIT y herramientas de test | aceptada |
 | [0007](0007-esqueleto-andante.md) | Validación del esqueleto andante | aceptada |
 | [0008](0008-oxlint-en-lugar-de-eslint.md) | oxlint en lugar de ESLint | aceptada |
+| [0009](0009-paginador-propio.md) | Paginador propio para la vista de página | aceptada |
 
 ## Plantilla
 

@@ -13,7 +13,25 @@ internal sealed record DocumentEntryDto(Guid Id, string Kind, string Title, int 
 
 internal sealed record ProjectIndexDto(IReadOnlyList<DocumentEntryDto> Chapters, IReadOnlyList<DocumentEntryDto> Fragments, IReadOnlyList<DocumentEntryDto> Trash);
 
-internal sealed record ProjectStateDto(Guid Id, string Path, string Title, DateTimeOffset CreatedAt, ProjectIndexDto Index, StatisticsDto Work);
+internal sealed record PageMarginsDto(double Top, double Bottom, double Inside, double Outside);
+
+internal sealed record WorkFormatDto(
+    string PageSize,
+    double PageWidth,
+    double PageHeight,
+    PageMarginsDto Margins,
+    string Typeface,
+    double BodySize,
+    double Leading,
+    bool FirstLineIndent,
+    bool Justified,
+    bool DropCap);
+
+internal sealed record ProjectStateDto(Guid Id, string Path, string Title, DateTimeOffset CreatedAt, ProjectIndexDto Index, StatisticsDto Work, WorkFormatDto Format);
+
+internal sealed record ManuscriptChapterDto(Guid Id, string Title, JsonNode Content);
+
+internal sealed record ManuscriptDto(IReadOnlyList<ManuscriptChapterDto> Chapters);
 
 internal sealed record DocumentStateDto(Guid Id, JsonNode Content, long Revision, StatisticsDto Statistics, DateTimeOffset UpdatedAt);
 
@@ -31,7 +49,14 @@ internal sealed record RecentProjectDto(string Path, string Title, DateTimeOffse
 
 internal sealed record StartProblemDto(string Path, string Reason);
 
-internal sealed record StartStateDto(ProjectStateDto? Project, PlaceDto? Place, StartProblemDto? Problem, IReadOnlyList<RecentProjectDto> Recent, PreferencesDto Preferences, string DefaultFolder);
+internal sealed record StartStateDto(
+    ProjectStateDto? Project,
+    PlaceDto? Place,
+    StartProblemDto? Problem,
+    IReadOnlyList<RecentProjectDto> Recent,
+    PreferencesDto Preferences,
+    string DefaultFolder,
+    WorkFormatDto SuggestedFormat);
 
 // Params.
 internal sealed record UpdatePreferencesParams(PreferencesChangeDto Changes, string Origin);
@@ -42,7 +67,9 @@ internal sealed record ReportParams(string Source, string Level, string Message,
 
 internal sealed record PathParams(string Path, string Origin);
 
-internal sealed record CreateProjectParams(string Path, string Title, string Origin);
+internal sealed record CreateProjectParams(string Path, string Title, WorkFormatDto? Format, string Origin);
+
+internal sealed record SetFormatParams(WorkFormatDto Format, string Origin);
 
 internal sealed record TitleParams(string Title, string Origin);
 
@@ -110,6 +137,8 @@ internal sealed record NotesChangedNotification(Guid DocumentId, IReadOnlyList<N
 [JsonSerializable(typeof(PathParams))]
 [JsonSerializable(typeof(CreateProjectParams))]
 [JsonSerializable(typeof(TitleParams))]
+[JsonSerializable(typeof(SetFormatParams))]
+[JsonSerializable(typeof(ManuscriptDto))]
 [JsonSerializable(typeof(CreateDocumentParams))]
 [JsonSerializable(typeof(RenameDocumentParams))]
 [JsonSerializable(typeof(MoveDocumentParams))]

@@ -13,6 +13,7 @@ import type {
   ProjectState,
   RecentProject,
   StartProblem,
+  WorkFormat,
 } from "../bridge/generated/protocol";
 import { applyTheme } from "../design/themes";
 import { Welcome, type Pickers } from "../features/welcome/Welcome";
@@ -59,6 +60,7 @@ export function App({ origin, pickers }: AppProps) {
   const [screen, setScreen] = useState<Screen>({ kind: "starting" });
   const [recent, setRecent] = useState<RecentProject[]>([]);
   const [defaultFolder, setDefaultFolder] = useState("");
+  const [suggestedFormat, setSuggestedFormat] = useState<WorkFormat | null>(null);
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   // Set when the core stopped for good: said over the page, which is left as it is.
   const [halted, setHalted] = useState<string | null>(null);
@@ -75,6 +77,7 @@ export function App({ origin, pickers }: AppProps) {
         applyPreferences(start.preferences);
         setRecent(start.recent);
         setDefaultFolder(start.defaultFolder);
+        setSuggestedFormat(start.suggestedFormat);
         setScreen(
           start.project
             ? { kind: "writing", project: start.project, place: start.place }
@@ -90,7 +93,13 @@ export function App({ origin, pickers }: AppProps) {
       onNotification("project.changed", ({ project }) =>
         setScreen((current) => (current.kind === "writing" ? { ...current, project } : current)),
       ),
-      onNotification("project.closed", () => setScreen({ kind: "welcome", notice: null })),
+      onNotification("project.closed", () => {
+        setScreen({ kind: "welcome", notice: null });
+        // The format to suggest may have changed while the work was open.
+        void request("app.start", { origin })
+          .then((start) => setSuggestedFormat(start.suggestedFormat))
+          .catch(() => {});
+      }),
       onNotification("recent.changed", ({ recent: next }) => setRecent(next)),
       onNotification("preferences.changed", ({ preferences: next }) => applyPreferences(next)),
       // A new core took over after the old one fell: it reopens the project the writer had
@@ -129,10 +138,13 @@ export function App({ origin, pickers }: AppProps) {
       case "failed":
         return <Trouble message={screen.message} />;
       case "welcome":
+        // The suggestion comes with the start, before the welcome screen can show.
+        if (!suggestedFormat) return <div className="app-starting" aria-busy="true" />;
         return (
           <Welcome
             recent={recent}
             defaultFolder={defaultFolder}
+            suggestedFormat={suggestedFormat}
             notice={screen.notice}
             origin={origin}
             pickers={pickers}

@@ -1,8 +1,20 @@
-/* The writing surface: paper without borders, a comfortable column, generous margins. */
+/*
+ * The writing surface: paper without borders, a comfortable column, generous margins.
+ *
+ * The text follows the format of the work (see features/format/work-style.ts): its typeface, body
+ * and leading arrive as --work-* variables, and its paragraphs as classes on the writing view. The
+ * column holds about 68 characters whatever the typeface: --work-char is the average width of one.
+ */
+
+.book-frame,
+.book-page {
+  font-family: var(--work-font, var(--font-book));
+  font-size: var(--work-size, var(--text-body));
+}
 
 .book-frame {
   position: relative;
-  max-width: calc(var(--measure) + 2 * var(--space-4));
+  max-width: calc(68em * var(--work-char, 0.38) + 2 * var(--space-4));
   margin: 0 auto;
   padding: var(--space-5) var(--space-4) var(--space-6);
 }
@@ -14,8 +26,7 @@
 }
 
 .book-page {
-  font-size: var(--text-body);
-  line-height: var(--leading-body);
+  line-height: var(--work-leading, var(--leading-body));
 }
 
 .book-page .ProseMirror {
@@ -33,9 +44,37 @@
   margin: 0;
 }
 
-/* Book convention: indent every paragraph that follows another, never the first. */
-.book-page p + p {
+.work-justified .book-page p {
+  text-align: justify;
+}
+
+/*
+ * Book convention: indent every paragraph that follows another, never the first after a title or
+ * a scene break. Without indents, a little space between paragraphs tells them apart.
+ */
+.work-indented .book-page p + p {
   text-indent: 1.5em;
+}
+
+.work-spaced .book-page p + p {
+  margin-top: 0.6em;
+}
+
+/* The drop cap opens a chapter, in rubric red, as in old books. */
+.work-drop-cap .book-page-chapter .ProseMirror > p:first-of-type::first-letter {
+  initial-letter: 3;
+  -webkit-initial-letter: 3;
+  margin-right: 0.08em;
+  color: var(--color-rubric);
+}
+
+@supports not ((initial-letter: 3) or (-webkit-initial-letter: 3)) {
+  .work-drop-cap .book-page-chapter .ProseMirror > p:first-of-type::first-letter {
+    float: left;
+    font-size: 3.3em;
+    line-height: 0.85;
+    padding-top: 0.06em;
+  }
 }
 
 .book-page [data-indent="1"] {
@@ -60,16 +99,17 @@
   text-align: center;
 }
 
+/* Titles in proportion to the body, so a bigger body brings bigger titles. */
 .book-page h1 {
-  font-size: var(--text-title);
+  font-size: 1.58em;
   font-variant: small-caps;
   letter-spacing: var(--tracking-small-caps);
 }
 .book-page h2 {
-  font-size: 24px;
+  font-size: 1.26em;
 }
 .book-page h3 {
-  font-size: var(--text-body);
+  font-size: 1em;
   font-style: italic;
 }
 

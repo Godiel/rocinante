@@ -50,7 +50,7 @@ internal sealed class AppFixture : IDisposable
     /// <summary>Creates a project and forgets the announcements it produced.</summary>
     public ProjectSnapshot CreateProject(string name = "obra.rocinante", string title = "El ingenioso hidalgo")
     {
-        var snapshot = Projects.Create(PathOf(name), title, Main);
+        var snapshot = Projects.Create(PathOf(name), title, format: null, Main);
         Notifier.Clear();
         return snapshot;
     }

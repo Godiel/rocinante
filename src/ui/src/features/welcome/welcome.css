@@ -140,3 +140,8 @@
   justify-content: flex-start;
   margin-top: var(--space-3);
 }
+
+/* The format step uses the same form as the format sheet, at the size of the interface. */
+.welcome-format .format-form {
+  font-size: var(--text-ui);
+}

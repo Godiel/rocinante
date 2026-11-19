@@ -1,6 +1,7 @@
 using Rocinante.Application.Ports;
 using Rocinante.Application.Settings;
 using Rocinante.Domain;
+using Rocinante.Domain.Formats;
 
 namespace Rocinante.Application;
 
@@ -19,7 +20,14 @@ public sealed record RecentProjectView(string Path, string Title, DateTimeOffset
 public sealed record StartProblem(string Path, ProjectFileError Error);
 
 /// <summary>What a window shows when it starts.</summary>
-public sealed record StartState(ProjectSnapshot? Project, Place? Place, StartProblem? Problem, IReadOnlyList<RecentProjectView> Recent, Preferences Preferences, string DefaultFolder);
+public sealed record StartState(
+    ProjectSnapshot? Project,
+    Place? Place,
+    StartProblem? Problem,
+    IReadOnlyList<RecentProjectView> Recent,
+    Preferences Preferences,
+    string DefaultFolder,
+    WorkFormat SuggestedFormat);
 
 /// <summary>Preferences, recent projects, where the writer left each project, and what to open on start.</summary>
 public sealed class SettingsUseCases(Workspace workspace, ProjectUseCases projects, WriterSettings settings, IChangeNotifier notifier, string defaultFolder, string? launchFile)
@@ -113,5 +121,6 @@ public sealed class SettingsUseCases(Workspace workspace, ProjectUseCases projec
             problem,
             Recent(),
             settings.Preferences,
-            defaultFolder);
+            defaultFolder,
+            settings.SuggestedFormat);
 }

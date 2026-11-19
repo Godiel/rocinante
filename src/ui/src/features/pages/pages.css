@@ -1,0 +1,256 @@
+/*
+ * The text of the pages: the same book as the continuous paper (book-editor.css), set at the real
+ * size of the work. The hidden column that measures the book uses these rules too, so what is
+ * measured is what is drawn. Each block stands on its own, so «after another paragraph» and «opens
+ * the chapter» come as classes from blocks.ts.
+ */
+
+.page-measure {
+  position: absolute;
+  top: 0;
+  left: -100000px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.page-block {
+  display: flow-root;
+}
+
+.page-text {
+  color: var(--color-ink);
+  hyphens: auto;
+  font-kerning: normal;
+}
+
+.page-text p {
+  margin: 0;
+}
+
+.work-justified.page-text p {
+  text-align: justify;
+}
+
+.work-indented.page-text p.page-follows {
+  text-indent: 1.5em;
+}
+
+.work-spaced.page-text p.page-follows {
+  margin-top: 0.6em;
+}
+
+.work-drop-cap.page-text p.page-opening::first-letter {
+  initial-letter: 3;
+  -webkit-initial-letter: 3;
+  margin-right: 0.08em;
+  color: var(--color-rubric);
+}
+
+@supports not ((initial-letter: 3) or (-webkit-initial-letter: 3)) {
+  .work-drop-cap.page-text p.page-opening::first-letter {
+    float: left;
+    font-size: 3.3em;
+    line-height: 0.85;
+    padding-top: 0.06em;
+  }
+}
+
+.page-text .page-chapter-title {
+  margin: 0 0 2.5em;
+  font-size: 1.58em;
+  font-weight: 400;
+  font-variant: small-caps;
+  letter-spacing: var(--tracking-small-caps);
+  line-height: 1.25;
+  text-align: center;
+}
+
+.page-text h1,
+.page-text h2,
+.page-text h3 {
+  margin: 1.5em 0 1em;
+  font-weight: 400;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.page-text h1 {
+  font-size: 1.58em;
+  font-variant: small-caps;
+}
+
+.page-text h2 {
+  font-size: 1.26em;
+}
+
+.page-text h3 {
+  font-size: 1em;
+  font-style: italic;
+}
+
+.page-text blockquote {
+  margin: 0.8em 0;
+  padding-left: 1.5em;
+  color: var(--color-ink-soft);
+}
+
+.page-text ul,
+.page-text ol {
+  margin: 0.8em 0;
+  padding-left: 1.5em;
+}
+
+.page-text [data-indent="1"] {
+  margin-left: 2em;
+}
+.page-text [data-indent="2"] {
+  margin-left: 4em;
+}
+.page-text [data-indent="3"] {
+  margin-left: 6em;
+}
+.page-text [data-indent="4"] {
+  margin-left: 8em;
+}
+
+/* The scene break: a fleuron with a line of space above and below. */
+.page-text hr[data-scene-break] {
+  height: 1lh;
+  margin: 1lh 0;
+  border: 0;
+  overflow: visible;
+  text-align: center;
+  color: var(--color-ink-faint);
+}
+
+.page-text hr[data-scene-break]::after {
+  content: "❦";
+}
+
+/* Calls and notes carry their number: a page shows only part of a chapter. */
+.page-text sup.footnote {
+  font-size: 0.65em;
+  line-height: 0;
+  color: var(--color-rubric);
+}
+
+.page-text sup.footnote::after {
+  content: attr(data-number);
+  padding: 0 0.1em;
+}
+
+.page-footnote {
+  margin: 0;
+  font-size: 0.8em;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.page-footnote::before {
+  content: attr(data-number) ". ";
+  color: var(--color-rubric);
+}
+
+/* The view: a desk of a slightly darker shade, with the pages laid on it. */
+
+.page-view {
+  position: fixed;
+  z-index: 6;
+  top: var(--bar-height);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-paper-shade);
+  outline: none;
+}
+
+.page-view-bar {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-caption);
+  color: var(--color-ink-soft);
+  border-bottom: var(--hairline) solid var(--color-rule);
+}
+
+.page-view-title {
+  margin: 0;
+  font-size: inherit;
+  font-weight: 400;
+}
+
+.page-view-count {
+  color: var(--color-ink-faint);
+}
+
+.page-view-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
+.page-view-scroller {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.page-view-book {
+  position: relative;
+}
+
+.page-view-row {
+  position: absolute;
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.page-view-frame {
+  overflow: hidden;
+  outline: var(--hairline) solid var(--color-rule);
+}
+
+.page-sheet {
+  position: relative;
+  background: var(--color-paper);
+}
+
+.page-lines {
+  overflow: hidden;
+}
+
+.page-notes {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+/* The short rule over the footnotes. */
+.page-notes-rule {
+  position: relative;
+}
+
+.page-notes-rule::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 30%;
+  border-top: var(--hairline) solid var(--color-ink-faint);
+}
+
+.page-number {
+  position: absolute;
+  right: 0;
+  left: 0;
+  transform: translateY(50%);
+  text-align: center;
+  font-variant-numeric: oldstyle-nums;
+  color: var(--color-ink-soft);
+}

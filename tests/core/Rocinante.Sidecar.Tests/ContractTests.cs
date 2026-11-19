@@ -112,6 +112,27 @@ public sealed class ContractTests : IDisposable
     }
 
     [Fact]
+    public void A_format_whose_margins_leave_no_room_for_the_text_is_a_broken_rule()
+    {
+        // Every measure is within the contract, but 148 − 60 − 60 leaves 28 mm for the text.
+        var cramped = JsonNode.Parse(
+            """
+            {
+              "pageSize": "a5", "pageWidth": 148, "pageHeight": 210,
+              "margins": { "top": 18, "bottom": 22, "inside": 60, "outside": 60 },
+              "typeface": "ebGaramond", "bodySize": 11, "leading": 1.35,
+              "firstLineIndent": true, "justified": true, "dropCap": false
+            }
+            """);
+
+        var response = _harness.Request(
+            "project.create", Params(("path", _harness.PathOf("estrecha.rocinante")), ("title", "Estrecha"), ("format", cramped), ("origin", "main")));
+
+        AssertError(response, -32002, "textAreaTooSmall");
+        File.Exists(_harness.PathOf("estrecha.rocinante")).ShouldBeFalse();
+    }
+
+    [Fact]
     public void A_file_that_is_not_a_project_is_reported_and_left_alone()
     {
         var path = _harness.PathOf("carta.rocinante");

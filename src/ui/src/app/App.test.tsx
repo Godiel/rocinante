@@ -1,7 +1,13 @@
 // @vitest-environment jsdom
 import { act, cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { CoreNotifications, ProjectState, StartState } from "../bridge/generated/protocol";
+import type {
+  CoreNotifications,
+  ProjectState,
+  StartState,
+  WorkFormat,
+} from "../bridge/generated/protocol";
 
 const request = vi.hoisted(() => vi.fn());
 const listeners = vi.hoisted(() => new Map<string, (params: unknown) => void>());
@@ -28,6 +34,19 @@ vi.mock("../features/editor/WritingView", () => ({
 import { messages } from "./messages";
 import { App } from "./App";
 
+const a5: WorkFormat = {
+  pageSize: "a5",
+  pageWidth: 148,
+  pageHeight: 210,
+  margins: { top: 18, bottom: 22, inside: 20, outside: 15 },
+  typeface: "ebGaramond",
+  bodySize: 11,
+  leading: 1.35,
+  firstLineIndent: true,
+  justified: true,
+  dropCap: false,
+};
+
 const project: ProjectState = {
   id: "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
   path: "C:\\Obras\\Don Quijote.rocinante",
@@ -35,6 +54,7 @@ const project: ProjectState = {
   createdAt: "2026-03-14T09:00:00+00:00",
   index: { chapters: [], fragments: [], trash: [] },
   work: { words: 0, characters: 0, paragraphs: 0 },
+  format: a5,
 };
 
 const start = (overrides: Partial<StartState> = {}): StartState => ({
@@ -49,6 +69,7 @@ const start = (overrides: Partial<StartState> = {}): StartState => ({
     typewriterScrolling: true,
   },
   defaultFolder: "C:\\Users\\autor\\Documents\\Rocinante",
+  suggestedFormat: a5,
   ...overrides,
 });
 
@@ -107,6 +128,21 @@ describe("app window", () => {
 
     announce("project.closed", { origin: "window-1" });
     expect(await screen.findByRole("button", { name: "Nuevo proyecto" })).toBeInTheDocument();
+  });
+
+  it("back home, offers the format the writer used last for the next work", async () => {
+    startWith(start({ project }));
+    await screen.findByText("Escribiendo en Don Quijote");
+    const pocket: WorkFormat = { ...a5, pageSize: "pocket", pageWidth: 110, pageHeight: 170 };
+    request.mockImplementation((method: string) =>
+      Promise.resolve(method === "app.start" ? start({ suggestedFormat: pocket }) : null),
+    );
+
+    announce("project.closed", { origin: "window-1" });
+    await userEvent.click(await screen.findByRole("button", { name: "Nuevo proyecto" }));
+    await userEvent.type(screen.getByLabelText("Título de la obra"), "Persiles{Enter}");
+
+    expect(screen.getByLabelText("Tamaño")).toHaveValue("pocket");
   });
 
   it("paints the theme of the writer's preferences and follows changes", async () => {

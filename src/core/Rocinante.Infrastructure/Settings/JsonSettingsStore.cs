@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Rocinante.Application.Ports;
 using Rocinante.Application.Settings;
 using Rocinante.Domain;
+using Rocinante.Domain.Formats;
 
 namespace Rocinante.Infrastructure.Settings;
 
@@ -11,7 +12,8 @@ namespace Rocinante.Infrastructure.Settings;
 /// Keeps the app settings in <c>settings.json</c> inside the app data folder. Writes go to a
 /// temporary file that then replaces the old one, so a crash never leaves half a file. A file that
 /// cannot be read is set aside as <c>settings.unreadable-…json</c> and the app starts with defaults:
-/// losing preferences must never stop the writer from working.
+/// losing preferences must never stop the writer from working. A suggested format that is no longer
+/// valid is dropped on its own, and the default is offered instead.
 /// </summary>
 public sealed class JsonSettingsStore(string directory, TextWriter log) : ISettingsStore
 {
@@ -67,7 +69,50 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 recent.Path,
                 recent.Title,
                 recent.LastOpenedAt,
-                recent.Place is { } place ? new PlaceFile(place.DocumentId.Value, place.Anchor, place.Head) : null))]);
+                recent.Place is { } place ? new PlaceFile(place.DocumentId.Value, place.Anchor, place.Head) : null))],
+            settings.LastFormat is { } format ? ToFile(format) : null);
+
+    private static FormatFile ToFile(WorkFormat format) =>
+        new(
+            JsonNamingPolicy.CamelCase.ConvertName(format.PageSize.ToString()),
+            format.PageWidth,
+            format.PageHeight,
+            new MarginsFile(format.Margins.Top, format.Margins.Bottom, format.Margins.Inside, format.Margins.Outside),
+            JsonNamingPolicy.CamelCase.ConvertName(format.Typeface.ToString()),
+            format.BodySize,
+            format.Leading,
+            format.FirstLineIndent,
+            format.Justified,
+            format.DropCap);
+
+    private static WorkFormat? ToFormat(FormatFile? file)
+    {
+        if (file?.Margins is not { } margins
+            || !Enum.TryParse<PageSize>(file.PageSize, ignoreCase: true, out var size)
+            || !Enum.TryParse<Typeface>(file.Typeface, ignoreCase: true, out var typeface))
+        {
+            return null;
+        }
+
+        try
+        {
+            return WorkFormat.Create(
+                size,
+                file.PageWidth,
+                file.PageHeight,
+                new PageMargins(margins.Top, margins.Bottom, margins.Inside, margins.Outside),
+                typeface,
+                file.BodySize,
+                file.Leading,
+                file.FirstLineIndent,
+                file.Justified,
+                file.DropCap);
+        }
+        catch (DomainException)
+        {
+            return null;
+        }
+    }
 
     // Unknown values (a theme added by a newer version, say) fall back to the default, one by one.
     private static AppSettings ToSettings(SettingsFile file)
@@ -91,11 +136,25 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 entry.Place is { Anchor: >= 0, Head: >= 0 } place ? new Place(new DocumentId(place.DocumentId), place.Anchor, place.Head) : null))
             .ToList();
 
-        return new AppSettings(preferences, recent, file.LastProject);
+        return new AppSettings(preferences, recent, file.LastProject, ToFormat(file.LastFormat));
     }
 }
 
-internal sealed record SettingsFile(int Version, PreferencesFile? Preferences, string? LastProject, IReadOnlyList<RecentFile>? Recent);
+internal sealed record SettingsFile(int Version, PreferencesFile? Preferences, string? LastProject, IReadOnlyList<RecentFile>? Recent, FormatFile? LastFormat);
+
+internal sealed record FormatFile(
+    string? PageSize,
+    double PageWidth,
+    double PageHeight,
+    MarginsFile? Margins,
+    string? Typeface,
+    double BodySize,
+    double Leading,
+    bool FirstLineIndent,
+    bool Justified,
+    bool DropCap);
+
+internal sealed record MarginsFile(double Top, double Bottom, double Inside, double Outside);
 
 internal sealed record PreferencesFile(string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling);
 

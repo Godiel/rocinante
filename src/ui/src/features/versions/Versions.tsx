@@ -78,7 +78,7 @@ export function Versions({
 
   return (
     <aside
-      className="versions"
+      className="sheet versions"
       aria-label={`Versiones de «${title}»`}
       onKeyDown={(event) => {
         if (event.key === "Escape" && !selectedId) {
@@ -87,8 +87,8 @@ export function Versions({
         }
       }}
     >
-      <header className="versions-header small-caps">
-        <h2 className="versions-title">Versiones</h2>
+      <header className="sheet-header small-caps">
+        <h2 className="sheet-title">Versiones</h2>
         <button type="button" className="action" onClick={onClose} title="Cerrar (F6)">
           Cerrar
         </button>
