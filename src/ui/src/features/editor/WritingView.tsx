@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { request } from "../../bridge/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { onNotification, request } from "../../bridge/core";
 import type {
   DocumentEntry,
+  DocumentKind,
+  Statistics,
   DocumentState,
   Place,
   Preferences,
@@ -13,6 +16,7 @@ import { savePendingNow } from "../../editor/pending-saves";
 import { isOutlineShortcut } from "../outline/shortcut";
 import { Outline } from "../outline/Outline";
 import { UndoNotice } from "../outline/UndoNotice";
+import { Counter, type SaveState } from "../counter/Counter";
 import { BookEditor } from "./BookEditor";
 import "./writing-view.css";
 
@@ -30,7 +34,14 @@ interface WritingViewProps {
 export function WritingView({ project, place, preferences, origin }: WritingViewProps) {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [document, setDocument] = useState<DocumentState | null>(null);
-  const [words, setWords] = useState<number | null>(null);
+  const [counts, setCounts] = useState<{ id: string; statistics: Statistics } | null>(null);
+  // Saves bring the counts of the work; a change to the index brings a new project with them.
+  const [work, setWork] = useState({ value: project.work, base: project.work });
+  const projectWork = useRef(project.work);
+  useEffect(() => {
+    projectWork.current = project.work;
+  }, [project.work]);
+  const [save, setSave] = useState<SaveState>({ kind: "saved" });
   const [problem, setProblem] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(preferences.outline === "docked");
   const [deleted, setDeleted] = useState<DocumentEntry | null>(null);
@@ -66,13 +77,31 @@ export function WritingView({ project, place, preferences, origin }: WritingView
       .then((loaded) => {
         if (!current) return;
         setDocument(loaded);
-        setWords(loaded.statistics.words);
+        setCounts({ id: loaded.id, statistics: loaded.statistics });
       })
       .catch((error: unknown) => current && setProblem(messageFor(error)));
     return () => {
       current = false;
     };
   }, [shownId]);
+
+  // What other windows write changes the counts of the work.
+  useEffect(() => {
+    const unlisten = onNotification("document.changed", (change) =>
+      setWork({ value: change.work, base: projectWork.current }),
+    );
+    return () => {
+      void unlisten.then((stop) => stop());
+    };
+  }, []);
+
+  // Closing the window waits for what was just typed to be saved.
+  useEffect(() => {
+    const unlisten = getCurrentWindow().onCloseRequested(() => savePendingNow());
+    return () => {
+      void unlisten.then((stop) => stop());
+    };
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -108,6 +137,15 @@ export function WritingView({ project, place, preferences, origin }: WritingView
     void request("preferences.update", { changes, origin });
 
   const dismissDeleted = useCallback(() => setDeleted(null), []);
+  // Typing reports itself on every key; the view only changes when the state does.
+  const onSaveState = useCallback(
+    (next: SaveState) =>
+      setSave((current) => (current.kind === next.kind && next.kind !== "failed" ? current : next)),
+    [],
+  );
+
+  const kindOf = (id: string | null): DocumentKind =>
+    index.fragments.some((entry) => entry.id === id) ? "fragment" : "chapter";
 
   const isEmpty = index.chapters.length === 0 && index.fragments.length === 0;
   const docked = outlineOpen && mode === "docked";
@@ -125,10 +163,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           >
             Índice
           </button>
-          <span>
-            {project.title}
-            {words !== null && <span className="writing-count"> · {words} palabras</span>}
-          </span>
+          <span>{project.title}</span>
         </span>
         <nav aria-label="Proyecto">
           <button
@@ -145,6 +180,13 @@ export function WritingView({ project, place, preferences, origin }: WritingView
             onClick={() => update({ typewriterScrolling: !preferences.typewriterScrolling })}
           >
             Rodillo {preferences.typewriterScrolling ? "sí" : "no"}
+          </button>
+          <button
+            className="action"
+            aria-pressed={preferences.counterVisible}
+            onClick={() => update({ counterVisible: !preferences.counterVisible })}
+          >
+            Contador {preferences.counterVisible ? "sí" : "no"}
           </button>
           <button className="action" onClick={() => void invoke("open_window")}>
             Otra ventana
@@ -187,17 +229,29 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           <BookEditor
             key={document.id}
             document={document}
-            kind={
-              index.fragments.some((entry) => entry.id === document.id) ? "fragment" : "chapter"
-            }
+            kind={kindOf(document.id)}
             place={place?.documentId === document.id ? place : null}
             origin={origin}
             typewriterScrolling={preferences.typewriterScrolling}
-            onWords={setWords}
+            onCounts={(statistics, total) => {
+              setCounts({ id: document.id, statistics });
+              setWork({ value: total, base: project.work });
+            }}
+            onSaveState={onSaveState}
             onProblem={setProblem}
           />
         )}
       </main>
+
+      <Counter
+        document={counts && counts.id === shownId ? counts.statistics : null}
+        kind={kindOf(shownId)}
+        work={work.base === project.work ? work.value : project.work}
+        chapters={index.chapters.length}
+        save={save}
+        visible={preferences.counterVisible}
+        onHide={() => update({ counterVisible: false })}
+      />
 
       {deleted && (
         <UndoNotice

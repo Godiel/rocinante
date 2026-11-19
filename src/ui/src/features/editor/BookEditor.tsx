@@ -3,11 +3,18 @@ import type { Editor } from "@tiptap/core";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import { onNotification, request } from "../../bridge/core";
 import { toTipTapDocument } from "../../bridge/document";
-import type { DocumentKind, DocumentState, Note, Place } from "../../bridge/generated/protocol";
+import type {
+  DocumentKind,
+  DocumentState,
+  Note,
+  Place,
+  Statistics,
+} from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
 import { bookExtensions, footnotesOf } from "../../editor/extensions";
 import { registerPendingSave } from "../../editor/pending-saves";
 import { platenScroll } from "../../editor/typewriter";
+import type { SaveState } from "../counter/Counter";
 import { BubbleToolbar } from "./BubbleToolbar";
 import { TextPopover } from "./TextPopover";
 import { TypewriterCaret } from "./TypewriterCaret";
@@ -15,6 +22,7 @@ import { useNotes } from "./useNotes";
 import "./book-editor.css";
 
 const SAVE_DELAY_MS = 300;
+const RETRY_DELAY_MS = 5000;
 const PLACE_DELAY_MS = 1000;
 const SLIP_WIDTH = 320;
 
@@ -40,7 +48,9 @@ export interface BookEditorProps {
   place: Place | null;
   origin: string;
   typewriterScrolling: boolean;
-  onWords(words: number): void;
+  /** Counts after a save here, or after a change from another window. */
+  onCounts(document: Statistics, work: Statistics): void;
+  onSaveState(state: SaveState): void;
   onProblem(message: string | null): void;
 }
 
@@ -55,7 +65,8 @@ export function BookEditor({
   place,
   origin,
   typewriterScrolling,
-  onWords,
+  onCounts,
+  onSaveState,
   onProblem,
 }: BookEditorProps) {
   const frame = useRef<HTMLDivElement>(null);
@@ -75,12 +86,14 @@ export function BookEditor({
   const notes = useNotes(document.id);
   const notesById = useMemo(() => new Map(notes.map((note) => [note.id, note])), [notes]);
   const callbacks = useRef({
-    onWords,
+    onCounts,
+    onSaveState,
     onProblem,
     openNewNote: () => {},
     openNewFootnote: () => {},
   });
-  callbacks.current.onWords = onWords;
+  callbacks.current.onCounts = onCounts;
+  callbacks.current.onSaveState = onSaveState;
   callbacks.current.onProblem = onProblem;
 
   const editor = useEditor({
@@ -108,17 +121,29 @@ export function BookEditor({
     },
     onUpdate: ({ editor: current }) => {
       window.clearTimeout(saveTimer.current);
-      pendingSave.current = () =>
-        request("document.save", {
+      callbacks.current.onSaveState({ kind: "typing" });
+      // The whole text is read when the save happens, so a retry always sends the latest.
+      const save = (): Promise<void> => {
+        callbacks.current.onSaveState({ kind: "saving" });
+        return request("document.save", {
           id: document.id,
           content: toTipTapDocument(current.getJSON()),
           origin,
         })
           .then((saved) => {
-            callbacks.current.onWords(saved.statistics.words);
-            callbacks.current.onProblem(null);
+            callbacks.current.onCounts(saved.statistics, saved.work);
+            if (!pendingSave.current) callbacks.current.onSaveState({ kind: "saved" });
           })
-          .catch((error: unknown) => callbacks.current.onProblem(messageFor(error)));
+          .catch((error: unknown) => {
+            // Nothing typed is given up: the save waits and tries again.
+            if (!pendingSave.current) {
+              pendingSave.current = save;
+              saveTimer.current = window.setTimeout(() => void savePending(), RETRY_DELAY_MS);
+            }
+            callbacks.current.onSaveState({ kind: "failed", message: messageFor(error) });
+          });
+      };
+      pendingSave.current = save;
       saveTimer.current = window.setTimeout(() => void savePending(), SAVE_DELAY_MS);
     },
     onSelectionUpdate: ({ editor: current }) => {
@@ -179,7 +204,7 @@ export function BookEditor({
     const unlisten = onNotification("document.changed", (change) => {
       if (change.document.id !== document.id || change.origin === origin) return;
       editor.commands.setContent(change.document.content, { emitUpdate: false });
-      callbacks.current.onWords(change.document.statistics.words);
+      callbacks.current.onCounts(change.document.statistics, change.work);
     });
     return () => {
       void unlisten.then((stop) => stop());
