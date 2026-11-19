@@ -34,12 +34,12 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Comprobar que las seis se ven sin internet y medir cuánto crece la app.
 
 ## 6. El formato en el papel continuo
-- [ ] Comprobar `hyphens: auto` en español en WebView2 y WebKit. **Si no parte palabras, consultar al autor** antes de añadir patrones.
-- [ ] Variables CSS del formato en la vista de escritura: letra, cuerpo, interlineado, sangría y justificado.
-- [ ] Sangría al estilo de libro: no se sangra el primer párrafo tras un título o un separador.
-- [ ] Capitular con `initial-letter` y respaldo flotante.
-- [ ] La columna conserva su ancho de 60–75 caracteres con cualquier cuerpo.
-- [ ] Tests de comportamiento y comprobación en la app real con las seis tipografías y los dos temas.
+- [x] Comprobar `hyphens: auto` en español en WebView2 y WebKit. **Si no parte palabras, consultar al autor** antes de añadir patrones.
+- [x] Variables CSS del formato en la vista de escritura: letra, cuerpo, interlineado, sangría y justificado.
+- [x] Sangría al estilo de libro: no se sangra el primer párrafo tras un título o un separador.
+- [x] Capitular con `initial-letter` y respaldo flotante.
+- [x] La columna conserva su ancho de 60–75 caracteres con cualquier cuerpo.
+- [x] Tests de comportamiento y comprobación en la app real con las seis tipografías y los dos temas.
 
 ## 7. Panel de formato
 - [ ] Hoja a la derecha con botón «Formato» en la barra; solo una hoja abierta a la vez (formato o versiones).

@@ -103,11 +103,15 @@ El trabajo se divide en dos partes:
 - **El formato es una fila, no un JSON** — una tabla `STRICT` con una columna por ajuste deja que SQLite rechace valores imposibles y que cualquiera lea el formato con una herramienta de SQLite, como el resto del archivo.
 - **La sugerencia es del escritor, el formato de la obra** — `lastFormat` vive en `settings.json` porque es una costumbre de quien escribe; el formato elegido se guarda dentro de la obra.
 - **Por defecto, A5 de novela** — A5 con márgenes de imprenta, EB Garamond de 11 pt, interlineado 1,35, sangría, justificado y sin capitular, como pidió el autor.
+- **En pantalla, el cuerpo en proporción** — el papel continuo muestra el cuerpo por defecto de un libro (11 pt) a los 19 px de la superficie de escritura, y los demás en proporción. Así se escribe cómodo y un cambio de cuerpo se nota. La vista de página usa puntos reales.
+- **La columna se mide en caracteres** — cada tipografía guarda el ancho medio de un carácter de prosa española (de 0,38 em en EB Garamond a 0,60 em en Courier Prime), y la columna da unos 68 caracteres con cualquiera.
+- **Sin sangría, espacio entre párrafos** — si la obra no sangra la primera línea, un poco de espacio separa los párrafos, como en los libros que no la usan.
+- **Partición de palabras del navegador** — WebView2 (Edge 157) parte las palabras en español con `hyphens: auto` sin añadir nada. WebKit en macOS también lo hace. Si en algún sistema no lo hiciera, el texto justificado se ve igual, solo con más espacio entre palabras.
 - **La interfaz no cambia de letra** — menús y paneles siguen en EB Garamond; el formato solo toca el texto de la obra.
 
 ## Riesgos
 
-- **Partición de palabras en WebView2** — `hyphens: auto` en español depende de diccionarios que WebView2 quizá no trae sin conexión. Sin partir palabras, el justificado deja huecos grandes. Se comprueba al empezar el paso 6, en Windows, macOS y Linux. Si falla, se buscan patrones de partición con licencia compatible y se consulta al autor antes de añadirlos.
+- **Partición de palabras en Linux** — comprobada en WebView2 en Windows. WebKitGTK parte palabras si el sistema tiene los diccionarios de hyphen; si no, el justificado deja más espacio entre palabras. Se revisa con la CI en Linux.
 - **Rendimiento del paginador** — 150 000 palabras son unas 500 páginas A5. Las medidas se hacen por lotes en un contenedor fuera de pantalla, con un solo cálculo de diseño por lote, y solo se dibujan las hojas visibles. La prueba de rendimiento lo vigila en la CI.
 - **Notas al pie largas** — una nota que no cabe en su página continúa en la siguiente. Es la convención de imprenta, pero complica el reparto. Se cubre con tests del paginador con el medidor falso.
 - **Diferencias entre motores** — WebView2 y WebKit miden el texto de forma un poco distinta, así que el número de páginas puede variar entre sistemas. La vista es una revisión, no la maqueta final: la exportación (011) fijará el resultado.
