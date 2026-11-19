@@ -42,11 +42,11 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real con las seis tipografías y los dos temas.
 
 ## 7. Panel de formato
-- [ ] Hoja a la derecha con botón «Formato» en la barra; solo una hoja abierta a la vez (formato o versiones).
-- [ ] Grupos: hoja y márgenes (lista o a medida, cm o pulgadas), letra (tipografía, cuerpo, interlineado), párrafos (sangría, justificado, capitular).
-- [ ] Cada cambio se envía y se ve al momento; los valores imposibles se marcan en su campo con un mensaje en español.
-- [ ] Elegir un tamaño de lista propone sus márgenes.
-- [ ] Accesible con teclado y lector de pantalla; tests de comportamiento.
+- [x] Hoja a la derecha con botón «Formato» en la barra; solo una hoja abierta a la vez (formato o versiones).
+- [x] Grupos: hoja y márgenes (lista o a medida, cm o pulgadas), letra (tipografía, cuerpo, interlineado), párrafos (sangría, justificado, capitular).
+- [x] Cada cambio se envía y se ve al momento; los valores imposibles se marcan en su campo con un mensaje en español.
+- [x] Elegir un tamaño de lista propone sus márgenes.
+- [x] Accesible con teclado y lector de pantalla; tests de comportamiento.
 
 ## 8. Paso de formato al crear
 - [ ] Tras el título, el formulario del panel relleno con `suggestedFormat`.
