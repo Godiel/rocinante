@@ -150,3 +150,107 @@
   content: attr(data-number) ". ";
   color: var(--color-rubric);
 }
+
+/* The view: a desk of a slightly darker shade, with the pages laid on it. */
+
+.page-view {
+  position: fixed;
+  z-index: 6;
+  top: var(--bar-height);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-paper-shade);
+  outline: none;
+}
+
+.page-view-bar {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-caption);
+  color: var(--color-ink-soft);
+  border-bottom: var(--hairline) solid var(--color-rule);
+}
+
+.page-view-title {
+  margin: 0;
+  font-size: inherit;
+  font-weight: 400;
+}
+
+.page-view-count {
+  color: var(--color-ink-faint);
+}
+
+.page-view-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
+.page-view-scroller {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.page-view-book {
+  position: relative;
+}
+
+.page-view-row {
+  position: absolute;
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.page-view-frame {
+  overflow: hidden;
+  outline: var(--hairline) solid var(--color-rule);
+}
+
+.page-sheet {
+  position: relative;
+  background: var(--color-paper);
+}
+
+.page-lines {
+  overflow: hidden;
+}
+
+.page-notes {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+/* The short rule over the footnotes. */
+.page-notes-rule {
+  position: relative;
+}
+
+.page-notes-rule::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 30%;
+  border-top: var(--hairline) solid var(--color-ink-faint);
+}
+
+.page-number {
+  position: absolute;
+  right: 0;
+  left: 0;
+  transform: translateY(50%);
+  text-align: center;
+  font-variant-numeric: oldstyle-nums;
+  color: var(--color-ink-soft);
+}

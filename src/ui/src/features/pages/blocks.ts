@@ -11,6 +11,11 @@ export interface BookChapter {
   blocks: HTMLElement[];
   /** The text of each footnote of the chapter, in reading order: footnote n is texts[n - 1]. */
   footnotes: string[];
+  /**
+   * Where each block is in the text of the chapter, as ProseMirror positions, to find the page of
+   * the cursor. The title is not in the text: its range is null.
+   */
+  ranges: ({ from: number; to: number } | null)[];
 }
 
 let schema: Schema | null = null;
@@ -52,9 +57,11 @@ export function chapterBlocks(chapter: ManuscriptChapter, document: Document): B
 
   const footnotes: string[] = [];
   const blocks: HTMLElement[] = [title];
+  const ranges: BookChapter["ranges"] = [null];
   let previous: string | null = null;
   let opened = false;
-  root.forEach((node) => {
+  root.forEach((node, offset) => {
+    ranges.push({ from: offset, to: offset + node.nodeSize });
     const element = serializer.serializeNode(node, { document }) as HTMLElement;
     // Each block is drawn on its own, so what the editor gets from its neighbours is said here:
     // a paragraph after another is indented (or spaced), and the first one opens the chapter.
@@ -73,5 +80,5 @@ export function chapterBlocks(chapter: ManuscriptChapter, document: Document): B
     }
     blocks.push(element);
   });
-  return { id: chapter.id, title: chapter.title, blocks, footnotes };
+  return { id: chapter.id, title: chapter.title, blocks, footnotes, ranges };
 }

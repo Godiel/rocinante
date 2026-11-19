@@ -43,10 +43,14 @@ export function geometryOf(format: WorkFormat): PageGeometry {
 }
 
 /** The CSS of the text of the pages, shared by the measuring column and the pages themselves. */
-export function textStyle(
-  format: WorkFormat,
-  geometry: PageGeometry,
-): Partial<CSSStyleDeclaration> {
+export interface TextStyle {
+  width: string;
+  fontFamily: string;
+  fontSize: string;
+  lineHeight: string;
+}
+
+export function textStyle(format: WorkFormat, geometry: PageGeometry): TextStyle {
   return {
     width: `${geometry.textWidth}px`,
     fontFamily: TYPEFACES[format.typeface].family,

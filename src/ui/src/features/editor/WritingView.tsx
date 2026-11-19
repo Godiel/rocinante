@@ -25,6 +25,8 @@ import { VersionView } from "../versions/VersionView";
 import { isSaveVersionShortcut, isVersionsShortcut } from "../versions/shortcuts";
 import { BookEditor } from "./BookEditor";
 import { FormatSheet } from "../format/FormatSheet";
+import { PageView } from "../pages/PageView";
+import { isPageViewShortcut } from "../pages/shortcuts";
 import { workClasses, workStyle } from "../format/work-style";
 import "./writing-view.css";
 
@@ -63,6 +65,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   // One sheet at a time on the right of the text: the versions or the format.
   const [sheet, setSheet] = useState<"versions" | "format" | null>(null);
   const versionsOpen = sheet === "versions";
+  const [pagesOpen, setPagesOpen] = useState(false);
   const [nameRequest, setNameRequest] = useState(0);
   const [viewing, setViewing] = useState<Viewing | null>(null);
   // The project and place only matter when the view opens; later changes arrive as notifications.
@@ -125,7 +128,11 @@ export function WritingView({ project, place, preferences, origin }: WritingView
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (isOutlineShortcut(event)) {
+      if (isPageViewShortcut(event)) {
+        // In a browser F5 reloads the page: here it is the page view.
+        event.preventDefault();
+        setPagesOpen((open) => !open);
+      } else if (isOutlineShortcut(event)) {
         event.preventDefault();
         setOutlineOpen((open) => !open);
       } else if (isVersionsShortcut(event)) {
@@ -192,6 +199,11 @@ export function WritingView({ project, place, preferences, origin }: WritingView
     } catch (error) {
       setProblem(messageFor(error));
     }
+  }
+
+  function closePages() {
+    setPagesOpen(false);
+    window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
   }
 
   function openFormat() {
@@ -270,6 +282,14 @@ export function WritingView({ project, place, preferences, origin }: WritingView
             onClick={() => update({ counterVisible: !preferences.counterVisible })}
           >
             Contador {preferences.counterVisible ? "sí" : "no"}
+          </button>
+          <button
+            className="action"
+            aria-pressed={pagesOpen}
+            title="Vista de página (F5)"
+            onClick={() => (pagesOpen ? closePages() : setPagesOpen(true))}
+          >
+            Páginas
           </button>
           <button
             className="action"
@@ -355,6 +375,10 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           </div>
         )}
       </main>
+
+      {pagesOpen && (
+        <PageView format={project.format} onClose={closePages} onProblem={setProblem} />
+      )}
 
       {sheet === "format" && (
         <FormatSheet

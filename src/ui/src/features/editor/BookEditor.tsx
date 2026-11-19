@@ -20,6 +20,7 @@ import { TextPopover } from "./TextPopover";
 import { TypewriterCaret } from "./TypewriterCaret";
 import { useNotes } from "./useNotes";
 import "./book-editor.css";
+import { rememberCursor } from "../../editor/cursor";
 
 const SAVE_DELAY_MS = 300;
 const RETRY_DELAY_MS = 5000;
@@ -158,6 +159,7 @@ export function BookEditor({
     },
     onSelectionUpdate: ({ editor: current }) => {
       const { anchor, head } = current.state.selection;
+      rememberCursor({ documentId: document.id, position: head });
       window.clearTimeout(placeTimer.current);
       placeTimer.current = window.setTimeout(() => {
         void request("place.save", { documentId: document.id, anchor, head });
