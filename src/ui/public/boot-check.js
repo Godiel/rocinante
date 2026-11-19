@@ -12,7 +12,8 @@
       }
       if (sessionStorage.getItem(KEY)) return;
       sessionStorage.setItem(KEY, "1");
-    } catch (error) {
+    } catch {
+      // Without session storage it cannot know whether it already tried: it does not try.
       return;
     }
     location.reload();
