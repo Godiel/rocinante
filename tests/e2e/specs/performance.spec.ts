@@ -2,7 +2,15 @@ import type { Page } from "@playwright/test";
 import { chapterText, createWork, expect, test } from "../support/desk";
 
 /** "No delay when typing": 95 % of keystrokes are on screen within this time. */
-const MAX_P95_MS = 50;
+const NO_DELAY_P95_MS = 50;
+/**
+ * GitHub's macOS machines are virtual and have no graphics card, so every frame is painted in
+ * software. There the test cannot measure what a writer feels; it only guards against the editor
+ * becoming several times slower.
+ */
+const VIRTUAL_MAC_P95_MS = 150;
+const MAX_P95_MS =
+  process.env.CI && process.platform === "darwin" ? VIRTUAL_MAC_P95_MS : NO_DELAY_P95_MS;
 const CHAPTER_WORDS = 20_000;
 const WORK_WORDS = 150_000;
 const WORDS_PER_PARAGRAPH = 100;
