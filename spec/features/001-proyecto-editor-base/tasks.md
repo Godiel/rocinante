@@ -91,10 +91,10 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Reinicio automático del sidecar si cae, sin perder lo escrito.
 
 ## 14. Pruebas de extremo a extremo y rendimiento
-- [ ] Relé de pruebas (Node) que conecta la interfaz en navegador con el sidecar real.
-- [ ] E2E: crear proyecto, escribir, cerrar y reabrir.
-- [ ] E2E: cierre forzado durante la escritura, pérdida ≤ 2 s y archivo íntegro.
-- [ ] Rendimiento: capítulo de 20 000 palabras y obra de 150 000 sin retraso al teclear.
+- [x] Relé de pruebas (Node) que conecta la interfaz en navegador con el sidecar real.
+- [x] E2E: crear proyecto, escribir, cerrar y reabrir.
+- [x] E2E: cierre forzado durante la escritura, pérdida ≤ 2 s y archivo íntegro.
+- [x] Rendimiento: capítulo de 20 000 palabras y obra de 150 000 sin retraso al teclear.
 
 ## 15. Cierre
 - [ ] Completar en `tech-stack.md` las secciones «Archivos / módulos clave», «Comandos» y el esquema de datos.
