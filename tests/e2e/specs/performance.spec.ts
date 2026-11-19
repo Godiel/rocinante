@@ -136,15 +136,26 @@ test.describe("a long work", () => {
     expect(pages).toBeGreaterThan(300);
 
     // It opened on the page of the cursor, in the middle of the first chapter, not on the first page.
-    const shown = await app.page.getByRole("img", { name: /^Página \d+$/ }).evaluateAll((sheets) =>
-      sheets
-        .filter((sheet) => {
-          const box = sheet.getBoundingClientRect();
-          return box.bottom > 0 && box.top < window.innerHeight;
-        })
-        .map((sheet) => Number(sheet.getAttribute("aria-label")!.split(" ")[1])),
-    );
-    expect(Math.min(...shown)).toBeGreaterThan(10);
-    expect(Math.max(...shown)).toBeLessThan(80);
+    // The view may still be settling its scroll when the count appears: wait for it, briefly.
+    const inSight = () =>
+      app.page.getByRole("img", { name: /^Página \d+$/ }).evaluateAll((sheets) =>
+        sheets
+          .filter((sheet) => {
+            const box = sheet.getBoundingClientRect();
+            return box.bottom > 0 && box.top < window.innerHeight;
+          })
+          .map((sheet) => Number(sheet.getAttribute("aria-label")!.split(" ")[1])),
+      );
+    await expect
+      .poll(
+        async () => {
+          const shown = await inSight();
+          return shown.length > 0 && Math.min(...shown) > 10 && Math.max(...shown) < 80
+            ? "on the page of the cursor"
+            : `pages in sight: ${shown.join(", ")}`;
+        },
+        { timeout: 5000 },
+      )
+      .toBe("on the page of the cursor");
   });
 });
