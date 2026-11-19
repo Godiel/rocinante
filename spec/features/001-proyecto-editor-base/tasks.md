@@ -81,8 +81,8 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Contador de palabras, caracteres, párrafos y capítulos (documento y obra), en una esquina, atenuado al escribir y ocultable.
 
 ## 12. Versiones
-- [ ] Lista de versiones de un documento; guardar versión manual con nombre.
-- [ ] Ver una versión, compararla con la actual y restaurarla.
+- [x] Lista de versiones de un documento; guardar versión manual con nombre.
+- [x] Ver una versión, compararla con la actual y restaurarla.
 
 ## 13. Errores y logs
 - [ ] Serilog a archivo con rotación en la carpeta de datos de la app.
