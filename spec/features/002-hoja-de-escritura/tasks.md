@@ -28,10 +28,10 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Métodos JSON-RPC y notificaciones; el escenario `WritingSession` de las pruebas de contrato los usa todos.
 
 ## 5. Tipografías
-- [ ] Añadir Fontsource de Literata, Crimson Pro, Source Serif 4, Libre Baskerville y Courier Prime, y EB Garamond 700. Solo los subconjuntos latino y latino extendido, en 400, 400 cursiva, 700 y 700 cursiva.
-- [ ] `design/typefaces.ts` como lista única de tipografías.
-- [ ] Incluir los textos de la licencia OFL con la app.
-- [ ] Comprobar que las seis se ven sin internet y medir cuánto crece la app.
+- [x] Añadir Fontsource de Literata, Crimson Pro, Source Serif 4, Libre Baskerville y Courier Prime, y EB Garamond 700. Solo los subconjuntos latino y latino extendido, en 400, 400 cursiva, 700 y 700 cursiva.
+- [x] `design/typefaces.ts` como lista única de tipografías.
+- [x] Incluir los textos de la licencia OFL con la app.
+- [x] Comprobar que las seis se ven sin internet y medir cuánto crece la app.
 
 ## 6. El formato en el papel continuo
 - [ ] Comprobar `hyphens: auto` en español en WebView2 y WebKit. **Si no parte palabras, consultar al autor** antes de añadir patrones.
