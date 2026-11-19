@@ -1,0 +1,24 @@
+{
+  "valid": [
+    {
+      "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "name": "Antes de la venta",
+      "origin": "main"
+    },
+    {
+      "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "name": null,
+      "origin": "main"
+    },
+    { "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b", "origin": "main" }
+  ],
+  "invalid": [
+    { "origin": "main" },
+    {
+      "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "name": 3,
+      "origin": "main"
+    },
+    { "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b" }
+  ]
+}

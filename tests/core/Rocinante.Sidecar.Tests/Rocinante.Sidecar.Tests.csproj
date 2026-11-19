@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Rocinante.Sidecar.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\core\Rocinante.Sidecar\Rocinante.Sidecar.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The contract and its shared examples, validated by both the UI and the core. -->
+    <None Include="..\..\..\src\contracts\protocol.json" Link="contract\protocol.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\..\src\contracts\examples\*.json" LinkBase="contract\examples" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\*.cs" LinkBase="Shared" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Rocinante.Tests.Shared" />
+    <Using Include="Shouldly" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Shouldly" Version="4.3.0" />
+    <PackageReference Include="xunit.v3" Version="4.0.3" />
+  </ItemGroup>
+
+</Project>

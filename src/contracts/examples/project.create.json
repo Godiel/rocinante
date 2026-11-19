@@ -1,0 +1,26 @@
+{
+  "valid": [
+    {
+      "path": "C:/Users/autor/Documents/Rocinante/Don Quijote.rocinante",
+      "title": "El ingenioso hidalgo",
+      "origin": "main"
+    },
+    {
+      "path": "/home/autor/Documentos/Rocinante/galatea.rocinante",
+      "title": "La Galatea",
+      "origin": "window-1"
+    }
+  ],
+  "invalid": [
+    { "title": "Sin ruta", "origin": "main" },
+    { "path": "", "title": "Ruta vacía", "origin": "main" },
+    { "path": "obra.rocinante", "title": "", "origin": "main" },
+    { "path": "obra.rocinante", "title": "Sin ventana" },
+    {
+      "path": "obra.rocinante",
+      "title": "Extra",
+      "origin": "main",
+      "template": "novela"
+    }
+  ]
+}

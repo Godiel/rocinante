@@ -1,0 +1,4 @@
+{
+  "valid": [{ "origin": "main" }],
+  "invalid": [{}, { "origin": "" }, { "origin": "main", "force": true }]
+}

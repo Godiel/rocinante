@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Entry point of the core: a JSON-RPC 2.0 server over stdin/stdout, started by the Tauri host. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Rocinante.Sidecar</RootNamespace>
+    <IsTrimmable>true</IsTrimmable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rocinante.Infrastructure\Rocinante.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JsonSchema.Net" Version="9.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The protocol contract is the single source of truth shared with the UI. -->
+    <EmbeddedResource Include="..\..\contracts\protocol.json" LogicalName="protocol.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Rocinante.Sidecar.Tests" />
+  </ItemGroup>
+
+</Project>

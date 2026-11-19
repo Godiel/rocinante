@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Entities and rules of a Rocinante project. No package references, no I/O. -->
+  <PropertyGroup>
+    <RootNamespace>Rocinante.Domain</RootNamespace>
+    <IsTrimmable>true</IsTrimmable>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: Núcleo .NET (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Formato
+        run: dotnet format src/core/Rocinante.slnx --verify-no-changes
+      - name: Compilar
+        run: dotnet build src/core/Rocinante.slnx --configuration Release
+      - name: Tests
+        run: dotnet test --solution src/core/Rocinante.slnx --configuration Release --no-build
+      - name: Informe de cobertura del dominio
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-dominio
+          path: TestResults/coverage.cobertura.*.xml
+          if-no-files-found: error
+
+  ui:
+    name: Interfaz React
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Contrato generado al día
+        run: npm run contracts:check
+      - name: Formato
+        run: npm run format:check -w @rocinante/ui
+      - name: Lint
+        run: npm run lint -w @rocinante/ui
+      - name: Tests
+        run: npm test -w @rocinante/ui
+      - name: Tipos y compilación
+        run: npm run build -w @rocinante/ui
+
+  host:
+    name: Anfitrión Tauri (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencias de sistema (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/host
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Publicar núcleo como sidecar
+        run: npm run core:build
+      - name: Compilar interfaz
+        run: npm run build -w @rocinante/ui
+      - name: Formato
+        working-directory: src/host
+        run: cargo fmt --check
+      - name: Clippy
+        working-directory: src/host
+        run: cargo clippy --all-targets --locked -- -D warnings
+      - name: Tests
+        working-directory: src/host
+        run: cargo test --locked
+
+  e2e:
+    name: Extremo a extremo y rendimiento (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Compilar núcleo
+        run: dotnet build src/core/Rocinante.slnx --configuration Release
+      - name: Compilar interfaz
+        run: npm run build -w @rocinante/ui
+      - name: Tipos, lint y formato de las pruebas
+        working-directory: tests/e2e
+        run: |
+          npm run typecheck
+          npm run lint
+          npm run format:check
+      # Edge en Windows y Chrome en macOS y Linux ya vienen en los ejecutores: nada que descargar.
+      - name: Pruebas
+        run: npm test -w @rocinante/e2e
+      - name: Informe de las pruebas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-${{ matrix.os }}
+          path: tests/e2e/playwright-report

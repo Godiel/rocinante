@@ -1,0 +1,91 @@
+/* The counts: a quiet line in the lower right corner, like a page number. */
+
+.counter {
+  position: fixed;
+  z-index: 3;
+  right: var(--space-4);
+  bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  max-width: 22rem;
+  font-size: var(--text-caption);
+  color: var(--color-ink-faint);
+  /* Comes back slowly, a moment after the writer stops. */
+  transition: opacity 600ms ease 1200ms;
+}
+
+.counter-quiet {
+  opacity: 0.25;
+  transition: opacity 200ms ease;
+}
+
+.counter:hover,
+.counter:focus-within {
+  opacity: 1;
+  transition-delay: 0ms;
+}
+
+.counter-line {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-soft);
+}
+
+.counter-work {
+  color: var(--color-ink-faint);
+}
+
+.counter-table {
+  padding: var(--space-2) var(--space-3);
+  border-collapse: separate;
+  border-spacing: var(--space-3) var(--space-1);
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: var(--radius);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.counter-table th {
+  font-weight: 400;
+  text-align: left;
+  color: var(--color-ink-faint);
+}
+
+.counter-table thead th {
+  text-align: right;
+}
+
+.counter-table td {
+  text-align: right;
+  color: var(--color-ink-soft);
+}
+
+.counter-table tfoot td {
+  padding-top: var(--space-1);
+}
+
+.counter-hide {
+  font-size: var(--text-caption);
+}
+
+/* Only a save that takes its time is worth a word, so the line waits a second to appear. */
+.counter-saving {
+  margin: 0;
+  font-style: italic;
+  opacity: 0;
+  animation: counter-appear var(--fade) 1s forwards;
+}
+
+.counter-failed {
+  margin: 0;
+  font-style: italic;
+  text-align: right;
+  color: var(--color-rubric);
+}
+
+@keyframes counter-appear {
+  to {
+    opacity: 1;
+  }
+}

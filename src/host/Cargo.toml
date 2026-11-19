@@ -1,0 +1,35 @@
+[package]
+name = "rocinante-host"
+version = "0.1.0"
+description = "Rocinante desktop host: windows and the relay to the .NET core"
+license = "MIT"
+edition = "2024"
+rust-version = "1.85"
+
+[lib]
+name = "rocinante_host_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["sync"] }
+tauri-plugin-dialog = "2"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt", "sync"] }

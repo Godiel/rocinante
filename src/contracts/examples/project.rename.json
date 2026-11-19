@@ -1,0 +1,8 @@
+{
+  "valid": [{ "title": "Don Quijote de la Mancha", "origin": "main" }],
+  "invalid": [
+    { "title": "", "origin": "main" },
+    { "origin": "main" },
+    { "title": "Sin ventana" }
+  ]
+}

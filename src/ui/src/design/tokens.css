@@ -1,0 +1,185 @@
+/*
+ * Rocinante design tokens: type, spacing and shape. Colours come from themes.ts, applied as
+ * --color-* variables on the root, so the contrast test checks exactly what is shown.
+ *
+ * Everything derives from the text of the work: 19 px with a line height of 1.6, so one line
+ * is about 30 px and spacing steps are fractions or multiples of that line.
+ */
+/* EB Garamond (SIL OFL), bundled with the app: Latin and Latin Extended cover Spanish and the
+   rest of Western Europe; no other scripts are loaded. */
+@import "@fontsource/eb-garamond/latin-400.css";
+@import "@fontsource/eb-garamond/latin-ext-400.css";
+@import "@fontsource/eb-garamond/latin-500.css";
+@import "@fontsource/eb-garamond/latin-ext-500.css";
+@import "@fontsource/eb-garamond/latin-400-italic.css";
+@import "@fontsource/eb-garamond/latin-ext-400-italic.css";
+
+:root {
+  --font-book: "EB Garamond", Garamond, "Times New Roman", serif;
+
+  /* Type scale. */
+  --text-caption: 12px; /* small caps labels */
+  --text-ui: 15px; /* interface text */
+  --text-body: 19px; /* the work */
+  --text-title: 30px;
+  --text-display: 40px;
+  --leading-body: 1.6;
+  --leading-ui: 1.4;
+  --tracking-small-caps: 0.06em;
+
+  /* Spacing: fractions and multiples of one line of the work. */
+  --line: calc(var(--text-body) * var(--leading-body));
+  --space-1: calc(var(--line) / 8);
+  --space-2: calc(var(--line) / 4);
+  --space-3: calc(var(--line) / 2);
+  --space-4: var(--line);
+  --space-5: calc(var(--line) * 2);
+  --space-6: calc(var(--line) * 4);
+
+  /* The writing column: 60–75 characters per line. */
+  --measure: 34em;
+
+  /* Shape and motion: barely there. */
+  --radius: 2px;
+  --hairline: 0.5px;
+  --fade: 160ms ease-out;
+
+  /* Fallback colours until the theme is applied (paper). */
+  --color-paper: #f5efe3;
+  --color-ink: #2b2620;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-book);
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  font-feature-settings:
+    "onum" 1,
+    "liga" 1,
+    "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition:
+    background var(--fade),
+    color var(--fade);
+}
+
+::selection {
+  background: var(--color-selection);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 1px solid var(--color-rubric);
+  outline-offset: 3px;
+}
+
+.small-caps {
+  font-variant: small-caps;
+  letter-spacing: var(--tracking-small-caps);
+}
+
+/* A text action: underlined like a margin note, never a boxed button. */
+.action {
+  border-bottom: var(--hairline) solid var(--color-rule);
+  padding-bottom: 1px;
+  transition: border-color var(--fade);
+}
+
+.action:hover {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.action-main {
+  color: var(--color-rubric);
+  border-bottom: 1px solid var(--color-rubric);
+}
+
+.action-main:hover {
+  border-bottom-color: var(--color-rubric);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --fade: 0ms;
+  }
+}
+
+/* The core stopped for good: said over the page, which stays so it can be copied. */
+.halted {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 50%;
+  max-width: min(40rem, calc(100% - 2 * var(--space-4)));
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  transform: translateX(-50%);
+  background: var(--color-paper-shade);
+  border: 1px solid var(--color-rubric);
+  border-radius: var(--radius);
+  font-style: italic;
+  text-align: center;
+}
+
+.halted p {
+  margin: 0 0 var(--space-1);
+}
+
+/* When the window cannot go on: what happened, and the way out. */
+.trouble {
+  max-width: var(--measure);
+  margin: var(--space-6) auto;
+  padding: 0 var(--space-4);
+  text-align: center;
+}
+
+.trouble-fleuron {
+  color: var(--color-ink-faint);
+}
+
+.trouble-message {
+  font-size: var(--text-body);
+  font-style: italic;
+}
+
+.trouble-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.trouble-note {
+  font-style: italic;
+  color: var(--color-rubric);
+}

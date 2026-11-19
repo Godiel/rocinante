@@ -1,0 +1,49 @@
+{
+  "valid": [
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              { "type": "text", "text": "En un lugar de la " },
+              {
+                "type": "text",
+                "text": "Mancha",
+                "marks": [{ "type": "italic" }]
+              }
+            ]
+          }
+        ]
+      },
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "content": { "type": "doc" },
+      "origin": "window-1"
+    }
+  ],
+  "invalid": [
+    { "content": { "type": "doc" }, "origin": "main" },
+    { "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b", "origin": "main" },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "content": { "type": "paragraph" },
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "content": { "type": "doc" },
+      "origin": ""
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "content": { "type": "doc" },
+      "origin": "main",
+      "unexpected": true
+    }
+  ]
+}
