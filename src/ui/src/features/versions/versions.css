@@ -1,32 +1,4 @@
-/* The versions: a sheet on the right of the text, as the index is on the left. */
-
-.versions {
-  position: fixed;
-  z-index: 4;
-  top: var(--bar-height);
-  right: 0;
-  bottom: 0;
-  width: 20rem;
-  padding: var(--space-3) var(--space-4) var(--space-5);
-  overflow-y: auto;
-  font-size: var(--text-ui);
-  background: var(--color-paper-shade);
-  border-left: var(--hairline) solid var(--color-rule);
-}
-
-.versions-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: var(--text-caption);
-  color: var(--color-ink-soft);
-}
-
-.versions-title {
-  margin: 0;
-  font-size: inherit;
-  font-weight: 400;
-}
+/* The versions, on the sheet to the right of the text (see .sheet in writing-view.css). */
 
 .versions-of {
   margin: var(--space-1) 0 var(--space-4);
@@ -118,14 +90,6 @@
 }
 
 /* With the sheet open, the page and the counter make room for it. */
-.writing-view-versions .writing-main {
-  margin-right: 20rem;
-}
-
-.writing-view-versions .counter {
-  right: calc(20rem + var(--space-4));
-}
-
 /* A version in place of the page. */
 .version-view {
   max-width: calc(var(--measure) + 2 * var(--space-4));

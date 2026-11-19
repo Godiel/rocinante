@@ -60,3 +60,41 @@
   text-align: center;
   color: var(--color-ink-soft);
 }
+
+/* A sheet on the right of the text, as the index is on the left: the versions or the format. */
+
+.sheet {
+  position: fixed;
+  z-index: 4;
+  top: var(--bar-height);
+  right: 0;
+  bottom: 0;
+  width: 20rem;
+  padding: var(--space-3) var(--space-4) var(--space-5);
+  overflow-y: auto;
+  font-size: var(--text-ui);
+  background: var(--color-paper-shade);
+  border-left: var(--hairline) solid var(--color-rule);
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--text-caption);
+  color: var(--color-ink-soft);
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: inherit;
+  font-weight: 400;
+}
+
+.writing-view-sheet .writing-main {
+  margin-right: 20rem;
+}
+
+.writing-view-sheet .counter {
+  right: calc(20rem + var(--space-4));
+}

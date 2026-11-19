@@ -24,6 +24,7 @@ import { Versions } from "../versions/Versions";
 import { VersionView } from "../versions/VersionView";
 import { isSaveVersionShortcut, isVersionsShortcut } from "../versions/shortcuts";
 import { BookEditor } from "./BookEditor";
+import { FormatSheet } from "../format/FormatSheet";
 import { workClasses, workStyle } from "../format/work-style";
 import "./writing-view.css";
 
@@ -59,7 +60,9 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const [problem, setProblem] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(preferences.outline === "docked");
   const [deleted, setDeleted] = useState<DocumentEntry | null>(null);
-  const [versionsOpen, setVersionsOpen] = useState(false);
+  // One sheet at a time on the right of the text: the versions or the format.
+  const [sheet, setSheet] = useState<"versions" | "format" | null>(null);
+  const versionsOpen = sheet === "versions";
   const [nameRequest, setNameRequest] = useState(0);
   const [viewing, setViewing] = useState<Viewing | null>(null);
   // The project and place only matter when the view opens; later changes arrive as notifications.
@@ -127,10 +130,10 @@ export function WritingView({ project, place, preferences, origin }: WritingView
         setOutlineOpen((open) => !open);
       } else if (isVersionsShortcut(event)) {
         event.preventDefault();
-        setVersionsOpen((open) => !open);
+        setSheet((open) => (open === "versions" ? null : "versions"));
       } else if (isSaveVersionShortcut(event)) {
         event.preventDefault();
-        setVersionsOpen(true);
+        setSheet("versions");
         setNameRequest((asked) => asked + 1);
       }
     };
@@ -191,8 +194,18 @@ export function WritingView({ project, place, preferences, origin }: WritingView
     }
   }
 
+  function openFormat() {
+    setViewing(null);
+    setSheet("format");
+  }
+
+  function closeSheet() {
+    setSheet(null);
+    window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
+  }
+
   function closeVersions() {
-    setVersionsOpen(false);
+    setSheet(null);
     setViewing(null);
     window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
   }
@@ -218,7 +231,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
     <div
       className={`writing-view ${workClasses(project.format)}${
         docked ? " writing-view-docked" : ""
-      }${versionsOpen ? " writing-view-versions" : ""}`}
+      }${sheet ? " writing-view-sheet" : ""}`}
       style={workStyle(project.format)}
       onFocus={onFocusIn}
     >
@@ -260,9 +273,16 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           </button>
           <button
             className="action"
+            aria-expanded={sheet === "format"}
+            onClick={() => (sheet === "format" ? closeSheet() : openFormat())}
+          >
+            Formato
+          </button>
+          <button
+            className="action"
             aria-expanded={versionsOpen}
             title="Versiones (F6)"
-            onClick={() => (versionsOpen ? closeVersions() : setVersionsOpen(true))}
+            onClick={() => (versionsOpen ? closeVersions() : setSheet("versions"))}
           >
             Versiones
           </button>
@@ -335,6 +355,16 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           </div>
         )}
       </main>
+
+      {sheet === "format" && (
+        <FormatSheet
+          format={project.format}
+          title={project.title}
+          origin={origin}
+          onClose={closeSheet}
+          onProblem={setProblem}
+        />
+      )}
 
       {versionsOpen && shownId && (
         <Versions

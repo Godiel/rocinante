@@ -1,0 +1,102 @@
+/* The format of the work: fields grouped as a printer would think of them. */
+
+.format-of {
+  margin: var(--space-1) 0 var(--space-4);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.format-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.format-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.format-legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+  font-size: var(--text-caption);
+  color: var(--color-ink-faint);
+}
+
+.format-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-2);
+}
+
+.format-field select {
+  max-width: 11rem;
+  padding: 0 0 1px;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+}
+
+.format-input {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+
+.format-input input {
+  width: 4.5em;
+  padding: 0 0 1px;
+  text-align: right;
+  font: inherit;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  outline: none;
+}
+
+.format-input input:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.format-input input[aria-invalid="true"] {
+  border-bottom-color: var(--color-rubric);
+}
+
+.format-unit {
+  min-width: 1.5em;
+  color: var(--color-ink-faint);
+}
+
+.format-units {
+  justify-content: flex-start;
+}
+
+.format-choice {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.format-choice input {
+  accent-color: var(--color-rubric);
+}
+
+.format-problem {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: var(--text-caption);
+  font-style: italic;
+  color: var(--color-rubric);
+}
