@@ -54,12 +54,12 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento.
 
 ## 9. Paginador
-- [ ] `features/pages/layout.ts`: `layout(blocks, format, measure)` devuelve páginas como datos, con las posiciones de ProseMirror de cada trozo.
-- [ ] Capítulo en página nueva, título del capítulo más abajo, ningún título solo al pie, viudas y huérfanas.
-- [ ] Notas al pie al pie de la página de su llamada, que continúan en la siguiente si no caben.
-- [ ] Medidor real con el DOM (alto por bloques, cortes de línea con `Range.getClientRects`) en un contenedor fuera de pantalla.
-- [ ] Tests del reparto con un medidor falso.
-- [ ] ADR del paginador propio.
+- [x] `features/pages/layout.ts`: `layout(blocks, format, measure)` devuelve páginas como datos, con las posiciones de ProseMirror de cada trozo.
+- [x] Capítulo en página nueva, título del capítulo más abajo, ningún título solo al pie, viudas y huérfanas.
+- [x] Notas al pie al pie de la página de su llamada, que continúan en la siguiente si no caben.
+- [x] Medidor real con el DOM (alto por bloques, cortes de línea con `Range.getClientRects`) en un contenedor fuera de pantalla.
+- [x] Tests del reparto con un medidor falso.
+- [x] ADR del paginador propio.
 
 ## 10. Vista de página
 - [ ] F5, botón de la barra y Escape la abren o la cierran.
