@@ -21,6 +21,7 @@ import { WritingView } from "../features/editor/WritingView";
 import { messageFor, messages } from "./messages";
 import { LogFolderButton, Trouble } from "./Trouble";
 import { savePendingNow } from "../editor/pending-saves";
+import { DEFAULT_AMBIENCE } from "../features/ambience/defaults";
 
 const HALTED =
   "Rocinante ha fallado varias veces seguidas y se ha detenido. Lo que aún no se haya guardado sigue en pantalla: cópialo antes de cerrar la app y volver a abrirla.";
@@ -30,6 +31,7 @@ const DEFAULT_PREFERENCES: Preferences = {
   outline: "docked",
   counterVisible: true,
   typewriterScrolling: true,
+  ambience: DEFAULT_AMBIENCE,
 };
 
 type Screen =

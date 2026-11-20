@@ -26,6 +26,13 @@ export const messages: Record<ErrorReason, string> = {
     "Alguna medida del formato no es posible: la hoja mide entre 7 y 30 cm por lado, la letra entre 8 y 16 puntos y el interlineado entre 1 y 2.",
   textAreaTooSmall:
     "Los márgenes no dejan sitio al texto: debe quedar al menos una caja de 4 × 6 cm.",
+  ambientRepeated: "Ese ambiente ya está sonando.",
+  ambienceNotFound: "Ese fondo o sonido ya no está. Puede que se haya quitado en otra ventana.",
+  notAnImage: "Ese archivo no es una imagen que Rocinante pueda usar. Prueba con PNG, JPEG o WebP.",
+  notASound:
+    "Ese archivo no es un sonido que Rocinante pueda usar. Prueba con Ogg, MP3, WAV o FLAC.",
+  fileTooLarge:
+    "El archivo es demasiado grande: hasta 30 MB para una imagen y 100 MB para un sonido.",
   notFound: "No se encuentra el archivo. Puede que se haya movido o borrado.",
   alreadyExists:
     "Ya hay un archivo con ese nombre en esa carpeta. Elige otro título u otra carpeta.",

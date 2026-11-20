@@ -2,6 +2,7 @@
 import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { DEFAULT_AMBIENCE } from "../features/ambience/defaults";
 import type {
   CoreNotifications,
   ProjectState,
@@ -67,9 +68,11 @@ const start = (overrides: Partial<StartState> = {}): StartState => ({
     outline: "docked",
     counterVisible: true,
     typewriterScrolling: true,
+    ambience: DEFAULT_AMBIENCE,
   },
   defaultFolder: "C:\\Users\\autor\\Documents\\Rocinante",
   suggestedFormat: a5,
+  ownAmbience: [],
   ...overrides,
 });
 
