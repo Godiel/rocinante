@@ -66,7 +66,14 @@ for (const [name, schema] of Object.entries(definitions)) {
 const types = await compile(
   { title: "Protocol", $defs: definitions, type: "object", additionalProperties: false },
   "Protocol",
-  { bannerComment: "", unreachableDefinitions: true, format: false, strictIndexSignatures: true },
+  {
+    bannerComment: "",
+    unreachableDefinitions: true,
+    format: false,
+    strictIndexSignatures: true,
+    // A list with at most N items stays a plain array: the core checks the limit against the contract.
+    ignoreMinAndMaxItems: true,
+  },
 );
 
 // Drop the synthetic root type and the generator's boilerplate comments.

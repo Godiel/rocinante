@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 5,
+  "protocolVersion": 6,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -133,6 +133,50 @@
         "type": "array",
         "items": {
           "$ref": "#/$defs/RecentProject"
+        }
+      }
+    },
+    "ambience.import": {
+      "description": "Copies an image or a sound of the writer's into the app's data folder, so it keeps working if the original moves. The core checks the kind by the file's signature, not its extension. Broadcasts ambience.changed.",
+      "params": {
+        "type": "object",
+        "required": ["path", "kind", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "$ref": "#/$defs/FilePath"
+          },
+          "kind": {
+            "$ref": "#/$defs/OwnAmbienceKind"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/OwnAmbience"
+      }
+    },
+    "ambience.remove": {
+      "description": "Deletes the copy of one of the writer's own images or sounds. If the preferences used it, they stop using it and preferences.changed is broadcast too. Broadcasts ambience.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/OwnAmbience"
         }
       }
     },
@@ -757,6 +801,25 @@
         }
       }
     },
+    "ambience.changed": {
+      "description": "The writer's own images and sounds changed.",
+      "params": {
+        "type": "object",
+        "required": ["own", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "own": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/OwnAmbience"
+            }
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
+    },
     "recent.changed": {
       "description": "The recent project list changed.",
       "params": {
@@ -851,6 +914,11 @@
         "noteNotFound",
         "formatOutOfRange",
         "textAreaTooSmall",
+        "ambientRepeated",
+        "ambienceNotFound",
+        "notAnImage",
+        "notASound",
+        "fileTooLarge",
         "notFound",
         "alreadyExists",
         "notAProject",
@@ -878,7 +946,7 @@
     },
     "Preferences": {
       "type": "object",
-      "required": ["theme", "outline", "counterVisible", "typewriterScrolling"],
+      "required": ["theme", "outline", "counterVisible", "typewriterScrolling", "ambience"],
       "additionalProperties": false,
       "properties": {
         "theme": {
@@ -892,6 +960,158 @@
         },
         "typewriterScrolling": {
           "type": "boolean"
+        },
+        "ambience": {
+          "$ref": "#/$defs/Ambience"
+        }
+      }
+    },
+    "AmbienceId": {
+      "description": "A background or an ambient sound: builtin:<name> for one that comes with the app, own:<id> for one the writer added. The list of built-in ones lives in the UI; one that no longer exists is shown as the default.",
+      "type": "string",
+      "pattern": "^(builtin:[a-z0-9-]{1,40}|own:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$"
+    },
+    "Volume": {
+      "description": "From 0 (silent) to 1 (full).",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "TypingSound": {
+      "enum": ["typewriter", "mechanical", "quill"]
+    },
+    "Typing": {
+      "description": "The sound of each keystroke that writes. muted keeps the choice and the volume.",
+      "type": "object",
+      "required": ["sound", "volume", "muted"],
+      "additionalProperties": false,
+      "properties": {
+        "sound": {
+          "$ref": "#/$defs/TypingSound"
+        },
+        "volume": {
+          "$ref": "#/$defs/Volume"
+        },
+        "muted": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Ambient": {
+      "description": "One looping ambient sound in the mix, at its own level.",
+      "type": "object",
+      "required": ["id", "level"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/AmbienceId"
+        },
+        "level": {
+          "$ref": "#/$defs/Volume"
+        }
+      }
+    },
+    "SessionGoal": {
+      "description": "What the writer aims for in one session of focus mode: nothing, new words, or minutes.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "none"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "amount"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "words"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 50,
+              "maximum": 50000
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "amount"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "minutes"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 600
+            }
+          }
+        }
+      ]
+    },
+    "Ambience": {
+      "description": "The writer's focus mode and sounds: the background behind the sheet, the typing sound, the ambient mix, dimming the other paragraphs and the session goal. Ambients may not repeat (ambientRepeated); an own: id must exist (ambienceNotFound).",
+      "type": "object",
+      "required": ["background", "typing", "ambients", "ambientVolume", "ambientMuted", "dimOthers", "goal"],
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "$ref": "#/$defs/AmbienceId"
+        },
+        "typing": {
+          "$ref": "#/$defs/Typing"
+        },
+        "ambients": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "$ref": "#/$defs/Ambient"
+          }
+        },
+        "ambientVolume": {
+          "$ref": "#/$defs/Volume"
+        },
+        "ambientMuted": {
+          "type": "boolean"
+        },
+        "dimOthers": {
+          "type": "boolean"
+        },
+        "goal": {
+          "$ref": "#/$defs/SessionGoal"
+        }
+      }
+    },
+    "OwnAmbienceKind": {
+      "description": "image: a background. sound: an ambient sound.",
+      "enum": ["image", "sound"]
+    },
+    "OwnAmbience": {
+      "description": "An image or a sound the writer added. file is the copy in the app's data folder, the only place the UI may read it from; name is the original file name, shown to the writer.",
+      "type": "object",
+      "required": ["id", "kind", "name", "file"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "$ref": "#/$defs/OwnAmbienceKind"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "file": {
+          "$ref": "#/$defs/FilePath"
         }
       }
     },
@@ -911,6 +1131,9 @@
         },
         "typewriterScrolling": {
           "type": "boolean"
+        },
+        "ambience": {
+          "$ref": "#/$defs/Ambience"
         }
       }
     },
@@ -973,7 +1196,8 @@
         "recent",
         "preferences",
         "defaultFolder",
-        "suggestedFormat"
+        "suggestedFormat",
+        "ownAmbience"
       ],
       "additionalProperties": false,
       "properties": {
@@ -1021,9 +1245,15 @@
         },
         "suggestedFormat": {
           "$ref": "#/$defs/WorkFormat"
+        },
+        "ownAmbience": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OwnAmbience"
+          }
         }
       },
-      "description": "defaultFolder is where new projects are proposed: Documents/Rocinante. suggestedFormat is the format of the last work the writer set up, or the default one, offered for the next new work."
+      "description": "defaultFolder is where new projects are proposed: Documents/Rocinante. suggestedFormat is the format of the last work the writer set up, or the default one, offered for the next new work. ownAmbience lists the images and sounds the writer added."
     },
     "Statistics": {
       "description": "Counts shown to the writer. Notes never count.",
