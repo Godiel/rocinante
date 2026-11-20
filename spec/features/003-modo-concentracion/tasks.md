@@ -1,0 +1,145 @@
+# 003 · Modo concentración y ambiente — Tareas
+
+Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests en verde, y con una comprobación en la app real cuando toca la interfaz, antes de pasar al siguiente. Rama: `feature/003-modo-concentracion`.
+
+## 1. Contrato de mensajes (versión 6)
+- [ ] `Ambience` en `protocol.json`, con estos campos:
+  - `background`;
+  - `typing { sound, volume, muted }`;
+  - `ambients [{ id, level }]`;
+  - `ambientVolume` y `ambientMuted`;
+  - `dimOthers`;
+  - `goal { kind, amount }`.
+- [ ] `Preferences.ambience` y `PreferencesChange.ambience`.
+- [ ] `OwnAmbience { id, kind, name }` y `StartState.ownAmbience`.
+- [ ] `ambience.import` y `ambience.remove`, que difunden `ambience.changed`.
+- [ ] Motivos de error `notAnImage`, `notASound` y `fileTooLarge`, con sus mensajes en español en `messages.ts`.
+- [ ] Ejemplos válidos e inválidos de cada método.
+- [ ] Regenerar los tipos de TypeScript y subir `protocolVersion` a 6.
+
+## 2. Preferencias de ambiente en el núcleo
+- [ ] `Ambience` en `Rocinante.Application/Settings`, con sus límites:
+  - volúmenes y niveles de 0 a 1;
+  - ningún ambiente repetido;
+  - como mucho 6 a la vez;
+  - meta de 50 a 50 000 palabras o de 5 a 600 minutos;
+  - identificadores `builtin:<nombre>` u `own:<uuid>`.
+- [ ] `Ambience.Default`, que forma parte de `Preferences.Default`.
+- [ ] `JsonSettingsStore` lee el ambiente campo a campo. Un valor inválido vuelve al de por defecto sin perder el resto.
+- [ ] `preferences.update` con `ambience`. El escenario `WritingSession` lo usa.
+- [ ] Tests del núcleo: límites, ida y vuelta, valores rotos en el archivo y un `settings.json` de la 002 sin ambiente.
+
+## 3. Fondos y sonidos propios en el núcleo
+- [ ] `AmbienceUseCases.Import(path, kind)`:
+  - comprueba la firma del archivo: PNG, JPEG o WebP para imágenes; Ogg, MP3, WAV o FLAC para sonidos;
+  - comprueba el tamaño: 30 MB por imagen y 100 MB por sonido;
+  - hace una copia atómica en `<datos>/ambience/<uuid>.<ext>`.
+- [ ] La lista de los propios se guarda en `settings.json`, con el nombre del archivo original.
+- [ ] `Remove(id)` borra la copia y deja de usarla en las preferencias.
+- [ ] Al arrancar se limpia:
+  - se quitan de la lista las copias que faltan;
+  - se borran los archivos huérfanos.
+- [ ] Ningún registro lleva el nombre ni la ruta de los archivos del escritor.
+- [ ] Métodos JSON-RPC y notificación `ambience.changed`. El escenario de contrato los usa.
+- [ ] Tests:
+  - firmas válidas y falsas;
+  - archivos demasiado grandes;
+  - original borrado tras importar;
+  - quitar un propio que estaba en uso;
+  - limpieza al arrancar.
+
+## 4. Host
+- [ ] Permiso `core:window:allow-set-fullscreen` en `capabilities/default.json`.
+- [ ] Protocolo `asset` de Tauri con alcance solo en `$APPDATA/ambience/*`.
+- [ ] Relay de pruebas: servir `/ambience/` desde la carpeta de datos; `convertFileSrc` en el shim.
+- [ ] `cargo fmt`, `clippy` y `test` en verde.
+
+## 5. Modo concentración
+- [ ] `features/focus`: F11 entra y sale; Esc sale, salvo con un menú del editor abierto, que se cierra primero.
+- [ ] Botón en la barra de la obra para entrar.
+- [ ] Pantalla completa con la ventana. Se esconden el índice, la barra y las hojas, en la misma vista y con el mismo editor.
+- [ ] Salir de la pantalla completa desde el sistema también sale del modo.
+- [ ] Barra mínima:
+  - aparece con el ratón en el borde superior;
+  - se esconde al escribir y tras unos segundos sin el ratón encima;
+  - muestra el contador y tiene un botón para salir.
+- [ ] Al salir, el cursor y el desplazamiento siguen donde estaban.
+- [ ] Atajo F11 en `shortcuts.ts`.
+- [ ] Tests de comportamiento y comprobación en la app real.
+
+## 6. Fondos fijos y hoja translúcida
+- [ ] Catálogo `features/ambience/catalog.ts`: colores, degradados e imágenes, cada uno con nombre, archivo y créditos.
+- [ ] Hoja translúcida por tema. Un test de Vitest comprueba el contraste WCAG AA sobre fondo blanco y sobre fondo negro.
+- [ ] Un identificador que ya no existe se muestra como el fondo por defecto.
+- [ ] Panel «Ambiente» en una hoja a la derecha, abierto desde la barra de la obra y desde la barra mínima. Solo hay una hoja abierta a la vez.
+- [ ] Tests de comportamiento y comprobación en la app real con los dos temas.
+
+## 7. Fondos animados
+- [ ] Lluvia en un cristal, vela y nubes en `canvas`, a 30 fotogramas por segundo como mucho.
+- [ ] El dibujo es una función pura de estado y tiempo, con tests sin navegador.
+- [ ] Se pausan con la ventana oculta.
+- [ ] Con `prefers-reduced-motion: reduce` se quedan quietos.
+- [ ] Comprobación en la app real: escribir con un fondo animado sigue siendo fluido.
+
+## 8. Motor de sonido y tecleo
+- [ ] `src/ui/src/audio`:
+  - un `AudioContext` único, creado con la primera pulsación;
+  - una cadena de ganancias para el tecleo y otra para los ambientes.
+- [ ] Plugin de ProseMirror que hace sonar el tecleo con texto, Intro y borrar; los atajos, las flechas y las teclas muertas no suenan.
+- [ ] Varias muestras por tecleo, elegidas al azar, con una pequeña variación de tono.
+- [ ] La máquina de escribir suena a retorno de carro con Intro y tiene su campanilla.
+- [ ] Muestras de prueba generadas con ffmpeg hasta el bloque 12.
+- [ ] El panel «Ambiente» elige el tecleo, su volumen y su silencio.
+- [ ] Tests con un `AudioContext` falso: qué pulsaciones suenan y con qué volumen.
+
+## 9. Ambientes de fondo
+- [ ] Bucle con fundido cruzado de dos copias del buffer.
+- [ ] Mezcla de varios ambientes, cada uno con su nivel.
+- [ ] Volumen general y silencio, con rampas de 100 ms.
+- [ ] Los sonidos paran con un fundido al cerrar la obra.
+- [ ] El panel «Ambiente» muestra cada ambiente con su nivel.
+- [ ] Tests con un `AudioContext` falso y comprobación de oído en la app real.
+
+## 10. Atenuar el resto y meta de la sesión
+- [ ] Decoración de ProseMirror en el bloque del cursor; el CSS atenúa el resto solo en el modo concentración.
+- [ ] Meta de palabras nuevas, sin bajar de cero al borrar, o de minutos en el modo con la ventana visible.
+- [ ] Progreso en la barra mínima y aviso discreto al cumplirla.
+- [ ] La meta se elige en el panel «Ambiente».
+- [ ] Tests de comportamiento: cuenta de palabras, de minutos con un reloj falso y aviso.
+
+## 11. Fondos y sonidos propios en la interfaz
+- [ ] «Añadir imagen» y «Añadir sonido» con el diálogo del sistema, con los filtros de tipo; la ruta va a `ambience.import`.
+- [ ] Los propios aparecen en el panel con su nombre y un botón para quitarlos.
+- [ ] Errores con su mensaje en español. Un sonido que no se puede decodificar se avisa y no suena.
+- [ ] Tests de comportamiento y comprobación en la app real con una imagen y un sonido propios.
+
+## 12. Fondos y sonidos incluidos
+- [ ] Proponer al autor una lista CC0, con enlace, autor, licencia y tamaño de cada archivo. **Descargar solo lo aprobado.**
+  - 3 tecleos: máquina de escribir, teclado mecánico y pluma;
+  - 4 ambientes: lluvia, chimenea, café y campo;
+  - las imágenes de los fondos.
+- [ ] `scripts/ambience.mjs` con ffmpeg:
+  - recorta y normaliza el volumen;
+  - convierte los ambientes a Opus (1–2 min), los tecleos a muestras cortas y las imágenes a WebP de 2560 px.
+- [ ] Al repo solo suben los archivos convertidos.
+- [ ] Créditos en el catálogo y `licenses/ambience.txt` generado por un plugin de Vite.
+- [ ] Test: cada entrada tiene su archivo y sus créditos, y el total no pasa de 15 MB.
+- [ ] Comprobar que Opus se decodifica en WebView2. Revisar la CI de macOS y de Linux (ver Riesgos del plan).
+
+## 13. Pruebas de extremo a extremo y rendimiento
+- [ ] El recorrido completo:
+  - F11;
+  - elegir fondo y ambiente;
+  - escribir con tecleo;
+  - Esc;
+  - cerrar y abrir la app con todo recordado.
+- [ ] Importar un fondo propio, borrar el original y comprobar que sigue.
+- [ ] Escribir con tecleo y fondo animado: p95 < 50 ms, o 150 ms en la CI de macOS.
+- [ ] El tecleo se programa en menos de 20 ms desde la pulsación, medido con un `AudioContext` instrumentado.
+- [ ] Todo en verde en los tres sistemas en la CI.
+
+## 14. Validación y cierre
+- [ ] Repasar los criterios de `spec.md` y marcar solo lo comprobado.
+- [ ] `tech-stack.md`: audio, protocolo `asset` y créditos del material incluido.
+- [ ] Pull request a `main` con la CI en verde.
+- [ ] Hoja de ruta: la 003 pasa a «Hecho» al fusionar.
