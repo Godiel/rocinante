@@ -114,17 +114,20 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real con una imagen y un sonido propios.
 
 ## 12. Fondos y sonidos incluidos
-- [ ] Proponer al autor una lista CC0, con enlace, autor, licencia y tamaño de cada archivo. **Descargar solo lo aprobado.**
-  - 3 tecleos: máquina de escribir, teclado mecánico y pluma;
+- [x] Proponer al autor una lista CC0, con enlace, autor, licencia y tamaño de cada archivo. **Descargar solo lo aprobado.**
+  - 3 tecleos: máquina de escribir, teclado mecánico y lápiz (no hay grabación CC0 de pluma);
   - 4 ambientes: lluvia, chimenea, café y campo;
   - las imágenes de los fondos.
-- [ ] `scripts/ambience.mjs` con ffmpeg:
+- [x] `scripts/ambience.mjs` con ffmpeg:
   - recorta y normaliza el volumen;
   - convierte los ambientes a Opus (1–2 min), los tecleos a muestras cortas y las imágenes a WebP de 2560 px.
-- [ ] Al repo solo suben los archivos convertidos.
-- [ ] Créditos en el catálogo y `licenses/ambience.txt` generado por un plugin de Vite.
-- [ ] Test: cada entrada tiene su archivo y sus créditos, y el total no pasa de 15 MB.
-- [ ] Comprobar que Opus se decodifica en WebView2. Revisar la CI de macOS y de Linux (ver Riesgos del plan).
+- [x] Al repo solo suben los archivos convertidos.
+- [x] Créditos en `features/ambience/credits.ts` y `licenses/ambience.txt` generado por un plugin de Vite.
+- [x] Test: cada entrada tiene su archivo y sus créditos, y el total no pasa de 15 MB.
+- [x] Comprobar que Opus se decodifica en WebView2.
+- [ ] Revisar la CI de macOS y de Linux (ver Riesgos del plan).
+- [ ] Café: grabación CC0 de Freesound, que pide cuenta para descargar (lo descarga el autor).
+- [ ] Imágenes: tres paisajes de Beruete en dominio público; Wikimedia limitó la descarga automática (lo descarga el autor).
 
 ## 13. Pruebas de extremo a extremo y rendimiento
 - [ ] El recorrido completo:
