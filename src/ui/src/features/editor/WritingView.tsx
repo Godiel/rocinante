@@ -28,6 +28,9 @@ import { FormatSheet } from "../format/FormatSheet";
 import { PageView } from "../pages/PageView";
 import { isPageViewShortcut } from "../pages/shortcuts";
 import { workClasses, workStyle } from "../format/work-style";
+import { FocusBar } from "../focus/FocusBar";
+import { tauriWindow } from "../focus/focus-window";
+import { useFocusMode } from "../focus/useFocusMode";
 import "./writing-view.css";
 
 /** A version shown in place of the page, with the text it is compared with. */
@@ -72,6 +75,14 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const opening = useRef({ project, place, origin });
   const mode = preferences.outline;
   const { index } = project;
+  const [screen] = useState(tauriWindow);
+  // Whether focus mode is on, for the shortcuts, which are bound once.
+  const focusedRef = useRef(false);
+  // What focus mode put away, to bring it back on leaving.
+  const putAway = useRef<{ outline: boolean; sheet: typeof sheet }>({
+    outline: false,
+    sheet: null,
+  });
 
   // First document to show.
   useEffect(() => {
@@ -91,6 +102,10 @@ export function WritingView({ project, place, preferences, origin }: WritingView
     currentId && index.trash.some((entry) => entry.id === currentId)
       ? (index.chapters[0]?.id ?? index.fragments[0]?.id ?? null)
       : currentId;
+  const shownRef = useRef(shownId);
+  useEffect(() => {
+    shownRef.current = shownId;
+  }, [shownId]);
 
   // Load the document whenever the writer picks another one.
   useEffect(() => {
@@ -128,6 +143,25 @@ export function WritingView({ project, place, preferences, origin }: WritingView
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (focusedRef.current) {
+        // In focus mode the big views stay away; a version is still kept, without the sheet.
+        if (isSaveVersionShortcut(event)) {
+          event.preventDefault();
+          const documentId = shownRef.current;
+          if (documentId) {
+            void savePendingNow()
+              .then(() => request("version.create", { documentId, name: null, origin: self }))
+              .catch((error: unknown) => setProblem(messageFor(error)));
+          }
+        } else if (
+          isPageViewShortcut(event) ||
+          isOutlineShortcut(event) ||
+          isVersionsShortcut(event)
+        ) {
+          event.preventDefault();
+        }
+        return;
+      }
       if (isPageViewShortcut(event)) {
         // In a browser F5 reloads the page: here it is the page view.
         event.preventDefault();
@@ -144,6 +178,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
         setNameRequest((asked) => asked + 1);
       }
     };
+    const self = opening.current.origin;
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
   }, []);
@@ -161,6 +196,36 @@ export function WritingView({ project, place, preferences, origin }: WritingView
       window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
     }
   }, [outlineOpen]);
+
+  const focusText = () =>
+    window.document
+      .querySelector<HTMLElement>(".book-page .ProseMirror")
+      ?.focus({ preventScroll: true });
+
+  // Focus mode puts away the index and the sheets, and brings them back as they were. The text
+  // keeps the keyboard, so the cursor stays where it was.
+  const focus = useFocusMode({
+    window: screen,
+    onEnter: () => {
+      putAway.current = { outline: outlineOpen, sheet };
+      outlineWasOpen.current = false;
+      setOutlineOpen(false);
+      setSheet(null);
+      setViewing(null);
+      setPagesOpen(false);
+      focusText();
+    },
+    onLeave: () => {
+      outlineWasOpen.current = putAway.current.outline;
+      setOutlineOpen(putAway.current.outline);
+      setSheet(putAway.current.sheet);
+      focusText();
+    },
+    onProblem: (error) => setProblem(messageFor(error)),
+  });
+  useEffect(() => {
+    focusedRef.current = focus.focused;
+  }, [focus.focused]);
 
   // A floating index steps aside as soon as the writer goes back to the text.
   const onFocusIn = (event: React.FocusEvent) => {
@@ -243,7 +308,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
     <div
       className={`writing-view ${workClasses(project.format)}${
         docked ? " writing-view-docked" : ""
-      }${sheet ? " writing-view-sheet" : ""}`}
+      }${sheet ? " writing-view-sheet" : ""}${focus.focused ? " writing-view-focus" : ""}`}
       style={workStyle(project.format)}
       onFocus={onFocusIn}
     >
@@ -282,6 +347,9 @@ export function WritingView({ project, place, preferences, origin }: WritingView
             onClick={() => update({ counterVisible: !preferences.counterVisible })}
           >
             Contador {preferences.counterVisible ? "sí" : "no"}
+          </button>
+          <button className="action" title="Modo concentración (F11)" onClick={focus.enter}>
+            Concentración
           </button>
           <button
             className="action"
@@ -400,6 +468,13 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           onSelect={(version) => void lookAt(version)}
           onClose={closeVersions}
           onProblem={setProblem}
+        />
+      )}
+
+      {focus.focused && (
+        <FocusBar
+          words={counts && counts.id === shownId ? counts.statistics.words : 0}
+          onLeave={focus.leave}
         />
       )}
 
