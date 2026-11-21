@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
-import type { WorkFormat } from "../../../src/ui/src/bridge/generated/protocol";
+import type { Ambience, WorkFormat } from "../../../src/ui/src/bridge/generated/protocol";
 import {
+  call,
   CHAPTER_WORDS,
   changeFormat,
   fillWork,
@@ -20,6 +21,8 @@ const VIRTUAL_MAC = Boolean(process.env.CI) && process.platform === "darwin";
 const MAX_P95_MS = VIRTUAL_MAC ? 150 : 50;
 /** The page view of a work of 150 000 words opens within this time. */
 const MAX_PAGE_VIEW_MS = VIRTUAL_MAC ? 6000 : 2000;
+/** A keystroke's sound is set going within this time of the key, so it is heard with the key. */
+const MAX_SOUND_DELAY_MS = VIRTUAL_MAC ? 60 : 20;
 
 /** Formats that set the text very differently, to type with each. */
 const FORMATS: [string, Partial<WorkFormat>][] = [
@@ -115,6 +118,62 @@ test.describe("a long work", () => {
     await desk.close(app);
     const again = await desk.open();
     await expect(chapterText(again.page)).toContainText("se le secó el celebro.");
+  });
+
+  test("in focus mode, with the typewriter heard and the rain falling on the window, typing keeps up", async ({
+    desk,
+  }) => {
+    const app = await longWork(desk);
+    const { preferences } = await call<{ preferences: { ambience: Ambience } }>(
+      app.page,
+      "app.start",
+      { origin: "test" },
+    );
+    await call(app.page, "preferences.update", {
+      changes: {
+        ambience: {
+          ...preferences.ambience,
+          background: "builtin:rain-window",
+          typing: { sound: "typewriter", volume: 0.6, muted: false },
+        },
+      },
+      origin: "test",
+    });
+    await cursorInTheMiddle(app.page);
+    await app.page.keyboard.press("F11");
+    await expect(app.page.locator("canvas.focus-backdrop-animated")).toBeVisible();
+
+    // From each key to the moment its sound is set going.
+    await app.page.evaluate(() => {
+      const delays: number[] = [];
+      (window as unknown as { delays: number[] }).delays = delays;
+      let key = 0;
+      document.addEventListener("keydown", (event) => (key = event.timeStamp), { capture: true });
+      const start = AudioBufferSourceNode.prototype.start;
+      AudioBufferSourceNode.prototype.start = function (...args) {
+        delays.push(performance.now() - key);
+        return start.apply(this, args);
+      };
+    });
+    // The first keystrokes wake the sound and load the recordings; they are not measured.
+    await app.page.keyboard.type(" En", { delay: 80 });
+    await app.page.waitForTimeout(500);
+    await app.page.evaluate(() => (window as unknown as { delays: number[] }).delays.splice(0));
+
+    const sentence = " Y así, del poco dormir y del mucho leer, se le secó el celebro.";
+    const times = await typeAndMeasure(app.page, sentence.repeat(2));
+    const delays = await app.page.evaluate(() =>
+      (window as unknown as { delays: number[] }).delays.splice(0),
+    );
+
+    const p95 = percentile(times, 95);
+    const soundP95 = percentile(delays, 95);
+    report(
+      `concentración con tecleo y lluvia animada: ${times.length} pulsaciones · p95 ${p95.toFixed(1)} ms · sonido p95 ${soundP95.toFixed(1)} ms · máx ${Math.max(...delays).toFixed(1)} ms`,
+    );
+    expect(p95).toBeLessThan(MAX_P95_MS);
+    expect(delays.length).toBeGreaterThan(times.length * 0.9);
+    expect(soundP95).toBeLessThan(MAX_SOUND_DELAY_MS);
   });
 
   test(`the page view of a work of ${WORK_WORDS} words opens in under ${MAX_PAGE_VIEW_MS / 1000} s`, async ({
