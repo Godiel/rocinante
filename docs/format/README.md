@@ -131,7 +131,7 @@ Dos `CHECK` de tabla exigen que los márgenes dejen una caja de texto de al meno
 
 ## Qué no está en el archivo
 
-La configuración del escritor (proyectos recientes, último capítulo abierto, posición del cursor, tema, preferencias y el formato que se sugiere para la próxima obra) vive en `settings.json`, en la carpeta de datos de la app, no en el proyecto. Al compartir un `.rocinante` solo se comparte la obra.
+La configuración del escritor (proyectos recientes, último capítulo abierto, posición del cursor, tema, preferencias, ambiente y el formato que se sugiere para la próxima obra) vive en `settings.json`, en la carpeta de datos de la app, no en el proyecto. Las copias de los fondos y sonidos propios del escritor viven junto a ella, en `ambience/`. Al compartir un `.rocinante` solo se comparte la obra.
 
 ## Migraciones
 

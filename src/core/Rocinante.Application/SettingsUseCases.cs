@@ -27,10 +27,12 @@ public sealed record StartState(
     IReadOnlyList<RecentProjectView> Recent,
     Preferences Preferences,
     string DefaultFolder,
-    WorkFormat SuggestedFormat);
+    WorkFormat SuggestedFormat,
+    IReadOnlyList<OwnAmbienceView> OwnAmbience);
 
 /// <summary>Preferences, recent projects, where the writer left each project, and what to open on start.</summary>
-public sealed class SettingsUseCases(Workspace workspace, ProjectUseCases projects, WriterSettings settings, IChangeNotifier notifier, string defaultFolder, string? launchFile)
+public sealed class SettingsUseCases(
+    Workspace workspace, ProjectUseCases projects, AmbienceUseCases ambience, WriterSettings settings, IChangeNotifier notifier, string defaultFolder, string? launchFile)
 {
     private string? _launchFile = launchFile;
 
@@ -122,5 +124,6 @@ public sealed class SettingsUseCases(Workspace workspace, ProjectUseCases projec
             Recent(),
             settings.Preferences,
             defaultFolder,
-            settings.SuggestedFormat);
+            settings.SuggestedFormat,
+            ambience.Own());
 }

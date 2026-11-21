@@ -29,4 +29,7 @@ public interface IChangeNotifier
     void PreferencesChanged(Preferences preferences, string origin);
 
     void RecentChanged(IReadOnlyList<RecentProjectView> recent, string origin);
+
+    /// <summary>The writer added or removed one of their own images or sounds.</summary>
+    void AmbienceChanged(IReadOnlyList<OwnAmbienceView> own, string origin);
 }

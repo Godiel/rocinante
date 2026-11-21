@@ -3,45 +3,45 @@
 Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests en verde, y con una comprobación en la app real cuando toca la interfaz, antes de pasar al siguiente. Rama: `feature/003-modo-concentracion`.
 
 ## 1. Contrato de mensajes (versión 6)
-- [ ] `Ambience` en `protocol.json`, con estos campos:
+- [x] `Ambience` en `protocol.json`, con estos campos:
   - `background`;
   - `typing { sound, volume, muted }`;
   - `ambients [{ id, level }]`;
   - `ambientVolume` y `ambientMuted`;
   - `dimOthers`;
   - `goal { kind, amount }`.
-- [ ] `Preferences.ambience` y `PreferencesChange.ambience`.
-- [ ] `OwnAmbience { id, kind, name }` y `StartState.ownAmbience`.
-- [ ] `ambience.import` y `ambience.remove`, que difunden `ambience.changed`.
-- [ ] Motivos de error `notAnImage`, `notASound` y `fileTooLarge`, con sus mensajes en español en `messages.ts`.
-- [ ] Ejemplos válidos e inválidos de cada método.
-- [ ] Regenerar los tipos de TypeScript y subir `protocolVersion` a 6.
+- [x] `Preferences.ambience` y `PreferencesChange.ambience`.
+- [x] `OwnAmbience { id, kind, name }` y `StartState.ownAmbience`.
+- [x] `ambience.import` y `ambience.remove`, que difunden `ambience.changed`.
+- [x] Motivos de error `notAnImage`, `notASound` y `fileTooLarge`, con sus mensajes en español en `messages.ts`.
+- [x] Ejemplos válidos e inválidos de cada método.
+- [x] Regenerar los tipos de TypeScript y subir `protocolVersion` a 6.
 
 ## 2. Preferencias de ambiente en el núcleo
-- [ ] `Ambience` en `Rocinante.Application/Settings`, con sus límites:
+- [x] `Ambience` en `Rocinante.Application/Settings`, con sus límites:
   - volúmenes y niveles de 0 a 1;
   - ningún ambiente repetido;
   - como mucho 6 a la vez;
   - meta de 50 a 50 000 palabras o de 5 a 600 minutos;
   - identificadores `builtin:<nombre>` u `own:<uuid>`.
-- [ ] `Ambience.Default`, que forma parte de `Preferences.Default`.
-- [ ] `JsonSettingsStore` lee el ambiente campo a campo. Un valor inválido vuelve al de por defecto sin perder el resto.
-- [ ] `preferences.update` con `ambience`. El escenario `WritingSession` lo usa.
-- [ ] Tests del núcleo: límites, ida y vuelta, valores rotos en el archivo y un `settings.json` de la 002 sin ambiente.
+- [x] `Ambience.Default`, que forma parte de `Preferences.Default`.
+- [x] `JsonSettingsStore` lee el ambiente campo a campo. Un valor inválido vuelve al de por defecto sin perder el resto.
+- [x] `preferences.update` con `ambience`. El escenario `WritingSession` lo usa.
+- [x] Tests del núcleo: límites, ida y vuelta, valores rotos en el archivo y un `settings.json` de la 002 sin ambiente.
 
 ## 3. Fondos y sonidos propios en el núcleo
-- [ ] `AmbienceUseCases.Import(path, kind)`:
+- [x] `AmbienceUseCases.Import(path, kind)`:
   - comprueba la firma del archivo: PNG, JPEG o WebP para imágenes; Ogg, MP3, WAV o FLAC para sonidos;
   - comprueba el tamaño: 30 MB por imagen y 100 MB por sonido;
   - hace una copia atómica en `<datos>/ambience/<uuid>.<ext>`.
-- [ ] La lista de los propios se guarda en `settings.json`, con el nombre del archivo original.
-- [ ] `Remove(id)` borra la copia y deja de usarla en las preferencias.
-- [ ] Al arrancar se limpia:
+- [x] La lista de los propios se guarda en `settings.json`, con el nombre del archivo original.
+- [x] `Remove(id)` borra la copia y deja de usarla en las preferencias.
+- [x] Al arrancar se limpia:
   - se quitan de la lista las copias que faltan;
   - se borran los archivos huérfanos.
-- [ ] Ningún registro lleva el nombre ni la ruta de los archivos del escritor.
-- [ ] Métodos JSON-RPC y notificación `ambience.changed`. El escenario de contrato los usa.
-- [ ] Tests:
+- [x] Ningún registro lleva el nombre ni la ruta de los archivos del escritor.
+- [x] Métodos JSON-RPC y notificación `ambience.changed`. El escenario de contrato los usa.
+- [x] Tests:
   - firmas válidas y falsas;
   - archivos demasiado grandes;
   - original borrado tras importar;

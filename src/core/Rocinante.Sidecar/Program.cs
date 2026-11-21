@@ -36,7 +36,8 @@ var options = new CoreOptions(
     TimeProvider.System,
     defaultFolder,
     arguments.OpenFile,
-    new LoggedProblems(log));
+    new LoggedProblems(log),
+    new AmbienceFolder(dataDirectory));
 
 var contract = ProtocolContract.LoadEmbedded();
 using var core = new Core(output, new LogWriter(log, LogEventLevel.Error), options, contract);

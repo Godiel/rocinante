@@ -20,7 +20,8 @@ internal sealed class ServerHarness : IDisposable
             Clock,
             PathOf("Documentos/Rocinante"),
             launchFile,
-            Problems);
+            Problems,
+            new AmbienceFolder(PathOf("datos")));
         _core = new Core(_output, Log, options, Contract);
     }
 
