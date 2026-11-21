@@ -84,7 +84,7 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 ## 8. Motor de sonido y tecleo
 - [x] `src/ui/src/audio`:
   - un `AudioContext` único, creado cuando el tecleo empieza a sonar y activado con la primera pulsación;
-  - una cadena de ganancias para el tecleo (la de los ambientes llega en el bloque 9).
+  - una cadena de ganancias para el tecleo y otra para los ambientes.
 - [x] Plugin de ProseMirror que hace sonar el tecleo con texto, Intro y borrar; los atajos, las flechas y las teclas muertas no suenan.
 - [x] Varias muestras por tecleo, elegidas al azar, con una pequeña variación de tono.
 - [x] La máquina de escribir suena a retorno de carro con Intro y tiene su campanilla.
@@ -93,12 +93,12 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests con un `AudioContext` falso: qué pulsaciones suenan y con qué volumen.
 
 ## 9. Ambientes de fondo
-- [ ] Bucle con fundido cruzado de dos copias del buffer.
-- [ ] Mezcla de varios ambientes, cada uno con su nivel.
-- [ ] Volumen general y silencio, con rampas de 100 ms.
-- [ ] Los sonidos paran con un fundido al cerrar la obra.
-- [ ] El panel «Ambiente» muestra cada ambiente con su nivel.
-- [ ] Tests con un `AudioContext` falso y comprobación de oído en la app real.
+- [x] Bucle con fundido cruzado de dos copias del buffer.
+- [x] Mezcla de varios ambientes, cada uno con su nivel.
+- [x] Volumen general y silencio, con rampas de 100 ms.
+- [x] Los sonidos paran con un fundido al cerrar la obra. Solo suenan en la ventana principal: cada ventana tiene su propio audio, y dos tocarían la lluvia dos veces.
+- [x] El panel «Ambiente» muestra cada ambiente con su nivel.
+- [x] Tests con un `AudioContext` falso y comprobación de oído en la app real.
 
 ## 10. Atenuar el resto y meta de la sesión
 - [ ] Decoración de ProseMirror en el bloque del cursor; el CSS atenúa el resto solo en el modo concentración.
