@@ -195,7 +195,10 @@ test.describe("a long work", () => {
       const paragraph =
         anchor instanceof Element ? anchor.closest("p") : anchor?.parentElement?.closest("p");
       const index = paragraph && text ? [...text.querySelectorAll("p")].indexOf(paragraph) : -1;
-      return `cursor in paragraph ${index}, text focused: ${document.activeElement === text}`;
+      const head = (
+        text as unknown as { editor?: { state: { selection: { head: number } } } } | null
+      )?.editor?.state.selection.head;
+      return `cursor in paragraph ${index} at ${head}, text focused: ${document.activeElement === text}`;
     });
 
     const started = Date.now();
@@ -221,13 +224,20 @@ test.describe("a long work", () => {
           })
           .map((sheet) => Number(sheet.getAttribute("aria-label")!.split(" ")[1])),
       );
+    const scrolled = () =>
+      app.page.evaluate(() => {
+        const area = document.querySelector(".page-view-scroller");
+        return area
+          ? `scrolled ${Math.round(area.scrollTop)} of ${area.scrollHeight}, in sight ${area.clientHeight}`
+          : "no scroller";
+      });
     await expect
       .poll(
         async () => {
           const shown = await inSight();
           return shown.length > 0 && Math.min(...shown) > 10 && Math.max(...shown) < 80
             ? "on the page of the cursor"
-            : `pages in sight: ${shown.join(", ")} (${cursorWas})`;
+            : `pages in sight: ${shown.join(", ")} (${cursorWas}; ${await scrolled()})`;
         },
         { timeout: 5000 },
       )
