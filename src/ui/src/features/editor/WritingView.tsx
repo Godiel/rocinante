@@ -34,6 +34,7 @@ import { useFocusMode } from "../focus/useFocusMode";
 import { AmbienceSheet } from "../ambience/AmbienceSheet";
 import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
+import { AnimatedBackdrop } from "../ambience/animated/AnimatedBackdrop";
 import "./writing-view.css";
 
 /** A version shown in place of the page, with the text it is compared with. */
@@ -307,9 +308,8 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const isEmpty = index.chapters.length === 0 && index.fragments.length === 0;
   // In focus mode the chosen background shows behind translucent paper.
   const allBackdrops = useMemo(() => backdrops([], convertFileSrc), []);
-  const paint = focus.focused
-    ? paintOf(backdropOf(preferences.ambience.background, allBackdrops), preferences.theme)
-    : null;
+  const backdrop = focus.focused ? backdropOf(preferences.ambience.background, allBackdrops) : null;
+  const paint = backdrop ? paintOf(backdrop, preferences.theme) : null;
   const toggleAmbience = () => (sheet === "ambience" ? closeSheet() : openSheet("ambience"));
   const docked = outlineOpen && mode === "docked";
 
@@ -418,6 +418,9 @@ export function WritingView({ project, place, preferences, origin }: WritingView
       )}
 
       {paint && <div className="focus-backdrop" style={{ background: paint }} />}
+      {backdrop?.kind === "animated" && (
+        <AnimatedBackdrop scene={backdrop.scene} theme={preferences.theme} />
+      )}
 
       <main className="writing-main">
         {problem && (

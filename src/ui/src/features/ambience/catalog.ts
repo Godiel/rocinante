@@ -1,4 +1,5 @@
 import type { OwnAmbience, Theme } from "../../bridge/generated/protocol";
+import type { SceneName } from "./animated/scenes";
 
 /** Who made something that comes with the app, and under what licence. */
 export interface Credit {
@@ -13,6 +14,8 @@ export type Backdrop =
   | { kind: "plain"; id: string; name: string }
   /** A colour or a gradient, one for each theme so night stays night. */
   | { kind: "colour"; id: string; name: string; paint: Record<Theme, string> }
+  /** A scene drawn on a canvas over a colour, moving slowly; still if the system asks for less motion. */
+  | { kind: "animated"; id: string; name: string; paint: Record<Theme, string>; scene: SceneName }
   /** A picture, built in or the writer's own, shown whole over the window. */
   | { kind: "image"; id: string; name: string; url: string; credit: Credit | null };
 
@@ -58,6 +61,36 @@ export const BUILT_IN_BACKDROPS: Backdrop[] = [
     },
   },
   {
+    kind: "animated",
+    id: "builtin:rain-window",
+    name: "Lluvia en el cristal",
+    scene: "rain",
+    paint: {
+      paper: "linear-gradient(180deg, #9fb0bb 0%, #7d909c 100%)",
+      candlelight: "linear-gradient(180deg, #1b2228 0%, #11171b 100%)",
+    },
+  },
+  {
+    kind: "animated",
+    id: "builtin:candle",
+    name: "Una vela",
+    scene: "candle",
+    paint: {
+      paper: "radial-gradient(circle at 14% 72%, #8a6a4a 0%, #4a3a2c 45%, #2a221b 100%)",
+      candlelight: "radial-gradient(circle at 14% 72%, #3a2a1c 0%, #1c1510 45%, #0e0b08 100%)",
+    },
+  },
+  {
+    kind: "animated",
+    id: "builtin:clouds",
+    name: "Nubes lentas",
+    scene: "clouds",
+    paint: {
+      paper: "linear-gradient(180deg, #a9c6dc 0%, #d9e5ec 100%)",
+      candlelight: "linear-gradient(180deg, #121a24 0%, #1c2430 100%)",
+    },
+  },
+  {
     kind: "colour",
     id: "builtin:night",
     name: "Noche de ronda",
@@ -98,6 +131,7 @@ export function paintOf(backdrop: Backdrop, theme: Theme): string | null {
     case "plain":
       return null;
     case "colour":
+    case "animated":
       return backdrop.paint[theme];
     case "image":
       return `center / cover no-repeat url("${backdrop.url.replace(/"/g, "%22")}")`;
