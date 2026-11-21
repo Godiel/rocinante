@@ -49,10 +49,10 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
   - limpieza al arrancar.
 
 ## 4. Host
-- [ ] Permiso `core:window:allow-set-fullscreen` en `capabilities/default.json`.
-- [ ] Protocolo `asset` de Tauri con alcance solo en `$APPDATA/ambience/*`.
-- [ ] Relay de pruebas: servir `/ambience/` desde la carpeta de datos; `convertFileSrc` en el shim.
-- [ ] `cargo fmt`, `clippy` y `test` en verde.
+- [x] Permiso `core:window:allow-set-fullscreen` en `capabilities/default.json`.
+- [x] Protocolo `asset` de Tauri con alcance solo en la carpeta `ambience` de los datos de la app, concedido por el host al arrancar (con la carpeta ya creada: en Windows, la regla de `tauri.conf.json` no coincidía con la ruta real).
+- [x] Relay de pruebas: servir `/ambience/` desde la carpeta de datos; `convertFileSrc` en el shim.
+- [x] `cargo fmt`, `clippy` y `test` en verde.
 
 ## 5. Modo concentración
 - [ ] `features/focus`: F11 entra y sale; Esc sale, salvo con un menú del editor abierto, que se cierra primero.

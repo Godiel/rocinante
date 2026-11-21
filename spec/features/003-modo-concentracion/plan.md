@@ -78,7 +78,7 @@ Los fondos y sonidos **propios** son la única parte que toca archivos. Pasan po
    - Los registros nunca llevan el nombre ni la ruta de los archivos del escritor.
 4. **Host** — `src/host`.
    - Permiso `core:window:allow-set-fullscreen` para el modo concentración.
-   - Protocolo `asset` de Tauri con el alcance limitado a `$APPDATA/ambience/*`: la interfaz puede leer esas copias y nada más.
+   - Protocolo `asset` de Tauri, con el alcance limitado a la carpeta `ambience` de los datos de la app: la interfaz puede leer esas copias y nada más. El host concede ese alcance al arrancar, después de crear la carpeta, porque en Windows la regla escrita en `tauri.conf.json` no coincide con la ruta real.
    - En las pruebas de extremo a extremo, el relay sirve esa carpeta en `/ambience/` y el shim implementa `convertFileSrc`.
 5. **Modo concentración** — `features/focus`.
    - F11 entra y sale; Esc sale si el editor no tiene un menú abierto que cerrar; hay un botón en la barra de la obra.
