@@ -187,6 +187,16 @@ test.describe("a long work", () => {
   }) => {
     const app = await longWork(desk);
     await cursorInTheMiddle(app.page);
+    // Where the cursor was when F5 was pressed, to tell a click that missed from a view that
+    // opened in the wrong place.
+    const cursorWas = await app.page.evaluate(() => {
+      const text = document.querySelector(".book-page .ProseMirror");
+      const anchor = document.getSelection()?.anchorNode ?? null;
+      const paragraph =
+        anchor instanceof Element ? anchor.closest("p") : anchor?.parentElement?.closest("p");
+      const index = paragraph && text ? [...text.querySelectorAll("p")].indexOf(paragraph) : -1;
+      return `cursor in paragraph ${index}, text focused: ${document.activeElement === text}`;
+    });
 
     const started = Date.now();
     await app.page.keyboard.press("F5");
@@ -217,7 +227,7 @@ test.describe("a long work", () => {
           const shown = await inSight();
           return shown.length > 0 && Math.min(...shown) > 10 && Math.max(...shown) < 80
             ? "on the page of the cursor"
-            : `pages in sight: ${shown.join(", ")}`;
+            : `pages in sight: ${shown.join(", ")} (${cursorWas})`;
         },
         { timeout: 5000 },
       )
