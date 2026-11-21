@@ -104,3 +104,18 @@ for (const [name, kinds] of Object.entries(sounds)) {
   if (kinds.bell) encode(kinds.bell(), join(folder, "bell.ogg"));
 }
 console.log("placeholder sounds in", root);
+
+// Ambient sounds: twenty seconds of shaped noise each, to loop. Placeholders as well.
+const ambients = {
+  rain: "anoisesrc=d=20:c=pink:a=0.5:seed=11,lowpass=f=6000,highpass=f=200",
+  fire: "anoisesrc=d=20:c=brown:a=0.6:seed=12,lowpass=f=900,tremolo=f=3:d=0.4,volume=1.4",
+  cafe: "anoisesrc=d=20:c=brown:a=0.5:seed=13,bandpass=f=500:w=600,tremolo=f=0.7:d=0.3,volume=1.6",
+  field:
+    "anoisesrc=d=20:c=pink:a=0.25:seed=14,highpass=f=1500,lowpass=f=7000,tremolo=f=0.2:d=0.5",
+};
+const ambientFolder = resolve(root, "..", "ambient");
+mkdirSync(ambientFolder, { recursive: true });
+for (const [name, source] of Object.entries(ambients)) {
+  encode(source, join(ambientFolder, `${name}.ogg`));
+}
+console.log("placeholder ambients in", ambientFolder);
