@@ -75,11 +75,11 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real con los dos temas.
 
 ## 7. Fondos animados
-- [ ] Lluvia en un cristal, vela y nubes en `canvas`, a 30 fotogramas por segundo como mucho.
-- [ ] El dibujo es una función pura de estado y tiempo, con tests sin navegador.
-- [ ] Se pausan con la ventana oculta.
-- [ ] Con `prefers-reduced-motion: reduce` se quedan quietos.
-- [ ] Comprobación en la app real: escribir con un fondo animado sigue siendo fluido.
+- [x] Lluvia en un cristal, vela y nubes en `canvas`, a 30 fotogramas por segundo como mucho.
+- [x] El dibujo es una función pura de estado y tiempo, con tests sin navegador.
+- [x] Se pausan con la ventana oculta.
+- [x] Con `prefers-reduced-motion: reduce` se quedan quietos.
+- [x] Comprobación en la app real: escribir con un fondo animado sigue siendo fluido.
 
 ## 8. Motor de sonido y tecleo
 - [ ] `src/ui/src/audio`:
