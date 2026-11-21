@@ -50,7 +50,7 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 
 ## 4. Host
 - [x] Permiso `core:window:allow-set-fullscreen` en `capabilities/default.json`.
-- [x] Protocolo `asset` de Tauri con alcance solo en la carpeta `ambience` de los datos de la app, concedido por el host al arrancar (con la carpeta ya creada: en Windows, la regla de `tauri.conf.json` no coincidía con la ruta real).
+- [x] Protocolo propio `ambience://` en el host: sirve solo las copias de la carpeta `ambience` por su nombre exacto (`<uuid>.<ext>`). Sustituye al protocolo `asset` de Tauri, cuya regla de rutas fallaba en Windows con archivos ya existentes (bloque 11).
 - [x] Relay de pruebas: servir `/ambience/` desde la carpeta de datos; `convertFileSrc` en el shim.
 - [x] `cargo fmt`, `clippy` y `test` en verde.
 
@@ -108,10 +108,10 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento: cuenta de palabras, de minutos con un reloj falso y aviso.
 
 ## 11. Fondos y sonidos propios en la interfaz
-- [ ] «Añadir imagen» y «Añadir sonido» con el diálogo del sistema, con los filtros de tipo; la ruta va a `ambience.import`.
-- [ ] Los propios aparecen en el panel con su nombre y un botón para quitarlos.
-- [ ] Errores con su mensaje en español. Un sonido que no se puede decodificar se avisa y no suena.
-- [ ] Tests de comportamiento y comprobación en la app real con una imagen y un sonido propios.
+- [x] «Añadir imagen» y «Añadir sonido» con el diálogo del sistema, con los filtros de tipo; la ruta va a `ambience.import`.
+- [x] Los propios aparecen en el panel con su nombre y un botón para quitarlos.
+- [x] Errores con su mensaje en español. Un sonido que no se puede decodificar se avisa y no suena.
+- [x] Tests de comportamiento y comprobación en la app real con una imagen y un sonido propios.
 
 ## 12. Fondos y sonidos incluidos
 - [ ] Proponer al autor una lista CC0, con enlace, autor, licencia y tamaño de cada archivo. **Descargar solo lo aprobado.**
@@ -140,6 +140,6 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 
 ## 14. Validación y cierre
 - [ ] Repasar los criterios de `spec.md` y marcar solo lo comprobado.
-- [ ] `tech-stack.md`: audio, protocolo `asset` y créditos del material incluido.
+- [ ] `tech-stack.md`: audio, protocolo `ambience://` y créditos del material incluido.
 - [ ] Pull request a `main` con la CI en verde.
 - [ ] Hoja de ruta: la 003 pasa a «Hecho» al fusionar.

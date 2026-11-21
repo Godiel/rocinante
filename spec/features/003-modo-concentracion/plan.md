@@ -29,7 +29,7 @@ Los fondos y sonidos **propios** son la única parte que toca archivos. Pasan po
  Interfaz ── modo concentración (F11 / Esc) ── pantalla completa (host)
         ├── fondo: CSS (colores, imágenes) o canvas (animados)
         └── motor de sonido (Web Audio): tecleo + ambientes en bucle
-                 └─ archivos propios por el protocolo asset del host, solo de <datos>/ambience
+                 └─ archivos propios por el protocolo ambience:// del host, solo de <datos>/ambience
 ```
 
 - **Un solo objeto `Ambience`** en las preferencias:
@@ -78,7 +78,7 @@ Los fondos y sonidos **propios** son la única parte que toca archivos. Pasan po
    - Los registros nunca llevan el nombre ni la ruta de los archivos del escritor.
 4. **Host** — `src/host`.
    - Permiso `core:window:allow-set-fullscreen` para el modo concentración.
-   - Protocolo `asset` de Tauri, con el alcance limitado a la carpeta `ambience` de los datos de la app: la interfaz puede leer esas copias y nada más. El host concede ese alcance al arrancar, después de crear la carpeta, porque en Windows la regla escrita en `tauri.conf.json` no coincide con la ruta real.
+   - Protocolo propio `ambience://`: el host sirve las copias de la carpeta `ambience` de los datos de la app por su nombre (`<uuid>.<ext>`) y nada más. Se descartó el protocolo `asset` de Tauri: en Windows su regla de rutas no coincidía de forma fiable con los archivos ya existentes.
    - En las pruebas de extremo a extremo, el relay sirve esa carpeta en `/ambience/` y el shim implementa `convertFileSrc`.
 5. **Modo concentración** — `features/focus`.
    - F11 entra y sale; Esc sale si el editor no tiene un menú abierto que cerrar; hay un botón en la barra de la obra.
@@ -132,7 +132,7 @@ Los fondos y sonidos **propios** son la única parte que toca archivos. Pasan po
     - El tecleo se programa en menos de 20 ms desde la pulsación: se mide con un `AudioContext` instrumentado.
 14. **Validación y cierre.**
     - Criterios de `spec.md`.
-    - `tech-stack.md`: audio, protocolo asset y créditos.
+    - `tech-stack.md`: audio, protocolo `ambience://` y créditos.
     - Pull request a `main` con la CI en verde.
     - Hoja de ruta.
 
@@ -142,7 +142,7 @@ Los fondos y sonidos **propios** son la única parte que toca archivos. Pasan po
 - **Web Audio y no `<audio>`** — Web Audio programa cada sonido con poca latencia, mezcla y hace fundidos sin cortes. La etiqueta `<audio>` tiene retrasos variables y huecos en los bucles.
 - **El tecleo depende de lo que cambia, no de la tecla** — así no suenan los atajos ni las teclas muertas de los acentos, y encaja con cómo ya cuenta palabras el editor.
 - **Animados por código** — un `canvas` sobre un fondo fijo pesa casi nada, se pausa y respeta «reducir el movimiento». Un vídeo en bucle pesaría de 5 a 20 MB y cargaría la tarjeta gráfica mientras se escribe.
-- **Los propios se copian** — la copia en la carpeta de datos hace que un fondo no se rompa al mover el original. El protocolo `asset` solo puede leer esa carpeta.
+- **Los propios se copian** — la copia en la carpeta de datos hace que un fondo no se rompa al mover el original. El protocolo `ambience://` solo sirve las copias de esa carpeta, por su nombre exacto.
 - **El núcleo valida por firma** — la extensión puede mentir. Se leen los primeros bytes, y el navegador decodifica el resto. Si un sonido con firma válida no se puede decodificar, la interfaz lo dice y no suena.
 - **Material CC0, unos 15 MB en total** — de dominio público, compatible con MIT y sin obligación de atribución. Aun así, se acredita a cada autor por cortesía.
 - **Opus para lo incluido** — da la mejor calidad por tamaño. Con el fundido cruzado, el relleno del códec al principio y al final no importa.
