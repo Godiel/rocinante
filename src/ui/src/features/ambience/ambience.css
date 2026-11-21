@@ -1,0 +1,78 @@
+/* The ambience sheet, and the background behind the text in focus mode. */
+
+.ambience-label {
+  margin: var(--space-4) 0 var(--space-1);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  color: var(--color-ink-soft);
+}
+
+.ambience-hint {
+  margin: 0 0 var(--space-3);
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
+
+.ambience-backdrops {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.ambience-backdrop {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  font: inherit;
+  text-align: left;
+  color: var(--color-ink);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.ambience-backdrop:hover {
+  border-color: var(--color-rule);
+}
+
+.ambience-backdrop[aria-checked="true"] {
+  border-color: var(--color-rubric);
+}
+
+.ambience-swatch {
+  display: block;
+  height: 3.5rem;
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: 2px;
+}
+
+.ambience-name {
+  font-size: var(--text-caption);
+}
+
+/* In focus mode the sheet has the whole height: there is no bar above it. */
+.writing-view-focus .sheet {
+  top: 0;
+}
+
+/* The background fills the window behind everything; the text sits on translucent paper. */
+.focus-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.writing-view-backdrop .writing-main {
+  position: relative;
+  z-index: 1;
+}
+
+.writing-view-backdrop .book-frame {
+  min-height: 100vh;
+  background: var(--sheet-colour);
+  box-shadow: 0 0 2.5rem rgb(0 0 0 / 0.18);
+  backdrop-filter: blur(6px);
+}

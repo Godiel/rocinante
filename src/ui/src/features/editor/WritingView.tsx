@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onNotification, request } from "../../bridge/core";
 import type {
@@ -31,6 +31,9 @@ import { workClasses, workStyle } from "../format/work-style";
 import { FocusBar } from "../focus/FocusBar";
 import { tauriWindow } from "../focus/focus-window";
 import { useFocusMode } from "../focus/useFocusMode";
+import { AmbienceSheet } from "../ambience/AmbienceSheet";
+import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
+import { sheetColour } from "../ambience/sheet";
 import "./writing-view.css";
 
 /** A version shown in place of the page, with the text it is compared with. */
@@ -65,8 +68,8 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const [problem, setProblem] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(preferences.outline === "docked");
   const [deleted, setDeleted] = useState<DocumentEntry | null>(null);
-  // One sheet at a time on the right of the text: the versions or the format.
-  const [sheet, setSheet] = useState<"versions" | "format" | null>(null);
+  // One sheet at a time on the right of the text: the versions, the format or the ambience.
+  const [sheet, setSheet] = useState<"versions" | "format" | "ambience" | null>(null);
   const versionsOpen = sheet === "versions";
   const [pagesOpen, setPagesOpen] = useState(false);
   const [nameRequest, setNameRequest] = useState(0);
@@ -271,9 +274,9 @@ export function WritingView({ project, place, preferences, origin }: WritingView
     window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
   }
 
-  function openFormat() {
+  function openSheet(which: "format" | "ambience") {
     setViewing(null);
-    setSheet("format");
+    setSheet(which);
   }
 
   function closeSheet() {
@@ -302,14 +305,25 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const shownViewing = viewing && viewing.version.documentId === shownId ? viewing : null;
 
   const isEmpty = index.chapters.length === 0 && index.fragments.length === 0;
+  // In focus mode the chosen background shows behind translucent paper.
+  const allBackdrops = useMemo(() => backdrops([], convertFileSrc), []);
+  const paint = focus.focused
+    ? paintOf(backdropOf(preferences.ambience.background, allBackdrops), preferences.theme)
+    : null;
+  const toggleAmbience = () => (sheet === "ambience" ? closeSheet() : openSheet("ambience"));
   const docked = outlineOpen && mode === "docked";
 
   return (
     <div
       className={`writing-view ${workClasses(project.format)}${
         docked ? " writing-view-docked" : ""
-      }${sheet ? " writing-view-sheet" : ""}${focus.focused ? " writing-view-focus" : ""}`}
-      style={workStyle(project.format)}
+      }${sheet ? " writing-view-sheet" : ""}${focus.focused ? " writing-view-focus" : ""}${paint ? " writing-view-backdrop" : ""}`}
+      style={
+        {
+          ...workStyle(project.format),
+          "--sheet-colour": sheetColour(preferences.theme),
+        } as React.CSSProperties
+      }
       onFocus={onFocusIn}
     >
       <header className="writing-bar small-caps">
@@ -348,6 +362,9 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           >
             Contador {preferences.counterVisible ? "sí" : "no"}
           </button>
+          <button className="action" aria-expanded={sheet === "ambience"} onClick={toggleAmbience}>
+            Ambiente
+          </button>
           <button className="action" title="Modo concentración (F11)" onClick={focus.enter}>
             Concentración
           </button>
@@ -362,7 +379,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           <button
             className="action"
             aria-expanded={sheet === "format"}
-            onClick={() => (sheet === "format" ? closeSheet() : openFormat())}
+            onClick={() => (sheet === "format" ? closeSheet() : openSheet("format"))}
           >
             Formato
           </button>
@@ -399,6 +416,8 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           onProblem={setProblem}
         />
       )}
+
+      {paint && <div className="focus-backdrop" style={{ background: paint }} />}
 
       <main className="writing-main">
         {problem && (
@@ -458,6 +477,17 @@ export function WritingView({ project, place, preferences, origin }: WritingView
         />
       )}
 
+      {sheet === "ambience" && (
+        <AmbienceSheet
+          ambience={preferences.ambience}
+          backdrops={allBackdrops}
+          theme={preferences.theme}
+          origin={origin}
+          onClose={closeSheet}
+          onProblem={setProblem}
+        />
+      )}
+
       {versionsOpen && shownId && (
         <Versions
           documentId={shownId}
@@ -475,7 +505,16 @@ export function WritingView({ project, place, preferences, origin }: WritingView
         <FocusBar
           words={counts && counts.id === shownId ? counts.statistics.words : 0}
           onLeave={focus.leave}
-        />
+        >
+          <button
+            type="button"
+            className="action"
+            aria-expanded={sheet === "ambience"}
+            onClick={toggleAmbience}
+          >
+            Ambiente
+          </button>
+        </FocusBar>
       )}
 
       <Counter
