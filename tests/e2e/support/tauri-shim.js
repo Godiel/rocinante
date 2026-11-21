@@ -26,6 +26,9 @@
     emit(event, payload);
   };
 
+  // Whether the page asked to go full screen; a browser test cannot leave the window.
+  let fullscreen = false;
+
   async function invoke(command, args = {}) {
     switch (command) {
       case "core_request": {
@@ -46,6 +49,11 @@
       }
       case "plugin:dialog|open":
         return picks.shift() ?? null;
+      case "plugin:window|set_fullscreen":
+        fullscreen = Boolean(args.value);
+        return null;
+      case "plugin:window|is_fullscreen":
+        return fullscreen;
       case "plugin:window|destroy":
         await fetch("/window/destroy", { method: "POST" });
         return null;
@@ -70,7 +78,8 @@
       return id;
     },
     unregisterCallback: (id) => callbacks.delete(id),
-    convertFileSrc: (path) => path,
+    // The relay serves the ambience folder of the data folder, as the asset protocol does.
+    convertFileSrc: (path) => `/ambience/${encodeURIComponent(path.split(/[\\/]/).pop())}`,
   };
   window.__TAURI_EVENT_PLUGIN_INTERNALS__ = {
     unregisterListener: (event, id) => listeners.get(event)?.delete(id),

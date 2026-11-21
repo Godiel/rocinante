@@ -31,6 +31,9 @@ export const CORE_LIBRARY = join(
 /** Same code as the host uses for "the core is not there right now". */
 const CORE_UNAVAILABLE = -32000;
 
+/** Where the page reads the writer's own files; the shim's convertFileSrc points here. */
+const AMBIENCE_PATH = "/ambience/";
+
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -39,6 +42,13 @@ const TYPES: Record<string, string> = {
   ".woff2": "font/woff2",
   ".woff": "font/woff",
   ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".webp": "image/webp",
+  ".ogg": "audio/ogg",
+  ".opus": "audio/ogg",
+  ".mp3": "audio/mpeg",
+  ".wav": "audio/wav",
+  ".flac": "audio/flac",
   ".ico": "image/x-icon",
 };
 
@@ -74,6 +84,28 @@ function readBody(request: IncomingMessage): Promise<string> {
 function sendJson(response: ServerResponse, body: unknown) {
   response.writeHead(200, { "content-type": "application/json; charset=utf-8" });
   response.end(JSON.stringify(body));
+}
+
+/**
+ * The writer's own images and sounds, as the host's asset protocol serves them: only files
+ * directly inside the ambience folder of the data folder.
+ */
+function serveAmbience(folder: string, name: string, response: ServerResponse) {
+  const file = join(folder, decodeURIComponent(name));
+  if (
+    !file.startsWith(folder + sep) ||
+    file.slice(folder.length + 1).includes(sep) ||
+    !existsSync(file)
+  ) {
+    response.writeHead(404);
+    response.end();
+    return;
+  }
+  response.writeHead(200, {
+    "content-type": TYPES[extname(file)] ?? "application/octet-stream",
+    "cache-control": "no-store",
+  });
+  response.end(readFileSync(file));
 }
 
 function serveFile(path: string, response: ServerResponse) {
@@ -158,6 +190,12 @@ export async function startRelay(dataDirectory: string): Promise<Relay> {
       } else if (request.method === "POST" && url.pathname === "/window/destroy") {
         closeWindow();
         sendJson(response, { result: null });
+      } else if (url.pathname.startsWith(AMBIENCE_PATH)) {
+        serveAmbience(
+          join(resolve(dataDirectory), "ambience"),
+          url.pathname.slice(AMBIENCE_PATH.length),
+          response,
+        );
       } else if (url.pathname === "/events") {
         response.writeHead(200, {
           "content-type": "text/event-stream",

@@ -14,6 +14,9 @@ use relay::Relay;
 
 static WINDOW_COUNTER: AtomicU32 = AtomicU32::new(1);
 
+/// The folder of the app data folder where the core keeps the writer's own images and sounds.
+const AMBIENCE_FOLDER: &str = "ambience";
+
 /// The app, for the panic hook, which cannot be handed anything.
 static APP: OnceLock<AppHandle> = OnceLock::new();
 
@@ -54,6 +57,17 @@ async fn open_log_folder(app: AppHandle) -> Result<(), String> {
     show_folder(&folder).map_err(|error| error.to_string())
 }
 
+/// Lets the windows read, through the asset protocol, the copies of the writer's own images
+/// and sounds that the core keeps in the app data folder, and nothing else. The folder is
+/// created first: the scope is matched against its real path, which on Windows is only known
+/// once it exists.
+fn allow_ambience(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    let folder = app.path().app_data_dir()?.join(AMBIENCE_FOLDER);
+    std::fs::create_dir_all(&folder)?;
+    app.asset_protocol_scope().allow_directory(&folder, false)?;
+    Ok(())
+}
+
 fn show_folder(folder: &Path) -> std::io::Result<()> {
     let program = if cfg!(target_os = "windows") {
         "explorer"
@@ -81,6 +95,7 @@ pub fn run() {
         .manage(Supervisor::new())
         .setup(|app| {
             let _ = APP.set(app.handle().clone());
+            allow_ambience(app.handle())?;
             core::start(app.handle(), true)?;
             Ok(())
         })
