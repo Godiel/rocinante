@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Ambience, OwnAmbience, Theme } from "../../bridge/generated/protocol";
 
 const request = vi.fn();
+const sounds = vi.hoisted(() => ({ setTyping: vi.fn(), play: vi.fn() }));
+vi.mock("../../audio/engine", () => ({ sounds }));
 vi.mock("../../bridge/core", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../bridge/core")>()),
   request: (...args: unknown[]) => request(...args) as unknown,
@@ -14,7 +16,7 @@ import { CoreError } from "../../bridge/core";
 import { contrastRatio } from "../../design/contrast";
 import { themes } from "../../design/themes";
 import { DEFAULT_AMBIENCE } from "./defaults";
-import { AmbienceSheet } from "./AmbienceSheet";
+import { AmbienceSheet, SEND_DELAY_MS } from "./AmbienceSheet";
 import {
   BUILT_IN_BACKDROPS,
   DEFAULT_BACKDROP,
@@ -28,6 +30,8 @@ import { SHEET_OPACITY, blend, sheetColour } from "./sheet";
 afterEach(() => {
   cleanup();
   request.mockReset();
+  sounds.setTyping.mockReset();
+  sounds.play.mockReset();
 });
 
 const BODY_TEXT = 4.5;
@@ -138,7 +142,7 @@ describe("the ambience sheet", () => {
   it("shows every background with the chosen one checked", () => {
     show({ ...DEFAULT_AMBIENCE, background: "builtin:olive" });
 
-    const options = screen.getAllByRole("radio");
+    const options = within(screen.getByRole("radiogroup", { name: "Fondo" })).getAllByRole("radio");
     expect(options).toHaveLength(BUILT_IN_BACKDROPS.length);
     expect(screen.getByRole("radio", { name: "Olivar" })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("radio", { name: "Papel" })).toHaveAttribute("aria-checked", "false");
@@ -194,5 +198,86 @@ describe("the ambience sheet", () => {
     await userEvent.keyboard("{Escape}");
 
     expect(onClose).toHaveBeenCalledOnce();
+  });
+});
+
+describe("the typing in the ambience sheet", () => {
+  const show = (ambience: Ambience = DEFAULT_AMBIENCE) => {
+    request.mockResolvedValue(ambience);
+    return render(
+      <AmbienceSheet
+        ambience={ambience}
+        backdrops={BUILT_IN_BACKDROPS}
+        theme="paper"
+        origin="main"
+        onClose={() => {}}
+        onProblem={() => {}}
+      />,
+    );
+  };
+  const sent = () =>
+    request.mock.calls.map(
+      ([, params]) => (params as { changes: { ambience: Ambience } }).changes.ambience,
+    );
+
+  it("chooses a typing sound, lets it be heard at once, and unmutes it", async () => {
+    show();
+
+    await userEvent.click(screen.getByRole("radio", { name: "Pluma sobre papel" }));
+
+    expect(sent()).toEqual([
+      { ...DEFAULT_AMBIENCE, typing: { ...DEFAULT_AMBIENCE.typing, sound: "quill", muted: false } },
+    ]);
+    expect(sounds.setTyping).toHaveBeenCalledWith({ sound: "quill", volume: 0.6, muted: false });
+    expect(sounds.play).toHaveBeenCalledWith("key");
+    expect(screen.getByRole("radio", { name: "Pluma sobre papel" })).toBeChecked();
+  });
+
+  it("sends a volume once it rests, not at every step of the slider", () => {
+    vi.useFakeTimers();
+    try {
+      show();
+      const slider = screen.getByRole("slider", { name: "Volumen del tecleo" });
+
+      for (const value of ["50", "40", "30"]) fireEvent.change(slider, { target: { value } });
+      expect(request).not.toHaveBeenCalled();
+      expect(slider).toHaveValue("30");
+      expect(sounds.play).toHaveBeenCalledTimes(3);
+
+      act(() => void vi.advanceTimersByTime(SEND_DELAY_MS));
+      expect(sent()).toEqual([
+        { ...DEFAULT_AMBIENCE, typing: { ...DEFAULT_AMBIENCE.typing, volume: 0.3, muted: false } },
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not lose a resting volume when the sheet closes", () => {
+    vi.useFakeTimers();
+    try {
+      const view = show();
+      fireEvent.change(screen.getByRole("slider", { name: "Volumen del tecleo" }), {
+        target: { value: "80" },
+      });
+
+      view.unmount();
+
+      expect(sent()).toEqual([
+        { ...DEFAULT_AMBIENCE, typing: { ...DEFAULT_AMBIENCE.typing, volume: 0.8, muted: false } },
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("mutes and unmutes, keeping the volume", async () => {
+    show({ ...DEFAULT_AMBIENCE, typing: { sound: "mechanical", volume: 0.35, muted: false } });
+
+    await userEvent.click(screen.getByRole("checkbox", { name: "Silencio" }));
+
+    expect(sent()).toEqual([
+      { ...DEFAULT_AMBIENCE, typing: { sound: "mechanical", volume: 0.35, muted: true } },
+    ]);
   });
 });

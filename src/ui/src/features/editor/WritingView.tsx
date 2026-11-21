@@ -35,6 +35,7 @@ import { AmbienceSheet } from "../ambience/AmbienceSheet";
 import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
 import { AnimatedBackdrop } from "../ambience/animated/AnimatedBackdrop";
+import { sounds } from "../../audio/engine";
 import "./writing-view.css";
 
 /** A version shown in place of the page, with the text it is compared with. */
@@ -126,6 +127,10 @@ export function WritingView({ project, place, preferences, origin }: WritingView
       current = false;
     };
   }, [shownId]);
+
+  // The typing sounds as the writer set them, in this window and as other windows change them.
+  const typing = preferences.ambience.typing;
+  useEffect(() => sounds.setTyping(typing), [typing]);
 
   // What other windows write changes the counts of the work.
   useEffect(() => {

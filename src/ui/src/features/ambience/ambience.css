@@ -52,6 +52,35 @@
   font-size: var(--text-caption);
 }
 
+.ambience-choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ambience-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.ambience-choice input {
+  accent-color: var(--color-rubric);
+}
+
+.ambience-volume {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.ambience-volume input[type="range"] {
+  flex: 1;
+  accent-color: var(--color-rubric);
+}
+
 /* In focus mode the sheet has the whole height: there is no bar above it. */
 .writing-view-focus .sheet {
   top: 0;

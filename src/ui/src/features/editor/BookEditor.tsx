@@ -12,6 +12,8 @@ import type {
 } from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
 import { bookExtensions, footnotesOf } from "../../editor/extensions";
+import { TypingSounds } from "../../editor/extensions/typing-sounds";
+import { sounds } from "../../audio/engine";
 import { registerPendingSave } from "../../editor/pending-saves";
 import { platenScroll } from "../../editor/typewriter";
 import type { SaveState } from "../counter/Counter";
@@ -102,7 +104,11 @@ export function BookEditor({
   callbacks.current.onProblem = onProblem;
 
   const editor = useEditor({
-    extensions: bookExtensions(),
+    // The typing sound lives only here: the page view and the versions reuse the schema in silence.
+    extensions: [
+      ...bookExtensions(),
+      TypingSounds.configure({ play: (stroke) => sounds.play(stroke) }),
+    ],
     content: document.content,
     editorProps: {
       attributes: {
