@@ -137,7 +137,7 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
   - Esc;
   - cerrar y abrir la app con todo recordado.
 - [x] Importar un fondo propio, borrar el original y comprobar que sigue.
-- [x] Escribir con tecleo y fondo animado: p95 < 50 ms, o 150 ms en la CI de macOS.
+- [x] Escribir con tecleo y fondo animado: p95 < 50 ms, o 150 ms en la CI de macOS. En la CI, sin tarjeta gráfica, la prueba usa un fondo liso: allí el lienzo se pinta por software, cosa que no ocurre en el equipo de un escritor.
 - [x] El tecleo se programa en menos de 20 ms desde la pulsación, medido con un `AudioContext` instrumentado.
 - [ ] Todo en verde en los tres sistemas en la CI.
 
