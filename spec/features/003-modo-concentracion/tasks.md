@@ -82,15 +82,15 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Comprobación en la app real: escribir con un fondo animado sigue siendo fluido.
 
 ## 8. Motor de sonido y tecleo
-- [ ] `src/ui/src/audio`:
-  - un `AudioContext` único, creado con la primera pulsación;
-  - una cadena de ganancias para el tecleo y otra para los ambientes.
-- [ ] Plugin de ProseMirror que hace sonar el tecleo con texto, Intro y borrar; los atajos, las flechas y las teclas muertas no suenan.
-- [ ] Varias muestras por tecleo, elegidas al azar, con una pequeña variación de tono.
-- [ ] La máquina de escribir suena a retorno de carro con Intro y tiene su campanilla.
-- [ ] Muestras de prueba generadas con ffmpeg hasta el bloque 12.
-- [ ] El panel «Ambiente» elige el tecleo, su volumen y su silencio.
-- [ ] Tests con un `AudioContext` falso: qué pulsaciones suenan y con qué volumen.
+- [x] `src/ui/src/audio`:
+  - un `AudioContext` único, creado cuando el tecleo empieza a sonar y activado con la primera pulsación;
+  - una cadena de ganancias para el tecleo (la de los ambientes llega en el bloque 9).
+- [x] Plugin de ProseMirror que hace sonar el tecleo con texto, Intro y borrar; los atajos, las flechas y las teclas muertas no suenan.
+- [x] Varias muestras por tecleo, elegidas al azar, con una pequeña variación de tono.
+- [x] La máquina de escribir suena a retorno de carro con Intro y tiene su campanilla.
+- [x] Muestras de prueba generadas con ffmpeg (`scripts/placeholder-sounds.mjs`) hasta el bloque 12.
+- [x] El panel «Ambiente» elige el tecleo, su volumen y su silencio.
+- [x] Tests con un `AudioContext` falso: qué pulsaciones suenan y con qué volumen.
 
 ## 9. Ambientes de fondo
 - [ ] Bucle con fundido cruzado de dos copias del buffer.
