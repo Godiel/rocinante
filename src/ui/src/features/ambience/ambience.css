@@ -81,6 +81,20 @@
   accent-color: var(--color-rubric);
 }
 
+.ambience-ambients {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ambience-level {
+  width: 100%;
+  accent-color: var(--color-rubric);
+}
+
 /* In focus mode the sheet has the whole height: there is no bar above it. */
 .writing-view-focus .sheet {
   top: 0;

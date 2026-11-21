@@ -1,4 +1,5 @@
 import type { Typing } from "../bridge/generated/protocol";
+import { AmbientLoop, type Timers } from "./ambient-loop";
 import { TYPING_SOUNDS, type Stroke } from "./typing-sounds";
 
 /** How long a change of volume takes: short enough to follow the hand, long enough not to click. */
@@ -16,6 +17,14 @@ interface Options {
   createContext(): AudioContextLike;
   load(url: string): Promise<ArrayBuffer>;
   random?: () => number;
+  timers?: Timers;
+}
+
+/** An ambient sound to play: its id, where its recording is, and its level in the mix. */
+export interface AmbientTrack {
+  id: string;
+  url: string;
+  level: number;
 }
 
 /**
@@ -26,6 +35,10 @@ interface Options {
 export class SoundEngine {
   private context: AudioContextLike | null = null;
   private typingGain: GainNode | null = null;
+  private ambientGain: GainNode | null = null;
+  /** The ambients that should be playing, by id; a loop appears once its recording is decoded. */
+  private readonly wanted = new Map<string, AmbientTrack>();
+  private readonly loops = new Map<string, AmbientLoop>();
   private typing: Typing | null = null;
   private readonly buffers = new Map<string, Promise<AudioBuffer | null>>();
   private readonly random: () => number;
@@ -82,6 +95,41 @@ export class SoundEngine {
     });
   }
 
+  /**
+   * The mix of ambient sounds changed. New ones fade in once loaded, those that left fade out,
+   * and the others follow their level. Their recordings are let go when they leave: an own sound
+   * can be long, and decoded it takes far more memory than on disk.
+   */
+  setAmbients(tracks: AmbientTrack[], volume: number, muted: boolean): void {
+    if (tracks.length === 0 && !this.context) return;
+    const context = this.ready();
+    this.ambientGain!.gain.setTargetAtTime(
+      muted ? 0 : volume,
+      context.currentTime,
+      RAMP_SECONDS / 3,
+    );
+
+    const next = new Map(tracks.map((track) => [track.id, track]));
+    for (const [id, track] of this.wanted) {
+      if (next.get(id)?.url === track.url) continue;
+      this.loops.get(id)?.stop();
+      this.loops.delete(id);
+      this.wanted.delete(id);
+      this.buffers.delete(track.url);
+    }
+    for (const track of tracks) {
+      const loop = this.loops.get(track.id);
+      if (loop) loop.setLevel(track.level);
+      this.wanted.set(track.id, track);
+      if (!loop) void this.startLoop(track);
+    }
+  }
+
+  /** The work closed: every ambient fades away. */
+  stopAmbients(): void {
+    this.setAmbients([], 0, true);
+  }
+
   /** Lets the browser start sound: called on the writer's first keystroke. */
   wake(): void {
     if (this.context?.state === "suspended") void this.context.resume();
@@ -93,8 +141,22 @@ export class SoundEngine {
       this.typingGain = this.context.createGain();
       this.typingGain.gain.value = 0;
       this.typingGain.connect(this.context.destination);
+      this.ambientGain = this.context.createGain();
+      this.ambientGain.gain.value = 0;
+      this.ambientGain.connect(this.context.destination);
     }
     return this.context;
+  }
+
+  private async startLoop(track: AmbientTrack): Promise<void> {
+    const buffer = await this.buffer(track.url);
+    // Still wanted, with the same recording, and not started meanwhile?
+    const now = this.wanted.get(track.id);
+    if (!buffer || !this.ambientGain || now?.url !== track.url || this.loops.has(track.id)) return;
+    this.loops.set(
+      track.id,
+      new AmbientLoop(this.ready(), buffer, this.ambientGain, now.level, this.options.timers),
+    );
   }
 
   private buffer(url: string): Promise<AudioBuffer | null> {

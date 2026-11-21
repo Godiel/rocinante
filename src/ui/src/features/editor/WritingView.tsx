@@ -36,6 +36,7 @@ import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
 import { AnimatedBackdrop } from "../ambience/animated/AnimatedBackdrop";
 import { sounds } from "../../audio/engine";
+import { ambientSounds, tracksOf } from "../../audio/ambient-sounds";
 import "./writing-view.css";
 
 /** A version shown in place of the page, with the text it is compared with. */
@@ -131,6 +132,28 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   // The typing sounds as the writer set them, in this window and as other windows change them.
   const typing = preferences.ambience.typing;
   useEffect(() => sounds.setTyping(typing), [typing]);
+
+  // The ambient sounds play in the main window only: each window has its own audio, and two
+  // would play the rain twice. They fade away when the work closes.
+  const allAmbients = useMemo(() => ambientSounds([], convertFileSrc), []);
+  const { ambients, ambientVolume, ambientMuted } = preferences.ambience;
+  const playsAmbients = origin === "main";
+  useEffect(() => {
+    if (playsAmbients)
+      sounds.setAmbients(tracksOf(ambients, allAmbients), ambientVolume, ambientMuted);
+  }, [playsAmbients, ambients, allAmbients, ambientVolume, ambientMuted]);
+  useEffect(() => () => sounds.stopAmbients(), []);
+
+  // Browsers start sound only after the writer does something: the first key or click wakes it.
+  useEffect(() => {
+    const wake = () => sounds.wake();
+    window.addEventListener("pointerdown", wake, { capture: true });
+    window.addEventListener("keydown", wake, { capture: true });
+    return () => {
+      window.removeEventListener("pointerdown", wake, { capture: true });
+      window.removeEventListener("keydown", wake, { capture: true });
+    };
+  }, []);
 
   // What other windows write changes the counts of the work.
   useEffect(() => {
@@ -489,6 +512,8 @@ export function WritingView({ project, place, preferences, origin }: WritingView
         <AmbienceSheet
           ambience={preferences.ambience}
           backdrops={allBackdrops}
+          ambients={allAmbients}
+          playsAmbients={playsAmbients}
           theme={preferences.theme}
           origin={origin}
           onClose={closeSheet}

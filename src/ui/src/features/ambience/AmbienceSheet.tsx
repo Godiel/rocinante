@@ -4,6 +4,7 @@ import type { Ambience, Theme } from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
 import { sounds } from "../../audio/engine";
 import { TYPING_ORDER, TYPING_SOUNDS } from "../../audio/typing-sounds";
+import type { AmbientSound } from "../../audio/ambient-sounds";
 import { backdropOf, paintOf, type Backdrop } from "./catalog";
 import "./ambience.css";
 
@@ -11,6 +12,10 @@ interface AmbienceSheetProps {
   ambience: Ambience;
   /** Every background there is: the built-in ones and the writer's own images. */
   backdrops: Backdrop[];
+  /** Every ambient sound there is: the built-in ones and the writer's own sounds. */
+  ambients: AmbientSound[];
+  /** Whether this window plays the ambient sounds; only the main one does. */
+  playsAmbients: boolean;
   theme: Theme;
   origin: string;
   onClose(): void;
@@ -19,6 +24,10 @@ interface AmbienceSheetProps {
 
 /** How long a slider rests before its value is sent: dragging sends once, not at every step. */
 export const SEND_DELAY_MS = 250;
+/** How many ambient sounds may play at once, as the contract allows. */
+export const MAX_AMBIENTS = 6;
+/** The level an ambient starts at when it joins the mix. */
+const DEFAULT_LEVEL = 0.7;
 
 /**
  * The writer's ambience: the background behind the sheet in focus mode, the typing sound and, later,
@@ -28,6 +37,8 @@ export const SEND_DELAY_MS = 250;
 export function AmbienceSheet({
   ambience,
   backdrops,
+  ambients,
+  playsAmbients,
   theme,
   origin,
   onClose,
@@ -35,6 +46,7 @@ export function AmbienceSheet({
 }: AmbienceSheetProps) {
   const backgroundsId = useId();
   const typingId = useId();
+  const ambientsId = useId();
   // What the sheet shows before the core has it: a slider moving, a choice on its way. The core's
   // answer comes back as new preferences, and a draft made on older ones gives way.
   const [draft, setDraft] = useState<{ base: Ambience; value: Ambience } | null>(null);
@@ -168,6 +180,72 @@ export function AmbienceSheet({
             change(next);
             if (!muted) hearTyping(next);
           }}
+        />
+      </section>
+
+      <section aria-labelledby={ambientsId}>
+        <h3 id={ambientsId} className="ambience-label small-caps">
+          Ambientes
+        </h3>
+        <p className="ambience-hint">
+          {playsAmbients
+            ? `Suenan en bucle. Puedes mezclar hasta ${MAX_AMBIENTS}.`
+            : "Suenan en la ventana principal."}
+        </p>
+        <ul className="ambience-ambients">
+          {ambients.map((sound) => {
+            const playing = shown.ambients.find((ambient) => ambient.id === sound.id);
+            const full = shown.ambients.length >= MAX_AMBIENTS;
+            return (
+              <li key={sound.id}>
+                <label className="ambience-choice">
+                  <input
+                    type="checkbox"
+                    checked={!!playing}
+                    disabled={!playing && full}
+                    onChange={(event) =>
+                      change({
+                        ...shown,
+                        ambientMuted: event.target.checked ? false : shown.ambientMuted,
+                        ambients: event.target.checked
+                          ? [...shown.ambients, { id: sound.id, level: DEFAULT_LEVEL }]
+                          : shown.ambients.filter((ambient) => ambient.id !== sound.id),
+                      })
+                    }
+                  />
+                  {sound.name}
+                </label>
+                {playing && (
+                  <input
+                    type="range"
+                    className="ambience-level"
+                    min={0}
+                    max={100}
+                    step={1}
+                    aria-label={`Nivel de ${sound.name}`}
+                    value={Math.round(playing.level * 100)}
+                    onChange={(event) =>
+                      changeSoon({
+                        ...shown,
+                        ambients: shown.ambients.map((ambient) =>
+                          ambient.id === sound.id
+                            ? { ...ambient, level: Number(event.target.value) / 100 }
+                            : ambient,
+                        ),
+                      })
+                    }
+                  />
+                )}
+              </li>
+            );
+          })}
+        </ul>
+        <Volume
+          label="Volumen de los ambientes"
+          value={shown.ambientVolume}
+          muted={shown.ambientMuted}
+          onChange={(ambientVolume) => changeSoon({ ...shown, ambientVolume, ambientMuted: false })}
+          onMute={(ambientMuted) => change({ ...shown, ambientMuted })}
         />
       </section>
     </aside>

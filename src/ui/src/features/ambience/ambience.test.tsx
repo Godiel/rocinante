@@ -16,6 +16,7 @@ import { CoreError } from "../../bridge/core";
 import { contrastRatio } from "../../design/contrast";
 import { themes } from "../../design/themes";
 import { DEFAULT_AMBIENCE } from "./defaults";
+import { BUILT_IN_AMBIENTS } from "../../audio/ambient-sounds";
 import { AmbienceSheet, SEND_DELAY_MS } from "./AmbienceSheet";
 import {
   BUILT_IN_BACKDROPS,
@@ -130,6 +131,8 @@ describe("the ambience sheet", () => {
       <AmbienceSheet
         ambience={ambience}
         backdrops={all}
+        ambients={BUILT_IN_AMBIENTS}
+        playsAmbients
         theme="paper"
         origin="main"
         onClose={onClose}
@@ -208,6 +211,8 @@ describe("the typing in the ambience sheet", () => {
       <AmbienceSheet
         ambience={ambience}
         backdrops={BUILT_IN_BACKDROPS}
+        ambients={BUILT_IN_AMBIENTS}
+        playsAmbients
         theme="paper"
         origin="main"
         onClose={() => {}}
@@ -274,10 +279,101 @@ describe("the typing in the ambience sheet", () => {
   it("mutes and unmutes, keeping the volume", async () => {
     show({ ...DEFAULT_AMBIENCE, typing: { sound: "mechanical", volume: 0.35, muted: false } });
 
-    await userEvent.click(screen.getByRole("checkbox", { name: "Silencio" }));
+    await userEvent.click(
+      within(screen.getByRole("region", { name: "Tecleo" })).getByRole("checkbox", {
+        name: "Silencio",
+      }),
+    );
 
     expect(sent()).toEqual([
       { ...DEFAULT_AMBIENCE, typing: { sound: "mechanical", volume: 0.35, muted: true } },
     ]);
+  });
+});
+
+describe("the ambient sounds in the ambience sheet", () => {
+  const show = (ambience: Ambience = DEFAULT_AMBIENCE, playsAmbients = true) => {
+    request.mockResolvedValue(ambience);
+    return render(
+      <AmbienceSheet
+        ambience={ambience}
+        backdrops={BUILT_IN_BACKDROPS}
+        ambients={BUILT_IN_AMBIENTS}
+        playsAmbients={playsAmbients}
+        theme="paper"
+        origin="main"
+        onClose={() => {}}
+        onProblem={() => {}}
+      />,
+    );
+  };
+  const sent = () =>
+    request.mock.calls.map(
+      ([, params]) => (params as { changes: { ambience: Ambience } }).changes.ambience,
+    );
+
+  it("adds an ambient to the mix at a gentle level, and takes it out", async () => {
+    show({ ...DEFAULT_AMBIENCE, ambientMuted: true });
+
+    await userEvent.click(screen.getByRole("checkbox", { name: "Lluvia" }));
+    await userEvent.click(screen.getByRole("checkbox", { name: "Chimenea" }));
+    await userEvent.click(screen.getByRole("checkbox", { name: "Lluvia" }));
+
+    expect(sent().map((ambience) => ambience.ambients)).toEqual([
+      [{ id: "builtin:rain", level: 0.7 }],
+      [
+        { id: "builtin:rain", level: 0.7 },
+        { id: "builtin:fire", level: 0.7 },
+      ],
+      [{ id: "builtin:fire", level: 0.7 }],
+    ]);
+    expect(sent()[0]?.ambientMuted).toBe(false);
+  });
+
+  it("gives each ambient that plays its own level, sent once it rests", () => {
+    vi.useFakeTimers();
+    try {
+      show({ ...DEFAULT_AMBIENCE, ambients: [{ id: "builtin:cafe", level: 0.5 }] });
+      expect(screen.queryByRole("slider", { name: "Nivel de Lluvia" })).toBeNull();
+      const level = screen.getByRole("slider", { name: "Nivel de Café" });
+
+      fireEvent.change(level, { target: { value: "20" } });
+      fireEvent.change(level, { target: { value: "10" } });
+      act(() => void vi.advanceTimersByTime(SEND_DELAY_MS));
+
+      expect(sent().map((ambience) => ambience.ambients)).toEqual([
+        [{ id: "builtin:cafe", level: 0.1 }],
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("lets no more than six play at once", () => {
+    const six = Array.from({ length: 6 }, (_, at) => ({ id: `builtin:own-${at}`, level: 1 }));
+    show({ ...DEFAULT_AMBIENCE, ambients: six });
+
+    for (const sound of BUILT_IN_AMBIENTS) {
+      expect(screen.getByRole("checkbox", { name: sound.name })).toBeDisabled();
+    }
+  });
+
+  it("has a volume and a silence for all of them", async () => {
+    show();
+
+    await userEvent.click(
+      within(screen.getByRole("region", { name: "Ambientes" })).getByRole("checkbox", {
+        name: "Silencio",
+      }),
+    );
+
+    expect(sent()).toEqual([{ ...DEFAULT_AMBIENCE, ambientMuted: true }]);
+    expect(screen.getByRole("slider", { name: "Volumen de los ambientes" })).toHaveValue("60");
+  });
+
+  it("says where they play in another window", () => {
+    show(DEFAULT_AMBIENCE, false);
+
+    expect(screen.getByText("Suenan en la ventana principal.")).toBeInTheDocument();
   });
 });
