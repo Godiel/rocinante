@@ -68,11 +68,11 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real.
 
 ## 6. Fondos fijos y hoja translúcida
-- [ ] Catálogo `features/ambience/catalog.ts`: colores, degradados e imágenes, cada uno con nombre, archivo y créditos.
-- [ ] Hoja translúcida por tema. Un test de Vitest comprueba el contraste WCAG AA sobre fondo blanco y sobre fondo negro.
-- [ ] Un identificador que ya no existe se muestra como el fondo por defecto.
-- [ ] Panel «Ambiente» en una hoja a la derecha, abierto desde la barra de la obra y desde la barra mínima. Solo hay una hoja abierta a la vez.
-- [ ] Tests de comportamiento y comprobación en la app real con los dos temas.
+- [x] Catálogo `features/ambience/catalog.ts`: el papel y cinco colores y degradados, cada uno con su versión de noche. Las imágenes incluidas llegan en el bloque 12; las propias, en el 11.
+- [x] Hoja translúcida por tema. Un test de Vitest comprueba el contraste WCAG AA sobre fondo blanco y sobre fondo negro.
+- [x] Un identificador que ya no existe se muestra como el fondo por defecto.
+- [x] Panel «Ambiente» en una hoja a la derecha, abierto desde la barra de la obra y desde la barra mínima. Solo hay una hoja abierta a la vez.
+- [x] Tests de comportamiento y comprobación en la app real con los dos temas.
 
 ## 7. Fondos animados
 - [ ] Lluvia en un cristal, vela y nubes en `canvas`, a 30 fotogramas por segundo como mucho.
