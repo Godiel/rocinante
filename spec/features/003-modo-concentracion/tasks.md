@@ -130,15 +130,15 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [ ] Imágenes: tres paisajes de Beruete en dominio público; Wikimedia limitó la descarga automática (lo descarga el autor).
 
 ## 13. Pruebas de extremo a extremo y rendimiento
-- [ ] El recorrido completo:
+- [x] El recorrido completo:
   - F11;
   - elegir fondo y ambiente;
   - escribir con tecleo;
   - Esc;
   - cerrar y abrir la app con todo recordado.
-- [ ] Importar un fondo propio, borrar el original y comprobar que sigue.
-- [ ] Escribir con tecleo y fondo animado: p95 < 50 ms, o 150 ms en la CI de macOS.
-- [ ] El tecleo se programa en menos de 20 ms desde la pulsación, medido con un `AudioContext` instrumentado.
+- [x] Importar un fondo propio, borrar el original y comprobar que sigue.
+- [x] Escribir con tecleo y fondo animado: p95 < 50 ms, o 150 ms en la CI de macOS.
+- [x] El tecleo se programa en menos de 20 ms desde la pulsación, medido con un `AudioContext` instrumentado.
 - [ ] Todo en verde en los tres sistemas en la CI.
 
 ## 14. Validación y cierre
