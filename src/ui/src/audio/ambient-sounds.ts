@@ -11,8 +11,9 @@ export interface AmbientSound {
 const file = (name: string) => `${import.meta.env.BASE_URL}sounds/ambient/${name}.ogg`;
 
 /**
- * The ambient sounds that come with the app, in the order the panel shows them. Until the CC0
- * recordings arrive they are synthesised placeholders (scripts/placeholder-sounds.mjs).
+ * The ambient sounds that come with the app, in the order the panel shows them. They come from
+ * CC0 recordings (see features/ambience/credits.ts), made by scripts/ambience.mjs; the café is
+ * still a synthesised placeholder.
  */
 export const BUILT_IN_AMBIENTS: AmbientSound[] = [
   { id: "builtin:rain", name: "Lluvia", url: file("rain") },

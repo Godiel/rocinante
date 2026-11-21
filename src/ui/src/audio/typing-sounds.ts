@@ -17,8 +17,8 @@ const folder = (sound: TypingSound) => `${import.meta.env.BASE_URL}sounds/typing
 const keys = (sound: TypingSound) => [1, 2, 3, 4].map((n) => `${folder(sound)}/key-${n}.ogg`);
 
 /**
- * The typing sounds that come with the app, in the order the panel shows them. Until the CC0
- * recordings arrive they are synthesised placeholders (scripts/placeholder-sounds.mjs).
+ * The typing sounds that come with the app, in the order the panel shows them. They come from
+ * CC0 recordings (see features/ambience/credits.ts), made by scripts/ambience.mjs.
  */
 export const TYPING_SOUNDS: Record<TypingSound, TypingSamples> = {
   typewriter: {
@@ -35,7 +35,7 @@ export const TYPING_SOUNDS: Record<TypingSound, TypingSamples> = {
     backspace: `${folder("mechanical")}/backspace.ogg`,
   },
   quill: {
-    name: "Pluma sobre papel",
+    name: "Lápiz sobre papel",
     keys: keys("quill"),
     enter: `${folder("quill")}/enter.ogg`,
     backspace: `${folder("quill")}/backspace.ogg`,

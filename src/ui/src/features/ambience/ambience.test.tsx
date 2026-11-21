@@ -236,14 +236,14 @@ describe("the typing in the ambience sheet", () => {
   it("chooses a typing sound, lets it be heard at once, and unmutes it", async () => {
     show();
 
-    await userEvent.click(screen.getByRole("radio", { name: "Pluma sobre papel" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Lápiz sobre papel" }));
 
     expect(sent()).toEqual([
       { ...DEFAULT_AMBIENCE, typing: { ...DEFAULT_AMBIENCE.typing, sound: "quill", muted: false } },
     ]);
     expect(sounds.setTyping).toHaveBeenCalledWith({ sound: "quill", volume: 0.6, muted: false });
     expect(sounds.play).toHaveBeenCalledWith("key");
-    expect(screen.getByRole("radio", { name: "Pluma sobre papel" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "Lápiz sobre papel" })).toBeChecked();
   });
 
   it("sends a volume once it rests, not at every step of the slider", () => {

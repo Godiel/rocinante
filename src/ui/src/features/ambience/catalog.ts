@@ -1,12 +1,6 @@
 import type { OwnAmbience, Theme } from "../../bridge/generated/protocol";
 import type { SceneName } from "./animated/scenes";
-
-/** Who made something that comes with the app, and under what licence. */
-export interface Credit {
-  author: string;
-  source: string;
-  licence: "CC0-1.0";
-}
+import type { Credit } from "./credits";
 
 /** What goes behind the sheet in focus mode. */
 export type Backdrop =
