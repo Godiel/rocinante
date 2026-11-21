@@ -27,13 +27,19 @@ export const TypingSounds = Extension.create<TypingSoundsOptions>({
     const { play } = this.options;
     // The line the bell last rang on, by its top edge on the screen.
     let rangOn: number | null = null;
+    // A character key already sounded on its way down, before the editor took it in.
+    let sounded = false;
 
     return [
       new Plugin({
         key: new PluginKey("typingSounds"),
         props: {
           handleTextInput(view, from) {
-            play("key");
+            // A key is heard as it goes down: waiting for the text to change would let a long
+            // chapter's work come between the finger and the sound. Text that came without a
+            // key of its own (a character composed by an input method) sounds here.
+            if (!sounded) play("key");
+            sounded = false;
             const line = nearLineEnd(view, from);
             if (line !== null && line !== rangOn) {
               rangOn = line;
@@ -43,7 +49,11 @@ export const TypingSounds = Extension.create<TypingSoundsOptions>({
           },
           handleKeyDown(view, event) {
             if (event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return false;
-            if (event.key === "Enter") {
+            if (event.key.length === 1) {
+              // A character: one letter, mark or space. Dead keys are "Dead" and stay silent.
+              sounded = true;
+              play("key");
+            } else if (event.key === "Enter") {
               rangOn = null;
               play("enter");
             } else if (event.key === "Backspace" || event.key === "Delete") {

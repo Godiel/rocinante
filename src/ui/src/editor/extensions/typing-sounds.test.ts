@@ -38,6 +38,29 @@ describe("the typing sounds", () => {
     ).toBeFalsy();
   });
 
+  it("sound a character key as it goes down, once, before the editor takes the text in", () => {
+    const { play, view } = write();
+    editor!.commands.setTextSelection(5);
+
+    press(view, { key: "a" });
+    expect(play.mock.calls).toEqual([["key"]]);
+    type(view, "a");
+    press(view, { key: " " });
+    type(view, " ");
+
+    expect(play.mock.calls).toEqual([["key"], ["key"]]);
+  });
+
+  it("sound a character composed after a dead key once, when it arrives", () => {
+    const { play, view } = write();
+    editor!.commands.setTextSelection(5);
+
+    press(view, { key: "Dead" });
+    type(view, "á");
+
+    expect(play.mock.calls).toEqual([["key"]]);
+  });
+
   it("sound Enter and erasing, but not shortcuts, arrows or the dead keys of accents", () => {
     const { play, view } = write();
     editor!.commands.setTextSelection(5);
