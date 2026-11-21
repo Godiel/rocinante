@@ -14,6 +14,10 @@ export interface Pickers {
   chooseFolder(startIn: string): Promise<string | null>;
   /** Asks for a project file; null if the writer cancels. */
   chooseProject(startIn: string): Promise<string | null>;
+  /** Asks for an image to use as a background; null if the writer cancels. */
+  chooseImage(): Promise<string | null>;
+  /** Asks for a sound to use as an ambient; null if the writer cancels. */
+  chooseSound(): Promise<string | null>;
 }
 
 export interface WelcomeProps {

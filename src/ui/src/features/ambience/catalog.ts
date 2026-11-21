@@ -103,7 +103,7 @@ export const BUILT_IN_BACKDROPS: Backdrop[] = [
 
 /**
  * Every background the writer can pick: the built-in ones and their own images. `urlOf` turns
- * the path of an own copy into something the page can load (the host's asset protocol).
+ * the path of an own copy into something the page can load (the host's ambience:// protocol).
  */
 export function backdrops(own: OwnAmbience[], urlOf: (file: string) => string): Backdrop[] {
   return [

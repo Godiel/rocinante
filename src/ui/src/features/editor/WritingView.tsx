@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onNotification, request } from "../../bridge/core";
 import type {
@@ -12,7 +12,9 @@ import type {
   Place,
   Preferences,
   ProjectState,
+  OwnAmbience,
 } from "../../bridge/generated/protocol";
+import type { Pickers } from "../welcome/Welcome";
 import { messageFor } from "../../app/messages";
 import { LogFolderButton } from "../../app/Trouble";
 import { savePendingNow } from "../../editor/pending-saves";
@@ -36,6 +38,7 @@ import { GoalMeter, GoalReached } from "../focus/Goal";
 import { AmbienceSheet } from "../ambience/AmbienceSheet";
 import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
+import { ambienceUrl } from "../ambience/own-url";
 import { AnimatedBackdrop } from "../ambience/animated/AnimatedBackdrop";
 import { sounds } from "../../audio/engine";
 import { ambientSounds, tracksOf } from "../../audio/ambient-sounds";
@@ -52,6 +55,9 @@ interface WritingViewProps {
   project: ProjectState;
   place: Place | null;
   preferences: Preferences;
+  /** The images and sounds the writer added. */
+  ownAmbience: OwnAmbience[];
+  pickers: Pickers;
   origin: string;
 }
 
@@ -59,7 +65,14 @@ interface WritingViewProps {
  * The open project: the index on one side and the chapter or fragment being written. It opens
  * where the writer left off, or on the first chapter.
  */
-export function WritingView({ project, place, preferences, origin }: WritingViewProps) {
+export function WritingView({
+  project,
+  place,
+  preferences,
+  ownAmbience,
+  pickers,
+  origin,
+}: WritingViewProps) {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [document, setDocument] = useState<DocumentState | null>(null);
   const [counts, setCounts] = useState<{ id: string; statistics: Statistics } | null>(null);
@@ -140,7 +153,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
 
   // The ambient sounds play in the main window only: each window has its own audio, and two
   // would play the rain twice. They fade away when the work closes.
-  const allAmbients = useMemo(() => ambientSounds([], convertFileSrc), []);
+  const allAmbients = useMemo(() => ambientSounds(ownAmbience, ambienceUrl), [ownAmbience]);
   const { ambients, ambientVolume, ambientMuted } = preferences.ambience;
   const playsAmbients = origin === "main";
   useEffect(() => {
@@ -148,6 +161,17 @@ export function WritingView({ project, place, preferences, origin }: WritingView
       sounds.setAmbients(tracksOf(ambients, allAmbients), ambientVolume, ambientMuted);
   }, [playsAmbients, ambients, allAmbients, ambientVolume, ambientMuted]);
   useEffect(() => () => sounds.stopAmbients(), []);
+  // A sound of the writer's that starts right but does not decode is said, and left silent.
+  useEffect(
+    () =>
+      sounds.onUnplayable((id) => {
+        const name = allAmbients.find((sound) => sound.id === id)?.name ?? "ese sonido";
+        setProblem(
+          `No se puede reproducir «${name}». Puede que el archivo esté dañado o en un formato que este equipo no reproduce.`,
+        );
+      }),
+    [allAmbients],
+  );
 
   // Browsers start sound only after the writer does something: the first key or click wakes it.
   useEffect(() => {
@@ -344,7 +368,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const progress = useSessionGoal(session, preferences.ambience.goal, workCounts.words);
   const dimming = focus.focused && preferences.ambience.dimOthers;
   // In focus mode the chosen background shows behind translucent paper.
-  const allBackdrops = useMemo(() => backdrops([], convertFileSrc), []);
+  const allBackdrops = useMemo(() => backdrops(ownAmbience, ambienceUrl), [ownAmbience]);
   const backdrop = focus.focused ? backdropOf(preferences.ambience.background, allBackdrops) : null;
   const paint = backdrop ? paintOf(backdrop, preferences.theme) : null;
   const toggleAmbience = () => (sheet === "ambience" ? closeSheet() : openSheet("ambience"));
@@ -523,6 +547,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           backdrops={allBackdrops}
           ambients={allAmbients}
           playsAmbients={playsAmbients}
+          pickers={pickers}
           theme={preferences.theme}
           origin={origin}
           onClose={closeSheet}

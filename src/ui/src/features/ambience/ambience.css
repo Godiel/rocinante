@@ -129,6 +129,33 @@
   color: var(--color-rubric);
 }
 
+.ambience-backdrop-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.ambience-remove {
+  align-self: flex-start;
+  margin-left: var(--space-1);
+  font-size: var(--text-caption);
+}
+
+.ambience-ambients li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-2);
+}
+
+.ambience-ambients .ambience-level {
+  flex-basis: 100%;
+}
+
+.ambience-add {
+  display: block;
+  margin-top: var(--space-2);
+}
+
 /* In focus mode the sheet has the whole height: there is no bar above it. */
 .writing-view-focus .sheet {
   top: 0;

@@ -39,6 +39,7 @@ export class SoundEngine {
   /** The ambients that should be playing, by id; a loop appears once its recording is decoded. */
   private readonly wanted = new Map<string, AmbientTrack>();
   private readonly loops = new Map<string, AmbientLoop>();
+  private readonly unplayable = new Set<(id: string) => void>();
   private typing: Typing | null = null;
   private readonly buffers = new Map<string, Promise<AudioBuffer | null>>();
   private readonly random: () => number;
@@ -125,6 +126,12 @@ export class SoundEngine {
     }
   }
 
+  /** Calls back with the id of an ambient whose recording cannot be played; returns how to stop. */
+  onUnplayable(listener: (id: string) => void): () => void {
+    this.unplayable.add(listener);
+    return () => this.unplayable.delete(listener);
+  }
+
   /** The work closed: every ambient fades away. */
   stopAmbients(): void {
     this.setAmbients([], 0, true);
@@ -152,6 +159,10 @@ export class SoundEngine {
     const buffer = await this.buffer(track.url);
     // Still wanted, with the same recording, and not started meanwhile?
     const now = this.wanted.get(track.id);
+    if (!buffer && now?.url === track.url) {
+      for (const listener of this.unplayable) listener(track.id);
+      return;
+    }
     if (!buffer || !this.ambientGain || now?.url !== track.url || this.loops.has(track.id)) return;
     this.loops.set(
       track.id,

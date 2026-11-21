@@ -16,6 +16,7 @@ import { CoreError } from "../../bridge/core";
 import { contrastRatio } from "../../design/contrast";
 import { themes } from "../../design/themes";
 import { DEFAULT_AMBIENCE } from "./defaults";
+import type { Pickers } from "../welcome/Welcome";
 import { BUILT_IN_AMBIENTS } from "../../audio/ambient-sounds";
 import { AmbienceSheet, SEND_DELAY_MS } from "./AmbienceSheet";
 import {
@@ -36,6 +37,11 @@ afterEach(() => {
 });
 
 const BODY_TEXT = 4.5;
+/** Dialogs where the writer cancels; a test that needs a file gives its own. */
+const noPickers: Pick<Pickers, "chooseImage" | "chooseSound"> = {
+  chooseImage: () => Promise.resolve(null),
+  chooseSound: () => Promise.resolve(null),
+};
 
 describe("the translucent sheet", () => {
   // Whatever the background, the paper under the text lets through at most this much of it; the
@@ -82,7 +88,7 @@ describe("the backgrounds", () => {
       file: "C:\\datos\\ambience\\b.ogg",
     },
   ];
-  const all = backdrops(own, (file) => `asset://${file}`);
+  const all = backdrops(own, (file) => `ambience://${file}`);
 
   it("start with the paper, and every built-in one has a name and an id of the contract's shape", () => {
     expect(BUILT_IN_BACKDROPS[0]?.id).toBe(DEFAULT_BACKDROP);
@@ -102,7 +108,7 @@ describe("the backgrounds", () => {
       expect.objectContaining({
         id: "own:0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
         name: "molinos.jpg",
-        url: "asset://C:\\datos\\ambience\\a.jpg",
+        url: "ambience://C:\\datos\\ambience\\a.jpg",
       }),
     ]);
   });
@@ -118,7 +124,7 @@ describe("the backgrounds", () => {
     expect(paintOf(dusk, "paper")).not.toBe(paintOf(dusk, "candlelight"));
     expect(paintOf(backdropOf(DEFAULT_BACKDROP, all), "paper")).toBeNull();
     expect(paintOf(backdropOf(`own:${own[0]!.id}`, all), "candlelight")).toContain(
-      'url("asset://C:\\datos\\ambience\\a.jpg")',
+      'url("ambience://C:\\datos\\ambience\\a.jpg")',
     );
   });
 });
@@ -133,6 +139,7 @@ describe("the ambience sheet", () => {
         backdrops={all}
         ambients={BUILT_IN_AMBIENTS}
         playsAmbients
+        pickers={noPickers}
         theme="paper"
         origin="main"
         onClose={onClose}
@@ -213,6 +220,7 @@ describe("the typing in the ambience sheet", () => {
         backdrops={BUILT_IN_BACKDROPS}
         ambients={BUILT_IN_AMBIENTS}
         playsAmbients
+        pickers={noPickers}
         theme="paper"
         origin="main"
         onClose={() => {}}
@@ -300,6 +308,7 @@ describe("the ambient sounds in the ambience sheet", () => {
         backdrops={BUILT_IN_BACKDROPS}
         ambients={BUILT_IN_AMBIENTS}
         playsAmbients={playsAmbients}
+        pickers={noPickers}
         theme="paper"
         origin="main"
         onClose={() => {}}
@@ -387,6 +396,7 @@ describe("focus aids in the ambience sheet", () => {
         backdrops={BUILT_IN_BACKDROPS}
         ambients={BUILT_IN_AMBIENTS}
         playsAmbients
+        pickers={noPickers}
         theme="paper"
         origin="main"
         onClose={() => {}}
@@ -440,5 +450,127 @@ describe("focus aids in the ambience sheet", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+describe("the writer's own files in the ambience sheet", () => {
+  const ownImage = {
+    id: "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+    kind: "image" as const,
+    name: "molinos.jpg",
+    file: "C:/datos/ambience/0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b.jpg",
+  };
+  const ownSound = {
+    ...ownImage,
+    id: "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+    kind: "sound" as const,
+    name: "lluvia.ogg",
+  };
+
+  const show = (pickers = noPickers, ambience: Ambience = DEFAULT_AMBIENCE) => {
+    const onProblem = vi.fn();
+    render(
+      <AmbienceSheet
+        ambience={ambience}
+        backdrops={backdrops([ownImage], (file) => file)}
+        ambients={[
+          ...BUILT_IN_AMBIENTS,
+          { id: `own:${ownSound.id}`, name: ownSound.name, url: "x" },
+        ]}
+        playsAmbients
+        pickers={pickers}
+        theme="paper"
+        origin="main"
+        onClose={() => {}}
+        onProblem={onProblem}
+      />,
+    );
+    return { onProblem };
+  };
+  const calls = (method: string) =>
+    request.mock.calls
+      .filter(([name]) => name === method)
+      .map(([, params]) => params as Record<string, unknown>);
+
+  it("copies a chosen image into the app and puts it behind the sheet", async () => {
+    request.mockImplementation((method: string) =>
+      Promise.resolve(
+        method === "ambience.import"
+          ? { ...ownImage, id: "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6d" }
+          : null,
+      ),
+    );
+    show({ ...noPickers, chooseImage: () => Promise.resolve("C:/Imágenes/venta.png") });
+
+    await userEvent.click(screen.getByRole("button", { name: "Añadir una imagen tuya" }));
+
+    expect(calls("ambience.import")).toEqual([
+      { path: "C:/Imágenes/venta.png", kind: "image", origin: "main" },
+    ]);
+    expect(calls("preferences.update")[0]).toMatchObject({
+      changes: { ambience: { background: "own:0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6d" } },
+    });
+  });
+
+  it("adds a chosen sound to the mix", async () => {
+    request.mockImplementation((method: string) =>
+      Promise.resolve(
+        method === "ambience.import"
+          ? { ...ownSound, id: "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6e" }
+          : null,
+      ),
+    );
+    show({ ...noPickers, chooseSound: () => Promise.resolve("/home/autor/olas.flac") });
+
+    await userEvent.click(screen.getByRole("button", { name: "Añadir un sonido tuyo" }));
+
+    expect(calls("ambience.import")[0]).toMatchObject({ kind: "sound" });
+    expect(calls("preferences.update")[0]).toMatchObject({
+      changes: {
+        ambience: { ambients: [{ id: "own:0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6e", level: 0.7 }] },
+      },
+    });
+  });
+
+  it("does nothing when the writer cancels the dialog", async () => {
+    show();
+
+    await userEvent.click(screen.getByRole("button", { name: "Añadir una imagen tuya" }));
+
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it("says in Spanish why a file was refused, and says it is copying meanwhile", async () => {
+    let refuse: (error: unknown) => void = () => {};
+    request.mockImplementation(() => new Promise((_, reject) => (refuse = reject)));
+    const { onProblem } = show({
+      ...noPickers,
+      chooseSound: () => Promise.resolve("C:/carta.ogg"),
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "Añadir un sonido tuyo" }));
+    expect(screen.getByRole("button", { name: "Copiando el sonido…" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Añadir una imagen tuya" })).toBeDisabled();
+
+    await act(async () => refuse(new CoreError(-32002, "no", "notASound")));
+
+    expect(onProblem).toHaveBeenLastCalledWith(
+      "Ese archivo no es un sonido que Rocinante pueda usar. Prueba con Ogg, MP3, WAV o FLAC.",
+    );
+    expect(screen.getByRole("button", { name: "Añadir un sonido tuyo" })).toBeEnabled();
+  });
+
+  it("takes away an own image or sound, and only those", async () => {
+    request.mockResolvedValue([]);
+    show();
+
+    await userEvent.click(screen.getByRole("button", { name: "Quitar «molinos.jpg»" }));
+    await userEvent.click(screen.getByRole("button", { name: "Quitar «lluvia.ogg»" }));
+
+    expect(calls("ambience.remove")).toEqual([
+      { id: ownImage.id, origin: "main" },
+      { id: ownSound.id, origin: "main" },
+    ]);
+    expect(screen.getAllByRole("button", { name: /^Quitar/ })).toHaveLength(2);
   });
 });

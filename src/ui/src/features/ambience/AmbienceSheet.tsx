@@ -5,6 +5,7 @@ import { messageFor } from "../../app/messages";
 import { sounds } from "../../audio/engine";
 import { TYPING_ORDER, TYPING_SOUNDS } from "../../audio/typing-sounds";
 import type { AmbientSound } from "../../audio/ambient-sounds";
+import type { Pickers } from "../welcome/Welcome";
 import { backdropOf, paintOf, type Backdrop } from "./catalog";
 import "./ambience.css";
 
@@ -16,6 +17,8 @@ interface AmbienceSheetProps {
   ambients: AmbientSound[];
   /** Whether this window plays the ambient sounds; only the main one does. */
   playsAmbients: boolean;
+  /** The system dialogs to choose an image or a sound of the writer's. */
+  pickers: Pick<Pickers, "chooseImage" | "chooseSound">;
   theme: Theme;
   origin: string;
   onClose(): void;
@@ -45,6 +48,7 @@ export function AmbienceSheet({
   backdrops,
   ambients,
   playsAmbients,
+  pickers,
   theme,
   origin,
   onClose,
@@ -100,6 +104,42 @@ export function AmbienceSheet({
     }, SEND_DELAY_MS);
   };
 
+  // Copying a file of the writer's can take a moment: one at a time, and said.
+  const [adding, setAdding] = useState<"image" | "sound" | null>(null);
+
+  /** Copies an image or a sound of the writer's into the app, and puts it to use at once. */
+  async function add(kind: "image" | "sound") {
+    const path = await (kind === "image" ? pickers.chooseImage() : pickers.chooseSound());
+    if (!path) return;
+    setAdding(kind);
+    try {
+      const own = await request("ambience.import", { path, kind, origin });
+      const id = `own:${own.id}`;
+      onProblem(null);
+      if (kind === "image") change({ ...shown, background: id });
+      else if (shown.ambients.length < MAX_AMBIENTS)
+        change({
+          ...shown,
+          ambientMuted: false,
+          ambients: [...shown.ambients, { id, level: DEFAULT_LEVEL }],
+        });
+    } catch (error) {
+      onProblem(messageFor(error));
+    } finally {
+      setAdding(null);
+    }
+  }
+
+  /** Takes away one of the writer's own files; the core stops using it where it was used. */
+  async function remove(id: string) {
+    try {
+      await request("ambience.remove", { id: id.slice("own:".length), origin });
+      onProblem(null);
+    } catch (error) {
+      onProblem(messageFor(error));
+    }
+  }
+
   // The writer hears the typing as they choose it.
   const hearTyping = (next: Ambience) => {
     sounds.setTyping(next.typing);
@@ -131,25 +171,44 @@ export function AmbienceSheet({
         <p className="ambience-hint">Se ve detrás de la hoja en el modo concentración (F11).</p>
         <div className="ambience-backdrops" role="radiogroup" aria-labelledby={backgroundsId}>
           {backdrops.map((backdrop) => (
-            <button
-              key={backdrop.id}
-              type="button"
-              role="radio"
-              aria-checked={backdrop.id === chosen}
-              className="ambience-backdrop"
-              onClick={() =>
-                backdrop.id !== chosen && change({ ...shown, background: backdrop.id })
-              }
-            >
-              <span
-                className="ambience-swatch"
-                aria-hidden="true"
-                style={{ background: paintOf(backdrop, theme) ?? "var(--color-paper)" }}
-              />
-              <span className="ambience-name">{backdrop.name}</span>
-            </button>
+            <div key={backdrop.id} className="ambience-backdrop-cell">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={backdrop.id === chosen}
+                className="ambience-backdrop"
+                onClick={() =>
+                  backdrop.id !== chosen && change({ ...shown, background: backdrop.id })
+                }
+              >
+                <span
+                  className="ambience-swatch"
+                  aria-hidden="true"
+                  style={{ background: paintOf(backdrop, theme) ?? "var(--color-paper)" }}
+                />
+                <span className="ambience-name">{backdrop.name}</span>
+              </button>
+              {backdrop.id.startsWith("own:") && (
+                <button
+                  type="button"
+                  className="action ambience-remove"
+                  aria-label={`Quitar «${backdrop.name}»`}
+                  onClick={() => void remove(backdrop.id)}
+                >
+                  Quitar
+                </button>
+              )}
+            </div>
           ))}
         </div>
+        <button
+          type="button"
+          className="action ambience-add"
+          disabled={adding !== null}
+          onClick={() => void add("image")}
+        >
+          {adding === "image" ? "Copiando la imagen…" : "Añadir una imagen tuya"}
+        </button>
       </section>
 
       <section aria-labelledby={typingId}>
@@ -247,6 +306,16 @@ export function AmbienceSheet({
                   />
                   {sound.name}
                 </label>
+                {sound.id.startsWith("own:") && (
+                  <button
+                    type="button"
+                    className="action ambience-remove"
+                    aria-label={`Quitar «${sound.name}»`}
+                    onClick={() => void remove(sound.id)}
+                  >
+                    Quitar
+                  </button>
+                )}
                 {playing && (
                   <input
                     type="range"
@@ -272,6 +341,14 @@ export function AmbienceSheet({
             );
           })}
         </ul>
+        <button
+          type="button"
+          className="action ambience-add"
+          disabled={adding !== null}
+          onClick={() => void add("sound")}
+        >
+          {adding === "sound" ? "Copiando el sonido…" : "Añadir un sonido tuyo"}
+        </button>
         <Volume
           label="Volumen de los ambientes"
           value={shown.ambientVolume}

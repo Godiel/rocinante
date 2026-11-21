@@ -250,3 +250,27 @@ describe("the ambient sounds", () => {
     expect(ambientVolume(audio)).toBe(0);
   });
 });
+
+describe("an ambient that cannot be played", () => {
+  it("is said once, and the others play", async () => {
+    const broken = {
+      id: "own:0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      url: "ambience://localhost/roto.ogg",
+      level: 1,
+    };
+    const rain = { id: "builtin:rain", url: "/sounds/ambient/rain.ogg", level: 1 };
+    const { sound, audio } = engine(() => 0.5, [broken.url]);
+    const heard: string[] = [];
+    const stop = sound.onUnplayable((id) => heard.push(id));
+
+    sound.setAmbients([broken, rain], 1, false);
+    await settle();
+    stop();
+    sound.setAmbients([rain], 1, false);
+    sound.setAmbients([broken, rain], 1, false);
+    await settle();
+
+    expect(heard).toEqual([broken.id]);
+    expect(audio.sources.map((source) => source.url)).toEqual([rain.url]);
+  });
+});

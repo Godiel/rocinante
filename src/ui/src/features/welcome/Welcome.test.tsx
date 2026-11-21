@@ -49,6 +49,8 @@ function renderWelcome(
   const pickers: Pickers = {
     chooseFolder: vi.fn(() => Promise.resolve(null)),
     chooseProject: vi.fn(() => Promise.resolve(null)),
+    chooseImage: vi.fn(() => Promise.resolve(null)),
+    chooseSound: vi.fn(() => Promise.resolve(null)),
     ...options.pickers,
   };
   render(

@@ -76,7 +76,12 @@ const start = (overrides: Partial<StartState> = {}): StartState => ({
   ...overrides,
 });
 
-const pickers = { chooseFolder: vi.fn(), chooseProject: vi.fn() };
+const pickers = {
+  chooseFolder: vi.fn(),
+  chooseProject: vi.fn(),
+  chooseImage: vi.fn(),
+  chooseSound: vi.fn(),
+};
 
 function announce<N extends keyof CoreNotifications>(method: N, params: CoreNotifications[N]) {
   act(() => listeners.get(method)?.(params));

@@ -12,6 +12,7 @@ import type {
   Preferences,
   ProjectState,
   RecentProject,
+  OwnAmbience,
   StartProblem,
   WorkFormat,
 } from "../bridge/generated/protocol";
@@ -64,6 +65,7 @@ export function App({ origin, pickers }: AppProps) {
   const [defaultFolder, setDefaultFolder] = useState("");
   const [suggestedFormat, setSuggestedFormat] = useState<WorkFormat | null>(null);
   const [preferences, setPreferences] = useState<Preferences | null>(null);
+  const [ownAmbience, setOwnAmbience] = useState<OwnAmbience[]>([]);
   // Set when the core stopped for good: said over the page, which is left as it is.
   const [halted, setHalted] = useState<string | null>(null);
 
@@ -80,6 +82,7 @@ export function App({ origin, pickers }: AppProps) {
         setRecent(start.recent);
         setDefaultFolder(start.defaultFolder);
         setSuggestedFormat(start.suggestedFormat);
+        setOwnAmbience(start.ownAmbience);
         setScreen(
           start.project
             ? { kind: "writing", project: start.project, place: start.place }
@@ -103,6 +106,7 @@ export function App({ origin, pickers }: AppProps) {
           .catch(() => {});
       }),
       onNotification("recent.changed", ({ recent: next }) => setRecent(next)),
+      onNotification("ambience.changed", ({ own }) => setOwnAmbience(own)),
       onNotification("preferences.changed", ({ preferences: next }) => applyPreferences(next)),
       // A new core took over after the old one fell: it reopens the project the writer had
       // open (the first window to ask does it) and the text not yet saved goes to it.
@@ -159,6 +163,8 @@ export function App({ origin, pickers }: AppProps) {
             project={screen.project}
             place={screen.place}
             preferences={preferences ?? DEFAULT_PREFERENCES}
+            ownAmbience={ownAmbience}
+            pickers={pickers}
             origin={origin}
           />
         );
