@@ -31,6 +31,8 @@ import { workClasses, workStyle } from "../format/work-style";
 import { FocusBar } from "../focus/FocusBar";
 import { tauriWindow } from "../focus/focus-window";
 import { useFocusMode } from "../focus/useFocusMode";
+import { useSessionGoal, type Session } from "../focus/useSessionGoal";
+import { GoalMeter, GoalReached } from "../focus/Goal";
 import { AmbienceSheet } from "../ambience/AmbienceSheet";
 import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
@@ -63,6 +65,9 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const [counts, setCounts] = useState<{ id: string; statistics: Statistics } | null>(null);
   // Saves bring the counts of the work; a change to the index brings a new project with them.
   const [work, setWork] = useState({ value: project.work, base: project.work });
+  const workCounts = work.base === project.work ? work.value : project.work;
+  // A session of focus mode, for its goal: it starts and ends with the mode.
+  const [session, setSession] = useState<Session | null>(null);
   const projectWork = useRef(project.work);
   useEffect(() => {
     projectWork.current = project.work;
@@ -245,9 +250,11 @@ export function WritingView({ project, place, preferences, origin }: WritingView
       setSheet(null);
       setViewing(null);
       setPagesOpen(false);
+      setSession({ words: workCounts.words });
       focusText();
     },
     onLeave: () => {
+      setSession(null);
       outlineWasOpen.current = putAway.current.outline;
       setOutlineOpen(putAway.current.outline);
       setSheet(putAway.current.sheet);
@@ -334,6 +341,8 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const shownViewing = viewing && viewing.version.documentId === shownId ? viewing : null;
 
   const isEmpty = index.chapters.length === 0 && index.fragments.length === 0;
+  const progress = useSessionGoal(session, preferences.ambience.goal, workCounts.words);
+  const dimming = focus.focused && preferences.ambience.dimOthers;
   // In focus mode the chosen background shows behind translucent paper.
   const allBackdrops = useMemo(() => backdrops([], convertFileSrc), []);
   const backdrop = focus.focused ? backdropOf(preferences.ambience.background, allBackdrops) : null;
@@ -345,7 +354,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
     <div
       className={`writing-view ${workClasses(project.format)}${
         docked ? " writing-view-docked" : ""
-      }${sheet ? " writing-view-sheet" : ""}${focus.focused ? " writing-view-focus" : ""}${paint ? " writing-view-backdrop" : ""}`}
+      }${sheet ? " writing-view-sheet" : ""}${focus.focused ? " writing-view-focus" : ""}${paint ? " writing-view-backdrop" : ""}${dimming ? " writing-view-dim" : ""}`}
       style={
         {
           ...workStyle(project.format),
@@ -539,6 +548,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           words={counts && counts.id === shownId ? counts.statistics.words : 0}
           onLeave={focus.leave}
         >
+          {progress && <GoalMeter progress={progress} />}
           <button
             type="button"
             className="action"
@@ -550,10 +560,12 @@ export function WritingView({ project, place, preferences, origin }: WritingView
         </FocusBar>
       )}
 
+      {session && progress && <GoalReached session={session} progress={progress} />}
+
       <Counter
         document={counts && counts.id === shownId ? counts.statistics : null}
         kind={kindOf(shownId)}
-        work={work.base === project.work ? work.value : project.work}
+        work={workCounts}
         chapters={index.chapters.length}
         save={save}
         visible={preferences.counterVisible}

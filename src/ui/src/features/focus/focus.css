@@ -51,3 +51,80 @@
     transition: none;
   }
 }
+
+/* Dimming the rest: only the block of the cursor keeps all its ink. */
+.writing-view-dim .book-page .ProseMirror > * {
+  opacity: 0.32;
+  transition: opacity 240ms ease;
+}
+
+.writing-view-dim .book-page .ProseMirror > .is-current {
+  opacity: 1;
+}
+
+/* The session goal in the minimal bar: a number and a thin line that fills. */
+.focus-goal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-variant: normal;
+  letter-spacing: 0;
+  font-style: italic;
+}
+
+.focus-goal-track {
+  display: inline-block;
+  width: 5rem;
+  height: 2px;
+  background: var(--color-rule);
+}
+
+.focus-goal-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-ink-soft);
+  transition: width 400ms ease;
+}
+
+.focus-goal-reached .focus-goal-fill {
+  background: var(--color-rubric);
+}
+
+/* The quiet word when the goal is reached: below where the minimal bar appears, out of the way. */
+.focus-goal-notice {
+  position: fixed;
+  z-index: 5;
+  top: calc(var(--bar-height) + var(--space-3));
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%);
+  font-style: italic;
+  font-size: var(--text-caption);
+  color: var(--color-ink-soft);
+  pointer-events: none;
+}
+
+.focus-goal-notice:not(:empty) {
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: 2px;
+  animation: focus-goal-in 400ms ease;
+}
+
+@keyframes focus-goal-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .writing-view-dim .book-page .ProseMirror > *,
+  .focus-goal-fill {
+    transition: none;
+  }
+
+  .focus-goal-notice:not(:empty) {
+    animation: none;
+  }
+}

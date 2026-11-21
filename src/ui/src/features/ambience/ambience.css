@@ -95,6 +95,40 @@
   accent-color: var(--color-rubric);
 }
 
+.ambience-goal {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  border: none;
+}
+
+.ambience-goal-legend {
+  margin-bottom: var(--space-1);
+  padding: 0;
+  color: var(--color-ink-soft);
+  font-style: italic;
+}
+
+.ambience-goal-amount {
+  width: 7rem;
+  margin-top: var(--space-2);
+  padding: var(--space-1);
+  font: inherit;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+}
+
+.ambience-goal-amount[aria-invalid="true"] {
+  border-color: var(--color-rubric);
+}
+
+.ambience-problem {
+  margin: var(--space-1) 0 0;
+  font-style: italic;
+  color: var(--color-rubric);
+}
+
 /* In focus mode the sheet has the whole height: there is no bar above it. */
 .writing-view-focus .sheet {
   top: 0;

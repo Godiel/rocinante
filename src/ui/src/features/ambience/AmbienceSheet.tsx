@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { request } from "../../bridge/core";
-import type { Ambience, Theme } from "../../bridge/generated/protocol";
+import type { Ambience, SessionGoal, Theme } from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
 import { sounds } from "../../audio/engine";
 import { TYPING_ORDER, TYPING_SOUNDS } from "../../audio/typing-sounds";
@@ -29,6 +29,12 @@ export const MAX_AMBIENTS = 6;
 /** The level an ambient starts at when it joins the mix. */
 const DEFAULT_LEVEL = 0.7;
 
+/** What a goal of each kind may be, as the contract allows, and what it starts at. */
+const GOAL_LIMITS = {
+  words: { min: 50, max: 50_000, start: 500, unit: "palabras" },
+  minutes: { min: 5, max: 600, start: 45, unit: "minutos" },
+} as const;
+
 /**
  * The writer's ambience: the background behind the sheet in focus mode, the typing sound and, later,
  * the ambient sounds and the session goal. Every choice applies at once and is the writer's, in
@@ -47,6 +53,7 @@ export function AmbienceSheet({
   const backgroundsId = useId();
   const typingId = useId();
   const ambientsId = useId();
+  const focusId = useId();
   // What the sheet shows before the core has it: a slider moving, a choice on its way. The core's
   // answer comes back as new preferences, and a draft made on older ones gives way.
   const [draft, setDraft] = useState<{ base: Ambience; value: Ambience } | null>(null);
@@ -183,6 +190,31 @@ export function AmbienceSheet({
         />
       </section>
 
+      <section aria-labelledby={focusId}>
+        <h3 id={focusId} className="ambience-label small-caps">
+          Concentración
+        </h3>
+        <label className="ambience-choice">
+          <input
+            type="checkbox"
+            checked={shown.dimOthers}
+            onChange={(event) => change({ ...shown, dimOthers: event.target.checked })}
+          />
+          Atenuar el resto: solo el párrafo donde escribes, con toda su tinta
+        </label>
+        <GoalField
+          key={shown.goal.kind}
+          goal={shown.goal}
+          onKind={(kind) =>
+            change({
+              ...shown,
+              goal: kind === "none" ? { kind } : { kind, amount: GOAL_LIMITS[kind].start },
+            })
+          }
+          onAmount={(goal) => changeSoon({ ...shown, goal })}
+        />
+      </section>
+
       <section aria-labelledby={ambientsId}>
         <h3 id={ambientsId} className="ambience-label small-caps">
           Ambientes
@@ -279,5 +311,77 @@ function Volume({ label, value, muted, onChange, onMute }: VolumeProps) {
         Silencio
       </label>
     </div>
+  );
+}
+
+interface GoalFieldProps {
+  goal: SessionGoal;
+  onKind(kind: SessionGoal["kind"]): void;
+  /** A valid amount the writer typed. */
+  onAmount(goal: SessionGoal): void;
+}
+
+/** The goal of a session: none, a number of new words, or of minutes. */
+function GoalField({ goal, onKind, onAmount }: GoalFieldProps) {
+  const id = useId();
+  // What the writer is typing, which may not be a valid amount yet.
+  const [text, setText] = useState(goal.kind === "none" ? "" : String(goal.amount));
+  const limits = goal.kind === "none" ? null : GOAL_LIMITS[goal.kind];
+  const amount = Number(text);
+  const valid =
+    !limits || (Number.isInteger(amount) && amount >= limits.min && amount <= limits.max);
+  const number = new Intl.NumberFormat("es-ES", { useGrouping: "always" });
+
+  return (
+    <fieldset className="ambience-goal">
+      <legend className="ambience-goal-legend">Meta de la sesión</legend>
+      <div className="ambience-choices">
+        {(["none", "words", "minutes"] as const).map((kind) => (
+          <label key={kind} className="ambience-choice">
+            <input
+              type="radio"
+              name={`${id}-kind`}
+              checked={goal.kind === kind}
+              onChange={() => onKind(kind)}
+            />
+            {kind === "none"
+              ? "Sin meta"
+              : kind === "words"
+                ? "Palabras nuevas"
+                : "Minutos escribiendo"}
+          </label>
+        ))}
+      </div>
+      {limits && goal.kind !== "none" && (
+        <>
+          <input
+            type="number"
+            className="ambience-goal-amount"
+            aria-label={`Meta en ${limits.unit}`}
+            aria-invalid={!valid}
+            aria-describedby={valid ? undefined : `${id}-problem`}
+            min={limits.min}
+            max={limits.max}
+            step={goal.kind === "words" ? 50 : 5}
+            value={text}
+            onChange={(event) => {
+              setText(event.target.value);
+              const next = Number(event.target.value);
+              if (Number.isInteger(next) && next >= limits.min && next <= limits.max) {
+                onAmount({ kind: goal.kind, amount: next });
+              }
+            }}
+          />
+          {!valid && (
+            <p id={`${id}-problem`} className="ambience-problem" role="alert">
+              Entre {number.format(limits.min)} y {number.format(limits.max)} {limits.unit}.
+            </p>
+          )}
+          <p className="ambience-hint">
+            Cuenta desde que entras en el modo concentración (F11) hasta que sales.
+          </p>
+        </>
+      )}
+    </fieldset>
   );
 }

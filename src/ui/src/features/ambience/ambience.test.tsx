@@ -377,3 +377,68 @@ describe("the ambient sounds in the ambience sheet", () => {
     expect(screen.getByText("Suenan en la ventana principal.")).toBeInTheDocument();
   });
 });
+
+describe("focus aids in the ambience sheet", () => {
+  const show = (ambience: Ambience = DEFAULT_AMBIENCE) => {
+    request.mockResolvedValue(ambience);
+    return render(
+      <AmbienceSheet
+        ambience={ambience}
+        backdrops={BUILT_IN_BACKDROPS}
+        ambients={BUILT_IN_AMBIENTS}
+        playsAmbients
+        theme="paper"
+        origin="main"
+        onClose={() => {}}
+        onProblem={() => {}}
+      />,
+    );
+  };
+  const sent = () =>
+    request.mock.calls.map(
+      ([, params]) => (params as { changes: { ambience: Ambience } }).changes.ambience,
+    );
+
+  it("dims the rest or not", async () => {
+    show();
+
+    await userEvent.click(screen.getByRole("checkbox", { name: /Atenuar el resto/ }));
+
+    expect(sent()).toEqual([{ ...DEFAULT_AMBIENCE, dimOthers: true }]);
+  });
+
+  it("sets a goal of words or of minutes, starting from a sensible amount", async () => {
+    show();
+    expect(screen.queryByRole("spinbutton")).toBeNull();
+
+    await userEvent.click(screen.getByRole("radio", { name: "Palabras nuevas" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Minutos escribiendo" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Sin meta" }));
+
+    expect(sent().map((ambience) => ambience.goal)).toEqual([
+      { kind: "words", amount: 500 },
+      { kind: "minutes", amount: 45 },
+      { kind: "none" },
+    ]);
+  });
+
+  it("sends an amount within reason once it rests, and says what is allowed otherwise", () => {
+    vi.useFakeTimers();
+    try {
+      show({ ...DEFAULT_AMBIENCE, goal: { kind: "words", amount: 500 } });
+      const amount = screen.getByRole("spinbutton", { name: "Meta en palabras" });
+
+      fireEvent.change(amount, { target: { value: "20" } });
+      expect(amount).toHaveAttribute("aria-invalid", "true");
+      expect(screen.getByRole("alert")).toHaveTextContent("Entre 50 y 50.000 palabras.");
+
+      fireEvent.change(amount, { target: { value: "1200" } });
+      act(() => void vi.advanceTimersByTime(SEND_DELAY_MS));
+
+      expect(screen.queryByRole("alert")).toBeNull();
+      expect(sent().map((ambience) => ambience.goal)).toEqual([{ kind: "words", amount: 1200 }]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

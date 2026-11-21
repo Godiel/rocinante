@@ -13,6 +13,7 @@ import type {
 import { messageFor } from "../../app/messages";
 import { bookExtensions, footnotesOf } from "../../editor/extensions";
 import { TypingSounds } from "../../editor/extensions/typing-sounds";
+import { CurrentBlock } from "../../editor/extensions/current-block";
 import { sounds } from "../../audio/engine";
 import { registerPendingSave } from "../../editor/pending-saves";
 import { platenScroll } from "../../editor/typewriter";
@@ -108,6 +109,7 @@ export function BookEditor({
     extensions: [
       ...bookExtensions(),
       TypingSounds.configure({ play: (stroke) => sounds.play(stroke) }),
+      CurrentBlock,
     ],
     content: document.content,
     editorProps: {
