@@ -23,7 +23,7 @@ import { TextPopover } from "./TextPopover";
 import { TypewriterCaret } from "./TypewriterCaret";
 import { useNotes } from "./useNotes";
 import "./book-editor.css";
-import { registerCursor } from "../../editor/cursor";
+import { registerCursor, shownHead } from "../../editor/cursor";
 
 const SAVE_DELAY_MS = 300;
 const RETRY_DELAY_MS = 5000;
@@ -187,13 +187,18 @@ export function BookEditor({
     },
   });
 
-  // The page view asks where the cursor is when it opens.
+  // The page view asks where the cursor is when it opens. What the writer sees on screen comes
+  // first: on macOS the editor can learn of a click a moment after the selection shows, and the
+  // page view would open where the cursor was before.
   useEffect(() => {
     if (!editor) return;
     return registerCursor(() =>
       editor.isDestroyed
         ? null
-        : { documentId: document.id, position: editor.state.selection.head },
+        : {
+            documentId: document.id,
+            position: shownHead(editor.view) ?? editor.state.selection.head,
+          },
     );
   }, [editor, document.id]);
 
