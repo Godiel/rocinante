@@ -55,17 +55,17 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] `cargo fmt`, `clippy` y `test` en verde.
 
 ## 5. Modo concentración
-- [ ] `features/focus`: F11 entra y sale; Esc sale, salvo con un menú del editor abierto, que se cierra primero.
-- [ ] Botón en la barra de la obra para entrar.
-- [ ] Pantalla completa con la ventana. Se esconden el índice, la barra y las hojas, en la misma vista y con el mismo editor.
-- [ ] Salir de la pantalla completa desde el sistema también sale del modo.
-- [ ] Barra mínima:
+- [x] `features/focus`: F11 entra y sale; Esc sale, salvo con un menú del editor abierto, que se cierra primero.
+- [x] Botón en la barra de la obra para entrar.
+- [x] Pantalla completa con la ventana. Se esconden el índice, la barra y las hojas, en la misma vista y con el mismo editor.
+- [x] Salir de la pantalla completa desde el sistema también sale del modo.
+- [x] Barra mínima:
   - aparece con el ratón en el borde superior;
   - se esconde al escribir y tras unos segundos sin el ratón encima;
   - muestra el contador y tiene un botón para salir.
-- [ ] Al salir, el cursor y el desplazamiento siguen donde estaban.
-- [ ] Atajo F11 en `shortcuts.ts`.
-- [ ] Tests de comportamiento y comprobación en la app real.
+- [x] Al salir, el cursor y el desplazamiento siguen donde estaban.
+- [x] Atajo F11 en `features/focus/shortcuts.ts`. En el modo, F5, F6 y el índice no abren nada, y Ctrl+S guarda una versión sin abrir la hoja.
+- [x] Tests de comportamiento y comprobación en la app real.
 
 ## 6. Fondos fijos y hoja translúcida
 - [ ] Catálogo `features/ambience/catalog.ts`: colores, degradados e imágenes, cada uno con nombre, archivo y créditos.
