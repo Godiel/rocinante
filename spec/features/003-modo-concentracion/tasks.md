@@ -101,11 +101,11 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests con un `AudioContext` falso y comprobación de oído en la app real.
 
 ## 10. Atenuar el resto y meta de la sesión
-- [ ] Decoración de ProseMirror en el bloque del cursor; el CSS atenúa el resto solo en el modo concentración.
-- [ ] Meta de palabras nuevas, sin bajar de cero al borrar, o de minutos en el modo con la ventana visible.
-- [ ] Progreso en la barra mínima y aviso discreto al cumplirla.
-- [ ] La meta se elige en el panel «Ambiente».
-- [ ] Tests de comportamiento: cuenta de palabras, de minutos con un reloj falso y aviso.
+- [x] Decoración de ProseMirror en el bloque del cursor; el CSS atenúa el resto solo en el modo concentración.
+- [x] Meta de palabras nuevas, sin bajar de cero al borrar, o de minutos en el modo con la ventana visible.
+- [x] Progreso en la barra mínima y aviso discreto al cumplirla.
+- [x] La meta se elige en el panel «Ambiente».
+- [x] Tests de comportamiento: cuenta de palabras, de minutos con un reloj falso y aviso.
 
 ## 11. Fondos y sonidos propios en la interfaz
 - [ ] «Añadir imagen» y «Añadir sonido» con el diálogo del sistema, con los filtros de tipo; la ruta va a `ambience.import`.
