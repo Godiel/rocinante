@@ -134,6 +134,11 @@ export async function startRelay(dataDirectory: string): Promise<Relay> {
 
   core.stderr.setEncoding("utf8");
   core.stderr.on("data", (text: string) => errors.push(text));
+  // Between the core dying and its exit being reported, a request can still be written to it:
+  // that write fails (EPIPE) and the request gets what the host gives, "core unavailable".
+  core.stdin.on("error", () => {
+    running = false;
+  });
 
   void exited.then(() => {
     running = false;
@@ -171,7 +176,11 @@ export async function startRelay(dataDirectory: string): Promise<Relay> {
     if (params !== null && params !== undefined) message.params = params;
     return new Promise((answer) => {
       pending.set(id, answer);
-      core.stdin.write(`${JSON.stringify(message)}\n`);
+      core.stdin.write(`${JSON.stringify(message)}\n`, (error) => {
+        if (!error) return;
+        pending.delete(id);
+        answer({ error: { code: CORE_UNAVAILABLE, message: "core unavailable: it stopped" } });
+      });
     });
   }
 
@@ -233,7 +242,7 @@ export async function startRelay(dataDirectory: string): Promise<Relay> {
     url: `http://127.0.0.1:${port}/`,
     windowClosed,
     async killCore() {
-      if (running) core.kill("SIGKILL");
+      if (core.exitCode === null && core.signalCode === null) core.kill("SIGKILL");
       await exited;
     },
     async stop() {
