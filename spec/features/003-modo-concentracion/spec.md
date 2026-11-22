@@ -1,6 +1,6 @@
 # 003 · Modo concentración y ambiente
 
-**Estado:** en especificación
+**Estado:** hecha. Quedan dos materiales por incluir y una comprobación (ver «Pendiente»).
 
 ## Qué hace
 
@@ -53,38 +53,46 @@ Escribir pide entrar en la historia y quedarse en ella. Una pantalla sin nada m�
 ## Criterios de aceptación
 
 **Modo concentración**
-- [ ] F11 entra y sale del modo concentración; Esc sale; el botón de la barra entra. Con un menú del editor abierto, Esc lo cierra sin salir.
-- [ ] En el modo concentración la ventana ocupa toda la pantalla y solo se ve el texto, en Windows, macOS y Linux.
-- [ ] La barra mínima aparece al llevar el ratón arriba y se esconde al escribir. Desde ella se ve el contador y la meta, se cambia el ambiente y se sale.
-- [ ] Al salir se vuelve a la vista de escritura con el cursor en el mismo sitio y sin perder nada de lo escrito.
+- [x] F11 entra y sale del modo concentración; Esc sale; el botón de la barra entra. Con un menú del editor abierto, Esc lo cierra sin salir.
+- [ ] En el modo concentración la ventana ocupa toda la pantalla y solo se ve el texto, en Windows, macOS y Linux. _(Comprobado en Windows; en macOS y Linux, con los instaladores de la 012.)_
+- [x] La barra mínima aparece al llevar el ratón arriba y se esconde al escribir. Desde ella se ve el contador y la meta, se cambia el ambiente y se sale.
+- [x] Al salir se vuelve a la vista de escritura con el cursor en el mismo sitio y sin perder nada de lo escrito.
 
 **Fondos**
-- [ ] Se puede elegir entre los fondos incluidos: colores y degradados, imágenes y animados.
-- [ ] El texto sobre la hoja translúcida cumple WCAG AA con cualquier fondo incluido y en los dos temas.
-- [ ] Con «reducir el movimiento» activado en el sistema, los fondos animados no se mueven.
-- [ ] Un fondo animado no hace que escribir sea menos fluido.
+- [ ] Se puede elegir entre los fondos incluidos: colores y degradados, imágenes y animados. _(Faltan las imágenes incluidas; las propias sí funcionan.)_
+- [x] El texto sobre la hoja translúcida cumple WCAG AA con cualquier fondo incluido y en los dos temas.
+- [x] Con «reducir el movimiento» activado en el sistema, los fondos animados no se mueven.
+- [x] Un fondo animado no hace que escribir sea menos fluido.
 
 **Sonidos**
-- [ ] Cada pulsación que escribe suena con el tecleo elegido, sin retraso perceptible. Los atajos y las flechas no suenan. Con la máquina de escribir, Intro suena a retorno de carro.
-- [ ] Los ambientes suenan en bucle sin cortes. Se pueden mezclar varios, cada uno con su nivel.
-- [ ] El volumen del tecleo y el de los ambientes se ajustan y se silencian por separado.
-- [ ] Los sonidos funcionan dentro y fuera del modo concentración, y paran al cerrar la obra.
-- [ ] Con el tecleo activo, escribir sigue igual de fluido que sin él.
+- [x] Cada pulsación que escribe suena con el tecleo elegido, sin retraso perceptible. Los atajos y las flechas no suenan. Con la máquina de escribir, Intro suena a retorno de carro.
+- [x] Los ambientes suenan en bucle sin cortes. Se pueden mezclar varios, cada uno con su nivel.
+- [x] El volumen del tecleo y el de los ambientes se ajustan y se silencian por separado.
+- [x] Los sonidos funcionan dentro y fuera del modo concentración, y paran al cerrar la obra.
+- [x] Con el tecleo activo, escribir sigue igual de fluido que sin él.
 
 **Ayudas**
-- [ ] «Atenuar el resto» deja con toda su tinta solo el párrafo del cursor.
-- [ ] Se puede poner una meta de palabras o de minutos. Su progreso se ve en la barra mínima y, al cumplirla, aparece un aviso suave.
+- [x] «Atenuar el resto» deja con toda su tinta solo el párrafo del cursor.
+- [x] Se puede poner una meta de palabras o de minutos. Su progreso se ve en la barra mínima y, al cumplirla, aparece un aviso suave.
 
 **Propios y preferencias**
-- [ ] Se puede añadir una imagen propia como fondo y un sonido propio como ambiente. Siguen funcionando aunque el original se borre, y se pueden quitar.
-- [ ] Un archivo que no es una imagen o un sonido válido se rechaza con un mensaje claro.
-- [ ] El fondo, los sonidos, los volúmenes, las ayudas y la meta se recuerdan al cerrar y abrir la app, y son los mismos en todas las obras.
+- [x] Se puede añadir una imagen propia como fondo y un sonido propio como ambiente. Siguen funcionando aunque el original se borre, y se pueden quitar.
+- [x] Un archivo que no es una imagen o un sonido válido se rechaza con un mensaje claro.
+- [x] El fondo, los sonidos, los volúmenes, las ayudas y la meta se recuerdan al cerrar y abrir la app, y son los mismos en todas las obras.
 
 **Calidad**
-- [ ] Las preferencias nuevas forman parte del contrato de mensajes, con sus pruebas de contrato.
-- [ ] Todos los fondos y sonidos incluidos son de dominio público (CC0). Su origen consta en un archivo de créditos que va con la app.
-- [ ] Todo funciona sin internet.
-- [ ] Tests de comportamiento de la interfaz y una prueba de extremo a extremo: entrar en el modo concentración, elegir un fondo y un ambiente, escribir, salir y volver a abrir la app con todo recordado.
+- [x] Las preferencias nuevas forman parte del contrato de mensajes, con sus pruebas de contrato.
+- [ ] Todos los fondos y sonidos incluidos son de dominio público (CC0). Su origen consta en un archivo de créditos que va con la app. _(Todo lo incluido es CC0 y consta en los créditos, salvo el café, que aún es un sonido provisional generado por el proyecto.)_
+- [x] Todo funciona sin internet.
+- [x] Tests de comportamiento de la interfaz y una prueba de extremo a extremo: entrar en el modo concentración, elegir un fondo y un ambiente, escribir, salir y volver a abrir la app con todo recordado.
+
+## Pendiente
+
+La feature se fusionó en `main` con la CI en verde en Windows, macOS y Linux. Quedan:
+
+- **Imágenes incluidas:** tres paisajes de Beruete en dominio público. Wikimedia limitó la descarga automática; las descarga el autor.
+- **Café:** una grabación CC0 de Freesound, que pide cuenta para descargar. Hasta entonces suena un sonido provisional generado por el proyecto.
+- **Pantalla completa en macOS y Linux:** se comprueba en la app real con los instaladores (012).
 
 ## Fuera de alcance
 

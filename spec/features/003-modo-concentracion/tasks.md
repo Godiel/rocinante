@@ -125,7 +125,7 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Créditos en `features/ambience/credits.ts` y `licenses/ambience.txt` generado por un plugin de Vite.
 - [x] Test: cada entrada tiene su archivo y sus créditos, y el total no pasa de 15 MB.
 - [x] Comprobar que Opus se decodifica en WebView2.
-- [ ] Revisar la CI de macOS y de Linux (ver Riesgos del plan).
+- [x] Revisar la CI de macOS y de Linux (ver Riesgos del plan).
 - [ ] Café: grabación CC0 de Freesound, que pide cuenta para descargar (lo descarga el autor).
 - [ ] Imágenes: tres paisajes de Beruete en dominio público; Wikimedia limitó la descarga automática (lo descarga el autor).
 
@@ -139,10 +139,10 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Importar un fondo propio, borrar el original y comprobar que sigue.
 - [x] Escribir con tecleo y fondo animado: p95 < 50 ms, o 150 ms en la CI de macOS. En la CI, sin tarjeta gráfica, la prueba usa un fondo liso: allí el lienzo se pinta por software, cosa que no ocurre en el equipo de un escritor.
 - [x] El tecleo se programa en menos de 20 ms desde la pulsación, medido con un `AudioContext` instrumentado.
-- [ ] Todo en verde en los tres sistemas en la CI.
+- [x] Todo en verde en los tres sistemas en la CI.
 
 ## 14. Validación y cierre
-- [ ] Repasar los criterios de `spec.md` y marcar solo lo comprobado.
-- [ ] `tech-stack.md`: audio, protocolo `ambience://` y créditos del material incluido.
-- [ ] Pull request a `main` con la CI en verde.
-- [ ] Hoja de ruta: la 003 pasa a «Hecho» al fusionar.
+- [x] Repasar los criterios de `spec.md` y marcar solo lo comprobado.
+- [x] `tech-stack.md`: audio, protocolo `ambience://` y créditos del material incluido.
+- [x] Pull request a `main` con la CI en verde (#3).
+- [x] Hoja de ruta: la 003 pasa a «Hecho» al fusionar.
