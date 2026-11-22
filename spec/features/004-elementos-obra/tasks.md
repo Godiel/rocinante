@@ -61,13 +61,13 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
   - notificaciones a otra ventana.
 
 ## 5. Estado de las fichas en la interfaz
-- [ ] `useBoard`: carga `board.get` al abrir la obra y aplica `elements.changed`.
-- [ ] Funciones puras con sus tests:
+- [x] `useBoard`: carga `board.get` al abrir la obra y aplica `elements.changed`.
+- [x] Funciones puras con sus tests:
   - búsqueda por nombre y alias sin mayúsculas ni tildes;
   - orden alfabético en español;
   - nombres y alias repetidos.
-- [ ] Caché de imágenes por id y versión, con `element.image` bajo demanda.
-- [ ] Catálogos de la interfaz: clases de relación comunes (`relationship-kinds.ts`) y atributos sugeridos por tipo.
+- [x] Caché de imágenes por id y versión, con `element.image` bajo demanda.
+- [x] Catálogos de la interfaz: clases de relación comunes (`relationship-kinds.ts`) y atributos sugeridos por tipo.
 
 ## 6. La ficha
 - [ ] `ElementSheet`:
