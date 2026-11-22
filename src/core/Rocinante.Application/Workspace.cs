@@ -1,5 +1,6 @@
 using Rocinante.Application.Ports;
 using Rocinante.Domain;
+using Rocinante.Domain.Elements;
 using Rocinante.Domain.Projects;
 
 namespace Rocinante.Application;
@@ -12,12 +13,16 @@ public sealed class Workspace : IDisposable
 {
     private IProjectSession? _session;
     private Project? _project;
+    private ElementBoard? _board;
 
     public bool IsOpen => _session is not null;
 
     public IProjectSession Session => _session ?? throw new ProjectNotOpenException();
 
     public Project Project => _project ?? throw new ProjectNotOpenException();
+
+    /// <summary>The elements of the open work, their relationships and the writer's kinds of relationship.</summary>
+    public ElementBoard Board => _board ?? throw new ProjectNotOpenException();
 
     public ProjectSnapshot Snapshot() => new(Session.FilePath, Project, Session.Documents.WorkStatistics());
 
@@ -27,9 +32,11 @@ public sealed class Workspace : IDisposable
         ArgumentNullException.ThrowIfNull(session);
 
         var project = session.Projects.Load();
+        var board = session.Elements.LoadBoard();
         Close();
         _session = session;
         _project = project;
+        _board = board;
     }
 
     public void Close()
@@ -37,6 +44,7 @@ public sealed class Workspace : IDisposable
         _session?.Dispose();
         _session = null;
         _project = null;
+        _board = null;
     }
 
     /// <summary>
@@ -61,6 +69,27 @@ public sealed class Workspace : IDisposable
         catch
         {
             _project = session.Projects.Load();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Applies a change to the elements and stores it with <paramref name="change"/>'s own writes, all or nothing.
+    /// If anything fails, the board is reloaded from the file, so memory never drifts from what is stored.
+    /// </summary>
+    public T ChangeBoard<T>(Func<ElementBoard, IElementRepository, T> change)
+    {
+        ArgumentNullException.ThrowIfNull(change);
+
+        var session = Session;
+        var board = Board;
+        try
+        {
+            return session.InTransaction(() => change(board, session.Elements));
+        }
+        catch
+        {
+            _board = session.Elements.LoadBoard();
             throw;
         }
     }

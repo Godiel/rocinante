@@ -71,6 +71,37 @@ internal sealed record StartStateDto(
     WorkFormatDto SuggestedFormat,
     IReadOnlyList<OwnAmbienceDto> OwnAmbience);
 
+internal sealed record BoardPositionDto(double X, double Y);
+
+internal sealed record ElementAttributeDto(string Name, string Value);
+
+internal sealed record ElementImageInfoDto(long Version);
+
+internal sealed record ElementSummaryDto(
+    Guid Id, string Kind, string? OtherKind, string Name, IReadOnlyList<string> Aliases, BoardPositionDto Position, ElementImageInfoDto? Image);
+
+internal sealed record ElementDto(
+    Guid Id,
+    string Kind,
+    string? OtherKind,
+    string Name,
+    IReadOnlyList<string> Aliases,
+    IReadOnlyList<ElementAttributeDto> Attributes,
+    JsonNode Description,
+    BoardPositionDto Position,
+    ElementImageInfoDto? Image);
+
+internal sealed record RelationshipDto(Guid Id, Guid From, Guid To, string Kind);
+
+internal sealed record RelationshipKindDto(string Id, string Forward, string? Inverse);
+
+internal sealed record NewRelationshipKindDto(string Forward, string? Inverse);
+
+internal sealed record BoardDto(
+    IReadOnlyList<ElementSummaryDto> Elements, IReadOnlyList<RelationshipDto> Relationships, IReadOnlyList<RelationshipKindDto> OwnKinds, IReadOnlyList<ElementSummaryDto> Trash);
+
+internal sealed record ImageDataDto(string Data, string MediaType);
+
 // Params.
 internal sealed record UpdatePreferencesParams(PreferencesChangeDto Changes, string Origin);
 
@@ -108,6 +139,28 @@ internal sealed record CreateNoteParams(Guid DocumentId, string Text, bool Ancho
 
 internal sealed record UpdateNoteParams(Guid Id, string Text, string Origin);
 
+internal sealed record CardPositionDto(Guid Id, double X, double Y);
+
+internal sealed record MoveCardsParams(IReadOnlyList<CardPositionDto> Positions, string Origin);
+
+internal sealed record CreateElementParams(
+    string Kind, string? OtherKind, string Name, IReadOnlyList<ElementAttributeDto>? Attributes, BoardPositionDto? Position, string Origin);
+
+internal sealed record ElementChangesDto(
+    string? Name, string? Kind, string? OtherKind, IReadOnlyList<string>? Aliases, IReadOnlyList<ElementAttributeDto>? Attributes, JsonObject? Description);
+
+internal sealed record UpdateElementParams(Guid Id, ElementChangesDto Changes, string Origin);
+
+internal sealed record ImagePathParams(string Path);
+
+internal sealed record SetImageParams(Guid Id, string Image, string Thumbnail, string Origin);
+
+internal sealed record ElementImageParams(Guid Id, string Size);
+
+internal sealed record RelateParams(Guid From, Guid To, string? Kind, NewRelationshipKindDto? NewKind, string Origin);
+
+internal sealed record ChangeRelationshipParams(Guid Id, string? Kind, NewRelationshipKindDto? NewKind, string Origin);
+
 // Results.
 internal sealed record SystemInfoResult(int ProtocolVersion, string CoreVersion);
 
@@ -133,6 +186,15 @@ internal sealed record DocumentChangedNotification(DocumentStateDto Document, St
 internal sealed record VersionsChangedNotification(Guid DocumentId, string Origin);
 
 internal sealed record NotesChangedNotification(Guid DocumentId, IReadOnlyList<NoteDto> Notes, string Origin);
+
+internal sealed record ElementsChangedNotification(
+    IReadOnlyList<ElementSummaryDto> Elements,
+    IReadOnlyList<ElementSummaryDto> Trash,
+    IReadOnlyList<ElementDto> Details,
+    IReadOnlyList<RelationshipDto> Relationships,
+    IReadOnlyList<Guid> RemovedRelationships,
+    IReadOnlyList<RelationshipKindDto> OwnKinds,
+    string Origin);
 
 /// <summary>
 /// Source-generated serialization for every wire shape. The core is published trimmed, where
@@ -187,4 +249,18 @@ internal sealed record NotesChangedNotification(Guid DocumentId, IReadOnlyList<N
 [JsonSerializable(typeof(DocumentChangedNotification))]
 [JsonSerializable(typeof(VersionsChangedNotification))]
 [JsonSerializable(typeof(NotesChangedNotification))]
+[JsonSerializable(typeof(BoardDto))]
+[JsonSerializable(typeof(ElementDto))]
+[JsonSerializable(typeof(ElementSummaryDto))]
+[JsonSerializable(typeof(RelationshipDto))]
+[JsonSerializable(typeof(ImageDataDto))]
+[JsonSerializable(typeof(MoveCardsParams))]
+[JsonSerializable(typeof(CreateElementParams))]
+[JsonSerializable(typeof(UpdateElementParams))]
+[JsonSerializable(typeof(ImagePathParams))]
+[JsonSerializable(typeof(SetImageParams))]
+[JsonSerializable(typeof(ElementImageParams))]
+[JsonSerializable(typeof(RelateParams))]
+[JsonSerializable(typeof(ChangeRelationshipParams))]
+[JsonSerializable(typeof(ElementsChangedNotification))]
 internal sealed partial class WireJson : JsonSerializerContext;

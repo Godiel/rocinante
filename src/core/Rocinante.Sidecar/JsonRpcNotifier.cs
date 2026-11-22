@@ -43,6 +43,9 @@ internal sealed class JsonRpcNotifier(MessageWriter writer) : IChangeNotifier
     public void RecentChanged(IReadOnlyList<RecentProjectView> recent, string origin) =>
         Send("recent.changed", new RecentChangedNotification(Wire.Of(recent), origin), WireJson.Default.RecentChangedNotification);
 
+    public void ElementsChanged(ElementsChange change, string origin) =>
+        Send("elements.changed", Wire.Of(change, origin), WireJson.Default.ElementsChangedNotification);
+
     public void AmbienceChanged(IReadOnlyList<OwnAmbienceView> own, string origin) =>
         Send("ambience.changed", new AmbienceChangedNotification(Wire.Of(own), origin), WireJson.Default.AmbienceChangedNotification);
 

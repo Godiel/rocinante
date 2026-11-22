@@ -12,8 +12,16 @@ namespace Rocinante.Sidecar;
 /// <param name="LaunchFile">A project the app was launched with, to open in the first window.</param>
 /// <param name="Problems">Where problems seen by the interface and the host are written.</param>
 /// <param name="Ambience">Where the copies of the writer's own images and sounds live.</param>
+/// <param name="ChosenFiles">Reads the files the writer chooses, such as the image of an element.</param>
 internal sealed record CoreOptions(
-    IProjectFiles Files, ISettingsStore Settings, TimeProvider Clock, string DefaultFolder, string? LaunchFile, IReportedProblems Problems, IAmbienceFolder Ambience);
+    IProjectFiles Files,
+    ISettingsStore Settings,
+    TimeProvider Clock,
+    string DefaultFolder,
+    string? LaunchFile,
+    IReportedProblems Problems,
+    IAmbienceFolder Ambience,
+    IChosenFiles ChosenFiles);
 
 /// <summary>
 /// Composition root: wires the use cases to the project files, the clock and the JSON-RPC
@@ -41,6 +49,7 @@ internal sealed class Core : IDisposable
             new NoteUseCases(_workspace, notifier, options.Clock),
             new SettingsUseCases(_workspace, projects, ambience, settings, notifier, options.DefaultFolder, options.LaunchFile),
             ambience,
+            new ElementUseCases(_workspace, options.ChosenFiles, notifier, options.Clock),
             options.Problems);
 
         _server = new JsonRpcServer(writer, contract, CoreMethods.Create(contract, services), log);

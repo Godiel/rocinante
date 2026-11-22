@@ -43,5 +43,13 @@ internal sealed class RecordingNotifier : IChangeNotifier
         Events.Add($"ambience.changed:{origin}");
     }
 
+    public ElementsChange? LastElements { get; private set; }
+
+    public void ElementsChanged(ElementsChange change, string origin)
+    {
+        LastElements = change;
+        Events.Add($"elements.changed:{origin}");
+    }
+
     public void Clear() => Events.Clear();
 }

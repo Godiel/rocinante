@@ -1,4 +1,5 @@
 using Rocinante.Application.Settings;
+using Rocinante.Infrastructure.Files;
 using Rocinante.Infrastructure.Persistence;
 using Rocinante.Infrastructure.Settings;
 
@@ -22,6 +23,7 @@ internal sealed class AppFixture : IDisposable
         Versions = new VersionUseCases(_workspace, Notifier, Clock);
         Notes = new NoteUseCases(_workspace, Notifier, Clock);
         Ambience = new AmbienceUseCases(Settings, new AmbienceFolder(PathOf("datos")), Notifier);
+        Elements = new ElementUseCases(_workspace, new ChosenFiles(), Notifier, Clock);
         App = new SettingsUseCases(_workspace, Projects, Ambience, Settings, Notifier, DefaultFolder, launchFile);
     }
 
@@ -46,6 +48,8 @@ internal sealed class AppFixture : IDisposable
     public NoteUseCases Notes { get; }
 
     public AmbienceUseCases Ambience { get; }
+
+    public ElementUseCases Elements { get; }
 
     public SettingsUseCases App { get; }
 

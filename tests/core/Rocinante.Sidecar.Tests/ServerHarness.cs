@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Rocinante.Infrastructure.Files;
 using Rocinante.Infrastructure.Persistence;
 using Rocinante.Infrastructure.Settings;
 
@@ -21,7 +22,8 @@ internal sealed class ServerHarness : IDisposable
             PathOf("Documentos/Rocinante"),
             launchFile,
             Problems,
-            new AmbienceFolder(PathOf("datos")));
+            new AmbienceFolder(PathOf("datos")),
+            new ChosenFiles());
         _core = new Core(_output, Log, options, Contract);
     }
 

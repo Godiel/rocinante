@@ -48,13 +48,13 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de persistencia: ida y vuelta, migración desde v2, cierre forzado a mitad de un cambio.
 
 ## 4. Casos de uso y sidecar
-- [ ] `ElementUseCases` con los métodos del contrato; cada cambio difunde `elements.changed` con su `origin`.
-- [ ] Imágenes validadas por firma con `FileSignature`:
+- [x] `ElementUseCases` con los métodos del contrato; cada cambio difunde `elements.changed` con su `origin`.
+- [x] Imágenes validadas por firma con `FileSignature`:
   - el archivo elegido: PNG, JPEG o WebP, hasta 30 MB;
   - lo que se guarda: WebP o JPEG, hasta 2 MB la imagen y 200 KB la miniatura.
-- [ ] Ningún registro lleva nombres, alias, atributos, descripciones ni rutas.
-- [ ] El escenario `WritingSession` usa todos los métodos y la notificación nuevos.
-- [ ] Tests:
+- [x] Ningún registro lleva nombres, alias, atributos, descripciones ni rutas.
+- [x] El escenario `WritingSession` usa todos los métodos y la notificación nuevos.
+- [x] Tests:
   - límites y errores con su motivo;
   - imágenes falsas o demasiado grandes;
   - papelera con relaciones;

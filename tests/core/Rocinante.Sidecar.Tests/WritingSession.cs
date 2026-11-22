@@ -55,6 +55,34 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("project.rename", Params(("title", "Don Quijote de la Mancha"), ("origin", Main)));
         harness.Call("project.setFormat", Params(("format", JsonNode.Parse(Trade)), ("origin", Other)));
 
+        // The writer fills the board: two characters, a place and how they are related.
+        var quixote = Id(harness.Call("element.create", Params(
+            ("kind", "character"), ("name", "Alonso Quijano"),
+            ("attributes", JsonNode.Parse("""[{ "name": "Edad", "value": "" }]""")), ("origin", Main))));
+        var sancho = Id(harness.Call("element.create", Params(("kind", "character"), ("name", "Sancho Panza"), ("origin", Other))));
+        var mancha = Id(harness.Call("element.create", Params(
+            ("kind", "other"), ("otherKind", "Región"), ("name", "La Mancha"), ("position", JsonNode.Parse("""{ "x": 400, "y": 0 }""")), ("origin", Main))));
+        harness.Call("element.update", Params(("id", quixote), ("changes", JsonNode.Parse(
+            """{ "name": "Don Quijote", "aliases": ["Alonso Quijano"], "description": { "type": "doc", "content": [{ "type": "paragraph" }] } }""")), ("origin", Main)));
+        harness.Call("element.get", Params(("id", quixote)));
+        harness.Call("board.move", Params(("positions", JsonNode.Parse($$"""[{ "id": "{{sancho}}", "x": -260, "y": 120 }]""")), ("origin", Other)));
+        var service = Id(harness.Call("relationship.create", Params(
+            ("from", sancho), ("to", quixote), ("newKind", JsonNode.Parse("""{ "forward": "escudero de", "inverse": "señor de" }""")), ("origin", Main))));
+        var home = Id(harness.Call("relationship.create", Params(("from", quixote), ("to", mancha), ("kind", "builtin:lives-in"), ("origin", Main))));
+        harness.Call("relationship.update", Params(("id", home), ("kind", "builtin:born-in"), ("origin", Other)));
+        harness.Call("relationship.delete", Params(("id", service), ("origin", Main)));
+        var portrait = harness.PathOf("retrato.png");
+        File.WriteAllBytes(portrait, [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0]);
+        harness.Call("element.readImage", Params(("path", portrait)));
+        harness.Call("element.setImage", Params(
+            ("id", quixote), ("image", Convert.ToBase64String([.. "RIFF"u8, 9, 0, 0, 0, .. "WEBPVP8 "u8])),
+            ("thumbnail", Convert.ToBase64String([0xFF, 0xD8, 0xFF, 0xE0])), ("origin", Main)));
+        harness.Call("element.image", Params(("id", quixote), ("size", "thumbnail")));
+        harness.Call("element.removeImage", Params(("id", quixote), ("origin", Main)));
+        harness.Call("element.delete", Params(("id", mancha), ("origin", Main)));
+        harness.Call("board.get");
+        harness.Call("element.restore", Params(("id", mancha), ("origin", Other)));
+
         var first = Id(harness.Call("document.create", Params(("kind", "chapter"), ("title", "Capítulo primero"), ("origin", Main))));
         var second = Id(harness.Call("document.create", Params(("kind", "chapter"), ("title", "Capítulo segundo"), ("position", 1), ("origin", Main))));
         var fragment = Id(harness.Call("document.create", Params(("kind", "fragment"), ("title", "Molinos"), ("origin", Other))));
