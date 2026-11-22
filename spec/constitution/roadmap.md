@@ -6,6 +6,7 @@ Orden y estado de las features. Cada entrada apunta a su carpeta en `features/`,
 
 - **001 · Proyecto y editor base** — [spec](../features/001-proyecto-editor-base/spec.md). Falta comprobar el doble clic en el archivo en macOS y Linux, que llega con los instaladores (012).
 - **002 · Hoja de escritura** — [spec](../features/002-hoja-de-escritura/spec.md).
+- **003 · Modo concentración y ambiente** — [spec](../features/003-modo-concentracion/spec.md). Faltan las imágenes de fondo incluidas y la grabación del café, que descarga el autor, y comprobar la pantalla completa en macOS y Linux con los instaladores (012).
 
 ## Versión 1 — «Primera salida» 🔜
 
@@ -20,7 +21,7 @@ Las pestañas se pueden arrastrar fuera de la ventana principal para convertirla
 
 1. **001 · Proyecto y editor base** — crear, abrir y guardar proyectos `.rocinante`. Dentro de un proyecto hay capítulos y un cajón de fragmentos sueltos, que se reordenan desde un índice anclable. El editor es papel sin bordes con cursor de máquina de escribir y menú flotante de formato (incluidas sangrías y notas al pie), notas ancladas en cualquier punto del texto, contador, guardado automático y versiones. _(Hecha.)_
 2. **002 · Hoja de escritura** — formatos de hoja con tamaños de libro (bolsillo, A5, 6×9 in, A4, carta…), márgenes y vista de página. Incluye una colección de tipografías abiertas pensadas para leer y escribir. _(Hecha.)_
-3. **003 · Modo concentración y ambiente** — pantalla completa con solo el texto. Fondos relajantes y sonidos de tecleo opcionales: cada pulsación suena, por ejemplo, como una máquina de escribir. Se activan, se eligen y se ajusta su volumen.
+3. **003 · Modo concentración y ambiente** — pantalla completa con solo el texto. Fondos relajantes y sonidos de tecleo opcionales: cada pulsación suena, por ejemplo, como una máquina de escribir. Se activan, se eligen y se ajusta su volumen. _(Hecha.)_
 4. **004 · Elementos de la obra** — fichas de personajes, lugares y tramas creadas a mano, con atributos, alias y relaciones entre ellas.
 5. **005 · Notas e ideas** — amplía las notas ancladas en el texto de la 001: ideas sueltas del proyecto, notas enlazadas a un elemento de la obra y una vista con todas las notas para consultarlas, filtrarlas y saltar a su pasaje sin salir de la escritura.
 6. **006 · Referencias en el texto** — el vínculo entre el texto y las tarjetas, en ambos sentidos. En el editor, las menciones de un elemento se reconocen y, al pasar el cursor, muestran su ficha. En la tarjeta aparecen todas sus referencias en el texto (cada pasaje donde se menciona, con salto directo a él), sus metadatos (atributos, alias, primera aparición, capítulos) y sus notas.

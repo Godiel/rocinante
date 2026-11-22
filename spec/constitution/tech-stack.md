@@ -40,6 +40,9 @@ Son dos procesos. Tauri abre las ventanas y aloja la interfaz. El núcleo .NET s
   - **De extremo a extremo:** Playwright sobre la interfaz con el núcleo real, para los flujos completos.
   - **Rust:** `cargo test` para los comandos que existan.
   - **Cobertura:** 80 % o más de líneas y de ramas en el dominio del núcleo, medida con coverlet (MIT) y exigida en cada ejecución de los tests. En la interfaz se prueba el comportamiento, sin porcentaje obligatorio.
+- **Sonido:** Web Audio, el del propio WebView, sin bibliotecas. Los sonidos incluidos van en Opus, que suena igual en WebView2, WebKit y WebKitGTK. Se preparan una vez con `scripts/ambience.mjs` (ffmpeg en el equipo del autor, no en la app), y al repositorio solo suben los archivos convertidos.
+- **Fondos y sonidos propios:** el núcleo los copia a la carpeta `ambience/` de los datos de la app con un nombre `<uuid>.<ext>`. El anfitrión los sirve a la interfaz con un protocolo propio, `ambience://`, que solo entrega nombres con esa forma y de esa carpeta. Se usa en lugar del protocolo de archivos de Tauri porque su lista de rutas permitidas falla en Windows.
+- **Material incluido:** solo de dominio público (CC0). Su origen está en `features/ambience/credits.ts` y la compilación lo copia a `licenses/ambience.txt`, junto a las licencias de las tipografías. Todo el material incluido pesa como máximo 15 MB, y un test lo comprueba.
 - **Distribución:** instaladores para Windows, macOS y Linux (feature 012).
 
 ## Licencia
@@ -63,12 +66,15 @@ Rocinante es código abierto y portafolio profesional, así que la calidad es pa
 | `src/contracts/protocol.json` | El contrato de mensajes entre interfaz y núcleo (JSON Schema, versionado). Cada método tiene ejemplos en `src/contracts/examples/`. |
 | `src/core/Rocinante.Domain` | Reglas de la obra sin dependencias: `Project` (índice de capítulos, fragmentos y papelera), `Document`, `DocumentContent` y `TextStatistics`, `DocumentVersion`, `Note`. |
 | `src/core/Rocinante.Application` | Casos de uso (`ProjectUseCases`, `DocumentUseCases`, `VersionUseCases`, `NoteUseCases`, `SettingsUseCases`), el `Workspace` compartido por todas las ventanas y los puertos que implementa la infraestructura. |
+| `src/core/Rocinante.Application/Settings` | Preferencias del escritor, incluido el ambiente (`Ambience`: fondo, tecleo, ambientes, atenuar y meta), y los fondos y sonidos propios (`AmbienceUseCases`, `FileSignature`). |
 | `src/core/Rocinante.Infrastructure` | SQLite (`Persistence/`, con las migraciones en `Persistence/Migrations/`), `settings.json` de la app (`Settings/`) y el registro con Serilog (`Logging/`). |
 | `src/core/Rocinante.Sidecar` | El proceso del núcleo: servidor JSON-RPC por stdin/stdout, validación contra el contrato y notificaciones a las ventanas. |
-| `src/host/src` | Anfitrión Tauri en Rust: `relay.rs` (relé entre ventanas y núcleo), `core.rs` (arranque, reinicio y registro de problemas) y `lib.rs` (ventanas y comandos). |
+| `src/host/src` | Anfitrión Tauri en Rust: `relay.rs` (relé entre ventanas y núcleo), `core.rs` (arranque, reinicio y registro de problemas) y `lib.rs` (ventanas y comandos) y `ambience.rs` (el protocolo `ambience://`). |
 | `src/ui/src/bridge` | Cliente tipado del contrato; `generated/protocol.ts` se genera desde `protocol.json`. |
 | `src/ui/src/editor` | Extensiones propias de TipTap (cambio de escena, notas al pie, anclas de notas, sangría), el desplazamiento tipo rodillo y los guardados pendientes. |
 | `src/ui/src/features` | Bienvenida, editor y vista de escritura, índice, contador, versiones, formato de la obra (`format/`) y vista de página con su paginador (`pages/`, ver [ADR 0009](../../docs/adr/0009-paginador-propio.md)). |
+| `src/ui/src/features/focus`, `features/ambience` | Modo concentración (F11, barra mínima, meta de la sesión) y ambiente: fondos, hoja translúcida, fondos animados dibujados por código (`animated/`) y créditos. |
+| `src/ui/src/audio` | Motor de sonido con Web Audio: tecleo y ambientes en bucle con fundido. |
 | `src/ui/src/design` | Temas («papel», «luz de vela»), tokens CSS, ornamentos y la lista de tipografías de la obra (`typefaces.ts`). |
 | `tests/core` | Tests del núcleo por capa (xUnit v3 y Shouldly), incluidas las pruebas de contrato. |
 | `tests/e2e` | Pruebas de extremo a extremo y de rendimiento con Playwright: la interfaz en un navegador y el núcleo real detrás de un relé de pruebas. |
@@ -106,7 +112,7 @@ Un proyecto `.rocinante` contiene todo lo que pertenece a la obra:
 - **Ajustes de la obra** — formato de hoja, tipografía y preferencias propias del proyecto.
 - **Datos del escudero** — qué propuso la IA, de qué pasaje lo dedujo y si el autor lo aceptó, corrigió o descartó.
 
-Las preferencias personales que no dependen de la obra (tema, sonidos, proveedor de IA) se guardan en la configuración de la app, no en el proyecto. Las claves de API nunca se guardan en el proyecto.
+Las preferencias personales que no dependen de la obra (tema, ambiente y sonidos, proveedor de IA) se guardan en la configuración de la app, no en el proyecto. Las claves de API nunca se guardan en el proyecto.
 
 **Esquema (versión 2).** El archivo es SQLite con `application_id` `ROCI`, modo WAL y `synchronous = FULL`. Sus tablas son `meta` (versión del esquema), `project` (una sola fila: título y fecha), `document` (capítulos y fragmentos: lugar en el índice, papelera, texto en JSON de TipTap y sus recuentos), `document_version` (versiones automáticas, a mano y «antes de restaurar»), `note` (notas del autor ancladas a un punto o pasaje, o sueltas) y, desde la versión 2 (feature 002), `work_format` (una sola fila: la hoja, los márgenes y la letra de la obra). Cada cambio del esquema es una migración numerada en `src/core/Rocinante.Infrastructure/Persistence/Migrations/`. La descripción completa, columna a columna, está en [`docs/format`](../../docs/format/README.md). Elementos de la obra y notas enlazadas llegarán con las features 004 y 005.
 
