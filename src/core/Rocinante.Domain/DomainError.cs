@@ -26,4 +26,13 @@ public enum DomainError
     NotAnImage,
     NotASound,
     FileTooLarge,
+    NameRequired,
+    OtherKindRequired,
+    ElementNotFound,
+    ElementIsDeleted,
+    ElementIsNotDeleted,
+    RelationshipNotFound,
+    RelationshipKindNotFound,
+    RelationshipRepeated,
+    SameElement,
 }

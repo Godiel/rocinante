@@ -20,19 +20,19 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Regenerar los tipos de TypeScript y subir `protocolVersion` a 7.
 
 ## 2. Dominio
-- [ ] `ElementKind` y `Element` en `Rocinante.Domain/Elements`:
+- [x] `ElementKind` y `Element` en `Rocinante.Domain/Elements`:
   - nombre obligatorio, sin espacios a los lados, hasta 200 caracteres;
   - tipo de «otro» hasta 60 caracteres, solo con `other`;
   - hasta 50 alias, sin vacíos, y hasta 100 atributos;
   - cambiar el tipo conserva todo.
-- [ ] `RelationshipKind`: comunes (`builtin:<nombre>`) y propias (`own:<uuid>`), con texto de ida y vuelta, o simétricas.
-- [ ] `Relationship`: extremos distintos y existentes; sin duplicados exactos.
-- [ ] `ElementBoard`:
+- [x] `RelationshipKind`: comunes (`builtin:<nombre>`) y propias (`own:<uuid>`), con texto de ida y vuelta, o simétricas.
+- [x] `Relationship`: extremos distintos y existentes; sin duplicados exactos.
+- [x] `ElementBoard`:
   - crea, cambia y mueve elementos;
   - manda a la papelera y restaura, con sus relaciones;
   - oculta las relaciones con un extremo en la papelera.
-- [ ] Glosario de `tech-stack.md`: `ElementKind`, `RelationshipKind` y `Other`, antes de usarlos en el código.
-- [ ] Tests de dominio, con la cobertura de la constitución.
+- [x] Glosario de `tech-stack.md`: `ElementKind`, `RelationshipKind` y `Other`, antes de usarlos en el código.
+- [x] Tests de dominio, con la cobertura de la constitución.
 
 ## 3. Persistencia (esquema v3)
 - [ ] Migración `0003-elements.sql` con estas tablas:

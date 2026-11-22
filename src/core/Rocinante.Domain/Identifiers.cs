@@ -27,6 +27,22 @@ public readonly record struct VersionId(Guid Value)
     public override string ToString() => Value.ToString();
 }
 
+/// <summary>Identifies an element of the work: a character, a place, a plot or another thing.</summary>
+public readonly record struct ElementId(Guid Value)
+{
+    public static ElementId New(DateTimeOffset now) => new(Guid.CreateVersion7(now));
+
+    public override string ToString() => Value.ToString();
+}
+
+/// <summary>Identifies a relationship between two elements.</summary>
+public readonly record struct RelationshipId(Guid Value)
+{
+    public static RelationshipId New(DateTimeOffset now) => new(Guid.CreateVersion7(now));
+
+    public override string ToString() => Value.ToString();
+}
+
 /// <summary>Identifies a note.</summary>
 public readonly record struct NoteId(Guid Value)
 {

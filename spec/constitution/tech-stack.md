@@ -148,9 +148,13 @@ Las preferencias personales que no dependen de la obra (tema, ambiente y sonidos
 | Personaje | `Character` |
 | Lugar | `Place` |
 | Trama | `Plot` |
+| Otro elemento (objeto, facción, época…, con el nombre que le da el escritor) | `Other` |
+| Tipo de elemento (personaje, lugar, trama u otro) | `ElementKind` |
 | Atributo | `Attribute` |
 | Alias | `Alias` |
 | Relación | `Relationship` |
+| Clase de relación («hijo de» / «padre de») | `RelationshipKind` |
+| Posición de una tarjeta en el tablero | `BoardPosition` |
 | Referencia (mención en el texto) | `Reference` |
 | Nota o idea del autor (anclada en el texto o suelta) | `Note` |
 | Nota al pie (parte del texto de la obra) | `Footnote` |
