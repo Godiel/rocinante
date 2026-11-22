@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
+import { creditsText } from "./src/features/ambience/credits.ts";
 
 /**
  * The SIL OFL asks for the licence to travel with the fonts. Every `@fontsource/*` dependency
@@ -35,9 +36,20 @@ function fontLicences(): Plugin {
   };
 }
 
+/** The credits of the sounds and pictures that come with the app, as licenses/ambience.txt. */
+function ambienceCredits(): Plugin {
+  return {
+    name: "rocinante-ambience-credits",
+    apply: "build",
+    generateBundle() {
+      this.emitFile({ type: "asset", fileName: "licenses/ambience.txt", source: creditsText() });
+    },
+  };
+}
+
 // Tauri expects a fixed port and must not have its own output cleared by Vite.
 export default defineConfig({
-  plugins: [react(), fontLicences()],
+  plugins: [react(), fontLicences(), ambienceCredits()],
   clearScreen: false,
   server: { port: 5173, strictPort: true },
   // A desktop app reads its code from the disk, not the network: one bundle of TipTap and

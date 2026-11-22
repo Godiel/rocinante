@@ -1,4 +1,5 @@
 using Rocinante.Application.Ports;
+using Rocinante.Domain;
 using Rocinante.Domain.Formats;
 
 namespace Rocinante.Application.Settings;
@@ -34,11 +35,49 @@ public sealed class WriterSettings
     /// <summary>What a new work is offered: the last format the writer set up, or the default one.</summary>
     public WorkFormat SuggestedFormat => _current.LastFormat ?? WorkFormat.Default;
 
+    /// <summary>The images and sounds the writer added, in the order they were added.</summary>
+    public IReadOnlyList<OwnAmbience> Own => _current.OwnAmbience;
+
+    /// <summary>Changes some preferences. An ambience may only use the writer's own files that are still here.</summary>
     public Preferences Update(PreferencesChange change)
     {
         ArgumentNullException.ThrowIfNull(change);
+        foreach (var id in change.Ambience?.OwnFiles() ?? [])
+        {
+            if (FindOwn(id) is null)
+            {
+                throw new DomainException(DomainError.AmbienceNotFound, $"The ambience uses own file {id}, which is not there.");
+            }
+        }
+
         Save(_current with { Preferences = change.ApplyTo(_current.Preferences) });
         return Preferences;
+    }
+
+    public OwnAmbience? FindOwn(Guid id) => Own.FirstOrDefault(own => own.Id == id);
+
+    public void AddOwn(OwnAmbience own)
+    {
+        ArgumentNullException.ThrowIfNull(own);
+        Save(_current with { Own = [.. Own, own] });
+    }
+
+    /// <summary>
+    /// Keeps only the writer's own files that <paramref name="kept"/> accepts, and stops the
+    /// ambience from using the others. Returns whether the preferences changed.
+    /// </summary>
+    public bool KeepOwn(Func<OwnAmbience, bool> kept)
+    {
+        ArgumentNullException.ThrowIfNull(kept);
+        var own = Own.Where(kept).ToList();
+        var ambience = _current.Preferences.Ambience.Without(id => own.Exists(entry => entry.Id == id));
+        var preferencesChanged = ambience != _current.Preferences.Ambience;
+        if (own.Count != Own.Count || preferencesChanged)
+        {
+            Save(_current with { Own = own, Preferences = _current.Preferences with { Ambience = ambience } });
+        }
+
+        return preferencesChanged;
     }
 
     /// <summary>A project was opened: it goes first in the recent list and will reopen on start.</summary>

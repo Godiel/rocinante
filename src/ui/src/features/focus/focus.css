@@ -1,0 +1,130 @@
+/*
+ * Focus mode: the text alone, full screen. The bar of the work, the index, the sheets and the
+ * counter step aside; only the minimal bar can come back, at the top edge.
+ */
+
+.writing-view-focus .writing-bar,
+.writing-view-focus .counter {
+  display: none;
+}
+
+.writing-view-focus .writing-main {
+  padding-top: var(--space-6);
+}
+
+.focus-bar {
+  position: fixed;
+  z-index: 5;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-5);
+  height: var(--bar-height);
+  padding: 0 var(--space-4);
+  font-size: var(--text-caption);
+  color: var(--color-ink-soft);
+  background: var(--color-paper);
+  border-bottom: var(--hairline) solid var(--color-rule);
+  opacity: 0;
+  transform: translateY(-100%);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.focus-bar-shown {
+  opacity: 1;
+  transform: none;
+}
+
+.focus-bar-words {
+  font-variant: normal;
+  letter-spacing: 0;
+  font-style: italic;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus-bar {
+    transition: none;
+  }
+}
+
+/* Dimming the rest: only the block of the cursor keeps all its ink. */
+.writing-view-dim .book-page .ProseMirror > * {
+  opacity: 0.32;
+  transition: opacity 240ms ease;
+}
+
+.writing-view-dim .book-page .ProseMirror > .is-current {
+  opacity: 1;
+}
+
+/* The session goal in the minimal bar: a number and a thin line that fills. */
+.focus-goal {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-variant: normal;
+  letter-spacing: 0;
+  font-style: italic;
+}
+
+.focus-goal-track {
+  display: inline-block;
+  width: 5rem;
+  height: 2px;
+  background: var(--color-rule);
+}
+
+.focus-goal-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-ink-soft);
+  transition: width 400ms ease;
+}
+
+.focus-goal-reached .focus-goal-fill {
+  background: var(--color-rubric);
+}
+
+/* The quiet word when the goal is reached: below where the minimal bar appears, out of the way. */
+.focus-goal-notice {
+  position: fixed;
+  z-index: 5;
+  top: calc(var(--bar-height) + var(--space-3));
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%);
+  font-style: italic;
+  font-size: var(--text-caption);
+  color: var(--color-ink-soft);
+  pointer-events: none;
+}
+
+.focus-goal-notice:not(:empty) {
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: 2px;
+  animation: focus-goal-in 400ms ease;
+}
+
+@keyframes focus-goal-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .writing-view-dim .book-page .ProseMirror > *,
+  .focus-goal-fill {
+    transition: none;
+  }
+
+  .focus-goal-notice:not(:empty) {
+    animation: none;
+  }
+}

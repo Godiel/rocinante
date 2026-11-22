@@ -133,6 +133,33 @@ public sealed class ContractTests : IDisposable
     }
 
     [Fact]
+    public void An_ambience_with_an_own_file_that_is_not_there_is_a_broken_rule()
+    {
+        var ambience = JsonNode.Parse(
+            """
+            {
+              "ambience": {
+                "background": "own:0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+                "typing": { "sound": "quill", "volume": 0.5, "muted": false },
+                "ambients": [], "ambientVolume": 0.5, "ambientMuted": false, "dimOthers": false,
+                "goal": { "kind": "none" }
+              }
+            }
+            """);
+
+        AssertError(_harness.Request("preferences.update", Params(("changes", ambience), ("origin", "main"))), -32002, "ambienceNotFound");
+    }
+
+    [Fact]
+    public void A_text_file_offered_as_a_sound_is_a_broken_rule()
+    {
+        var path = _harness.PathOf("carta.ogg");
+        File.WriteAllText(path, "Querido Sancho:");
+
+        AssertError(_harness.Request("ambience.import", Params(("path", path), ("kind", "sound"), ("origin", "main"))), -32002, "notASound");
+    }
+
+    [Fact]
     public void A_file_that_is_not_a_project_is_reported_and_left_alone()
     {
         var path = _harness.PathOf("carta.rocinante");

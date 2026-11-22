@@ -24,3 +24,26 @@ export function registerCursor(read: Read): () => void {
 export function currentCursor(): Cursor | null {
   return reader?.() ?? null;
 }
+
+/** What `shownHead` needs of a ProseMirror view. */
+interface ShownView {
+  readonly dom: HTMLElement;
+  hasFocus(): boolean;
+  posAtDOM(node: Node, offset: number): number;
+}
+
+/**
+ * The head of the selection as it shows on screen, if the text has the keyboard; null otherwise.
+ * The editor's own state can lag a click by a moment, and the writer means what they see.
+ */
+export function shownHead(view: ShownView): number | null {
+  const selection = view.dom.ownerDocument.getSelection();
+  const node = selection?.focusNode;
+  if (!view.hasFocus() || !node || !view.dom.contains(node)) return null;
+  try {
+    return view.posAtDOM(node, selection.focusOffset);
+  } catch {
+    // A point the view cannot place, such as inside a widget: the editor's state will do.
+    return null;
+  }
+}

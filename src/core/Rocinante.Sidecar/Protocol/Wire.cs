@@ -98,14 +98,51 @@ internal static class Wire
             preferences.Theme == Theme.Candlelight ? "candlelight" : "paper",
             preferences.Outline == OutlineMode.Floating ? "floating" : "docked",
             preferences.CounterVisible,
-            preferences.TypewriterScrolling);
+            preferences.TypewriterScrolling,
+            Of(preferences.Ambience));
 
     public static PreferencesChange ToChange(PreferencesChangeDto change) =>
         new(
             change.Theme switch { null => null, "candlelight" => Theme.Candlelight, _ => Theme.Paper },
             change.Outline switch { null => null, "floating" => OutlineMode.Floating, _ => OutlineMode.Docked },
             change.CounterVisible,
-            change.TypewriterScrolling);
+            change.TypewriterScrolling,
+            change.Ambience is { } ambience ? ToAmbience(ambience) : null);
+
+    private static string Name<T>(T value)
+        where T : struct, Enum => JsonNamingPolicy.CamelCase.ConvertName(value.ToString());
+
+    public static AmbienceDto Of(Ambience ambience) =>
+        new(
+            ambience.Background.Value,
+            new TypingDto(Name(ambience.Typing.Sound), ambience.Typing.Volume, ambience.Typing.Muted),
+            [.. ambience.Ambients.Select(ambient => new AmbientDto(ambient.Id.Value, ambient.Level))],
+            ambience.AmbientVolume,
+            ambience.AmbientMuted,
+            ambience.DimOthers,
+            new SessionGoalDto(Name(ambience.Goal.Kind), ambience.Goal.Kind == GoalKind.None ? null : ambience.Goal.Amount));
+
+    /// <summary>The contract has already checked the names, the ids, the volumes and the range of the goal.</summary>
+    public static Ambience ToAmbience(AmbienceDto ambience) =>
+        new(
+            AmbienceId.Parse(ambience.Background),
+            new Typing(Enum.Parse<TypingSound>(ambience.Typing.Sound, ignoreCase: true), ambience.Typing.Volume, ambience.Typing.Muted),
+            [.. ambience.Ambients.Select(ambient => new Ambient(AmbienceId.Parse(ambient.Id), ambient.Level))],
+            ambience.AmbientVolume,
+            ambience.AmbientMuted,
+            ambience.DimOthers,
+            ambience.Goal.Kind switch
+            {
+                "words" => SessionGoal.Words(ambience.Goal.Amount!.Value),
+                "minutes" => SessionGoal.Minutes(ambience.Goal.Amount!.Value),
+                _ => SessionGoal.None,
+            });
+
+    public static OwnAmbienceKind ParseOwnKind(string kind) => kind == "image" ? OwnAmbienceKind.Image : OwnAmbienceKind.Sound;
+
+    public static OwnAmbienceDto Of(OwnAmbienceView own) => new(own.Id, Name(own.Kind), own.Name, own.File);
+
+    public static IReadOnlyList<OwnAmbienceDto> Of(IReadOnlyList<OwnAmbienceView> own) => [.. own.Select(Of)];
 
     public static PlaceDto Of(Place place) => new(place.DocumentId.Value, place.Anchor, place.Head);
 
@@ -122,5 +159,6 @@ internal static class Wire
             Of(state.Recent),
             Of(state.Preferences),
             state.DefaultFolder,
-            Of(state.SuggestedFormat));
+            Of(state.SuggestedFormat),
+            Of(state.OwnAmbience));
 }

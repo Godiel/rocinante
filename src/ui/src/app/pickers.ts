@@ -19,4 +19,18 @@ export const systemPickers: Pickers = {
     });
     return typeof file === "string" ? file : null;
   },
+  async chooseImage() {
+    const file = await open({
+      title: "Añadir una imagen de fondo",
+      filters: [{ name: "Imagen", extensions: ["png", "jpg", "jpeg", "webp"] }],
+    });
+    return typeof file === "string" ? file : null;
+  },
+  async chooseSound() {
+    const file = await open({
+      title: "Añadir un sonido de ambiente",
+      filters: [{ name: "Sonido", extensions: ["ogg", "opus", "mp3", "wav", "flac"] }],
+    });
+    return typeof file === "string" ? file : null;
+  },
 };

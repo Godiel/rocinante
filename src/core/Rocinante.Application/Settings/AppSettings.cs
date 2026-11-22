@@ -21,13 +21,14 @@ public enum OutlineMode
 }
 
 /// <summary>How the writer likes to work. They belong to the writer, not to any work.</summary>
-public sealed record Preferences(Theme Theme, OutlineMode Outline, bool CounterVisible, bool TypewriterScrolling)
+public sealed record Preferences(Theme Theme, OutlineMode Outline, bool CounterVisible, bool TypewriterScrolling, Ambience Ambience)
 {
-    public static Preferences Default { get; } = new(Theme.Paper, OutlineMode.Docked, CounterVisible: true, TypewriterScrolling: true);
+    public static Preferences Default { get; } = new(Theme.Paper, OutlineMode.Docked, CounterVisible: true, TypewriterScrolling: true, Ambience.Default);
 }
 
 /// <summary>Some preferences to change; the ones left null stay as they are.</summary>
-public sealed record PreferencesChange(Theme? Theme = null, OutlineMode? Outline = null, bool? CounterVisible = null, bool? TypewriterScrolling = null)
+public sealed record PreferencesChange(
+    Theme? Theme = null, OutlineMode? Outline = null, bool? CounterVisible = null, bool? TypewriterScrolling = null, Ambience? Ambience = null)
 {
     public Preferences ApplyTo(Preferences preferences)
     {
@@ -36,7 +37,8 @@ public sealed record PreferencesChange(Theme? Theme = null, OutlineMode? Outline
             Theme ?? preferences.Theme,
             Outline ?? preferences.Outline,
             CounterVisible ?? preferences.CounterVisible,
-            TypewriterScrolling ?? preferences.TypewriterScrolling);
+            TypewriterScrolling ?? preferences.TypewriterScrolling,
+            Ambience ?? preferences.Ambience);
     }
 }
 
@@ -48,14 +50,19 @@ public sealed record RecentProject(string Path, string Title, DateTimeOffset Las
 
 /// <summary>
 /// Everything the app remembers between sessions, kept in the app data folder and never in the
-/// project: preferences, recent projects, the project to reopen on start, and the format to suggest
-/// for the next new work.
+/// project: preferences, recent projects, the project to reopen on start, the format to suggest
+/// for the next new work, and the images and sounds the writer added.
 /// </summary>
 /// <param name="Preferences">How the writer likes to work.</param>
 /// <param name="Recent">Recently opened projects, most recent first.</param>
 /// <param name="LastProject">The project that was open when the app quit; null if the writer closed it.</param>
 /// <param name="LastFormat">The format of the last work the writer set up; null if there is none yet.</param>
-public sealed record AppSettings(Preferences Preferences, IReadOnlyList<RecentProject> Recent, string? LastProject, WorkFormat? LastFormat = null)
+/// <param name="Own">The images and sounds the writer added, in the order they were added; null means none.</param>
+public sealed record AppSettings(
+    Preferences Preferences, IReadOnlyList<RecentProject> Recent, string? LastProject, WorkFormat? LastFormat = null, IReadOnlyList<OwnAmbience>? Own = null)
 {
     public static AppSettings Empty { get; } = new(Preferences.Default, [], LastProject: null);
+
+    /// <summary>The writer's own images and sounds; never null.</summary>
+    public IReadOnlyList<OwnAmbience> OwnAmbience => Own ?? [];
 }

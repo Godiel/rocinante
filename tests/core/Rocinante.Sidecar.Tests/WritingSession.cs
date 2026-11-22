@@ -30,6 +30,25 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("app.start", Params(("origin", Main)));
         harness.Call("preferences.update", Params(("changes", JsonNode.Parse("""{ "theme": "candlelight", "outline": "floating" }""")), ("origin", Main)));
 
+        // The writer brings a sound of their own, mixes it with the rain, and later takes it away.
+        var recording = harness.PathOf("lluvia en el tejado.ogg");
+        File.WriteAllBytes(recording, [.. "OggS"u8, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0]);
+        var own = Id(harness.Call("ambience.import", Params(("path", recording), ("kind", "sound"), ("origin", Main))));
+        harness.Call("preferences.update", Params(("changes", JsonNode.Parse($$"""
+            {
+              "ambience": {
+                "background": "builtin:rain-window",
+                "typing": { "sound": "typewriter", "volume": 0.6, "muted": false },
+                "ambients": [{ "id": "builtin:rain", "level": 0.8 }, { "id": "own:{{own}}", "level": 0.4 }],
+                "ambientVolume": 0.5,
+                "ambientMuted": false,
+                "dimOthers": true,
+                "goal": { "kind": "words", "amount": 500 }
+              }
+            }
+            """)), ("origin", Main)));
+        harness.Call("ambience.remove", Params(("id", own), ("origin", Other)));
+
         var original = harness.PathOf("quijote.rocinante");
         harness.Call("project.create", Params(("path", original), ("title", "El ingenioso hidalgo"), ("origin", Main)));
         harness.Call("project.get");

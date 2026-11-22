@@ -63,14 +63,79 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 settings.Preferences.Theme == Theme.Candlelight ? "candlelight" : "paper",
                 settings.Preferences.Outline == OutlineMode.Floating ? "floating" : "docked",
                 settings.Preferences.CounterVisible,
-                settings.Preferences.TypewriterScrolling),
+                settings.Preferences.TypewriterScrolling,
+                ToFile(settings.Preferences.Ambience)),
             settings.LastProject,
             [.. settings.Recent.Select(recent => new RecentFile(
                 recent.Path,
                 recent.Title,
                 recent.LastOpenedAt,
                 recent.Place is { } place ? new PlaceFile(place.DocumentId.Value, place.Anchor, place.Head) : null))],
-            settings.LastFormat is { } format ? ToFile(format) : null);
+            settings.LastFormat is { } format ? ToFile(format) : null,
+            [.. settings.OwnAmbience.Select(own => new OwnFile(own.Id, Name(own.Kind), own.Name, own.FileName))]);
+
+    private static string Name<T>(T value)
+        where T : struct, Enum => JsonNamingPolicy.CamelCase.ConvertName(value.ToString());
+
+    private static bool TryParse<T>(string? name, out T value)
+        where T : struct, Enum => Enum.TryParse(name, ignoreCase: true, out value) && Enum.IsDefined(value) && !int.TryParse(name, out _);
+
+    private static AmbienceFile ToFile(Ambience ambience) =>
+        new(
+            ambience.Background.Value,
+            new TypingFile(Name(ambience.Typing.Sound), ambience.Typing.Volume, ambience.Typing.Muted),
+            [.. ambience.Ambients.Select(ambient => new AmbientFile(ambient.Id.Value, ambient.Level))],
+            ambience.AmbientVolume,
+            ambience.AmbientMuted,
+            ambience.DimOthers,
+            new GoalFile(Name(ambience.Goal.Kind), ambience.Goal.Kind == GoalKind.None ? null : ambience.Goal.Amount));
+
+    // Field by field, like the rest of the preferences: what no longer makes sense falls back to
+    // the default, and the rest is kept. A repeated ambient keeps its first appearance.
+    private static Ambience ToAmbience(AmbienceFile? file)
+    {
+        var defaults = Ambience.Default;
+        if (file is null)
+        {
+            return defaults;
+        }
+
+        var typing = file.Typing is { } storedTyping && TryParse<TypingSound>(storedTyping.Sound, out var sound) && IsVolume(storedTyping.Volume)
+            ? new Typing(sound, storedTyping.Volume!.Value, storedTyping.Muted ?? defaults.Typing.Muted)
+            : defaults.Typing;
+        var ambients = (file.Ambients ?? [])
+            .Where(ambient => AmbienceId.TryParse(ambient.Id, out _) && IsVolume(ambient.Level))
+            .Select(ambient => new Ambient(AmbienceId.Parse(ambient.Id!), ambient.Level!.Value))
+            .DistinctBy(ambient => ambient.Id)
+            .Take(Ambience.MaxAmbients)
+            .ToList();
+
+        return new Ambience(
+            AmbienceId.TryParse(file.Background, out var background) ? background : defaults.Background,
+            typing,
+            ambients,
+            IsVolume(file.AmbientVolume) ? file.AmbientVolume!.Value : defaults.AmbientVolume,
+            file.AmbientMuted ?? defaults.AmbientMuted,
+            file.DimOthers ?? defaults.DimOthers,
+            ToGoal(file.Goal));
+    }
+
+    private static bool IsVolume(double? value) => value is { } volume && double.IsFinite(volume) && volume is >= 0 and <= 1;
+
+    private static SessionGoal ToGoal(GoalFile? file) =>
+        file is null || !TryParse<GoalKind>(file.Kind, out var kind) ? SessionGoal.None
+        : kind == GoalKind.Words && file.Amount is >= SessionGoal.MinWords and <= SessionGoal.MaxWords ? SessionGoal.Words(file.Amount.Value)
+        : kind == GoalKind.Minutes && file.Amount is >= SessionGoal.MinMinutes and <= SessionGoal.MaxMinutes ? SessionGoal.Minutes(file.Amount.Value)
+        : SessionGoal.None;
+
+    private static List<OwnAmbience> ToOwn(IReadOnlyList<OwnFile>? files) =>
+        [.. (files ?? [])
+            .Where(file => TryParse<OwnAmbienceKind>(file.Kind, out _)
+                && !string.IsNullOrWhiteSpace(file.Name)
+                && file.FileName is { Length: > 0 } name
+                && Path.GetFileName(name) == name)
+            .Select(file => new OwnAmbience(file.Id, Enum.Parse<OwnAmbienceKind>(file.Kind!, ignoreCase: true), file.Name!, file.FileName!))
+            .DistinctBy(file => file.Id)];
 
     private static FormatFile ToFile(WorkFormat format) =>
         new(
@@ -123,7 +188,8 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 stored.Theme == "candlelight" ? Theme.Candlelight : defaults.Theme,
                 stored.Outline == "floating" ? OutlineMode.Floating : defaults.Outline,
                 stored.CounterVisible ?? defaults.CounterVisible,
-                stored.TypewriterScrolling ?? defaults.TypewriterScrolling)
+                stored.TypewriterScrolling ?? defaults.TypewriterScrolling,
+                ToAmbience(stored.Ambience))
             : defaults;
 
         var recent = (file.Recent ?? [])
@@ -136,11 +202,27 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 entry.Place is { Anchor: >= 0, Head: >= 0 } place ? new Place(new DocumentId(place.DocumentId), place.Anchor, place.Head) : null))
             .ToList();
 
-        return new AppSettings(preferences, recent, file.LastProject, ToFormat(file.LastFormat));
+        // An ambience that names an own file which is not listed is fixed here, not at the door.
+        var own = ToOwn(file.OwnAmbience);
+        preferences = preferences with { Ambience = preferences.Ambience.Without(id => own.Exists(entry => entry.Id == id)) };
+
+        return new AppSettings(preferences, recent, file.LastProject, ToFormat(file.LastFormat), own);
     }
 }
 
-internal sealed record SettingsFile(int Version, PreferencesFile? Preferences, string? LastProject, IReadOnlyList<RecentFile>? Recent, FormatFile? LastFormat);
+internal sealed record SettingsFile(
+    int Version, PreferencesFile? Preferences, string? LastProject, IReadOnlyList<RecentFile>? Recent, FormatFile? LastFormat, IReadOnlyList<OwnFile>? OwnAmbience);
+
+internal sealed record AmbienceFile(
+    string? Background, TypingFile? Typing, IReadOnlyList<AmbientFile>? Ambients, double? AmbientVolume, bool? AmbientMuted, bool? DimOthers, GoalFile? Goal);
+
+internal sealed record TypingFile(string? Sound, double? Volume, bool? Muted);
+
+internal sealed record AmbientFile(string? Id, double? Level);
+
+internal sealed record GoalFile(string? Kind, int? Amount);
+
+internal sealed record OwnFile(Guid Id, string? Kind, string? Name, string? FileName);
 
 internal sealed record FormatFile(
     string? PageSize,
@@ -156,7 +238,7 @@ internal sealed record FormatFile(
 
 internal sealed record MarginsFile(double Top, double Bottom, double Inside, double Outside);
 
-internal sealed record PreferencesFile(string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling);
+internal sealed record PreferencesFile(string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling, AmbienceFile? Ambience);
 
 internal sealed record RecentFile(string Path, string Title, DateTimeOffset LastOpenedAt, PlaceFile? Place);
 

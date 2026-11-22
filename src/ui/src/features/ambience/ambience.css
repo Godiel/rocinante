@@ -1,0 +1,182 @@
+/* The ambience sheet, and the background behind the text in focus mode. */
+
+.ambience-label {
+  margin: var(--space-4) 0 var(--space-1);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  color: var(--color-ink-soft);
+}
+
+.ambience-hint {
+  margin: 0 0 var(--space-3);
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
+
+.ambience-backdrops {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.ambience-backdrop {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  font: inherit;
+  text-align: left;
+  color: var(--color-ink);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.ambience-backdrop:hover {
+  border-color: var(--color-rule);
+}
+
+.ambience-backdrop[aria-checked="true"] {
+  border-color: var(--color-rubric);
+}
+
+.ambience-swatch {
+  display: block;
+  height: 3.5rem;
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: 2px;
+}
+
+.ambience-name {
+  font-size: var(--text-caption);
+}
+
+.ambience-choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ambience-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.ambience-choice input {
+  accent-color: var(--color-rubric);
+}
+
+.ambience-volume {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.ambience-volume input[type="range"] {
+  flex: 1;
+  accent-color: var(--color-rubric);
+}
+
+.ambience-ambients {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ambience-level {
+  width: 100%;
+  accent-color: var(--color-rubric);
+}
+
+.ambience-goal {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  border: none;
+}
+
+.ambience-goal-legend {
+  margin-bottom: var(--space-1);
+  padding: 0;
+  color: var(--color-ink-soft);
+  font-style: italic;
+}
+
+.ambience-goal-amount {
+  width: 7rem;
+  margin-top: var(--space-2);
+  padding: var(--space-1);
+  font: inherit;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+}
+
+.ambience-goal-amount[aria-invalid="true"] {
+  border-color: var(--color-rubric);
+}
+
+.ambience-problem {
+  margin: var(--space-1) 0 0;
+  font-style: italic;
+  color: var(--color-rubric);
+}
+
+.ambience-backdrop-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.ambience-remove {
+  align-self: flex-start;
+  margin-left: var(--space-1);
+  font-size: var(--text-caption);
+}
+
+.ambience-ambients li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-2);
+}
+
+.ambience-ambients .ambience-level {
+  flex-basis: 100%;
+}
+
+.ambience-add {
+  display: block;
+  margin-top: var(--space-2);
+}
+
+/* In focus mode the sheet has the whole height: there is no bar above it. */
+.writing-view-focus .sheet {
+  top: 0;
+}
+
+/* The background fills the window behind everything; the text sits on translucent paper. */
+.focus-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.writing-view-backdrop .writing-main {
+  position: relative;
+  z-index: 1;
+}
+
+.writing-view-backdrop .book-frame {
+  min-height: 100vh;
+  background: var(--sheet-colour);
+  box-shadow: 0 0 2.5rem rgb(0 0 0 / 0.18);
+  backdrop-filter: blur(6px);
+}

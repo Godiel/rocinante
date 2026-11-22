@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onNotification, request } from "../../bridge/core";
@@ -12,7 +12,9 @@ import type {
   Place,
   Preferences,
   ProjectState,
+  OwnAmbience,
 } from "../../bridge/generated/protocol";
+import type { Pickers } from "../welcome/Welcome";
 import { messageFor } from "../../app/messages";
 import { LogFolderButton } from "../../app/Trouble";
 import { savePendingNow } from "../../editor/pending-saves";
@@ -28,6 +30,18 @@ import { FormatSheet } from "../format/FormatSheet";
 import { PageView } from "../pages/PageView";
 import { isPageViewShortcut } from "../pages/shortcuts";
 import { workClasses, workStyle } from "../format/work-style";
+import { FocusBar } from "../focus/FocusBar";
+import { tauriWindow } from "../focus/focus-window";
+import { useFocusMode } from "../focus/useFocusMode";
+import { useSessionGoal, type Session } from "../focus/useSessionGoal";
+import { GoalMeter, GoalReached } from "../focus/Goal";
+import { AmbienceSheet } from "../ambience/AmbienceSheet";
+import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
+import { sheetColour } from "../ambience/sheet";
+import { ambienceUrl } from "../ambience/own-url";
+import { AnimatedBackdrop } from "../ambience/animated/AnimatedBackdrop";
+import { sounds } from "../../audio/engine";
+import { ambientSounds, tracksOf } from "../../audio/ambient-sounds";
 import "./writing-view.css";
 
 /** A version shown in place of the page, with the text it is compared with. */
@@ -41,6 +55,9 @@ interface WritingViewProps {
   project: ProjectState;
   place: Place | null;
   preferences: Preferences;
+  /** The images and sounds the writer added. */
+  ownAmbience: OwnAmbience[];
+  pickers: Pickers;
   origin: string;
 }
 
@@ -48,12 +65,22 @@ interface WritingViewProps {
  * The open project: the index on one side and the chapter or fragment being written. It opens
  * where the writer left off, or on the first chapter.
  */
-export function WritingView({ project, place, preferences, origin }: WritingViewProps) {
+export function WritingView({
+  project,
+  place,
+  preferences,
+  ownAmbience,
+  pickers,
+  origin,
+}: WritingViewProps) {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [document, setDocument] = useState<DocumentState | null>(null);
   const [counts, setCounts] = useState<{ id: string; statistics: Statistics } | null>(null);
   // Saves bring the counts of the work; a change to the index brings a new project with them.
   const [work, setWork] = useState({ value: project.work, base: project.work });
+  const workCounts = work.base === project.work ? work.value : project.work;
+  // A session of focus mode, for its goal: it starts and ends with the mode.
+  const [session, setSession] = useState<Session | null>(null);
   const projectWork = useRef(project.work);
   useEffect(() => {
     projectWork.current = project.work;
@@ -62,8 +89,8 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const [problem, setProblem] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(preferences.outline === "docked");
   const [deleted, setDeleted] = useState<DocumentEntry | null>(null);
-  // One sheet at a time on the right of the text: the versions or the format.
-  const [sheet, setSheet] = useState<"versions" | "format" | null>(null);
+  // One sheet at a time on the right of the text: the versions, the format or the ambience.
+  const [sheet, setSheet] = useState<"versions" | "format" | "ambience" | null>(null);
   const versionsOpen = sheet === "versions";
   const [pagesOpen, setPagesOpen] = useState(false);
   const [nameRequest, setNameRequest] = useState(0);
@@ -72,6 +99,14 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const opening = useRef({ project, place, origin });
   const mode = preferences.outline;
   const { index } = project;
+  const [screen] = useState(tauriWindow);
+  // Whether focus mode is on, for the shortcuts, which are bound once.
+  const focusedRef = useRef(false);
+  // What focus mode put away, to bring it back on leaving.
+  const putAway = useRef<{ outline: boolean; sheet: typeof sheet }>({
+    outline: false,
+    sheet: null,
+  });
 
   // First document to show.
   useEffect(() => {
@@ -91,6 +126,10 @@ export function WritingView({ project, place, preferences, origin }: WritingView
     currentId && index.trash.some((entry) => entry.id === currentId)
       ? (index.chapters[0]?.id ?? index.fragments[0]?.id ?? null)
       : currentId;
+  const shownRef = useRef(shownId);
+  useEffect(() => {
+    shownRef.current = shownId;
+  }, [shownId]);
 
   // Load the document whenever the writer picks another one.
   useEffect(() => {
@@ -107,6 +146,43 @@ export function WritingView({ project, place, preferences, origin }: WritingView
       current = false;
     };
   }, [shownId]);
+
+  // The typing sounds as the writer set them, in this window and as other windows change them.
+  const typing = preferences.ambience.typing;
+  useEffect(() => sounds.setTyping(typing), [typing]);
+
+  // The ambient sounds play in the main window only: each window has its own audio, and two
+  // would play the rain twice. They fade away when the work closes.
+  const allAmbients = useMemo(() => ambientSounds(ownAmbience, ambienceUrl), [ownAmbience]);
+  const { ambients, ambientVolume, ambientMuted } = preferences.ambience;
+  const playsAmbients = origin === "main";
+  useEffect(() => {
+    if (playsAmbients)
+      sounds.setAmbients(tracksOf(ambients, allAmbients), ambientVolume, ambientMuted);
+  }, [playsAmbients, ambients, allAmbients, ambientVolume, ambientMuted]);
+  useEffect(() => () => sounds.stopAmbients(), []);
+  // A sound of the writer's that starts right but does not decode is said, and left silent.
+  useEffect(
+    () =>
+      sounds.onUnplayable((id) => {
+        const name = allAmbients.find((sound) => sound.id === id)?.name ?? "ese sonido";
+        setProblem(
+          `No se puede reproducir «${name}». Puede que el archivo esté dañado o en un formato que este equipo no reproduce.`,
+        );
+      }),
+    [allAmbients],
+  );
+
+  // Browsers start sound only after the writer does something: the first key or click wakes it.
+  useEffect(() => {
+    const wake = () => sounds.wake();
+    window.addEventListener("pointerdown", wake, { capture: true });
+    window.addEventListener("keydown", wake, { capture: true });
+    return () => {
+      window.removeEventListener("pointerdown", wake, { capture: true });
+      window.removeEventListener("keydown", wake, { capture: true });
+    };
+  }, []);
 
   // What other windows write changes the counts of the work.
   useEffect(() => {
@@ -128,6 +204,25 @@ export function WritingView({ project, place, preferences, origin }: WritingView
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (focusedRef.current) {
+        // In focus mode the big views stay away; a version is still kept, without the sheet.
+        if (isSaveVersionShortcut(event)) {
+          event.preventDefault();
+          const documentId = shownRef.current;
+          if (documentId) {
+            void savePendingNow()
+              .then(() => request("version.create", { documentId, name: null, origin: self }))
+              .catch((error: unknown) => setProblem(messageFor(error)));
+          }
+        } else if (
+          isPageViewShortcut(event) ||
+          isOutlineShortcut(event) ||
+          isVersionsShortcut(event)
+        ) {
+          event.preventDefault();
+        }
+        return;
+      }
       if (isPageViewShortcut(event)) {
         // In a browser F5 reloads the page: here it is the page view.
         event.preventDefault();
@@ -144,6 +239,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
         setNameRequest((asked) => asked + 1);
       }
     };
+    const self = opening.current.origin;
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
   }, []);
@@ -161,6 +257,38 @@ export function WritingView({ project, place, preferences, origin }: WritingView
       window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
     }
   }, [outlineOpen]);
+
+  const focusText = () =>
+    window.document
+      .querySelector<HTMLElement>(".book-page .ProseMirror")
+      ?.focus({ preventScroll: true });
+
+  // Focus mode puts away the index and the sheets, and brings them back as they were. The text
+  // keeps the keyboard, so the cursor stays where it was.
+  const focus = useFocusMode({
+    window: screen,
+    onEnter: () => {
+      putAway.current = { outline: outlineOpen, sheet };
+      outlineWasOpen.current = false;
+      setOutlineOpen(false);
+      setSheet(null);
+      setViewing(null);
+      setPagesOpen(false);
+      setSession({ words: workCounts.words });
+      focusText();
+    },
+    onLeave: () => {
+      setSession(null);
+      outlineWasOpen.current = putAway.current.outline;
+      setOutlineOpen(putAway.current.outline);
+      setSheet(putAway.current.sheet);
+      focusText();
+    },
+    onProblem: (error) => setProblem(messageFor(error)),
+  });
+  useEffect(() => {
+    focusedRef.current = focus.focused;
+  }, [focus.focused]);
 
   // A floating index steps aside as soon as the writer goes back to the text.
   const onFocusIn = (event: React.FocusEvent) => {
@@ -206,9 +334,9 @@ export function WritingView({ project, place, preferences, origin }: WritingView
     window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
   }
 
-  function openFormat() {
+  function openSheet(which: "format" | "ambience") {
     setViewing(null);
-    setSheet("format");
+    setSheet(which);
   }
 
   function closeSheet() {
@@ -237,14 +365,26 @@ export function WritingView({ project, place, preferences, origin }: WritingView
   const shownViewing = viewing && viewing.version.documentId === shownId ? viewing : null;
 
   const isEmpty = index.chapters.length === 0 && index.fragments.length === 0;
+  const progress = useSessionGoal(session, preferences.ambience.goal, workCounts.words);
+  const dimming = focus.focused && preferences.ambience.dimOthers;
+  // In focus mode the chosen background shows behind translucent paper.
+  const allBackdrops = useMemo(() => backdrops(ownAmbience, ambienceUrl), [ownAmbience]);
+  const backdrop = focus.focused ? backdropOf(preferences.ambience.background, allBackdrops) : null;
+  const paint = backdrop ? paintOf(backdrop, preferences.theme) : null;
+  const toggleAmbience = () => (sheet === "ambience" ? closeSheet() : openSheet("ambience"));
   const docked = outlineOpen && mode === "docked";
 
   return (
     <div
       className={`writing-view ${workClasses(project.format)}${
         docked ? " writing-view-docked" : ""
-      }${sheet ? " writing-view-sheet" : ""}`}
-      style={workStyle(project.format)}
+      }${sheet ? " writing-view-sheet" : ""}${focus.focused ? " writing-view-focus" : ""}${paint ? " writing-view-backdrop" : ""}${dimming ? " writing-view-dim" : ""}`}
+      style={
+        {
+          ...workStyle(project.format),
+          "--sheet-colour": sheetColour(preferences.theme),
+        } as React.CSSProperties
+      }
       onFocus={onFocusIn}
     >
       <header className="writing-bar small-caps">
@@ -283,6 +423,12 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           >
             Contador {preferences.counterVisible ? "sí" : "no"}
           </button>
+          <button className="action" aria-expanded={sheet === "ambience"} onClick={toggleAmbience}>
+            Ambiente
+          </button>
+          <button className="action" title="Modo concentración (F11)" onClick={focus.enter}>
+            Concentración
+          </button>
           <button
             className="action"
             aria-pressed={pagesOpen}
@@ -294,7 +440,7 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           <button
             className="action"
             aria-expanded={sheet === "format"}
-            onClick={() => (sheet === "format" ? closeSheet() : openFormat())}
+            onClick={() => (sheet === "format" ? closeSheet() : openSheet("format"))}
           >
             Formato
           </button>
@@ -330,6 +476,11 @@ export function WritingView({ project, place, preferences, origin }: WritingView
           onDeleted={setDeleted}
           onProblem={setProblem}
         />
+      )}
+
+      {paint && <div className="focus-backdrop" style={{ background: paint }} />}
+      {backdrop?.kind === "animated" && (
+        <AnimatedBackdrop scene={backdrop.scene} theme={preferences.theme} />
       )}
 
       <main className="writing-main">
@@ -390,6 +541,20 @@ export function WritingView({ project, place, preferences, origin }: WritingView
         />
       )}
 
+      {sheet === "ambience" && (
+        <AmbienceSheet
+          ambience={preferences.ambience}
+          backdrops={allBackdrops}
+          ambients={allAmbients}
+          playsAmbients={playsAmbients}
+          pickers={pickers}
+          theme={preferences.theme}
+          origin={origin}
+          onClose={closeSheet}
+          onProblem={setProblem}
+        />
+      )}
+
       {versionsOpen && shownId && (
         <Versions
           documentId={shownId}
@@ -403,10 +568,29 @@ export function WritingView({ project, place, preferences, origin }: WritingView
         />
       )}
 
+      {focus.focused && (
+        <FocusBar
+          words={counts && counts.id === shownId ? counts.statistics.words : 0}
+          onLeave={focus.leave}
+        >
+          {progress && <GoalMeter progress={progress} />}
+          <button
+            type="button"
+            className="action"
+            aria-expanded={sheet === "ambience"}
+            onClick={toggleAmbience}
+          >
+            Ambiente
+          </button>
+        </FocusBar>
+      )}
+
+      {session && progress && <GoalReached session={session} progress={progress} />}
+
       <Counter
         document={counts && counts.id === shownId ? counts.statistics : null}
         kind={kindOf(shownId)}
-        work={work.base === project.work ? work.value : project.work}
+        work={workCounts}
         chapters={index.chapters.length}
         save={save}
         visible={preferences.counterVisible}

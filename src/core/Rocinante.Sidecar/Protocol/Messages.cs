@@ -39,9 +39,21 @@ internal sealed record VersionSummaryDto(Guid Id, Guid DocumentId, string Kind, 
 
 internal sealed record NoteDto(Guid Id, Guid DocumentId, string Text, bool Anchored, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt);
 
-internal sealed record PreferencesDto(string Theme, string Outline, bool CounterVisible, bool TypewriterScrolling);
+internal sealed record TypingDto(string Sound, double Volume, bool Muted);
 
-internal sealed record PreferencesChangeDto(string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling);
+internal sealed record AmbientDto(string Id, double Level);
+
+/// <summary>amount is left out when there is no goal, as the contract asks.</summary>
+internal sealed record SessionGoalDto(string Kind, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? Amount);
+
+internal sealed record AmbienceDto(
+    string Background, TypingDto Typing, IReadOnlyList<AmbientDto> Ambients, double AmbientVolume, bool AmbientMuted, bool DimOthers, SessionGoalDto Goal);
+
+internal sealed record OwnAmbienceDto(Guid Id, string Kind, string Name, string File);
+
+internal sealed record PreferencesDto(string Theme, string Outline, bool CounterVisible, bool TypewriterScrolling, AmbienceDto Ambience);
+
+internal sealed record PreferencesChangeDto(string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling, AmbienceDto? Ambience);
 
 internal sealed record PlaceDto(Guid DocumentId, int Anchor, int Head);
 
@@ -56,12 +68,15 @@ internal sealed record StartStateDto(
     IReadOnlyList<RecentProjectDto> Recent,
     PreferencesDto Preferences,
     string DefaultFolder,
-    WorkFormatDto SuggestedFormat);
+    WorkFormatDto SuggestedFormat,
+    IReadOnlyList<OwnAmbienceDto> OwnAmbience);
 
 // Params.
 internal sealed record UpdatePreferencesParams(PreferencesChangeDto Changes, string Origin);
 
 internal sealed record OriginParams(string Origin);
+
+internal sealed record ImportAmbienceParams(string Path, string Kind, string Origin);
 
 internal sealed record ReportParams(string Source, string Level, string Message, string? Detail);
 
@@ -105,6 +120,8 @@ internal sealed record VersionRestoredResult(DocumentStateDto Document, VersionS
 // Notifications.
 internal sealed record PreferencesChangedNotification(PreferencesDto Preferences, string Origin);
 
+internal sealed record AmbienceChangedNotification(IReadOnlyList<OwnAmbienceDto> Own, string Origin);
+
 internal sealed record RecentChangedNotification(IReadOnlyList<RecentProjectDto> Recent, string Origin);
 
 internal sealed record ProjectNotification(ProjectStateDto Project, string Origin);
@@ -134,6 +151,10 @@ internal sealed record NotesChangedNotification(Guid DocumentId, IReadOnlyList<N
 [JsonSerializable(typeof(IReadOnlyList<RecentProjectDto>))]
 [JsonSerializable(typeof(PreferencesChangedNotification))]
 [JsonSerializable(typeof(RecentChangedNotification))]
+[JsonSerializable(typeof(ImportAmbienceParams))]
+[JsonSerializable(typeof(OwnAmbienceDto))]
+[JsonSerializable(typeof(IReadOnlyList<OwnAmbienceDto>))]
+[JsonSerializable(typeof(AmbienceChangedNotification))]
 [JsonSerializable(typeof(PathParams))]
 [JsonSerializable(typeof(CreateProjectParams))]
 [JsonSerializable(typeof(TitleParams))]

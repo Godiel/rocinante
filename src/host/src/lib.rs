@@ -1,3 +1,4 @@
+mod ambience;
 mod core;
 mod relay;
 
@@ -77,6 +78,12 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
+        .register_asynchronous_uri_scheme_protocol(
+            ambience::SCHEME,
+            |context, request, responder| {
+                ambience::serve(context.app_handle(), &request, responder);
+            },
+        )
         .manage(Relay::new())
         .manage(Supervisor::new())
         .setup(|app| {

@@ -21,4 +21,9 @@ public enum DomainError
     NoteNotFound,
     FormatOutOfRange,
     TextAreaTooSmall,
+    AmbientRepeated,
+    AmbienceNotFound,
+    NotAnImage,
+    NotASound,
+    FileTooLarge,
 }

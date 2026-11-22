@@ -1,0 +1,20 @@
+{
+  "valid": [
+    {
+      "path": "C:/Users/autor/Pictures/molinos.jpg",
+      "kind": "image",
+      "origin": "main"
+    },
+    {
+      "path": "/home/autor/Música/lluvia en el tejado.ogg",
+      "kind": "sound",
+      "origin": "window-1"
+    }
+  ],
+  "invalid": [
+    { "path": "molinos.jpg", "origin": "main" },
+    { "path": "", "kind": "image", "origin": "main" },
+    { "path": "molinos.jpg", "kind": "video", "origin": "main" },
+    { "path": "molinos.jpg", "kind": "image" }
+  ]
+}

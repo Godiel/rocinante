@@ -35,5 +35,13 @@ internal sealed class RecordingNotifier : IChangeNotifier
 
     public void RecentChanged(IReadOnlyList<RecentProjectView> recent, string origin) => Events.Add($"recent.changed:{origin}");
 
+    public IReadOnlyList<OwnAmbienceView>? LastOwn { get; private set; }
+
+    public void AmbienceChanged(IReadOnlyList<OwnAmbienceView> own, string origin)
+    {
+        LastOwn = own;
+        Events.Add($"ambience.changed:{origin}");
+    }
+
     public void Clear() => Events.Clear();
 }
