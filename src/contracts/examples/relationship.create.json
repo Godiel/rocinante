@@ -1,0 +1,66 @@
+{
+  "valid": [
+    {
+      "from": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "to": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "kind": "builtin:child-of",
+      "origin": "main"
+    },
+    {
+      "from": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "to": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "kind": "own:0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "origin": "main"
+    },
+    {
+      "from": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "to": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "newKind": {
+        "forward": "escudero de",
+        "inverse": "señor de"
+      },
+      "origin": "window-1"
+    },
+    {
+      "from": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "to": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "newKind": {
+        "forward": "rival de",
+        "inverse": null
+      },
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    {
+      "from": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "to": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "origin": "main"
+    },
+    {
+      "from": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "to": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "kind": "builtin:child-of",
+      "newKind": {
+        "forward": "hijo de",
+        "inverse": "padre de"
+      },
+      "origin": "main"
+    },
+    {
+      "from": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "to": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "kind": "hijo de",
+      "origin": "main"
+    },
+    {
+      "from": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "to": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "newKind": {
+        "forward": "",
+        "inverse": null
+      },
+      "origin": "main"
+    }
+  ]
+}

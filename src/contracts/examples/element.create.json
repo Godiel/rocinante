@@ -1,0 +1,56 @@
+{
+  "valid": [
+    {
+      "kind": "character",
+      "name": "Alonso Quijano",
+      "attributes": [
+        {
+          "name": "Edad",
+          "value": ""
+        },
+        {
+          "name": "Aspecto",
+          "value": ""
+        }
+      ],
+      "origin": "main"
+    },
+    {
+      "kind": "other",
+      "otherKind": "Objeto",
+      "name": "Yelmo de Mambrino",
+      "position": {
+        "x": 300,
+        "y": 120
+      },
+      "origin": "window-1"
+    },
+    {
+      "kind": "place",
+      "name": "La Mancha",
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    {
+      "kind": "character",
+      "name": "",
+      "origin": "main"
+    },
+    {
+      "kind": "villain",
+      "name": "Frestón",
+      "origin": "main"
+    },
+    {
+      "kind": "place",
+      "name": "El Toboso",
+      "origin": "main",
+      "color": "red"
+    },
+    {
+      "kind": "plot",
+      "origin": "main"
+    }
+  ]
+}

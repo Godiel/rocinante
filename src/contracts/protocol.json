@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 6,
+  "protocolVersion": 7,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -680,6 +680,362 @@
           "$ref": "#/$defs/Note"
         }
       }
+    },
+    "board.get": {
+      "description": "Everything the list, the cards and the board need, in one go.",
+      "params": null,
+      "result": {
+        "$ref": "#/$defs/Board"
+      }
+    },
+    "board.move": {
+      "description": "Moves cards on the board: one dragged card or all of them after arranging. Broadcasts elements.changed.",
+      "params": {
+        "type": "object",
+        "required": ["positions", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "positions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5000,
+            "items": {
+              "type": "object",
+              "required": ["id", "x", "y"],
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/Id"
+                },
+                "x": {
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                }
+              }
+            }
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
+      }
+    },
+    "element.create": {
+      "description": "Creates an element. The UI sends the suggested attributes of its kind, empty. Without position the card goes to a free place. Broadcasts elements.changed.",
+      "params": {
+        "type": "object",
+        "required": ["kind", "name", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "$ref": "#/$defs/ElementKind"
+          },
+          "otherKind": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/OtherKindName"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "$ref": "#/$defs/ElementName"
+          },
+          "attributes": {
+            "$ref": "#/$defs/ElementAttributes"
+          },
+          "position": {
+            "$ref": "#/$defs/BoardPosition"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/Element"
+      }
+    },
+    "element.get": {
+      "description": "An element with everything in it, in the work or in the trash.",
+      "params": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/Element"
+      }
+    },
+    "element.update": {
+      "description": "Changes an element. Changing nothing broadcasts nothing; otherwise broadcasts elements.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "changes", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "changes": {
+            "$ref": "#/$defs/ElementChanges"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/Element"
+      }
+    },
+    "element.delete": {
+      "description": "Sends an element to the trash with its relationships, which stop being shown. Broadcasts elements.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
+      }
+    },
+    "element.restore": {
+      "description": "Brings an element back from the trash, with its relationships and its place on the board. Broadcasts elements.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/Element"
+      }
+    },
+    "element.readImage": {
+      "description": "Reads an image the writer chose, so the UI can reduce it. The core checks it is PNG, JPEG or WebP by its signature, and its size.",
+      "params": {
+        "type": "object",
+        "required": ["path"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "$ref": "#/$defs/FilePath"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/ImageData"
+      }
+    },
+    "element.setImage": {
+      "description": "Gives an element its image, already reduced by the UI, and its thumbnail. Both are WebP or JPEG. Broadcasts elements.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "image", "thumbnail", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "image": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2796204,
+            "pattern": "^[A-Za-z0-9+/]*={0,2}$"
+          },
+          "thumbnail": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 273068,
+            "pattern": "^[A-Za-z0-9+/]*={0,2}$"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/ElementSummary"
+      }
+    },
+    "element.removeImage": {
+      "description": "Takes the image away from an element. Broadcasts elements.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/ElementSummary"
+      }
+    },
+    "element.image": {
+      "description": "The image of an element, whole or as a thumbnail.",
+      "params": {
+        "type": "object",
+        "required": ["id", "size"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "size": {
+            "$ref": "#/$defs/ImageSize"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/ImageData"
+      }
+    },
+    "relationship.create": {
+      "description": "Joins two elements with a kind, or with a new own kind. Broadcasts elements.changed.",
+      "params": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["from", "to", "kind", "origin"],
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "$ref": "#/$defs/Id"
+              },
+              "to": {
+                "$ref": "#/$defs/Id"
+              },
+              "kind": {
+                "$ref": "#/$defs/RelationshipKindId"
+              },
+              "origin": {
+                "$ref": "#/$defs/WindowLabel"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["from", "to", "newKind", "origin"],
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "$ref": "#/$defs/Id"
+              },
+              "to": {
+                "$ref": "#/$defs/Id"
+              },
+              "newKind": {
+                "$ref": "#/$defs/NewRelationshipKind"
+              },
+              "origin": {
+                "$ref": "#/$defs/WindowLabel"
+              }
+            }
+          }
+        ]
+      },
+      "result": {
+        "$ref": "#/$defs/Relationship"
+      }
+    },
+    "relationship.update": {
+      "description": "Changes the kind of a relationship, to an existing one or a new own one. Broadcasts elements.changed.",
+      "params": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["id", "kind", "origin"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/Id"
+              },
+              "kind": {
+                "$ref": "#/$defs/RelationshipKindId"
+              },
+              "origin": {
+                "$ref": "#/$defs/WindowLabel"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "newKind", "origin"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/Id"
+              },
+              "newKind": {
+                "$ref": "#/$defs/NewRelationshipKind"
+              },
+              "origin": {
+                "$ref": "#/$defs/WindowLabel"
+              }
+            }
+          }
+        ]
+      },
+      "result": {
+        "$ref": "#/$defs/Relationship"
+      }
+    },
+    "relationship.delete": {
+      "description": "Takes a relationship away. Broadcasts elements.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
+      }
     }
   },
   "notifications": {
@@ -838,6 +1194,63 @@
           }
         }
       }
+    },
+    "elements.changed": {
+      "description": "Elements, relationships or kinds changed. Each list has only what changed: elements are now in the work, trash went to the trash; details carries the whole element when more than its summary changed.",
+      "params": {
+        "type": "object",
+        "required": [
+          "elements",
+          "trash",
+          "details",
+          "relationships",
+          "removedRelationships",
+          "ownKinds",
+          "origin"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "elements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ElementSummary"
+            }
+          },
+          "trash": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ElementSummary"
+            }
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Element"
+            }
+          },
+          "relationships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Relationship"
+            }
+          },
+          "removedRelationships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Id"
+            }
+          },
+          "ownKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/RelationshipKind"
+            }
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -919,6 +1332,15 @@
         "notAnImage",
         "notASound",
         "fileTooLarge",
+        "nameRequired",
+        "otherKindRequired",
+        "elementNotFound",
+        "elementIsDeleted",
+        "elementIsNotDeleted",
+        "relationshipNotFound",
+        "relationshipKindNotFound",
+        "relationshipRepeated",
+        "sameElement",
         "notFound",
         "alreadyExists",
         "notAProject",
@@ -1683,6 +2105,350 @@
           }
         }
       }
+    },
+    "ElementKind": {
+      "description": "What an element of the work is. other carries a kind named by the writer in otherKind.",
+      "enum": ["character", "place", "plot", "other"]
+    },
+    "ElementName": {
+      "description": "Name of an element. Surrounding spaces are trimmed; a blank name is refused with nameRequired.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "OtherKindName": {
+      "description": "The kind of an element of kind other, as the writer names it: object, faction, era…",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "ElementAliases": {
+      "description": "Other names of an element. Blank ones are dropped.",
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "$ref": "#/$defs/ElementName"
+      }
+    },
+    "ElementAttribute": {
+      "type": "object",
+      "required": ["name", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 5000
+        }
+      }
+    },
+    "ElementAttributes": {
+      "description": "Name–value pairs of an element, in the order the writer gave them.",
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/ElementAttribute"
+      }
+    },
+    "BoardPosition": {
+      "description": "Where a card sits on the board, in board units.",
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "y": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        }
+      }
+    },
+    "ElementImageInfo": {
+      "description": "An element has an image. version changes with every new image, so the UI knows when its copy is stale.",
+      "type": "object",
+      "required": ["version"],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "ElementSummary": {
+      "description": "What the list and the board show of an element.",
+      "type": "object",
+      "required": ["id", "kind", "otherKind", "name", "aliases", "position", "image"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "$ref": "#/$defs/ElementKind"
+        },
+        "otherKind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OtherKindName"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "$ref": "#/$defs/ElementName"
+        },
+        "aliases": {
+          "$ref": "#/$defs/ElementAliases"
+        },
+        "position": {
+          "$ref": "#/$defs/BoardPosition"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ElementImageInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Element": {
+      "description": "An element with everything the writer put in it.",
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "otherKind",
+        "name",
+        "aliases",
+        "attributes",
+        "description",
+        "position",
+        "image"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "$ref": "#/$defs/ElementKind"
+        },
+        "otherKind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OtherKindName"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "$ref": "#/$defs/ElementName"
+        },
+        "aliases": {
+          "$ref": "#/$defs/ElementAliases"
+        },
+        "attributes": {
+          "$ref": "#/$defs/ElementAttributes"
+        },
+        "description": {
+          "$ref": "#/$defs/TipTapDocument"
+        },
+        "position": {
+          "$ref": "#/$defs/BoardPosition"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ElementImageInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "ElementChanges": {
+      "description": "The parts of an element that change; what is left out stays as it is. otherKind goes with kind other and is null otherwise.",
+      "type": "object",
+      "required": [],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/ElementName"
+        },
+        "kind": {
+          "$ref": "#/$defs/ElementKind"
+        },
+        "otherKind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OtherKindName"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "aliases": {
+          "$ref": "#/$defs/ElementAliases"
+        },
+        "attributes": {
+          "$ref": "#/$defs/ElementAttributes"
+        },
+        "description": {
+          "$ref": "#/$defs/TipTapDocument"
+        }
+      },
+      "minProperties": 1
+    },
+    "RelationshipKindId": {
+      "description": "A kind of relationship: builtin:<name> for a common one, whose words live in the UI, or own:<id> for one the writer wrote in this work.",
+      "type": "string",
+      "pattern": "^(builtin:[a-z0-9-]{1,40}|own:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$"
+    },
+    "RelationshipLabel": {
+      "description": "How a relationship reads from one side: «hijo de». Surrounding spaces are trimmed.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "NewRelationshipKind": {
+      "description": "A kind of relationship the writer writes. Without inverse it is symmetric: it reads the same from both sides.",
+      "type": "object",
+      "required": ["forward", "inverse"],
+      "additionalProperties": false,
+      "properties": {
+        "forward": {
+          "$ref": "#/$defs/RelationshipLabel"
+        },
+        "inverse": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RelationshipLabel"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "RelationshipKind": {
+      "description": "A kind of relationship the writer wrote in this work.",
+      "type": "object",
+      "required": ["id", "forward", "inverse"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^own:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "forward": {
+          "$ref": "#/$defs/RelationshipLabel"
+        },
+        "inverse": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RelationshipLabel"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Relationship": {
+      "description": "Two elements joined by a kind. It reads forward from `from` and inverse from `to`.",
+      "type": "object",
+      "required": ["id", "from", "to", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "from": {
+          "$ref": "#/$defs/Id"
+        },
+        "to": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "$ref": "#/$defs/RelationshipKindId"
+        }
+      }
+    },
+    "Board": {
+      "description": "Every element of the work, its relationships and the writer's kinds of relationship. Relationships of elements in the trash are left out.",
+      "type": "object",
+      "required": ["elements", "relationships", "ownKinds", "trash"],
+      "additionalProperties": false,
+      "properties": {
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ElementSummary"
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Relationship"
+          }
+        },
+        "ownKinds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RelationshipKind"
+          }
+        },
+        "trash": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ElementSummary"
+          }
+        }
+      }
+    },
+    "ImageMediaType": {
+      "enum": ["image/png", "image/jpeg", "image/webp"]
+    },
+    "ImageData": {
+      "description": "The bytes of an image in base64, with their type.",
+      "type": "object",
+      "required": ["data", "mediaType"],
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]*={0,2}$"
+        },
+        "mediaType": {
+          "$ref": "#/$defs/ImageMediaType"
+        }
+      }
+    },
+    "ImageSize": {
+      "enum": ["full", "thumbnail"]
     }
   }
 }

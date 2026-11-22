@@ -3,21 +3,21 @@
 Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests en verde, y con una comprobación en la app real cuando toca la interfaz, antes de pasar al siguiente. Rama: `feature/004-elementos-obra`.
 
 ## 1. Contrato de mensajes (versión 7)
-- [ ] Definiciones nuevas en `protocol.json`:
+- [x] Definiciones nuevas en `protocol.json`:
   - `ElementKind`: `character | place | plot | other`;
   - `ElementSummary { id, kind, otherKind, name, aliases, position, image }`;
   - `Element`: el resumen más `attributes` y `description`;
   - `Relationship { id, from, to, kind }` y `RelationshipKind { id, forward, inverse }`;
   - `Board { elements, relationships, ownKinds, trash }`.
-- [ ] Métodos:
+- [x] Métodos:
   - `board.get` y `board.move`;
   - `element.create`, `element.get`, `element.update`, `element.delete` y `element.restore`;
   - `element.readImage`, `element.setImage`, `element.removeImage` y `element.image`;
   - `relationship.create`, `relationship.update` y `relationship.delete`.
-- [ ] Notificación `elements.changed`, solo con lo que cambió.
-- [ ] Motivos de error `elementNotFound`, `relationshipNotFound`, `relationshipKindNotFound`, `nameRequired` y `sameElement`, con sus mensajes en español en `messages.ts`.
-- [ ] Ejemplos válidos e inválidos de cada método.
-- [ ] Regenerar los tipos de TypeScript y subir `protocolVersion` a 7.
+- [x] Notificación `elements.changed`, solo con lo que cambió.
+- [x] Motivos de error `nameRequired`, `otherKindRequired`, `elementNotFound`, `elementIsDeleted`, `elementIsNotDeleted`, `relationshipNotFound`, `relationshipKindNotFound`, `relationshipRepeated` y `sameElement`, con sus mensajes en español en `messages.ts`.
+- [x] Ejemplos válidos e inválidos de cada método.
+- [x] Regenerar los tipos de TypeScript y subir `protocolVersion` a 7.
 
 ## 2. Dominio
 - [ ] `ElementKind` y `Element` en `Rocinante.Domain/Elements`:

@@ -67,7 +67,7 @@ La pizarra no se carga hasta que se abre el Tablero por primera vez, para que ab
      - `board.move { positions [{ id, x, y }], origin }`, en lote: arrastrar una o reordenar todas es la misma llamada.
      - `relationship.create { from, to, kind | newKind { forward, inverse }, origin }`, `relationship.update { id, kind, origin }` y `relationship.delete { id, origin }`.
    - Notificación `elements.changed { origin, elements, removed, relationships, removedRelationships, ownKinds }`, con solo lo que cambió. `removed` incluye lo que va a la papelera.
-   - Motivos de error nuevos: `elementNotFound`, `relationshipNotFound`, `relationshipKindNotFound`, `nameRequired` y `sameElement` (una relación de una ficha consigo misma). Se reutilizan `notAnImage` y `fileTooLarge` de la 003.
+   - Motivos de error nuevos: `nameRequired`, `otherKindRequired` (tipo «otro» sin nombre), `elementNotFound`, `elementIsDeleted`, `elementIsNotDeleted`, `relationshipNotFound`, `relationshipKindNotFound`, `relationshipRepeated` y `sameElement` (una relación de una ficha consigo misma). Se reutilizan `notAnImage` y `fileTooLarge` de la 003.
    - Ejemplos válidos e inválidos de cada método; el escenario de `ContractTests` usa todos.
 2. **Dominio** — `Rocinante.Domain/Elements`.
    - `Element`:
