@@ -25,6 +25,8 @@ public interface IProjectSession : IDisposable
 
     INoteRepository Notes { get; }
 
+    IElementRepository Elements { get; }
+
     /// <summary>Runs <paramref name="work"/> so that every write inside it is kept, or none is.</summary>
     T InTransaction<T>(Func<T> work);
 

@@ -35,17 +35,17 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de dominio, con la cobertura de la constitución.
 
 ## 3. Persistencia (esquema v3)
-- [ ] Migración `0003-elements.sql` con estas tablas:
+- [x] Migración `0003-elements.sql` con estas tablas:
   - `element`;
   - `element_alias` y `element_attribute`;
   - `element_image`;
   - `relationship`;
   - `relationship_kind`.
-- [ ] Repositorio de elementos, con cada cambio en una transacción.
-- [ ] Una obra v2 se abre, se migra y queda lista para tener fichas.
-- [ ] «Guardar como» copia las fichas, las relaciones y las imágenes.
-- [ ] `docs/format`: las tablas nuevas, columna a columna.
-- [ ] Tests de persistencia: ida y vuelta, migración desde v2, cierre forzado a mitad de un cambio.
+- [x] Repositorio de elementos, con cada cambio en una transacción.
+- [x] Una obra v2 se abre, se migra y queda lista para tener fichas.
+- [x] «Guardar como» copia las fichas, las relaciones y las imágenes.
+- [x] `docs/format`: las tablas nuevas, columna a columna.
+- [x] Tests de persistencia: ida y vuelta, migración desde v2, cierre forzado a mitad de un cambio.
 
 ## 4. Casos de uso y sidecar
 - [ ] `ElementUseCases` con los métodos del contrato; cada cambio difunde `elements.changed` con su `origin`.

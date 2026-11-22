@@ -2,7 +2,7 @@
 
 Un proyecto de Rocinante es **un único archivo** que contiene la obra completa: capítulos, fragmentos, papelera, versiones y notas. Por dentro es una base de datos [SQLite 3](https://sqlite.org/fileformat.html), así que se puede abrir con cualquier herramienta de SQLite para inspeccionarla o recuperar el texto sin depender de la app.
 
-Este documento describe la **versión 2 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql) y [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql).
+Este documento describe la **versión 3 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql) [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql) y [`0003-elements.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0003-elements.sql).
 
 ## Cómo se reconoce
 
@@ -128,6 +128,70 @@ _Desde la versión 2._ Cómo se compone la obra: la hoja del libro que será, su
 | `first_line_indent`, `justified`, `drop_cap` | INTEGER 0/1 | Sangría de primera línea, texto justificado y capitular |
 
 Dos `CHECK` de tabla exigen que los márgenes dejen una caja de texto de al menos 40 × 60 mm.
+
+### `element`
+_Desde la versión 3._ Los elementos de la obra: personajes, lugares, tramas y otros. Cada uno es una tarjeta en la pizarra del Tablero. Las obras anteriores la reciben vacía.
+
+| Columna | Tipo | |
+|---|---|---|
+| `id` | TEXT, PK | |
+| `kind` | TEXT | `character`, `place`, `plot` u `other` |
+| `other_kind` | TEXT, 1–60 o NULL | Qué es, con las palabras del escritor (objeto, facción…). Solo con `kind = 'other'`, y entonces es obligatorio |
+| `name` | TEXT, 1–200 | |
+| `description` | TEXT | JSON de TipTap, como el texto de la obra: párrafos, cursiva y negrita |
+| `board_x`, `board_y` | REAL, ±1 000 000 | Dónde está su tarjeta en la pizarra |
+| `last_image_version` | INTEGER ≥ 0 | Versión de la última imagen que tuvo, aunque ya no la tenga: una imagen nueva nunca repite versión. 0 si nunca tuvo |
+| `created_at` | INTEGER | |
+| `deleted_at` | INTEGER o NULL | En la papelera desde entonces |
+
+### `element_alias`
+_Desde la versión 3._ Otros nombres de un elemento, en el orden del escritor. Se borran con su elemento.
+
+| Columna | Tipo | |
+|---|---|---|
+| `element_id` | TEXT → `element.id` | |
+| `position` | INTEGER ≥ 0 | Orden; con `element_id` forma la clave |
+| `alias` | TEXT, 1–200 | |
+
+### `element_attribute`
+_Desde la versión 3._ Pares nombre–valor de un elemento, en el orden del escritor. Se borran con su elemento.
+
+| Columna | Tipo | |
+|---|---|---|
+| `element_id` | TEXT → `element.id` | |
+| `position` | INTEGER ≥ 0 | Orden; con `element_id` forma la clave |
+| `name` | TEXT, 1–100 | |
+| `value` | TEXT, hasta 5000 | Puede estar vacío, como empiezan los sugeridos |
+
+### `element_image`
+_Desde la versión 3._ La imagen de un elemento, como mucho una, ya reducida por la interfaz, y la miniatura que muestra su tarjeta. Se borra con su elemento.
+
+| Columna | Tipo | |
+|---|---|---|
+| `element_id` | TEXT, PK → `element.id` | |
+| `version` | INTEGER ≥ 1 | La de `element.last_image_version` al guardarla |
+| `image`, `thumbnail` | BLOB | La imagen (hasta 1600 px por el lado mayor) y su miniatura (256 px) |
+| `image_type`, `thumbnail_type` | TEXT | `image/webp` o `image/jpeg` |
+
+### `relationship_kind`
+_Desde la versión 3._ Las clases de relación que el escritor escribió en esta obra. Las comunes («hijo de» / «padre de», «hermano de»…) no están aquí: viven en la interfaz, que puede traducirlas.
+
+| Columna | Tipo | |
+|---|---|---|
+| `id` | TEXT, PK | |
+| `forward` | TEXT, 1–60 | Cómo se lee desde `from_id` («escudero de») |
+| `inverse` | TEXT, 1–60 o NULL | Cómo se lee desde `to_id` («señor de»). NULL si es simétrica («rival de») |
+
+### `relationship`
+_Desde la versión 3._ Dos elementos unidos por una clase. La relación de un elemento en la papelera se conserva y no se muestra hasta restaurarlo.
+
+| Columna | Tipo | |
+|---|---|---|
+| `id` | TEXT, PK | |
+| `from_id`, `to_id` | TEXT → `element.id` | Distintos. Se borran con sus elementos |
+| `kind` | TEXT | `builtin:<nombre>` para una clase común o `own:<relationship_kind.id>` para una del escritor |
+
+Índices `relationship_by_from (from_id)` y `relationship_by_to (to_id)`.
 
 ## Qué no está en el archivo
 
