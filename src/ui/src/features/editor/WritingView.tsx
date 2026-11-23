@@ -37,6 +37,10 @@ import { useFocusMode } from "../focus/useFocusMode";
 import { useSessionGoal, type Session } from "../focus/useSessionGoal";
 import { GoalMeter, GoalReached } from "../focus/Goal";
 import { AmbienceSheet } from "../ambience/AmbienceSheet";
+import { ElementsPanel } from "../elements/ElementsPanel";
+import { suggestedAttributes } from "../elements/kinds";
+import { isElementsShortcut, panelWasOpen, rememberPanel } from "../elements/panel";
+import { useBoard } from "../elements/useBoard";
 import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
 import { ambienceUrl } from "../ambience/own-url";
@@ -44,6 +48,13 @@ import { AnimatedBackdrop } from "../ambience/animated/AnimatedBackdrop";
 import { sounds } from "../../audio/engine";
 import { ambientSounds, tracksOf } from "../../audio/ambient-sounds";
 import "./writing-view.css";
+
+/** Gives the keyboard back to the text, where the cursor was. */
+function focusText() {
+  window.document
+    .querySelector<HTMLElement>(".book-page .ProseMirror")
+    ?.focus({ preventScroll: true });
+}
 
 /** A version shown in place of the page, with the text it is compared with. */
 interface Viewing {
@@ -90,8 +101,19 @@ export function WritingView({
   const [problem, setProblem] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(preferences.outline === "docked");
   const [deleted, setDeleted] = useState<DocumentEntry | null>(null);
-  // One sheet at a time on the right of the text: the versions, the format or the ambience.
-  const [sheet, setSheet] = useState<"versions" | "format" | "ambience" | null>(null);
+  // One sheet at a time on the right of the text: the fichas, the versions, the format or the ambience.
+  // Whether the fichas were open is kept for this window.
+  const [sheet, setSheet] = useState<"elements" | "versions" | "format" | "ambience" | null>(() =>
+    panelWasOpen() ? "elements" : null,
+  );
+  const elementsOpen = sheet === "elements";
+  const { board, loaded: boardLoaded } = useBoard(project.id);
+  const [openElement, setOpenElement] = useState<string | null>(null);
+  const [freshElement, setFreshElement] = useState<{
+    id: string;
+    field: "name" | "kind";
+  } | null>(null);
+  const [searchRequest, setSearchRequest] = useState(0);
   const versionsOpen = sheet === "versions";
   const [pagesOpen, setPagesOpen] = useState(false);
   const [nameRequest, setNameRequest] = useState(0);
@@ -108,6 +130,16 @@ export function WritingView({
     outline: false,
     sheet: null,
   });
+
+  useEffect(() => rememberPanel(elementsOpen), [elementsOpen]);
+
+  // The fichas open with the keyboard in their search, and give it back to the text on closing.
+  const toggleElements = useCallback(() => {
+    setViewing(null);
+    setSheet((open) => (open === "elements" ? null : "elements"));
+    setSearchRequest((asked) => asked + 1);
+    focusText();
+  }, []);
 
   // First document to show.
   useEffect(() => {
@@ -219,7 +251,8 @@ export function WritingView({
         } else if (
           isPageViewShortcut(event) ||
           isOutlineShortcut(event) ||
-          isVersionsShortcut(event)
+          isVersionsShortcut(event) ||
+          isElementsShortcut(event)
         ) {
           event.preventDefault();
         }
@@ -232,6 +265,9 @@ export function WritingView({
       } else if (isOutlineShortcut(event)) {
         event.preventDefault();
         setOutlineOpen((open) => !open);
+      } else if (isElementsShortcut(event)) {
+        event.preventDefault();
+        toggleElements();
       } else if (isVersionsShortcut(event)) {
         event.preventDefault();
         setSheet((open) => (open === "versions" ? null : "versions"));
@@ -244,7 +280,26 @@ export function WritingView({
     const self = opening.current.origin;
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
-  }, []);
+  }, [toggleElements]);
+
+  async function createElement(name: string | null) {
+    try {
+      const created = await request("element.create", {
+        kind: "character",
+        name: name ?? "Ficha nueva",
+        attributes: suggestedAttributes("character"),
+        origin,
+      });
+      setViewing(null);
+      setSheet("elements");
+      setOpenElement(created.id);
+      // From the text the name is already right: what is left is to say what it is.
+      setFreshElement({ id: created.id, field: name === null ? "name" : "kind" });
+      setProblem(null);
+    } catch (error) {
+      setProblem(messageFor(error));
+    }
+  }
 
   // Opening the index takes the keyboard to it; closing gives it back to the text.
   const outlineWasOpen = useRef(outlineOpen);
@@ -259,11 +314,6 @@ export function WritingView({
       window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
     }
   }, [outlineOpen]);
-
-  const focusText = () =>
-    window.document
-      .querySelector<HTMLElement>(".book-page .ProseMirror")
-      ?.focus({ preventScroll: true });
 
   // Focus mode puts away the index and the sheets, and brings them back as they were. The text
   // keeps the keyboard, so the cursor stays where it was.
@@ -425,6 +475,14 @@ export function WritingView({
           >
             Contador {preferences.counterVisible ? "sí" : "no"}
           </button>
+          <button
+            className="action"
+            aria-expanded={elementsOpen}
+            title="Fichas (Ctrl+Mayús+E)"
+            onClick={toggleElements}
+          >
+            Fichas
+          </button>
           <button className="action" aria-expanded={sheet === "ambience"} onClick={toggleAmbience}>
             Ambiente
           </button>
@@ -524,6 +582,7 @@ export function WritingView({
               }}
               onSaveState={onSaveState}
               onProblem={setProblem}
+              onCreateElement={(name) => void createElement(name)}
             />
           </div>
         )}
@@ -531,6 +590,25 @@ export function WritingView({
 
       {pagesOpen && (
         <PageView format={project.format} onClose={closePages} onProblem={setProblem} />
+      )}
+
+      {elementsOpen && (
+        <ElementsPanel
+          board={board}
+          loaded={boardLoaded}
+          openId={openElement}
+          fresh={freshElement}
+          origin={origin}
+          searchRequest={searchRequest}
+          chooseImage={pickers.chooseElementImage}
+          onOpen={(id) => {
+            setOpenElement(id);
+            setFreshElement(null);
+          }}
+          onCreate={() => void createElement(null)}
+          onClose={closeSheet}
+          onProblem={setProblem}
+        />
       )}
 
       {sheet === "format" && (

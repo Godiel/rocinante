@@ -85,15 +85,15 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Aviso de nombre repetido, con enlace a la otra ficha.
 - [x] Los atajos de la obra (Ctrl+S, F5, F6, F11) no actúan desde la descripción, y los de la descripción no tocan el texto.
 - [x] Tests de comportamiento de la ficha.
-- [ ] Comprobar en la app real: junto con el panel del bloque 7, que es donde se ve la ficha.
+- [x] Comprobar en la app real: junto con el panel del bloque 7, que es donde se ve la ficha.
 
 ## 7. Panel junto al texto
-- [ ] `ElementsPanel` a la derecha del editor.
-- [ ] Ctrl+Mayús+E y un botón de la barra de la obra lo abren y cierran; se recuerda por ventana.
-- [ ] Buscador y lista agrupada por tipo, plegable y en orden alfabético. La ficha sustituye a la lista y una flecha vuelve.
-- [ ] «Crear ficha» en el menú flotante del editor: crea la ficha con el texto seleccionado y la abre en el panel.
-- [ ] Tests de comportamiento del panel y del menú flotante.
-- [ ] Comprobar en la app real, con el índice abierto a la vez.
+- [x] `ElementsPanel` a la derecha del editor.
+- [x] Ctrl+Mayús+E y un botón de la barra de la obra lo abren y cierran; se recuerda por ventana.
+- [x] Buscador y lista agrupada por tipo, plegable y en orden alfabético. La ficha sustituye a la lista y una flecha vuelve.
+- [x] «Crear ficha» en el menú flotante del editor: crea la ficha con el texto seleccionado y la abre en el panel.
+- [x] Tests de comportamiento del panel y del menú flotante.
+- [x] Comprobar en la app real, con el índice abierto a la vez.
 
 ## 8. Pestañas Escritura y Tablero
 - [ ] Dos pestañas en `features/workspace`; F2 alterna.

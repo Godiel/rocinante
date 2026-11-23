@@ -157,3 +157,131 @@
   display: flex;
   gap: var(--space-3);
 }
+
+/* The panel beside the text: the list of fichas, or one of them. */
+
+.elements-back {
+  padding: 0;
+}
+
+.elements-tools {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin: var(--space-3) 0;
+}
+
+.elements-search {
+  flex: 1;
+}
+
+.elements-search input {
+  width: 100%;
+  padding: 2px 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  outline: none;
+}
+
+.elements-search input:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.elements-empty {
+  color: var(--color-ink-soft);
+}
+
+.elements-group {
+  margin-bottom: var(--space-3);
+}
+
+.elements-group-title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-caption);
+  font-weight: 400;
+}
+
+.elements-group-toggle {
+  padding: 0;
+  font: inherit;
+  letter-spacing: var(--tracking-small-caps);
+  color: var(--color-ink-faint);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.elements-group-toggle::before {
+  content: "▾ ";
+}
+
+.elements-group-toggle[aria-expanded="false"]::before {
+  content: "▸ ";
+}
+
+.elements-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.elements-item {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  width: 100%;
+  padding: var(--space-1) 0;
+  font: inherit;
+  color: var(--color-ink-soft);
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.elements-item:hover,
+.elements-item:focus-visible {
+  color: var(--color-ink);
+}
+
+.elements-thumbnail {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.elements-thumbnail-empty {
+  display: grid;
+  place-items: center;
+  font-variant: small-caps;
+  color: var(--color-ink-faint);
+  border: var(--hairline) solid var(--color-rule);
+}
+
+.elements-item-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.elements-item-name,
+.elements-item-detail {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.elements-item-detail {
+  font-size: var(--text-caption);
+  color: var(--color-ink-faint);
+}
+
+.elements-repeated {
+  color: var(--color-rubric);
+}

@@ -205,7 +205,11 @@
   }
 }
 
-/* The formatting row over a selection. */
+/* The formatting row over a selection. It passes over the sheets on the right, so all of it shows. */
+.bubble-toolbar {
+  z-index: 5;
+}
+
 .bubble-toolbar [role="toolbar"] {
   display: flex;
   gap: 2px;
@@ -231,6 +235,13 @@
 
 .bubble-button-active {
   color: var(--color-rubric);
+}
+
+/* Making a ficha is not formatting: a hairline sets it apart. */
+.bubble-button-element {
+  margin-left: 2px;
+  border-left: var(--hairline) solid var(--color-rule);
+  border-radius: 0 var(--radius) var(--radius) 0;
 }
 
 /* The slip of paper for notes and footnotes. */
