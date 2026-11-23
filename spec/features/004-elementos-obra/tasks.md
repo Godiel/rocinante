@@ -70,22 +70,22 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Catálogos de la interfaz: clases de relación comunes (`relationship-kinds.ts`) y atributos sugeridos por tipo.
 
 ## 6. La ficha
-- [ ] `ElementSheet`:
+- [x] `ElementSheet`:
   - nombre y tipo, y nombre del tipo con «otro»;
   - alias;
   - atributos: añadir, editar, ordenar arrastrando y quitar.
-- [ ] Descripción con TipTap: párrafos, cursiva y negrita.
-- [ ] Guardado automático tras una pausa, con `pending-saves`: nada queda sin guardar al cerrar.
-- [ ] Imagen:
+- [x] Descripción con TipTap: párrafos, cursiva y negrita.
+- [x] Guardado automático tras una pausa, con `pending-saves`: nada queda sin guardar al cerrar.
+- [x] Imagen:
   1. elegir el archivo con el diálogo;
   2. `element.readImage`;
   3. reducirla en un `canvas` a 1600 px y una miniatura de 256 px, en WebP o en JPEG si el sistema no codifica WebP;
   4. `element.setImage`.
-- [ ] Cambiar y quitar la imagen.
-- [ ] Aviso de nombre repetido, con enlace a la otra ficha.
-- [ ] Los atajos de la obra (Ctrl+S, F5, F6, F11) no actúan desde la descripción, y los de la descripción no tocan el texto.
-- [ ] Tests de comportamiento de la ficha.
-- [ ] Comprobar en la app real.
+- [x] Cambiar y quitar la imagen.
+- [x] Aviso de nombre repetido, con enlace a la otra ficha.
+- [x] Los atajos de la obra (Ctrl+S, F5, F6, F11) no actúan desde la descripción, y los de la descripción no tocan el texto.
+- [x] Tests de comportamiento de la ficha.
+- [ ] Comprobar en la app real: junto con el panel del bloque 7, que es donde se ve la ficha.
 
 ## 7. Panel junto al texto
 - [ ] `ElementsPanel` a la derecha del editor.

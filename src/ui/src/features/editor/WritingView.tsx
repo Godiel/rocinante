@@ -17,6 +17,7 @@ import type {
 import type { Pickers } from "../welcome/Welcome";
 import { messageFor } from "../../app/messages";
 import { LogFolderButton } from "../../app/Trouble";
+import { keepsItsOwnKeys } from "../../editor/own-keys";
 import { savePendingNow } from "../../editor/pending-saves";
 import { isOutlineShortcut } from "../outline/shortcut";
 import { Outline } from "../outline/Outline";
@@ -204,6 +205,7 @@ export function WritingView({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (keepsItsOwnKeys(event.target)) return;
       if (focusedRef.current) {
         // In focus mode the big views stay away; a version is still kept, without the sheet.
         if (isSaveVersionShortcut(event)) {

@@ -1,0 +1,159 @@
+/* The ficha of an element: a page of notes about someone or something of the work. */
+
+.element-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.element-picture {
+  display: block;
+  width: 100%;
+  max-height: 16rem;
+  object-fit: contain;
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: var(--radius);
+}
+
+.element-name {
+  width: 100%;
+  padding: 0 0 2px;
+  font-size: var(--text-title);
+  line-height: 1.15;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid transparent;
+  outline: none;
+}
+
+.element-name:focus,
+.element-sheet input:focus,
+.element-sheet textarea:focus,
+.element-sheet select:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.element-sheet [aria-invalid="true"] {
+  border-bottom-color: var(--color-rubric);
+}
+
+.element-label {
+  display: block;
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: var(--tracking-small-caps);
+  font-variant: small-caps;
+  color: var(--color-ink-faint);
+}
+
+.element-kind {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.element-sheet input,
+.element-sheet textarea,
+.element-sheet select {
+  padding: 0 0 1px;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  outline: none;
+}
+
+.element-problem {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-rubric);
+}
+
+.element-shared {
+  margin: 0;
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
+
+.element-shared .action {
+  font-style: normal;
+}
+
+.element-section {
+  margin-top: var(--space-3);
+}
+
+.element-aliases,
+.element-attributes {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.element-aliases li {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin-bottom: var(--space-1);
+}
+
+.element-aliases input,
+.element-add {
+  flex: 1;
+  width: 100%;
+  font-style: italic;
+}
+
+.element-attribute {
+  display: grid;
+  grid-template-columns: auto 7rem 1fr auto;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin-bottom: var(--space-1);
+  background: var(--color-paper-shade);
+}
+
+.element-attribute.is-dragging {
+  position: relative;
+  z-index: 1;
+  outline: var(--hairline) solid var(--color-rule);
+}
+
+.element-attribute-name {
+  min-width: 0;
+  color: var(--color-ink-soft);
+}
+
+.element-attribute-value {
+  min-width: 0;
+  resize: vertical;
+  field-sizing: content;
+}
+
+.element-handle {
+  cursor: grab;
+  color: var(--color-ink-faint);
+  touch-action: none;
+}
+
+.element-description .ProseMirror {
+  min-height: 6em;
+  padding: var(--space-1) 0;
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  outline: none;
+  border-bottom: var(--hairline) solid var(--color-rule);
+}
+
+.element-description .ProseMirror:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.element-description p {
+  margin: 0 0 var(--space-2);
+}
+
+.element-image-actions {
+  display: flex;
+  gap: var(--space-3);
+}

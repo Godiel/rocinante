@@ -34,7 +34,7 @@ export const messages: Record<ErrorReason, string> = {
   fileTooLarge:
     "El archivo es demasiado grande: hasta 30 MB para una imagen y 100 MB para un sonido.",
   nameRequired: "Escribe un nombre.",
-  otherKindRequired: "Escribe qué es: objeto, facción, época…",
+  otherKindRequired: "Escribe qué es: un objeto, una facción, una época.",
   elementNotFound: "Esa ficha ya no está en la obra. Puede que se haya borrado en otra ventana.",
   elementIsDeleted: "Esa ficha está en la papelera. Restáurala para cambiarla.",
   elementIsNotDeleted: "Esa ficha no está en la papelera.",

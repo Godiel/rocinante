@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FocusWindow } from "./focus-window";
+import { keepsItsOwnKeys } from "../../editor/own-keys";
 import { isFocusShortcut, isLeaveFocusKey } from "./shortcuts";
 
 interface FocusModeOptions {
@@ -64,7 +65,7 @@ export function useFocusMode({ window: screen, onEnter, onLeave, onProblem }: Fo
   // F11 first, before the editor or the browser see it.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!isFocusShortcut(event)) return;
+      if (!isFocusShortcut(event) || keepsItsOwnKeys(event.target)) return;
       event.preventDefault();
       if (focusedRef.current) leave();
       else enter();

@@ -26,6 +26,13 @@ export const systemPickers: Pickers = {
     });
     return typeof file === "string" ? file : null;
   },
+  async chooseElementImage() {
+    const file = await open({
+      title: "Imagen de la ficha",
+      filters: [{ name: "Imagen", extensions: ["png", "jpg", "jpeg", "webp"] }],
+    });
+    return typeof file === "string" ? file : null;
+  },
   async chooseSound() {
     const file = await open({
       title: "Añadir un sonido de ambiente",

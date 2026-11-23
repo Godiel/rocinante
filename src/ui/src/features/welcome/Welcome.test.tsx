@@ -51,6 +51,7 @@ function renderWelcome(
     chooseProject: vi.fn(() => Promise.resolve(null)),
     chooseImage: vi.fn(() => Promise.resolve(null)),
     chooseSound: vi.fn(() => Promise.resolve(null)),
+    chooseElementImage: vi.fn(() => Promise.resolve(null)),
     ...options.pickers,
   };
   render(
