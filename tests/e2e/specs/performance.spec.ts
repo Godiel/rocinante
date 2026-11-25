@@ -21,13 +21,12 @@ const VIRTUAL_MAC = Boolean(process.env.CI) && process.platform === "darwin";
 /** "No delay when typing": 95 % of keystrokes are on screen within this time. */
 const MAX_P95_MS = VIRTUAL_MAC ? 150 : 50;
 /**
- * GitHub's Linux machines have no graphics card either, and Chrome there paints in software.
- * Typing keeps up, but moving a card repaints hundreds of arrows each frame, so there the board
- * is only guarded against becoming several times slower. On a writer's computer it is held to
- * the same 50 ms as typing.
+ * None of GitHub's machines has a graphics card, so the browser paints in software. Typing keeps
+ * up, but moving a card repaints hundreds of arrows each frame, so there the board is only
+ * guarded against becoming several times slower. On a writer's computer it is held to the same
+ * 50 ms as typing.
  */
-const MAX_BOARD_P95_MS =
-  VIRTUAL_MAC || (Boolean(process.env.CI) && process.platform === "linux") ? 150 : MAX_P95_MS;
+const MAX_BOARD_P95_MS = process.env.CI ? 150 : MAX_P95_MS;
 /** The page view of a work of 150 000 words opens within this time. */
 const MAX_PAGE_VIEW_MS = VIRTUAL_MAC ? 6000 : 2000;
 /**
