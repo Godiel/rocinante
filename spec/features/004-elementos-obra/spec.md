@@ -79,55 +79,55 @@ Una novela se sostiene en lo que el escritor sabe de su mundo: quién es cada pe
 ## Criterios de aceptación
 
 **Pestañas**
-- [ ] La ventana de la obra tiene las pestañas Escritura y Tablero; F2 y un clic pasan de una a otra. Al volver a Escritura, el cursor sigue en el mismo sitio.
+- [x] La ventana de la obra tiene las pestañas Escritura y Tablero; F2 y un clic pasan de una a otra. Al volver a Escritura, el cursor sigue en el mismo sitio.
 
 **Fichas**
-- [ ] Se crean fichas de personaje, lugar, trama y otro (con nombre de tipo libre). Una ficha sin nombre no se guarda y lo dice con claridad.
-- [ ] Cada tipo trae sus atributos sugeridos, que se pueden quitar. Se añaden, editan, ordenan y quitan atributos propios.
-- [ ] Se añaden y quitan alias.
-- [ ] La descripción admite párrafos, cursiva y negrita.
-- [ ] Se pone, cambia y quita una imagen. Va dentro del archivo de la obra y se sigue viendo aunque el original se borre. Un archivo que no es una imagen válida, o que es demasiado grande, se rechaza con un mensaje claro.
-- [ ] Cambiar el tipo de una ficha conserva todo lo escrito en ella.
-- [ ] Los cambios se guardan solos y sobreviven a cerrar y abrir la app, y a un cierre forzado.
+- [x] Se crean fichas de personaje, lugar, trama y otro (con nombre de tipo libre). Una ficha sin nombre no se guarda y lo dice con claridad.
+- [x] Cada tipo trae sus atributos sugeridos, que se pueden quitar. Se añaden, editan, ordenan y quitan atributos propios.
+- [x] Se añaden y quitan alias.
+- [x] La descripción admite párrafos, cursiva y negrita.
+- [x] Se pone, cambia y quita una imagen. Va dentro del archivo de la obra y se sigue viendo aunque el original se borre. Un archivo que no es una imagen válida, o que es demasiado grande, se rechaza con un mensaje claro.
+- [x] Cambiar el tipo de una ficha conserva todo lo escrito en ella.
+- [x] Los cambios se guardan solos y sobreviven a cerrar y abrir la app, y a un cierre forzado.
 
 **Pizarra**
-- [ ] Cada ficha se ve como una tarjeta con su imagen, su nombre y su tipo.
-- [ ] Las tarjetas se arrastran a cualquier sitio y su posición se recuerda al cerrar y abrir la obra. Una ficha nueva no tapa a otra.
-- [ ] La vista se desplaza, se acerca, se aleja y encaja todas las tarjetas.
-- [ ] Arrastrar de una tarjeta a otra crea una relación con la etiqueta elegida. La flecha muestra la etiqueta y el sentido; las simétricas no tienen punta. Una flecha se puede editar y quitar.
-- [ ] El filtro por tipo oculta y muestra tarjetas con sus flechas.
-- [ ] Al elegir una tarjeta, ella, sus flechas y sus tarjetas relacionadas quedan resaltadas y el resto atenuado.
-- [ ] El buscador encuentra por nombre y por alias, sin distinguir mayúsculas ni tildes, y centra la tarjeta.
-- [ ] «Ordenar automáticamente» reparte las tarjetas sin que se solapen y se puede deshacer.
-- [ ] Al abrir una tarjeta, su ficha se edita en el panel de la derecha con la pizarra a la vista.
-- [ ] La pizarra se usa con el teclado: recorrer tarjetas, abrirlas, moverlas y relacionarlas.
-- [ ] Con 300 tarjetas y 600 flechas, arrastrar una tarjeta, desplazar y acercar la vista se mueven con fluidez.
+- [x] Cada ficha se ve como una tarjeta con su imagen, su nombre y su tipo.
+- [x] Las tarjetas se arrastran a cualquier sitio y su posición se recuerda al cerrar y abrir la obra. Una ficha nueva no tapa a otra.
+- [x] La vista se desplaza, se acerca, se aleja y encaja todas las tarjetas.
+- [x] Arrastrar de una tarjeta a otra crea una relación con la etiqueta elegida. La flecha muestra la etiqueta y el sentido; las simétricas no tienen punta. Una flecha se puede editar y quitar.
+- [x] El filtro por tipo oculta y muestra tarjetas con sus flechas.
+- [x] Al elegir una tarjeta, ella, sus flechas y sus tarjetas relacionadas quedan resaltadas y el resto atenuado.
+- [x] El buscador encuentra por nombre y por alias, sin distinguir mayúsculas ni tildes, y centra la tarjeta.
+- [x] «Ordenar automáticamente» reparte las tarjetas sin que se solapen y se puede deshacer.
+- [x] Al abrir una tarjeta, su ficha se edita en el panel de la derecha con la pizarra a la vista.
+- [x] La pizarra se usa con el teclado: recorrer tarjetas, abrirlas, moverlas y relacionarlas.
+- [x] Con 300 tarjetas y 600 flechas, arrastrar una tarjeta, desplazar y acercar la vista se mueven con fluidez.
 
 **Panel junto al texto**
-- [ ] Ctrl+Mayús+E y el botón de la barra abren y cierran el panel de fichas a la derecha del texto. El índice puede seguir abierto a la izquierda.
-- [ ] La lista agrupa las fichas por tipo, en orden alfabético, con grupos plegables. El buscador encuentra por nombre y por alias.
-- [ ] Con el panel abierto, escribir en la obra sigue igual de fluido.
+- [x] Ctrl+Mayús+E y el botón de la barra abren y cierran el panel de fichas a la derecha del texto. El índice puede seguir abierto a la izquierda.
+- [x] La lista agrupa las fichas por tipo, en orden alfabético, con grupos plegables. El buscador encuentra por nombre y por alias.
+- [x] Con el panel abierto, escribir en la obra sigue igual de fluido.
 
 **Relaciones**
-- [ ] Se relacionan dos fichas con una pareja común o propia, desde la ficha o desde la pizarra, y cada ficha muestra la etiqueta que le toca. Las simétricas se leen igual desde las dos.
-- [ ] Desde una relación de la ficha se abre la otra ficha.
-- [ ] Una pareja propia queda disponible para otras relaciones de la misma obra.
+- [x] Se relacionan dos fichas con una pareja común o propia, desde la ficha o desde la pizarra, y cada ficha muestra la etiqueta que le toca. Las simétricas se leen igual desde las dos.
+- [x] Desde una relación de la ficha se abre la otra ficha.
+- [x] Una pareja propia queda disponible para otras relaciones de la misma obra.
 
 **Desde el texto, repetidos y papelera**
-- [ ] Con un nombre seleccionado, «Crear ficha» del menú flotante crea la ficha con ese nombre y la abre en el panel. El texto no cambia.
-- [ ] Dos fichas con el mismo nombre o alias se permiten, y las dos avisan de la coincidencia.
-- [ ] Una ficha borrada va a la papelera y se restaura con sus relaciones y su sitio en la pizarra. Mientras está en la papelera, no aparece en la pizarra, en la lista ni en las relaciones de otras fichas.
+- [x] Con un nombre seleccionado, «Crear ficha» del menú flotante crea la ficha con ese nombre y la abre en el panel. El texto no cambia.
+- [x] Dos fichas con el mismo nombre o alias se permiten, y las dos avisan de la coincidencia.
+- [x] Una ficha borrada va a la papelera y se restaura con sus relaciones y su sitio en la pizarra. Mientras está en la papelera, no aparece en la pizarra, en la lista ni en las relaciones de otras fichas.
 
 **De la obra**
-- [ ] Las fichas, las relaciones y la pizarra se ven y se actualizan en vivo en todas las ventanas de la obra.
-- [ ] «Guardar como» copia las fichas con sus imágenes y la pizarra.
-- [ ] Una obra creada con versiones anteriores se abre sin perder nada y queda lista para tener fichas.
+- [x] Las fichas, las relaciones y la pizarra se ven y se actualizan en vivo en todas las ventanas de la obra.
+- [x] «Guardar como» copia las fichas con sus imágenes y la pizarra.
+- [x] Una obra creada con versiones anteriores se abre sin perder nada y queda lista para tener fichas.
 
 **Calidad**
-- [ ] Los métodos y notificaciones nuevos forman parte del contrato de mensajes, con sus pruebas de contrato.
-- [ ] Los cambios del archivo `.rocinante` son una migración numerada, documentada en `docs/format`.
-- [ ] Los logs no contienen nombres, alias, atributos, descripciones ni imágenes de las fichas.
-- [ ] Tests de dominio en el núcleo, tests de comportamiento de la interfaz y una prueba de extremo a extremo: crear un personaje y un lugar en la pizarra, unirlos con una flecha, crear una ficha desde el texto, borrarla y restaurarla, y volver a abrir la obra con todo en su sitio.
+- [x] Los métodos y notificaciones nuevos forman parte del contrato de mensajes, con sus pruebas de contrato.
+- [x] Los cambios del archivo `.rocinante` son una migración numerada, documentada en `docs/format`.
+- [x] Los logs no contienen nombres, alias, atributos, descripciones ni imágenes de las fichas.
+- [x] Tests de dominio en el núcleo, tests de comportamiento de la interfaz y una prueba de extremo a extremo: crear un personaje y un lugar en la pizarra, unirlos con una flecha, crear una ficha desde el texto, borrarla y restaurarla, y volver a abrir la obra con todo en su sitio.
 
 ## Fuera de alcance
 

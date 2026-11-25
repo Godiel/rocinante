@@ -156,13 +156,13 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
   - borrarla y restaurarla;
   - cerrar y abrir la obra con todo en su sitio.
 - [x] Otra ventana de la misma obra ve los cambios en vivo.
-- [x] Pizarra con 300 tarjetas y 600 flechas: arrastrar y desplazar con un p95 de fotograma por debajo de 50 ms (150 ms en la CI de macOS).
+- [x] Pizarra con 300 tarjetas y 600 flechas: arrastrar, desplazar y acercar con un p95 de fotograma por debajo de 50 ms (150 ms en la CI, cuyas máquinas no tienen tarjeta gráfica).
 - [x] Escribir con el panel de fichas abierto mantiene el p95 de la 001.
-- [ ] Todo en verde en los tres sistemas en la CI.
+- [x] Todo en verde en los tres sistemas en la CI.
 
 ## 14. Validación y cierre
-- [ ] Repasar los criterios de `spec.md` y marcar solo lo comprobado.
-- [ ] `tech-stack.md`: React Flow y d3-force, el esquema v3 y los módulos nuevos.
-- [ ] ADR 0010: React Flow para el Tablero.
-- [ ] Pull request a `main` con `gh`, con la CI en verde.
-- [ ] Hoja de ruta: la 004 pasa a «Hecho» al fusionar.
+- [x] Repasar los criterios de `spec.md` y marcar solo lo comprobado.
+- [x] `tech-stack.md`: React Flow y d3-force, el esquema v3 y los módulos nuevos.
+- [x] ADR 0010: React Flow para el Tablero.
+- [x] Pull request a `main` con `gh`, con la CI en verde.
+- [x] Hoja de ruta: la 004 pasa a «Hecho» (entra con la fusión).
