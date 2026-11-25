@@ -8,12 +8,133 @@
   background: var(--color-paper);
 }
 
-.board-empty {
-  max-width: var(--measure);
-  margin: var(--space-6) auto 0;
-  padding: 0 var(--space-4);
-  font-size: var(--text-body);
+.board-tab .react-flow {
+  background: transparent;
+}
+
+/* With a ficha open, the cards leave it room on the right. */
+.board-tab-sheet .react-flow {
+  width: calc(100% - 20rem);
+}
+
+.board-empty,
+.board-problem {
+  position: absolute;
+  top: var(--space-5);
+  left: 50%;
+  width: min(var(--measure), calc(100% - 2 * var(--space-4)));
+  margin: 0;
+  transform: translateX(-50%);
   font-style: italic;
   text-align: center;
+  pointer-events: none;
+}
+
+.board-empty {
+  top: var(--space-6);
+  font-size: var(--text-body);
   color: var(--color-ink-soft);
+}
+
+.board-problem {
+  color: var(--color-rubric);
+}
+
+.board-tools {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  font-size: var(--text-caption);
+}
+
+/* A card: a slip of paper with the picture, the name and what it is. No shadows, no bright colours. */
+.board-card {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  width: 220px;
+  height: 88px;
+  padding: var(--space-2);
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  border-left: 3px solid var(--card-mark, var(--color-rule));
+  border-radius: var(--radius);
+  cursor: grab;
+}
+
+.board-card-character {
+  --card-mark: var(--color-rubric);
+}
+
+.board-card-place {
+  --card-mark: var(--color-ink-soft);
+}
+
+.board-card-plot {
+  --card-mark: var(--color-ink-faint);
+}
+
+.board-card-selected {
+  border-color: var(--color-ink-soft);
+}
+
+.react-flow__node:focus-visible {
+  outline: none;
+}
+
+.react-flow__node:focus-visible .board-card {
+  outline: 1px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.react-flow__node.dragging .board-card {
+  cursor: grabbing;
+}
+
+.board-card-image {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.board-card-initial {
+  display: grid;
+  place-items: center;
+  font-size: var(--text-title);
+  font-variant: small-caps;
+  color: var(--color-ink-faint);
+  border: var(--hairline) solid var(--color-rule);
+}
+
+.board-card-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.board-card-name {
+  overflow: hidden;
+  font-size: var(--text-ui);
+  line-height: 1.2;
+  color: var(--color-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.board-card-kind {
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-small-caps);
+  color: var(--color-ink-faint);
+}
+
+.react-flow__attribution {
+  font-size: 10px;
+  background: transparent;
+}
+
+.react-flow__attribution a {
+  color: var(--color-ink-faint);
 }

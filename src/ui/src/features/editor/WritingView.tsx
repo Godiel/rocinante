@@ -749,7 +749,12 @@ export function WritingView({
           hidden={!onBoard}
         >
           <Suspense fallback={null}>
-            <BoardTab board={board} loaded={boardLoaded} />
+            <BoardTab
+              board={board}
+              loaded={boardLoaded}
+              origin={origin}
+              chooseImage={pickers.chooseElementImage}
+            />
           </Suspense>
         </div>
       )}

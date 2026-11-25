@@ -104,14 +104,14 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Comprobar en la app real.
 
 ## 9. Pizarra
-- [ ] Añadir `@xyflow/react` (MIT), tras revisar su licencia y las de sus dependencias.
-- [ ] Nodo de tarjeta con miniatura, nombre y marca del tipo, y estilos con los tokens de la app.
-- [ ] Arrastrar guarda la posición con `board.move` al soltar.
-- [ ] Desplazar, acercar, alejar y encajar todo. Al abrir, encaja todas las tarjetas.
-- [ ] Crear ficha desde la pizarra, en un hueco libre junto al centro de la vista.
-- [ ] Abrir una tarjeta muestra su ficha en el panel derecho del Tablero.
-- [ ] Tests de comportamiento.
-- [ ] Comprobar en la app real.
+- [x] Añadir `@xyflow/react` (MIT), tras revisar su licencia y las de sus dependencias.
+- [x] Nodo de tarjeta con miniatura, nombre y marca del tipo, y estilos con los tokens de la app.
+- [x] Arrastrar guarda la posición con `board.move` al soltar.
+- [x] Desplazar, acercar, alejar y encajar todo. Al abrir, encaja todas las tarjetas.
+- [x] Crear ficha desde la pizarra, en un hueco libre junto al centro de la vista.
+- [x] Abrir una tarjeta muestra su ficha en el panel derecho del Tablero.
+- [x] Tests de comportamiento.
+- [x] Comprobar en la app real.
 
 ## 10. Flechas y relaciones
 - [ ] Arrastrar de una tarjeta a otra abre el selector de clase: comunes, propias y «Nueva…».

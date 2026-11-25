@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Board, ElementKind, ElementSummary } from "../../bridge/generated/protocol";
-import { ElementSheet } from "./ElementSheet";
 import { useElementImage } from "./images";
 import { KIND_NAMES, KINDS, kindLabel } from "./kinds";
 import { byName, matches, sharedNames } from "./search";
-import { useElement } from "./useBoard";
+import { OpenElementSheet } from "./OpenElementSheet";
 import "./elements.css";
 
 export interface ElementsPanelProps {
@@ -81,7 +80,7 @@ export function ElementsPanel({
       </header>
 
       {shownId ? (
-        <OpenSheet
+        <OpenElementSheet
           id={shownId}
           field={fresh?.id === shownId ? fresh.field : null}
           others={board.elements}
@@ -104,42 +103,6 @@ export function ElementsPanel({
         />
       )}
     </aside>
-  );
-}
-
-interface OpenSheetProps {
-  id: string;
-  field: "name" | "kind" | null;
-  others: readonly ElementSummary[];
-  origin: string;
-  chooseImage(): Promise<string | null>;
-  onOpen(id: string): void;
-  onProblem(message: string | null): void;
-}
-
-function OpenSheet({ id, field, ...props }: OpenSheetProps) {
-  const element = useElement(id);
-  const frame = useRef<HTMLDivElement>(null);
-  const ready = element !== null;
-
-  // A new ficha starts at its name, or at its kind when the name came from the text.
-  useEffect(() => {
-    if (!ready || !field) return;
-    const target = frame.current?.querySelector<HTMLInputElement | HTMLSelectElement>(
-      field === "name" ? ".element-name" : ".element-kind select",
-    );
-    target?.focus();
-    if (target instanceof HTMLInputElement) target.select();
-  }, [ready, field]);
-
-  return (
-    <div ref={frame}>
-      {element ? (
-        <ElementSheet key={id} element={element} {...props} />
-      ) : (
-        <p className="elements-empty">Abriendo la ficha…</p>
-      )}
-    </div>
   );
 }
 
