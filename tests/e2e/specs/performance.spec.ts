@@ -20,6 +20,14 @@ const VIRTUAL_MAC = Boolean(process.env.CI) && process.platform === "darwin";
 
 /** "No delay when typing": 95 % of keystrokes are on screen within this time. */
 const MAX_P95_MS = VIRTUAL_MAC ? 150 : 50;
+/**
+ * GitHub's Linux machines have no graphics card either, and Chrome there paints in software.
+ * Typing keeps up, but moving a card repaints hundreds of arrows each frame, so there the board
+ * is only guarded against becoming several times slower. On a writer's computer it is held to
+ * the same 50 ms as typing.
+ */
+const MAX_BOARD_P95_MS =
+  VIRTUAL_MAC || (Boolean(process.env.CI) && process.platform === "linux") ? 150 : MAX_P95_MS;
 /** The page view of a work of 150 000 words opens within this time. */
 const MAX_PAGE_VIEW_MS = VIRTUAL_MAC ? 6000 : 2000;
 /**
@@ -336,7 +344,7 @@ test.describe("a board full of fichas", () => {
         `pizarra de ${CARDS} tarjetas y ${ARROWS} flechas, ${name}: ${gaps.length} fotogramas · mediana ${percentile(gaps, 50).toFixed(1)} ms · p95 ${p95.toFixed(1)} ms · máx ${Math.max(...gaps).toFixed(1)} ms`,
       );
       expect(gaps.length, name).toBeGreaterThan(10);
-      expect(p95, name).toBeLessThan(MAX_P95_MS);
+      expect(p95, name).toBeLessThan(MAX_BOARD_P95_MS);
     }
 
     // The card was kept where the hand left it.
