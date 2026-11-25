@@ -1,4 +1,4 @@
-import type { NodeProps } from "@xyflow/react";
+import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { useElementImage } from "../elements/images";
 import { kindLabel } from "../elements/kinds";
 import type { CardNode } from "./nodes";
@@ -21,6 +21,19 @@ export function ElementCard({ data: { element }, selected }: NodeProps<CardNode>
         <span className="board-card-name">{element.name}</span>
         <span className="board-card-kind small-caps">{kindLabel(element)}</span>
       </span>
+      {/* Dragging from here to another card relates them; the arrows follow the cards, not these. */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="board-card-handle"
+        title="Arrastra hasta otra tarjeta para relacionarlas"
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="board-card-target"
+        isConnectableStart={false}
+      />
     </div>
   );
 }

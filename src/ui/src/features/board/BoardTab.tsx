@@ -1,10 +1,14 @@
 import {
   applyNodeChanges,
+  MarkerType,
   Panel,
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
   type AriaLabelConfig,
+  type Connection,
+  type EdgeTypes,
+  type FinalConnectionState,
   type NodeChange,
   type NodeTypes,
 } from "@xyflow/react";
@@ -12,19 +16,24 @@ import "@xyflow/react/dist/base.css";
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
 import { request } from "../../bridge/core";
-import type { Board } from "../../bridge/generated/protocol";
+import type { Board, Relationship } from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
 import { suggestedAttributes } from "../elements/kinds";
 import { OpenElementSheet } from "../elements/OpenElementSheet";
+import { changeRelationship, relate, type KindChoice } from "../elements/relate";
+import { RelationshipPicker } from "../elements/RelationshipPicker";
+import { arrowsFor } from "./edges";
 import { ElementCard } from "./ElementCard";
 import { cardsFor, type CardNode } from "./nodes";
 import { CARD, freePlaceNear } from "./placement";
+import { RelationArrow } from "./RelationArrow";
 import "./board.css";
 
 export interface BoardTabProps {
@@ -38,6 +47,20 @@ export interface BoardTabProps {
 export const MOVE_DELAY_MS = 250;
 
 const nodeTypes: NodeTypes = { card: ElementCard };
+const edgeTypes: EdgeTypes = { relation: RelationArrow };
+const arrowHead = { type: MarkerType.ArrowClosed, width: 14, height: 14 };
+
+/** The card under the point where a drag let go, if any. */
+function cardAt(event: globalThis.MouseEvent | TouchEvent): string | null {
+  const point = "changedTouches" in event ? event.changedTouches[0] : event;
+  if (!point) return null;
+  const under = window.document.elementFromPoint(point.clientX, point.clientY);
+  return under?.closest<HTMLElement>(".react-flow__node")?.dataset.id ?? null;
+}
+
+/** What the relationship picker is open for: two cards just joined, or an arrow there is. */
+type Picking =
+  { kind: "new"; from: string; to: string } | { kind: "change"; relationship: Relationship };
 
 /** What React Flow says to screen readers, in Spanish. */
 const ariaLabels: Partial<AriaLabelConfig> = {
@@ -46,7 +69,7 @@ const ariaLabels: Partial<AriaLabelConfig> = {
   "node.a11yDescription.keyboardDisabled": "Intro abre la ficha.",
   "node.a11yDescription.ariaLiveMessage": ({ direction, x, y }) =>
     `Tarjeta movida hacia ${direction}, a ${Math.round(x)}, ${Math.round(y)}.`,
-  "edge.a11yDescription.default": "Relación entre dos fichas.",
+  "edge.a11yDescription.default": "Intro cambia o quita la relación.",
   "controls.ariaLabel": "Vista de la pizarra",
 };
 
@@ -66,6 +89,7 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [freshId, setFreshId] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
+  const [picking, setPicking] = useState<Picking | null>(null);
 
   // What any window does to the elements shows on the cards.
   if (synced !== board.elements) {
@@ -121,6 +145,66 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
     [keepMoves],
   );
 
+  const editArrow = useCallback(
+    (id: string) => {
+      const relationship = board.relationships.find((candidate) => candidate.id === id);
+      if (relationship) setPicking({ kind: "change", relationship });
+    },
+    [board.relationships],
+  );
+
+  const edges = useMemo(
+    () =>
+      arrowsFor(board.relationships, board.elements, board.ownKinds).map((arrow) => ({
+        ...arrow,
+        markerEnd: arrowHead,
+        selected: picking?.kind === "change" && picking.relationship.id === arrow.id,
+        data: arrow.data && { ...arrow.data, onEdit: () => editArrow(arrow.id) },
+      })),
+    [board.relationships, board.elements, board.ownKinds, picking, editArrow],
+  );
+
+  function join(from: string, to: string) {
+    if (from === to) return;
+    setPicking({ kind: "new", from, to });
+  }
+
+  // Letting go anywhere on another card joins them: React Flow alone only knows its handles.
+  function onConnectEnd(event: globalThis.MouseEvent | TouchEvent, state: FinalConnectionState) {
+    if (state.isValid || !state.fromNode) return;
+    const to = cardAt(event);
+    if (to) join(state.fromNode.id, to);
+  }
+
+  async function choose(choice: KindChoice) {
+    const now = picking;
+    setPicking(null);
+    if (!now) return;
+    try {
+      if (now.kind === "new") await relate(now.from, now.to, choice, origin);
+      else await changeRelationship(now.relationship, choice, origin);
+      setProblem(null);
+    } catch (error) {
+      setProblem(messageFor(error));
+    }
+  }
+
+  function removeArrow(relationship: Relationship) {
+    setPicking(null);
+    request("relationship.delete", { id: relationship.id, origin }).then(
+      () => setProblem(null),
+      (error: unknown) => setProblem(messageFor(error)),
+    );
+  }
+
+  const named = (id: string) => board.elements.find((element) => element.id === id);
+  const sides =
+    picking?.kind === "new"
+      ? { from: named(picking.from), to: named(picking.to) }
+      : picking
+        ? { from: named(picking.relationship.from), to: named(picking.relationship.to) }
+        : null;
+
   function open(id: string) {
     setOpenId(id);
     setFreshId(null);
@@ -170,12 +254,22 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
       {loaded && (
         <ReactFlow
           nodes={nodes}
-          edges={[]}
+          edges={edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          onConnect={(connection: Connection) => join(connection.source, connection.target)}
+          onConnectEnd={onConnectEnd}
+          onEdgeClick={(_: MouseEvent, edge: { id: string }) => editArrow(edge.id)}
           onNodesChange={onNodesChange}
           onNodeDoubleClick={(_: MouseEvent, node: CardNode) => open(node.id)}
           onKeyDown={(event: KeyboardEvent) => {
             if (event.key !== "Enter") return;
+            const arrow = (event.target as Element).closest<SVGElement>(".react-flow__edge");
+            if (arrow?.dataset.id) {
+              event.preventDefault();
+              editArrow(arrow.dataset.id);
+              return;
+            }
             const card = (event.target as HTMLElement).closest<HTMLElement>(".react-flow__node");
             const id = card?.dataset.id;
             if (!id) return;
@@ -187,7 +281,6 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
           minZoom={0.2}
           maxZoom={2}
           deleteKeyCode={null}
-          nodesConnectable={false}
           onlyRenderVisibleElements
           ariaLabelConfig={ariaLabels}
         >
@@ -256,13 +349,25 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
           <OpenElementSheet
             id={shownId}
             field={freshId === shownId ? "name" : null}
-            others={board.elements}
+            board={board}
             origin={origin}
             chooseImage={chooseImage}
             onOpen={open}
             onProblem={setProblem}
           />
         </aside>
+      )}
+      {picking && sides?.from && sides.to && (
+        <RelationshipPicker
+          from={sides.from}
+          to={sides.to}
+          relationships={board.relationships}
+          ownKinds={board.ownKinds}
+          changing={picking.kind === "change" ? picking.relationship : undefined}
+          onChoose={(choice) => void choose(choice)}
+          onCancel={() => setPicking(null)}
+          onRemove={picking.kind === "change" ? () => removeArrow(picking.relationship) : undefined}
+        />
       )}
     </div>
   );

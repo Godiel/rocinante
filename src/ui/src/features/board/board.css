@@ -138,3 +138,81 @@
 .react-flow__attribution a {
   color: var(--color-ink-faint);
 }
+
+/* The handle to relate two cards: a small ring on the right edge, shown when the card is near the hand. */
+.board-card {
+  position: relative;
+}
+
+.board-card-handle.react-flow__handle {
+  width: 12px;
+  height: 12px;
+  background: var(--color-paper);
+  border: 1px solid var(--color-ink-soft);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity var(--fade);
+}
+
+.react-flow__node:hover .board-card-handle,
+.react-flow__node:focus-visible .board-card-handle,
+.react-flow__node.selected .board-card-handle,
+.board-card-handle.connectingfrom {
+  opacity: 1;
+}
+
+.board-card-target.react-flow__handle {
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  border: 0;
+}
+
+/* The arrows: fine lines of ink, the words in small capitals on the paper. */
+.board-arrow {
+  stroke: var(--color-ink-soft);
+  stroke-width: 1;
+}
+
+.board-arrow-selected {
+  stroke: var(--color-rubric);
+  stroke-width: 1.5;
+}
+
+.react-flow__edge:focus-visible .board-arrow {
+  stroke: var(--color-ink);
+  stroke-width: 2;
+}
+
+.react-flow__edge:focus-visible {
+  outline: none;
+}
+
+.board-arrow-label {
+  position: absolute;
+  padding: 0 4px;
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-small-caps);
+  color: var(--color-ink-soft);
+  white-space: nowrap;
+  background: var(--color-paper);
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.board-arrow-label-selected {
+  color: var(--color-rubric);
+}
+
+.react-flow__connectionline path {
+  stroke: var(--color-ink-faint);
+  stroke-dasharray: 4 3;
+}
+
+.react-flow__arrowhead polyline {
+  stroke: var(--color-ink-soft) !important;
+  fill: var(--color-ink-soft) !important;
+}

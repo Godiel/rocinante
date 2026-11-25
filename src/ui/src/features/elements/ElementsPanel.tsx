@@ -83,7 +83,7 @@ export function ElementsPanel({
         <OpenElementSheet
           id={shownId}
           field={fresh?.id === shownId ? fresh.field : null}
-          others={board.elements}
+          board={board}
           origin={origin}
           chooseImage={chooseImage}
           onOpen={onOpen}

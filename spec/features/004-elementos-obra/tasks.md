@@ -114,16 +114,16 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Comprobar en la app real.
 
 ## 10. Flechas y relaciones
-- [ ] Arrastrar de una tarjeta a otra abre el selector de clase: comunes, propias y «Nueva…».
-- [ ] Arista propia: etiqueta en el centro, punta según el sentido y sin punta en las simétricas; varias entre las mismas fichas se curvan.
-- [ ] Elegir una flecha permite cambiar su clase o quitarla.
-- [ ] En la ficha:
+- [x] Arrastrar de una tarjeta a otra abre el selector de clase: comunes, propias y «Nueva…».
+- [x] Arista propia: etiqueta en el centro, punta según el sentido y sin punta en las simétricas; varias entre las mismas fichas se curvan.
+- [x] Elegir una flecha permite cambiar su clase o quitarla.
+- [x] En la ficha:
   - lista de relaciones con la etiqueta desde ese lado;
   - crear relaciones con un buscador de fichas;
   - saltar a la otra ficha.
-- [ ] Una pareja propia queda para otras relaciones de la obra.
-- [ ] Tests de comportamiento.
-- [ ] Comprobar en la app real.
+- [x] Una pareja propia queda para otras relaciones de la obra.
+- [x] Tests de comportamiento.
+- [x] Comprobar en la app real.
 
 ## 11. Ayudas de la pizarra
 - [ ] Filtro por tipo, que oculta tarjetas y sus flechas.

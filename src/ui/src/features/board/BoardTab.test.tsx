@@ -193,3 +193,48 @@ describe("the board", () => {
     expect(card("Alonso Quijano")).toBeInTheDocument();
   });
 });
+
+describe("the arrows on the board", () => {
+  const related: Board = {
+    ...boardOf([quixote, sancho]),
+    relationships: [{ id: "r", from: "s", to: "q", kind: "builtin:servant-of" }],
+  };
+
+  it("draws each relationship with its words, named for screen readers", () => {
+    show({ board: related });
+
+    expect(document.querySelector('[data-id="r"]')).toHaveAttribute(
+      "aria-label",
+      "Sancho Panza criado de Alonso Quijano",
+    );
+    expect(screen.getByText("criado de")).toBeInTheDocument();
+  });
+
+  it("opens an arrow from its words to change it", async () => {
+    const user = userEvent.setup();
+    show({ board: related });
+
+    await user.click(screen.getByText("criado de"));
+    expect(screen.getByRole("dialog")).toHaveAccessibleName("Sancho Panza es… Alonso Quijano");
+    await user.click(screen.getByRole("button", { name: "amigo de" }));
+
+    await waitFor(() =>
+      expect(request).toHaveBeenCalledWith("relationship.update", {
+        id: "r",
+        kind: "builtin:friend-of",
+        origin: "main",
+      }),
+    );
+  });
+
+  it("opens a focused arrow with Intro, and removes it from there", async () => {
+    const user = userEvent.setup();
+    show({ board: related });
+
+    fireEvent.keyDown(document.querySelector('[data-id="r"]')!, { key: "Enter" });
+    await user.click(screen.getByRole("button", { name: "Quitar la relación" }));
+
+    expect(request).toHaveBeenCalledWith("relationship.delete", { id: "r", origin: "main" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+});
