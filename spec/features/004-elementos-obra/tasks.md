@@ -96,12 +96,12 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Comprobar en la app real, con el índice abierto a la vez.
 
 ## 8. Pestañas Escritura y Tablero
-- [ ] Dos pestañas en `features/workspace`; F2 alterna.
-- [ ] La Escritura se oculta sin desmontarse: el cursor y el desplazamiento siguen donde estaban.
-- [ ] El Tablero se carga con `import()` la primera vez.
-- [ ] En el modo concentración, las pestañas no se ven y F2 no hace nada.
-- [ ] Tests de comportamiento.
-- [ ] Comprobar en la app real.
+- [x] Dos pestañas en `features/workspace`; F2 alterna.
+- [x] La Escritura se oculta sin desmontarse: el cursor y el desplazamiento siguen donde estaban.
+- [x] El Tablero se carga con `import()` la primera vez.
+- [x] En el modo concentración, las pestañas no se ven y F2 no hace nada.
+- [x] Tests de comportamiento.
+- [x] Comprobar en la app real.
 
 ## 9. Pizarra
 - [ ] Añadir `@xyflow/react` (MIT), tras revisar su licencia y las de sus dependencias.

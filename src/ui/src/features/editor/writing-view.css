@@ -98,3 +98,30 @@
 .writing-view-sheet .counter {
   right: calc(20rem + var(--space-4));
 }
+
+/* The two tabs of the work, in the bar. */
+.workspace-tabs {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.workspace-tab {
+  padding: 0 0 1px;
+  font: inherit;
+  letter-spacing: var(--tracking-small-caps);
+  color: var(--color-ink-faint);
+  background: none;
+  border: 0;
+  border-bottom: var(--hairline) solid transparent;
+  cursor: pointer;
+}
+
+.workspace-tab[aria-selected="true"] {
+  color: var(--color-ink);
+  border-bottom-color: var(--color-rubric);
+}
+
+/* The writing keeps its place in the grid while it shows, and is hidden whole while the board does. */
+.workspace-writing:not([hidden]) {
+  display: contents;
+}
