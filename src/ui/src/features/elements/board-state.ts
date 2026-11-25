@@ -5,7 +5,8 @@ export type ElementsChange = CoreNotifications["elements.changed"];
 export const EMPTY_BOARD: Board = { elements: [], relationships: [], ownKinds: [], trash: [] };
 
 function upsert<T extends { id: string }>(list: readonly T[], items: readonly T[]): T[] {
-  if (items.length === 0) return [...list];
+  // Nothing changed: the same list, so what depends on it need not be redone.
+  if (items.length === 0) return list as T[];
   const byId = new Map(items.map((item) => [item.id, item]));
   const kept = list.map((item) => byId.get(item.id) ?? item);
   const known = new Set(list.map((item) => item.id));
@@ -14,7 +15,9 @@ function upsert<T extends { id: string }>(list: readonly T[], items: readonly T[
 
 function without<T extends { id: string }>(list: readonly T[], ids: Iterable<string>): T[] {
   const gone = new Set(ids);
-  return gone.size === 0 ? [...list] : list.filter((item) => !gone.has(item.id));
+  if (gone.size === 0) return list as T[];
+  const kept = list.filter((item) => !gone.has(item.id));
+  return kept.length === list.length ? (list as T[]) : kept;
 }
 
 /**

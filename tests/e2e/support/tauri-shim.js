@@ -13,6 +13,9 @@
     }
   }
 
+  // The label of this window: `main`, or another one named in the address, as a second window of the work.
+  const label = new URLSearchParams(location.search).get("window") ?? "main";
+
   const picks = [];
   window.__rocinanteE2E = {
     /** What the next system dialogs answer, in order. */
@@ -65,8 +68,8 @@
 
   window.__TAURI_INTERNALS__ = {
     metadata: {
-      currentWindow: { label: "main" },
-      currentWebview: { windowLabel: "main", label: "main" },
+      currentWindow: { label },
+      currentWebview: { windowLabel: label, label },
     },
     invoke,
     transformCallback(callback, once = false) {

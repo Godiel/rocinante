@@ -149,15 +149,15 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Comprobar en la app real.
 
 ## 13. Pruebas de extremo a extremo y rendimiento
-- [ ] El recorrido de la spec:
+- [x] El recorrido de la spec:
   - crear un personaje y un lugar en la pizarra;
   - unirlos con una flecha;
   - crear una ficha desde el texto;
   - borrarla y restaurarla;
   - cerrar y abrir la obra con todo en su sitio.
-- [ ] Otra ventana de la misma obra ve los cambios en vivo.
-- [ ] Pizarra con 300 tarjetas y 600 flechas: arrastrar y desplazar con un p95 de fotograma por debajo de 50 ms (150 ms en la CI de macOS).
-- [ ] Escribir con el panel de fichas abierto mantiene el p95 de la 001.
+- [x] Otra ventana de la misma obra ve los cambios en vivo.
+- [x] Pizarra con 300 tarjetas y 600 flechas: arrastrar y desplazar con un p95 de fotograma por debajo de 50 ms (150 ms en la CI de macOS).
+- [x] Escribir con el panel de fichas abierto mantiene el p95 de la 001.
 - [ ] Todo en verde en los tres sistemas en la CI.
 
 ## 14. Validación y cierre

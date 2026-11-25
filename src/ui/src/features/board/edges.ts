@@ -28,7 +28,7 @@ function bendFor(index: number): number {
 /** The arrows for the relationships of the work, read forward and named for screen readers. */
 export function arrowsFor(
   relationships: readonly Relationship[],
-  elements: readonly ElementSummary[],
+  elements: readonly Pick<ElementSummary, "id" | "name">[],
   ownKinds: readonly RelationshipKind[],
 ): RelationEdge[] {
   const names = new Map(elements.map((element) => [element.id, element.name]));

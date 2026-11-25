@@ -15,6 +15,8 @@ export function cardsFor(
   const before = new Map(previous.map((node) => [node.id, node]));
   return elements.map((element) => {
     const was = before.get(element.id);
+    // The same element as before: the same card, wherever the hand has it.
+    if (was && was.data.element === element) return was;
     return {
       id: element.id,
       type: "card",
@@ -26,4 +28,26 @@ export function cardsFor(
       measured: was?.measured,
     };
   });
+}
+
+/** How a card looks on top of where it is: hidden by the kind filter, faded by a highlight. */
+export interface CardLook {
+  hidden: boolean;
+  className: string | undefined;
+}
+
+const dressed = new WeakMap<CardNode, { look: CardLook; node: CardNode }>();
+
+/**
+ * A card with its look. The same card with the same look is the same object as last time, so React Flow
+ * redraws only the cards that changed: while one card moves, the other hundreds stay as they are.
+ */
+export function dress(node: CardNode, look: CardLook): CardNode {
+  const before = dressed.get(node);
+  if (before && before.look.hidden === look.hidden && before.look.className === look.className) {
+    return before.node;
+  }
+  const result = { ...node, hidden: look.hidden, className: look.className };
+  dressed.set(node, { look, node: result });
+  return result;
 }

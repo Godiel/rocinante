@@ -40,7 +40,7 @@ import { changeRelationship, relate, type KindChoice } from "../elements/relate"
 import { RelationshipPicker } from "../elements/RelationshipPicker";
 import { arrowsFor } from "./edges";
 import { ElementCard } from "./ElementCard";
-import { cardsFor, type CardNode } from "./nodes";
+import { cardsFor, dress, type CardNode } from "./nodes";
 import { CARD, freePlaceNear } from "./placement";
 import { RelationArrow } from "./RelationArrow";
 import "./board.css";
@@ -57,6 +57,8 @@ export const MOVE_DELAY_MS = 250;
 
 const nodeTypes: NodeTypes = { card: ElementCard };
 const edgeTypes: EdgeTypes = { relation: RelationArrow };
+/** How the whole board is fitted into view. */
+const FIT = { padding: 0.2, maxZoom: 1 };
 const arrowHead = { type: MarkerType.ArrowClosed, width: 14, height: 14 };
 
 /** The card under the point where a drag let go, if any. */
@@ -171,8 +173,10 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
   );
 
   // One card chosen: it, its arrows and its neighbours stay clear; the rest steps back.
+  // Not while a card moves: the hand is busy, and fading hundreds of things at once would make it jolt.
   const chosen = nodes.filter((node) => node.selected);
-  const chosenId = chosen.length === 1 ? chosen[0]!.id : null;
+  const moving = nodes.some((node) => node.dragging);
+  const chosenId = chosen.length === 1 && !moving ? chosen[0]!.id : null;
   const near = useMemo(() => {
     if (chosenId === null) return null;
     const id = chosenId;
@@ -186,18 +190,33 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
 
   const shownNodes = useMemo(
     () =>
-      nodes.map((node) => ({
-        ...node,
-        hidden: hiddenKinds.has(node.data.element.kind),
-        className: near && !near.set.has(node.id) ? "board-faded" : undefined,
-      })),
+      nodes.map((node) =>
+        dress(node, {
+          hidden: hiddenKinds.has(node.data.element.kind),
+          className: near && !near.set.has(node.id) ? "board-faded" : undefined,
+        }),
+      ),
     [nodes, hiddenKinds, near],
   );
 
+  // The arrows only need the names and kinds of the cards, not where they are: moving a card redoes none.
+  const namesKey = JSON.stringify(
+    board.elements.map((element) => [element.id, element.kind, element.name]),
+  );
+  const cardNames = useMemo(
+    () =>
+      (JSON.parse(namesKey) as [string, ElementKind, string][]).map(([id, kind, name]) => ({
+        id,
+        kind,
+        name,
+      })),
+    [namesKey],
+  );
+
   const edges = useMemo(() => {
-    const kindOf = new Map(board.elements.map((element) => [element.id, element.kind]));
+    const kindOf = new Map(cardNames.map((element) => [element.id, element.kind]));
     const hides = (id: string) => hiddenKinds.has(kindOf.get(id) ?? "other");
-    return arrowsFor(board.relationships, board.elements, board.ownKinds).map((arrow) => ({
+    return arrowsFor(board.relationships, cardNames, board.ownKinds).map((arrow) => ({
       ...arrow,
       // An arrow goes with the cards it joins.
       hidden: hides(arrow.source) || hides(arrow.target),
@@ -207,7 +226,7 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
         near && arrow.source !== near.id && arrow.target !== near.id ? "board-faded" : undefined,
       data: arrow.data && { ...arrow.data, onEdit: () => editArrow(arrow.id) },
     }));
-  }, [board.relationships, board.elements, board.ownKinds, picking, editArrow, near, hiddenKinds]);
+  }, [board.relationships, cardNames, board.ownKinds, picking, editArrow, near, hiddenKinds]);
 
   function toggleKind(kind: ElementKind) {
     setHiddenKinds((current) => {
@@ -248,7 +267,7 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
       origin,
     });
     // The cards come back with the change; then the view takes them all in.
-    window.setTimeout(() => void flow.fitView({ padding: 0.2, maxZoom: 1, duration: 300 }), 50);
+    window.setTimeout(() => void flow.fitView({ ...FIT, duration: 300 }), 50);
   }
 
   async function arrangeAll() {
@@ -282,17 +301,34 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
 
   const dismissUndo = useCallback(() => setBefore(null), []);
 
-  function join(from: string, to: string) {
+  // The handlers given to React Flow stay the same from one render to the next: it hands them to every card and
+  // every arrow, and a new one would make all of them draw again each time a card moves.
+  const join = useCallback((from: string, to: string) => {
     if (from === to) return;
     setPicking({ kind: "new", from, to });
-  }
+  }, []);
+  const onConnect = useCallback(
+    (connection: Connection) => join(connection.source, connection.target),
+    [join],
+  );
+  const onEdgeClick = useCallback(
+    (_: MouseEvent, edge: { id: string }) => editArrow(edge.id),
+    [editArrow],
+  );
+  const onNodeDoubleClick = useCallback((_: MouseEvent, node: CardNode) => {
+    setOpenId(node.id);
+    setFreshId(null);
+  }, []);
 
   // Letting go anywhere on another card joins them: React Flow alone only knows its handles.
-  function onConnectEnd(event: globalThis.MouseEvent | TouchEvent, state: FinalConnectionState) {
-    if (state.isValid || !state.fromNode) return;
-    const to = cardAt(event);
-    if (to) join(state.fromNode.id, to);
-  }
+  const onConnectEnd = useCallback(
+    (event: globalThis.MouseEvent | TouchEvent, state: FinalConnectionState) => {
+      if (state.isValid || !state.fromNode) return;
+      const to = cardAt(event);
+      if (to) join(state.fromNode.id, to);
+    },
+    [join],
+  );
 
   async function choose(choice: KindChoice) {
     const now = picking;
@@ -375,11 +411,11 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
           edges={edges}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
-          onConnect={(connection: Connection) => join(connection.source, connection.target)}
+          onConnect={onConnect}
           onConnectEnd={onConnectEnd}
-          onEdgeClick={(_: MouseEvent, edge: { id: string }) => editArrow(edge.id)}
+          onEdgeClick={onEdgeClick}
           onNodesChange={onNodesChange}
-          onNodeDoubleClick={(_: MouseEvent, node: CardNode) => open(node.id)}
+          onNodeDoubleClick={onNodeDoubleClick}
           onKeyDown={(event: KeyboardEvent) => {
             if (event.key === "Delete") {
               // Supr sends the card in hand to the trash; the notice brings it back.
@@ -404,7 +440,7 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
             open(id);
           }}
           fitView
-          fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
+          fitViewOptions={FIT}
           minZoom={0.2}
           maxZoom={2}
           deleteKeyCode={null}
@@ -459,7 +495,7 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
             <button
               type="button"
               className="action"
-              onClick={() => void flow.fitView({ padding: 0.2, maxZoom: 1, duration: 200 })}
+              onClick={() => void flow.fitView({ ...FIT, duration: 200 })}
             >
               Encajar todo
             </button>
