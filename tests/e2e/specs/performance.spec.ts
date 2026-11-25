@@ -297,7 +297,7 @@ const ARROWS = 600;
 test.describe("a board full of fichas", () => {
   test.setTimeout(240_000);
 
-  test(`with ${CARDS} cards and ${ARROWS} arrows, dragging a card and moving the board keep up`, async ({
+  test(`with ${CARDS} cards and ${ARROWS} arrows, dragging a card, moving the board and zooming keep up`, async ({
     desk,
   }) => {
     const app = await desk.open();
@@ -334,9 +334,17 @@ test.describe("a board full of fichas", () => {
       await page.mouse.up();
     });
 
+    const zooming = await framesDuring(page, async () => {
+      await page.mouse.move(start.x, start.y);
+      for (let step = 1; step <= steps; step++) {
+        await page.mouse.wheel(0, step <= steps / 2 ? -40 : 40);
+      }
+    });
+
     for (const [name, gaps] of [
       ["arrastrar una tarjeta", dragging],
       ["desplazar la pizarra", panning],
+      ["acercar y alejar la vista", zooming],
     ] as const) {
       const p95 = percentile(gaps, 95);
       report(
