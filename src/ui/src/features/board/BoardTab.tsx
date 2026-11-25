@@ -35,6 +35,7 @@ import { UndoNotice } from "../outline/UndoNotice";
 import { arrange } from "./arrange";
 import { BoardSearch } from "./BoardSearch";
 import { OpenElementSheet } from "../elements/OpenElementSheet";
+import { useElementTrash } from "../elements/useElementTrash";
 import { changeRelationship, relate, type KindChoice } from "../elements/relate";
 import { RelationshipPicker } from "../elements/RelationshipPicker";
 import { arrowsFor } from "./edges";
@@ -73,7 +74,7 @@ type Picking =
 /** What React Flow says to screen readers, in Spanish. */
 const ariaLabels: Partial<AriaLabelConfig> = {
   "node.a11yDescription.default":
-    "Intro abre la ficha. Las flechas mueven la tarjeta seleccionada.",
+    "Intro abre la ficha. Las flechas mueven la tarjeta seleccionada. Supr la manda a la papelera.",
   "node.a11yDescription.keyboardDisabled": "Intro abre la ficha.",
   "node.a11yDescription.ariaLiveMessage": ({ direction, x, y }) =>
     `Tarjeta movida hacia ${direction}, a ${Math.round(x)}, ${Math.round(y)}.`,
@@ -98,6 +99,7 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
   const [freshId, setFreshId] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [picking, setPicking] = useState<Picking | null>(null);
+  const elementTrash = useElementTrash(origin, setProblem);
   // The kinds the writer chose not to see, with their cards and arrows.
   const [hiddenKinds, setHiddenKinds] = useState<ReadonlySet<ElementKind>>(() => new Set());
   // Where the cards were before arranging them, while the writer can still take it back.
@@ -379,6 +381,15 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
           onNodesChange={onNodesChange}
           onNodeDoubleClick={(_: MouseEvent, node: CardNode) => open(node.id)}
           onKeyDown={(event: KeyboardEvent) => {
+            if (event.key === "Delete") {
+              // Supr sends the card in hand to the trash; the notice brings it back.
+              const card = (event.target as HTMLElement).closest<HTMLElement>(".react-flow__node");
+              const element = board.elements.find((candidate) => candidate.id === card?.dataset.id);
+              if (!element) return;
+              event.preventDefault();
+              void elementTrash.trash(element.id, element.name);
+              return;
+            }
             if (event.key !== "Enter") return;
             const arrow = (event.target as Element).closest<SVGElement>(".react-flow__edge");
             if (arrow?.dataset.id) {
@@ -493,9 +504,14 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
             chooseImage={chooseImage}
             onOpen={open}
             onProblem={setProblem}
+            onTrash={(id, name) => {
+              setOpenId(null);
+              void elementTrash.trash(id, name);
+            }}
           />
         </aside>
       )}
+      {!before && elementTrash.notice}
       {before && (
         <UndoNotice
           key={before.at}

@@ -182,15 +182,38 @@ describe("the board", () => {
     expect(request.mock.calls.filter(([method]) => method === "board.move")).toHaveLength(1);
   });
 
-  it("does not throw cards away with the Delete key", () => {
+  it("sends a card to the trash with Supr, and takes it back from the notice", async () => {
+    const user = userEvent.setup();
     show();
     const quixoteCard = card("Alonso Quijano");
     fireEvent.click(quixoteCard);
 
-    fireEvent.keyDown(quixoteCard, { key: "Delete" });
     fireEvent.keyDown(quixoteCard, { key: "Backspace" });
+    expect(request).not.toHaveBeenCalledWith("element.delete", expect.anything());
 
-    expect(card("Alonso Quijano")).toBeInTheDocument();
+    fireEvent.keyDown(quixoteCard, { key: "Delete" });
+    await waitFor(() =>
+      expect(request).toHaveBeenCalledWith("element.delete", { id: "q", origin: "main" }),
+    );
+    expect(await screen.findByText("«Alonso Quijano» está en la papelera.")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Deshacer" }));
+    await waitFor(() =>
+      expect(request).toHaveBeenCalledWith("element.restore", { id: "q", origin: "main" }),
+    );
+  });
+
+  it("sends the open ficha to the trash and closes it", async () => {
+    const user = userEvent.setup();
+    show();
+    fireEvent.doubleClick(card("Sancho Panza"));
+
+    await user.click(await screen.findByRole("button", { name: "Mandar a la papelera" }));
+
+    expect(screen.queryByRole("complementary", { name: "Ficha" })).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(request).toHaveBeenCalledWith("element.delete", { id: "s", origin: "main" }),
+    );
   });
 });
 

@@ -125,3 +125,29 @@
 .workspace-writing:not([hidden]) {
   display: contents;
 }
+
+/* The bar keeps to one line: the title gives way first, and every button stays whole. */
+.writing-bar {
+  gap: var(--space-4);
+}
+
+.writing-bar-start {
+  min-width: 0;
+}
+
+.writing-bar-title {
+  min-width: 4em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.writing-bar nav {
+  gap: var(--space-3);
+}
+
+.writing-bar .action,
+.workspace-tab {
+  flex: none;
+  white-space: nowrap;
+}

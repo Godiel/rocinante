@@ -141,12 +141,12 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Comprobar en la app real.
 
 ## 12. Papelera y repetidos
-- [ ] Borrar desde la ficha o la tarjeta manda a la papelera, con el aviso de deshacer (`UndoNotice`).
-- [ ] La papelera de fichas está al final de la lista del panel.
-- [ ] Restaurar devuelve la tarjeta a su sitio y sus flechas.
-- [ ] Los avisos de nombre repetido aparecen en las dos fichas.
-- [ ] Tests de comportamiento.
-- [ ] Comprobar en la app real.
+- [x] Borrar desde la ficha o la tarjeta manda a la papelera, con el aviso de deshacer (`UndoNotice`).
+- [x] La papelera de fichas está al final de la lista del panel.
+- [x] Restaurar devuelve la tarjeta a su sitio y sus flechas.
+- [x] Los avisos de nombre repetido aparecen en las dos fichas.
+- [x] Tests de comportamiento.
+- [x] Comprobar en la app real.
 
 ## 13. Pruebas de extremo a extremo y rendimiento
 - [ ] El recorrido de la spec:

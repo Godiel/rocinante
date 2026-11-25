@@ -41,6 +41,7 @@ import { ElementsPanel } from "../elements/ElementsPanel";
 import { suggestedAttributes } from "../elements/kinds";
 import { isElementsShortcut, panelWasOpen, rememberPanel } from "../elements/panel";
 import { useBoard } from "../elements/useBoard";
+import { useElementTrash } from "../elements/useElementTrash";
 import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
 import { ambienceUrl } from "../ambience/own-url";
@@ -120,6 +121,7 @@ export function WritingView({
     field: "name" | "kind";
   } | null>(null);
   const [searchRequest, setSearchRequest] = useState(0);
+  const elementTrash = useElementTrash(origin, setProblem);
   const versionsOpen = sheet === "versions";
   const [pagesOpen, setPagesOpen] = useState(false);
   const [nameRequest, setNameRequest] = useState(0);
@@ -481,7 +483,7 @@ export function WritingView({
               Índice
             </button>
           )}
-          <span>{project.title}</span>
+          <span className="writing-bar-title">{project.title}</span>
           {!focus.focused && <WorkspaceTabs tab={workspace.tab} onShow={workspace.show} />}
         </span>
         <nav aria-label="Proyecto">
@@ -655,6 +657,11 @@ export function WritingView({
             onCreate={() => void createElement(null)}
             onClose={closeSheet}
             onProblem={setProblem}
+            onTrash={(id, name) => {
+              setOpenElement(null);
+              void elementTrash.trash(id, name);
+            }}
+            onRestore={(id) => void elementTrash.restore(id)}
           />
         )}
 
@@ -724,6 +731,7 @@ export function WritingView({
           onHide={() => update({ counterVisible: false })}
         />
 
+        {!deleted && elementTrash.notice}
         {deleted && (
           <UndoNotice
             key={deleted.id}

@@ -21,6 +21,8 @@ export interface ElementsPanelProps {
   onCreate(): void;
   onClose(): void;
   onProblem(message: string | null): void;
+  onTrash(id: string, name: string): void;
+  onRestore(id: string): void;
 }
 
 /**
@@ -39,6 +41,8 @@ export function ElementsPanel({
   onCreate,
   onClose,
   onProblem,
+  onTrash,
+  onRestore,
 }: ElementsPanelProps) {
   // A ficha that went to the trash, here or in another window, gives its place back to the list.
   const shownId = openId && board.elements.some((element) => element.id === openId) ? openId : null;
@@ -88,10 +92,12 @@ export function ElementsPanel({
           chooseImage={chooseImage}
           onOpen={onOpen}
           onProblem={onProblem}
+          onTrash={onTrash}
         />
       ) : (
         <ElementList
           elements={board.elements}
+          trash={board.trash}
           loaded={loaded}
           takesFocus={cameBack}
           searchRequest={searchRequest}
@@ -100,6 +106,7 @@ export function ElementsPanel({
             onOpen(id);
           }}
           onCreate={onCreate}
+          onRestore={onRestore}
         />
       )}
     </aside>
@@ -108,20 +115,24 @@ export function ElementsPanel({
 
 interface ElementListProps {
   elements: readonly ElementSummary[];
+  trash: readonly ElementSummary[];
   loaded: boolean;
   takesFocus: boolean;
   searchRequest: number;
   onOpen(id: string): void;
   onCreate(): void;
+  onRestore(id: string): void;
 }
 
 function ElementList({
   elements,
+  trash,
   loaded,
   takesFocus,
   searchRequest,
   onOpen,
   onCreate,
+  onRestore,
 }: ElementListProps) {
   const [query, setQuery] = useState("");
   const [folded, setFolded] = useState<ReadonlySet<ElementKind>>(() => new Set());
@@ -219,6 +230,27 @@ function ElementList({
           </section>
         );
       })}
+
+      {trash.length > 0 && (
+        <details className="elements-trash">
+          <summary className="elements-group-title small-caps">Papelera ({trash.length})</summary>
+          <ul className="elements-items">
+            {byName(trash).map((element) => (
+              <li key={element.id} className="elements-trash-entry">
+                <span className="elements-trash-name">{element.name}</span>
+                <button
+                  type="button"
+                  className="action"
+                  aria-label={`Restaurar «${element.name}»`}
+                  onClick={() => onRestore(element.id)}
+                >
+                  Restaurar
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </div>
   );
 }

@@ -51,6 +51,8 @@ function detail(of: ElementSummary): Element {
 const onOpen = vi.fn();
 const onCreate = vi.fn();
 const onClose = vi.fn();
+const onTrash = vi.fn();
+const onRestore = vi.fn();
 
 function show(props: Partial<ElementsPanelProps> = {}) {
   const all: ElementsPanelProps = {
@@ -64,6 +66,8 @@ function show(props: Partial<ElementsPanelProps> = {}) {
     onOpen,
     onCreate,
     onClose,
+    onTrash,
+    onRestore,
     onProblem: vi.fn(),
     ...props,
   };
@@ -93,6 +97,8 @@ beforeEach(() => {
   onOpen.mockReset();
   onCreate.mockReset();
   onClose.mockReset();
+  onTrash.mockReset();
+  onRestore.mockReset();
 });
 
 afterEach(cleanup);
@@ -230,6 +236,55 @@ describe("the fichas beside the text", () => {
     expect(screen.getByText(/Aún no hay fichas/)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Nueva ficha" }));
     expect(onCreate).toHaveBeenCalled();
+  });
+});
+
+describe("fichas with the same name", () => {
+  it("warns in both, each with the way to the other", async () => {
+    const user = userEvent.setup();
+    const view = show({ openId: "j1" });
+
+    expect(await screen.findByText(/Otra ficha se llama igual/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Juan" }));
+    expect(onOpen).toHaveBeenLastCalledWith("j2");
+
+    view.update({ openId: "j2" });
+    expect(await screen.findByText(/Otra ficha se llama igual/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Juan" }));
+    expect(onOpen).toHaveBeenLastCalledWith("j1");
+  });
+});
+
+describe("the trash of fichas", () => {
+  const gone = summary("g", "Ginés de Pasamonte");
+
+  it("sends the open ficha to the trash", async () => {
+    const user = userEvent.setup();
+    show({ openId: "s" });
+
+    await user.click(await screen.findByRole("button", { name: "Mandar a la papelera" }));
+
+    expect(onTrash).toHaveBeenCalledWith("s", "Sancho Panza");
+  });
+
+  it("keeps the trash at the foot of the list, and restores from there", async () => {
+    const user = userEvent.setup();
+    show({ board: { ...boardOf(elements), trash: [gone] } });
+
+    const trash = screen.getByText("Papelera (1)");
+    expect(trash.closest("details")).toBe(
+      screen.getByText("Ginés de Pasamonte").closest("details"),
+    );
+    await user.click(trash);
+    await user.click(screen.getByRole("button", { name: "Restaurar «Ginés de Pasamonte»" }));
+
+    expect(onRestore).toHaveBeenCalledWith("g");
+  });
+
+  it("shows no trash while it is empty", () => {
+    show();
+
+    expect(screen.queryByText(/Papelera/)).not.toBeInTheDocument();
   });
 });
 

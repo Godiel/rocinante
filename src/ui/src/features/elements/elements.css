@@ -495,3 +495,36 @@
 .element-relate input:focus {
   border-bottom-color: var(--color-ink-soft);
 }
+
+/* The trash of fichas, at the foot of the list. */
+.elements-trash {
+  margin-top: var(--space-4);
+}
+
+.elements-trash summary {
+  cursor: pointer;
+}
+
+.elements-trash-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.elements-trash-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-ink-faint);
+}
+
+.element-trash {
+  margin-top: var(--space-4);
+  font-size: var(--text-caption);
+}
+
+.element-trash .action {
+  color: var(--color-rubric);
+}

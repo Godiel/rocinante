@@ -13,6 +13,8 @@ export interface OpenElementSheetProps {
   chooseImage(): Promise<string | null>;
   onOpen(id: string): void;
   onProblem(message: string | null): void;
+  /** Sends the ficha to the trash, with its relationships. */
+  onTrash(id: string, name: string): void;
 }
 
 /**
@@ -26,6 +28,7 @@ export function OpenElementSheet({
   origin,
   onOpen,
   onProblem,
+  onTrash,
   ...props
 }: OpenElementSheetProps) {
   const element = useElement(id);
@@ -62,6 +65,15 @@ export function OpenElementSheet({
             onOpen={onOpen}
             onProblem={onProblem}
           />
+          <p className="element-section element-trash">
+            <button
+              type="button"
+              className="action"
+              onClick={() => onTrash(element.id, element.name)}
+            >
+              Mandar a la papelera
+            </button>
+          </p>
         </>
       ) : (
         <p className="elements-empty">Abriendo la ficha…</p>
