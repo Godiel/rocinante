@@ -74,8 +74,11 @@
   --card-mark: var(--color-ink-faint);
 }
 
+/* Chosen: the edges darken, and the mark of the kind stays. */
 .board-card-selected {
-  border-color: var(--color-ink-soft);
+  border-top-color: var(--color-ink-soft);
+  border-right-color: var(--color-ink-soft);
+  border-bottom-color: var(--color-ink-soft);
 }
 
 .react-flow__node:focus-visible {
@@ -215,4 +218,102 @@
 .react-flow__arrowhead polyline {
   stroke: var(--color-ink-soft) !important;
   fill: var(--color-ink-soft) !important;
+}
+
+/* The tools along the top of the board. */
+.board-tools-top {
+  flex-wrap: wrap;
+  max-width: calc(100% - 2 * var(--space-4));
+  font-size: var(--text-ui);
+}
+
+.board-search {
+  position: relative;
+}
+
+.board-search input {
+  width: 14rem;
+  padding: 2px 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  outline: none;
+}
+
+.board-search input:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.board-search-found {
+  position: absolute;
+  z-index: 6;
+  top: 100%;
+  left: 0;
+  min-width: 100%;
+  margin: 2px 0 0;
+  padding: var(--space-1) 0;
+  list-style: none;
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: var(--radius);
+}
+
+.board-search-found button {
+  width: 100%;
+  padding: 2px var(--space-2);
+  font: inherit;
+  color: var(--color-ink);
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.board-search-found button:hover,
+.board-search-found button:focus-visible {
+  background: var(--color-paper-shade);
+}
+
+.board-search-kind {
+  font-size: var(--text-caption);
+  color: var(--color-ink-faint);
+}
+
+.board-search-none {
+  padding: 2px var(--space-2);
+  font-style: italic;
+  color: var(--color-ink-faint);
+}
+
+.board-kinds {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.board-kind {
+  padding: 0 0 1px;
+  font: inherit;
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-small-caps);
+  color: var(--color-ink-faint);
+  background: none;
+  border: 0;
+  border-bottom: var(--hairline) solid transparent;
+  cursor: pointer;
+  text-decoration: line-through;
+}
+
+.board-kind[aria-pressed="true"] {
+  color: var(--color-ink-soft);
+  border-bottom-color: var(--color-rule);
+  text-decoration: none;
+}
+
+/* With one card chosen, what is not hers steps back. */
+.react-flow__node.board-faded,
+.react-flow__edge.board-faded {
+  opacity: 0.25;
+  transition: opacity var(--fade);
 }

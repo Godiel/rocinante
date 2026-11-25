@@ -23,9 +23,17 @@ import {
   type MouseEvent,
 } from "react";
 import { request } from "../../bridge/core";
-import type { Board, Relationship } from "../../bridge/generated/protocol";
+import type {
+  Board,
+  BoardPosition,
+  ElementKind,
+  Relationship,
+} from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
-import { suggestedAttributes } from "../elements/kinds";
+import { KIND_NAMES, KINDS, suggestedAttributes } from "../elements/kinds";
+import { UndoNotice } from "../outline/UndoNotice";
+import { arrange } from "./arrange";
+import { BoardSearch } from "./BoardSearch";
 import { OpenElementSheet } from "../elements/OpenElementSheet";
 import { changeRelationship, relate, type KindChoice } from "../elements/relate";
 import { RelationshipPicker } from "../elements/RelationshipPicker";
@@ -90,6 +98,13 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
   const [freshId, setFreshId] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [picking, setPicking] = useState<Picking | null>(null);
+  // The kinds the writer chose not to see, with their cards and arrows.
+  const [hiddenKinds, setHiddenKinds] = useState<ReadonlySet<ElementKind>>(() => new Set());
+  // Where the cards were before arranging them, while the writer can still take it back.
+  const [before, setBefore] = useState<{
+    at: number;
+    positions: Map<string, BoardPosition>;
+  } | null>(null);
 
   // What any window does to the elements shows on the cards.
   if (synced !== board.elements) {
@@ -153,16 +168,117 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
     [board.relationships],
   );
 
-  const edges = useMemo(
+  // One card chosen: it, its arrows and its neighbours stay clear; the rest steps back.
+  const chosen = nodes.filter((node) => node.selected);
+  const chosenId = chosen.length === 1 ? chosen[0]!.id : null;
+  const near = useMemo(() => {
+    if (chosenId === null) return null;
+    const id = chosenId;
+    const set = new Set([id]);
+    for (const relationship of board.relationships) {
+      if (relationship.from === id) set.add(relationship.to);
+      if (relationship.to === id) set.add(relationship.from);
+    }
+    return { id, set };
+  }, [chosenId, board.relationships]);
+
+  const shownNodes = useMemo(
     () =>
-      arrowsFor(board.relationships, board.elements, board.ownKinds).map((arrow) => ({
-        ...arrow,
-        markerEnd: arrowHead,
-        selected: picking?.kind === "change" && picking.relationship.id === arrow.id,
-        data: arrow.data && { ...arrow.data, onEdit: () => editArrow(arrow.id) },
+      nodes.map((node) => ({
+        ...node,
+        hidden: hiddenKinds.has(node.data.element.kind),
+        className: near && !near.set.has(node.id) ? "board-faded" : undefined,
       })),
-    [board.relationships, board.elements, board.ownKinds, picking, editArrow],
+    [nodes, hiddenKinds, near],
   );
+
+  const edges = useMemo(() => {
+    const kindOf = new Map(board.elements.map((element) => [element.id, element.kind]));
+    const hides = (id: string) => hiddenKinds.has(kindOf.get(id) ?? "other");
+    return arrowsFor(board.relationships, board.elements, board.ownKinds).map((arrow) => ({
+      ...arrow,
+      // An arrow goes with the cards it joins.
+      hidden: hides(arrow.source) || hides(arrow.target),
+      markerEnd: arrowHead,
+      selected: picking?.kind === "change" && picking.relationship.id === arrow.id,
+      className:
+        near && arrow.source !== near.id && arrow.target !== near.id ? "board-faded" : undefined,
+      data: arrow.data && { ...arrow.data, onEdit: () => editArrow(arrow.id) },
+    }));
+  }, [board.relationships, board.elements, board.ownKinds, picking, editArrow, near, hiddenKinds]);
+
+  function toggleKind(kind: ElementKind) {
+    setHiddenKinds((current) => {
+      const next = new Set(current);
+      if (next.has(kind)) next.delete(kind);
+      else next.add(kind);
+      return next;
+    });
+  }
+
+  /** Takes the view to a card, shows its kind if it was hidden, and leaves it chosen with the keyboard on it. */
+  function find(id: string) {
+    const element = board.elements.find((candidate) => candidate.id === id);
+    if (!element) return;
+    setHiddenKinds((current) => {
+      if (!current.has(element.kind)) return current;
+      const next = new Set(current);
+      next.delete(element.kind);
+      return next;
+    });
+    setNodes((current) => current.map((node) => ({ ...node, selected: node.id === id })));
+    void flow.setCenter(element.position.x + CARD.width / 2, element.position.y + CARD.height / 2, {
+      zoom: Math.max(flow.getZoom(), 1),
+      duration: 300,
+    });
+    window.setTimeout(
+      () =>
+        window.document
+          .querySelector<HTMLElement>(`.board-tab .react-flow__node[data-id="${id}"]`)
+          ?.focus({ preventScroll: true }),
+      0,
+    );
+  }
+
+  async function moveAll(positions: Map<string, BoardPosition>) {
+    await request("board.move", {
+      positions: [...positions].map(([id, { x, y }]) => ({ id, x, y })),
+      origin,
+    });
+    // The cards come back with the change; then the view takes them all in.
+    window.setTimeout(() => void flow.fitView({ padding: 0.2, maxZoom: 1, duration: 300 }), 50);
+  }
+
+  async function arrangeAll() {
+    if (board.elements.length < 2) return;
+    const previous = new Map(board.elements.map((element) => [element.id, element.position]));
+    try {
+      await moveAll(arrange(board.elements, board.relationships));
+      setBefore({ at: Date.now(), positions: previous });
+      setProblem(null);
+    } catch (error) {
+      setProblem(messageFor(error));
+    }
+  }
+
+  async function undoArrange() {
+    const previous = before;
+    setBefore(null);
+    if (!previous) return;
+    // Cards that left the board meanwhile are left out.
+    const still = new Map(
+      [...previous.positions].filter(([id]) => board.elements.some((element) => element.id === id)),
+    );
+    if (still.size === 0) return;
+    try {
+      await moveAll(still);
+      setProblem(null);
+    } catch (error) {
+      setProblem(messageFor(error));
+    }
+  }
+
+  const dismissUndo = useCallback(() => setBefore(null), []);
 
   function join(from: string, to: string) {
     if (from === to) return;
@@ -253,7 +369,7 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
     <div className={`board-tab${shownId ? " board-tab-sheet" : ""}`}>
       {loaded && (
         <ReactFlow
-          nodes={nodes}
+          nodes={shownNodes}
           edges={edges}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
@@ -284,10 +400,33 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
           onlyRenderVisibleElements
           ariaLabelConfig={ariaLabels}
         >
-          <Panel position="top-left" className="board-tools">
+          <Panel position="top-left" className="board-tools board-tools-top">
             <button type="button" className="action action-main" onClick={() => void create()}>
               Nueva ficha
             </button>
+            <BoardSearch elements={board.elements} onFind={find} />
+            <button
+              type="button"
+              className="action"
+              disabled={board.elements.length < 2}
+              title="Reparte las tarjetas según sus relaciones. Se puede deshacer."
+              onClick={() => void arrangeAll()}
+            >
+              Ordenar
+            </button>
+            <div className="board-kinds" role="group" aria-label="Tipos que se ven">
+              {KINDS.map((kind) => (
+                <button
+                  key={kind}
+                  type="button"
+                  className="board-kind small-caps"
+                  aria-pressed={!hiddenKinds.has(kind)}
+                  onClick={() => toggleKind(kind)}
+                >
+                  {KIND_NAMES[kind].group}
+                </button>
+              ))}
+            </div>
           </Panel>
           <Panel position="bottom-left" className="board-tools" aria-label="Vista de la pizarra">
             <button
@@ -356,6 +495,14 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
             onProblem={setProblem}
           />
         </aside>
+      )}
+      {before && (
+        <UndoNotice
+          key={before.at}
+          message="Tarjetas ordenadas."
+          onUndo={() => void undoArrange()}
+          onDismiss={dismissUndo}
+        />
       )}
       {picking && sides?.from && sides.to && (
         <RelationshipPicker

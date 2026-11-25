@@ -126,19 +126,19 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Comprobar en la app real.
 
 ## 11. Ayudas de la pizarra
-- [ ] Filtro por tipo, que oculta tarjetas y sus flechas.
-- [ ] Resaltar las relaciones de la tarjeta elegida y atenuar el resto.
-- [ ] Buscar y centrar.
-- [ ] Ordenar automáticamente con `d3-force` (ISC):
+- [x] Filtro por tipo, que oculta tarjetas y sus flechas.
+- [x] Resaltar las relaciones de la tarjeta elegida y atenuar el resto.
+- [x] Buscar y centrar.
+- [x] Ordenar automáticamente con `d3-force` (ISC):
   - iteraciones fijas y arranque fijo;
   - sin solapes;
   - un solo `board.move`;
   - «Deshacer».
-- [ ] Teclado:
+- [x] Teclado:
   - tabular entre tarjetas e Intro para abrirlas;
   - flechas para moverlas, con Mayús para pasos grandes.
-- [ ] Tests: el orden automático es repetible y no solapa; el resto, tests de comportamiento.
-- [ ] Comprobar en la app real.
+- [x] Tests: el orden automático es repetible y no solapa; el resto, tests de comportamiento.
+- [x] Comprobar en la app real.
 
 ## 12. Papelera y repetidos
 - [ ] Borrar desde la ficha o la tarjeta manda a la papelera, con el aviso de deshacer (`UndoNotice`).
