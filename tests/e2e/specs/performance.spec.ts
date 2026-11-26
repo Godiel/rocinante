@@ -492,3 +492,25 @@ test.describe("the cards of a long work", () => {
     expect(again.ms).toBeLessThan(first.ms + 50);
   });
 });
+
+test.describe("a long work with its spelling checked", () => {
+  test.setTimeout(240_000);
+
+  test("typing keeps up with the dictionary loaded and the marks showing", async ({ desk }) => {
+    const app = await longWork(desk);
+    // Some old words of the text are not in today's dictionary: their marks say it has loaded.
+    await expect
+      .poll(() => chapterText(app.page).locator(".misspelled").count(), { timeout: 30_000 })
+      .toBeGreaterThan(0);
+    await cursorInTheMiddle(app.page);
+
+    const sentence = " Y así, del poco dormir y del mucho leer, se le secó el celebro.";
+    const times = await typeAndMeasure(app.page, sentence.repeat(2));
+
+    const p95 = percentile(times, 95);
+    report(
+      `escribir con la corrección activa (${await chapterText(app.page).locator(".misspelled").count()} marcas): ${times.length} pulsaciones · mediana ${percentile(times, 50).toFixed(1)} ms · p95 ${p95.toFixed(1)} ms`,
+    );
+    expect(p95).toBeLessThan(MAX_P95_MS);
+  });
+});

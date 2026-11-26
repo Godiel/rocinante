@@ -24,8 +24,8 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/008-correccion`.
 - [x] `licenses/dictionary-es.txt` en la compilación.
 
 ## 8. Pruebas de extremo a extremo y rendimiento
-- [ ] El recorrido de la spec y el p95 con el diccionario cargado.
+- [x] El recorrido de la spec y el p95 con el diccionario cargado.
 - [ ] Todo en verde en la CI.
 
 ## 9. Validación y cierre
-- [ ] Criterios, `tech-stack.md`, hoja de ruta y PR.
+- [x] Criterios, `tech-stack.md`, hoja de ruta y PR.

@@ -1,6 +1,6 @@
 # 008 · Corrección
 
-**Estado:** en especificación
+**Estado:** hecha.
 
 ## Qué hace
 
@@ -38,21 +38,21 @@ Un manuscrito con erratas cansa a quien lo lee y distrae a quien lo revisa. Tene
 ## Criterios de aceptación
 
 **Ortografía**
-- [ ] Se subrayan las palabras que no están en el diccionario; no los nombres de las fichas, las del diccionario propio, las siglas, las que llevan números ni las de una letra.
-- [ ] Al pulsar una palabra marcada se ven hasta cinco sugerencias, y elegir una la cambia, con deshacer.
-- [ ] «Añadir al diccionario» la acepta en todas las obras y ventanas, también tras cerrar y abrir; «Ignorar» deja de marcarla en la sesión.
+- [x] Se subrayan las palabras que no están en el diccionario; no los nombres de las fichas, las del diccionario propio, las siglas, las que llevan números ni las de una letra.
+- [x] Al pulsar una palabra marcada se ven hasta cinco sugerencias, y elegir una la cambia, con deshacer.
+- [x] «Añadir al diccionario» la acepta en todas las obras y ventanas, también tras cerrar y abrir; «Ignorar» deja de marcarla en la sesión.
 
 **Puntuación**
-- [ ] Cada regla de la spec marca su caso y explica el problema; los arreglos claros se aplican con un botón.
-- [ ] Ninguna regla marca un texto correcto de diálogo y puntuación española (casos de prueba).
+- [x] Cada regla de la spec marca su caso y explica el problema; los arreglos claros se aplican con un botón.
+- [x] Ninguna regla marca un texto correcto de diálogo y puntuación española (casos de prueba).
 
 **General**
-- [ ] F7 muestra y oculta las marcas y se recuerda; no hay marcas en el modo concentración.
-- [ ] Nada cambia el texto sin que el escritor lo elija.
-- [ ] Abrir una obra no espera al diccionario; con él cargado, escribir en un capítulo de 20 000 palabras mantiene el p95 de la 001.
-- [ ] La licencia del diccionario va con la app, en `licenses/`.
-- [ ] Los métodos nuevos forman parte del contrato; los logs no contienen palabras del escritor.
-- [ ] Tests de dominio, de comportamiento y una prueba de extremo a extremo: una errata marcada y corregida, una palabra añadida al diccionario, un signo sin cerrar y F7.
+- [x] F7 muestra y oculta las marcas y se recuerda; no hay marcas en el modo concentración.
+- [x] Nada cambia el texto sin que el escritor lo elija.
+- [x] Abrir una obra no espera al diccionario; con él cargado, escribir en un capítulo de 20 000 palabras mantiene el p95 de la 001.
+- [x] La licencia del diccionario va con la app, en `licenses/`.
+- [x] Los métodos nuevos forman parte del contrato; los logs no contienen palabras del escritor.
+- [x] Tests de dominio, de comportamiento y una prueba de extremo a extremo: una errata marcada y corregida, una palabra añadida al diccionario, un signo sin cerrar y F7.
 
 ## Fuera de alcance
 
