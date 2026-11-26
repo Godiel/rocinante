@@ -528,3 +528,27 @@
 .element-trash .action {
   color: var(--color-rubric);
 }
+
+/* The names the text suggests as fichas, folded away like the trash. */
+.elements-suggestions {
+  margin-top: var(--space-4);
+}
+
+.elements-suggestions summary {
+  cursor: pointer;
+}
+
+.elements-suggestions-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.elements-suggestions-list li {
+  padding: var(--space-1) 0;
+}
+
+.elements-suggestion-actions {
+  display: flex;
+  gap: var(--space-3);
+}

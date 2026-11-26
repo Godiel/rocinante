@@ -40,3 +40,29 @@ test("the board tells what the text says of each ficha", async ({ desk }) => {
     "Don Quijote",
   );
 });
+
+test("the text suggests fichas for the names it repeats", async ({ desk }) => {
+  const app = await desk.open();
+  const { page } = app;
+  await createWork(desk, page, "El Toboso");
+  await chapterText(page).click();
+  await page.keyboard.type(
+    "Pensaba en Dulcinea y en Maritornes. Soñaba con Dulcinea y con Maritornes. Escribía a Dulcinea y a Maritornes.",
+  );
+  await page.keyboard.press("Control+Shift+E");
+  const panel = page.getByRole("complementary", { name: "Fichas de la obra" });
+  await panel.getByText("Sugerencias (2)").click();
+
+  // One becomes a ficha, the other is dismissed for good.
+  await panel.getByRole("button", { name: "Crear la ficha de «Dulcinea»" }).click();
+  await expect(panel.getByRole("textbox", { name: "Nombre", exact: true })).toHaveValue("Dulcinea");
+  await panel.getByRole("button", { name: "← Fichas" }).click();
+  await panel.getByText("Sugerencias (1)").click();
+  await panel.getByRole("button", { name: "Descartar «Maritornes»" }).click();
+  await expect(panel.getByText(/Sugerencias/)).toHaveCount(0);
+  await desk.close(app);
+
+  const again = await desk.open();
+  await expect(chapterText(again.page)).toBeVisible();
+  expect(await call(again.page, "suggestions.get")).toEqual([]);
+});

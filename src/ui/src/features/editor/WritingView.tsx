@@ -770,6 +770,7 @@ export function WritingView({
               },
             }}
             mentionsVisible={preferences.mentionsVisible}
+            onCreateNamed={(name) => void createElement(name)}
             onMentionsVisible={(visible) => update({ mentionsVisible: visible })}
             notes={{
               all: workNotes,

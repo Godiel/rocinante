@@ -30,8 +30,8 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests y comprobación en un navegador real.
 
 ## 7. Sugerencias
-- [ ] Sección plegable en la pestaña Fichas, con «Crear ficha» y «Descartar».
-- [ ] Tests y comprobación en un navegador real.
+- [x] Sección plegable en la pestaña Fichas, con «Crear ficha» y «Descartar».
+- [x] Tests y comprobación en un navegador real.
 
 ## 8. Separar el Tablero
 - [ ] `open_window` del anfitrión acepta `board`.
