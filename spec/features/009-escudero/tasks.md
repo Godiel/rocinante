@@ -6,7 +6,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/009-escudero`.
 - [x] Métodos `squire.*`, `proposals.get`, `proposal.*` y la notificación `squire.changed`, con ejemplos.
 
 ## 2. Dominio
-- [ ] `Proposal` y su ciclo, con tests.
+- [x] `Proposal` y su ciclo, con tests.
 
 ## 3. Persistencia (esquema v6)
 - [ ] Migración con `proposal`, `squire_paragraph` y el interruptor por obra; `docs/format`.

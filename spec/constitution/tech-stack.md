@@ -174,7 +174,7 @@ Las preferencias personales que no dependen de la obra (tema, ambiente y sonidos
 | Tablero | `Board` |
 | Tarjeta | `Card` |
 | Escudero | `Squire` |
-| Propuesta del escudero | `Suggestion` |
+| Propuesta del escudero (lo que deduce de un párrafo, a la espera del escritor) | `Proposal` |
 | Hilo del destino | `FateThread` (no `Thread`, que choca con `System.Threading.Thread` de .NET) |
 
 _El glosario crece con cada feature. Un concepto nuevo se añade aquí antes de usarlo en el código._
