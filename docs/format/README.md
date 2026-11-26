@@ -2,7 +2,7 @@
 
 Un proyecto de Rocinante es **un único archivo** que contiene la obra completa: capítulos, fragmentos, papelera, versiones y notas. Por dentro es una base de datos [SQLite 3](https://sqlite.org/fileformat.html), así que se puede abrir con cualquier herramienta de SQLite para inspeccionarla o recuperar el texto sin depender de la app.
 
-Este documento describe la **versión 4 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql), [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql), [`0003-elements.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0003-elements.sql) y [`0004-notes.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0004-notes.sql).
+Este documento describe la **versión 5 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql), [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql), [`0003-elements.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0003-elements.sql) [`0004-notes.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0004-notes.sql) y [`0005-dismissed-names.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0005-dismissed-names.sql).
 
 ## Cómo se reconoce
 
@@ -207,6 +207,16 @@ _Desde la versión 3._ Dos elementos unidos por una clase. La relación de un el
 | `kind` | TEXT | `builtin:<nombre>` para una clase común o `own:<relationship_kind.id>` para una del escritor |
 
 Índices `relationship_by_from (from_id)` y `relationship_by_to (to_id)`.
+
+### `dismissed_name`
+_Desde la versión 5._ Los nombres que el escritor descartó como sugerencias de fichas: Rocinante no los vuelve a sugerir en esta obra.
+
+| Columna | Tipo | |
+|---|---|---|
+| `name` | TEXT, PK, 1–200 | El nombre como se compara: sus palabras sin mayúsculas ni tildes (la ñ se conserva) y separadas por un espacio |
+| `dismissed_at` | INTEGER | |
+
+Las menciones, las coincidencias y las sugerencias no se guardan: se deducen del texto y de las fichas cada vez.
 
 ## Qué no está en el archivo
 

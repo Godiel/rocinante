@@ -11,9 +11,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests con casos de español.
 
 ## 3. Persistencia (esquema v5)
-- [ ] Migración `0005-dismissed-names.sql`; repositorio de lo descartado.
-- [ ] Una obra v4 se abre sin perder nada; «Guardar como» lo copia.
-- [ ] `docs/format` al día.
+- [x] Migración `0005-dismissed-names.sql`; repositorio de lo descartado.
+- [x] Una obra v4 se abre sin perder nada; «Guardar como» lo copia.
+- [x] `docs/format` al día.
 
 ## 4. Casos de uso y sidecar
 - [ ] El índice de menciones guarda el párrafo de cada una.
