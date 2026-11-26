@@ -3,8 +3,8 @@
 Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests en verde, y con una comprobación en la app real cuando toca la interfaz, antes de pasar al siguiente. Rama: `feature/006-referencias-texto`.
 
 ## 1. Reglas compartidas
-- [ ] `src/contracts/mentions.json` con los casos: palabras enteras, mayúsculas y tildes, solapes, nombres de una letra, nombres repetidos, diálogo y puntuación.
-- [ ] Descritas en el README de `src/contracts`.
+- [x] `src/contracts/mentions.json` con los casos: palabras enteras, mayúsculas y tildes, solapes, nombres de una letra, nombres repetidos, diálogo y puntuación.
+- [x] Descritas en el README de `src/contracts`.
 
 ## 2. Contrato de mensajes (versión 9)
 - [ ] `element.references { id }` con `total`, `chapters`, `first` y las menciones por documento con su trozo de texto.

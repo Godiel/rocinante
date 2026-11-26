@@ -40,3 +40,13 @@ Cada método que cambia algo recibe la ventana de origen (`origin`) y lo anuncia
 2. Si el cambio es incompatible, incrementa `protocolVersion`.
 3. Ejecuta `npm run contracts:generate` y confirma el archivo generado.
 4. CI falla si el archivo generado no está al día o si alguna capa incumple el contrato.
+
+## Menciones
+
+[`mentions.json`](mentions.json) fija cómo se reconocen en el texto los nombres y alias de las fichas (feature 006). La interfaz los marca mientras se escribe y el núcleo los cuenta para la ficha; los dos lados pasan los mismos casos:
+
+- Una mención es una secuencia de palabras enteras: letras y números de Unicode, con sus marcas combinadas.
+- Se comparan sin mayúsculas ni tildes, pero la ñ es una letra propia («peña» no es «pena»).
+- Entre las palabras de un nombre vale cualquier separación de hasta tres caracteres que no sean letras ni números, sin saltos de línea: «Don  Quijote» es «Don Quijote».
+- Cuando dos nombres se solapan, gana el más largo; un nombre con una sola letra no se busca.
+- Si varias fichas comparten un nombre, la mención es de todas.
