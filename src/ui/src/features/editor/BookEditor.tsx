@@ -29,6 +29,7 @@ import { mentionAt, Mentions } from "../../editor/extensions/mentions";
 import type { MentionIndex } from "../mentions/find-mentions";
 import { MentionCard } from "../mentions/MentionCard";
 import { Correction, type CorrectionSetup } from "../../editor/extensions/correction";
+import { ParagraphDone } from "../../editor/extensions/paragraph-done";
 import { CorrectionSlip, type CorrectionTarget } from "../correction/CorrectionSlip";
 import "./book-editor.css";
 import { registerCursor, shownHead } from "../../editor/cursor";
@@ -103,6 +104,8 @@ export interface BookEditorProps {
   onAddWord?(word: string): void;
   /** Stops marking a word for the rest of the session. */
   onIgnoreWord?(word: string): void;
+  /** Told the text of each paragraph the writer finishes, for the squire; nothing is told without it. */
+  onParagraphDone?(text: string): void;
 }
 
 /**
@@ -132,6 +135,7 @@ export function BookEditor({
   onOpenElement,
   correction = null,
   correctionVisible = false,
+  onParagraphDone,
   onAddWord,
   onIgnoreWord,
 }: BookEditorProps) {
@@ -165,6 +169,10 @@ export function BookEditor({
   callbacks.current.onCounts = onCounts;
   callbacks.current.onSaveState = onSaveState;
   callbacks.current.onProblem = onProblem;
+  const paragraphDone = useRef(onParagraphDone);
+  useEffect(() => {
+    paragraphDone.current = onParagraphDone;
+  }, [onParagraphDone]);
 
   const editor = useEditor({
     // The typing sound lives only here: the page view and the versions reuse the schema in silence.
@@ -175,6 +183,7 @@ export function BookEditor({
       NoteStatesExtension,
       Mentions,
       Correction,
+      ParagraphDone.configure({ onDone: (text) => paragraphDone.current?.(text) }),
     ],
     content: document.content,
     editorProps: {

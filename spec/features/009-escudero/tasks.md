@@ -24,7 +24,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/009-escudero`.
 - [x] Proveedor, modelo, clave, «Probar» y encender en esta obra con aviso.
 
 ## 8. Párrafo terminado
-- [ ] Intro o pausa de 8 segundos manda el párrafo.
+- [x] Intro o pausa de 8 segundos manda el párrafo.
 
 ## 9. Pestaña Escudero
 - [ ] Propuestas, aceptar, corregir, descartar, ir al pasaje, estado y contador.

@@ -786,6 +786,16 @@ export function WritingView({
                 onSaveState={onSaveState}
                 onProblem={setProblem}
                 onCreateElement={(name) => void createElement(name)}
+                onParagraphDone={
+                  squire.settings.enabled
+                    ? (text) =>
+                        void request("squire.analyze", {
+                          documentId: document.id,
+                          text,
+                          origin,
+                        }).catch(() => {})
+                    : undefined
+                }
               />
             </div>
           )}
