@@ -449,3 +449,46 @@ test.describe("a work full of mentions", () => {
     expect(p95).toBeLessThan(MAX_P95_MS);
   });
 });
+
+test.describe("the cards of a long work", () => {
+  test.setTimeout(240_000);
+
+  test("the mentions of 300 cards in 150000 words arrive in under a second", async ({ desk }) => {
+    const app = await desk.open();
+    await createWork(desk, app.page, "Obra larga");
+    await fillWork(app.page, CHAPTER_WORDS, WORK_WORDS);
+    const names = [
+      "hidalgo",
+      "rocín",
+      "galgo",
+      "Mancha",
+      "adarga",
+      "lanza",
+      "olla",
+      "vaca",
+      "lentejas",
+      "palomino",
+    ];
+    await fillNamedFichas(app.page, 300, names);
+
+    const timed = async () => {
+      const started = Date.now();
+      const { elements } = await call<{ elements: { total: number }[] }>(
+        app.page,
+        "board.mentions",
+      );
+      return {
+        ms: Date.now() - started,
+        total: elements.reduce((sum, element) => sum + element.total, 0),
+      };
+    };
+    const first = await timed();
+    const again = await timed();
+    report(
+      `menciones de 300 tarjetas en ${WORK_WORDS} palabras: ${first.total} menciones · primera vez ${first.ms} ms · después ${again.ms} ms`,
+    );
+    expect(first.total).toBeGreaterThan(10_000);
+    expect(first.ms).toBeLessThan(VIRTUAL_MAC ? 3000 : 1000);
+    expect(again.ms).toBeLessThan(first.ms + 50);
+  });
+});

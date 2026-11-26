@@ -39,8 +39,8 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests y comprobación en un navegador real.
 
 ## 9. Pruebas de extremo a extremo y rendimiento
-- [ ] El recorrido de la spec.
-- [ ] `board.mentions` con 300 fichas en 150 000 palabras por debajo de 1 segundo.
+- [x] El recorrido de la spec.
+- [x] `board.mentions` con 300 fichas en 150 000 palabras por debajo de 1 segundo.
 - [ ] Todo en verde en los tres sistemas en la CI.
 
 ## 10. Validación y cierre
