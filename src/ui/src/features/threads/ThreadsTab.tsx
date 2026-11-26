@@ -105,6 +105,17 @@ export function ThreadsTab({
             role="group"
             aria-label="Hilos del destino"
           >
+            {/* The whole column shades with its chapter; only its heading is the button. */}
+            {threads.chapters.map((chapter, place) => (
+              <rect
+                key={chapter.documentId}
+                className={`threads-column${selectedChapter === chapter.documentId ? " threads-selected" : ""}`}
+                x={LAYOUT.labels + LAYOUT.column * place}
+                y={0}
+                width={LAYOUT.column}
+                height={height}
+              />
+            ))}
             {threads.chapters.map((chapter, place) => (
               <g
                 key={chapter.documentId}
@@ -127,11 +138,11 @@ export function ThreadsTab({
                 }
               >
                 <rect
-                  className="threads-column"
+                  className="threads-heading"
                   x={LAYOUT.labels + LAYOUT.column * place}
                   y={0}
                   width={LAYOUT.column}
-                  height={height}
+                  height={LAYOUT.header}
                 />
                 <text className="threads-chapter-number" x={columnX(place)} y={16}>
                   {place + 1}

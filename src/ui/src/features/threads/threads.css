@@ -57,11 +57,21 @@
 
 .threads-column {
   fill: transparent;
+  pointer-events: none;
 }
 
-.threads-chapter:hover .threads-column,
-.threads-chapter:focus-visible .threads-column,
-.threads-chapter.threads-selected .threads-column {
+.threads-heading {
+  fill: transparent;
+}
+
+.threads-chapter-number,
+.threads-chapter-title {
+  pointer-events: none;
+}
+
+.threads-column.threads-selected,
+.threads-chapter:hover .threads-heading,
+.threads-chapter:focus-visible .threads-heading {
   fill: var(--color-paper-shade);
 }
 

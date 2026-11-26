@@ -36,7 +36,14 @@ describe("the arrows of the board", () => {
   it("bends the ones between the same fichas to either side, and leaves out what has no card", () => {
     const arrows = arrowsFor(
       [
-        ...["1", "2", "3", "4"].map((id) => ({ id, from: "a", to: "c", kind: `own:${id}`, starts: null, ends: null })),
+        ...["1", "2", "3", "4"].map((id) => ({
+          id,
+          from: "a",
+          to: "c",
+          kind: `own:${id}`,
+          starts: null,
+          ends: null,
+        })),
         { id: "5", from: "a", to: "gone", kind: "builtin:friend-of", starts: null, ends: null },
       ],
       people,

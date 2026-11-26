@@ -1,6 +1,6 @@
 # 010 · Hilos del destino
 
-**Estado:** propuesta.
+**Estado:** hecha.
 
 ## Qué hace
 
@@ -46,26 +46,26 @@ Una novela larga se escribe durante meses, y es fácil perder la pista de un per
 ## Criterios de aceptación
 
 **Vista Hilos**
-- [ ] F8 abre la pestaña Hilos: capítulos en orden y una línea por cada ficha elegida, con puntos donde aparece, de tamaño según las menciones.
-- [ ] Los puntos de dos fichas que coinciden en un párrafo del mismo capítulo se ven unidos.
-- [ ] Se eligen las fichas que se muestran. Al principio son los cinco personajes más nombrados, y la elección se recuerda en la obra.
-- [ ] Un punto abre sus pasajes y un hito su frase. Desde los dos se va al pasaje.
-- [ ] Al escribir, la vista se actualiza sin recargarla.
+- [x] F8 abre la pestaña Hilos: capítulos en orden y una línea por cada ficha elegida, con puntos donde aparece, de tamaño según las menciones.
+- [x] Los puntos de dos fichas que coinciden en un párrafo del mismo capítulo se ven unidos.
+- [x] Se eligen las fichas que se muestran. Al principio son los cinco personajes más nombrados, y la elección se recuerda en la obra.
+- [x] Un punto abre sus pasajes y un hito su frase. Desde los dos se va al pasaje.
+- [x] Al escribir, la vista se actualiza sin recargarla.
 
 **Hitos**
-- [ ] Se marca un hito sobre un pasaje del texto o desde la vista Hilos; se corrige y se borra.
-- [ ] El hito sigue a su párrafo cuando este cambia. Si el párrafo desaparece, el hito queda marcado «sin pasaje» en su capítulo.
-- [ ] Con el escudero encendido, se proponen hitos que se aceptan, se corrigen o se descartan. Lo descartado no vuelve para ese pasaje.
+- [x] Se marca un hito sobre un pasaje del texto o desde la vista Hilos; se corrige y se borra.
+- [x] El hito sigue a su párrafo cuando este cambia. Si el párrafo desaparece, el hito queda marcado «sin pasaje» en su capítulo.
+- [x] Con el escudero encendido, se proponen hitos que se aceptan, se corrigen o se descartan. Lo descartado no vuelve para ese pasaje.
 
 **Relaciones**
-- [ ] Una relación admite un capítulo de inicio y uno de fin, opcionales. Las que ya existen valen para toda la obra.
-- [ ] En la vista Hilos, al elegir un capítulo, se ven las relaciones vigentes. Donde una empieza o termina, el hilo lo señala.
+- [x] Una relación admite un capítulo de inicio y uno de fin, opcionales. Las que ya existen valen para toda la obra.
+- [x] En la vista Hilos, al elegir un capítulo, se ven las relaciones vigentes. Donde una empieza o termina, el hilo lo señala.
 
 **Calidad**
-- [ ] Los métodos nuevos forman parte del contrato, y los hitos y las fechas de las relaciones se guardan en el `.rocinante` con una migración documentada.
-- [ ] Los registros no contienen el texto de los hitos ni los nombres de las fichas.
-- [ ] Con una obra de 150 000 palabras y 300 fichas, la vista Hilos se abre en menos de un segundo y escribir con ella abierta sigue el ritmo del tecleo.
-- [ ] Tests del núcleo y de comportamiento, y una prueba de extremo a extremo: abrir Hilos, marcar un hito, poner fechas a una relación y aceptar un hito propuesto por un escudero falso.
+- [x] Los métodos nuevos forman parte del contrato, y los hitos y las fechas de las relaciones se guardan en el `.rocinante` con una migración documentada.
+- [x] Los registros no contienen el texto de los hitos ni los nombres de las fichas.
+- [x] Con una obra de 150 000 palabras y 300 fichas, la vista Hilos se abre en menos de un segundo y escribir con ella abierta sigue el ritmo del tecleo.
+- [x] Tests del núcleo y de comportamiento, y una prueba de extremo a extremo: abrir Hilos, marcar un hito, poner fechas a una relación y aceptar un hito propuesto por un escudero falso.
 
 ## Fuera de alcance
 
