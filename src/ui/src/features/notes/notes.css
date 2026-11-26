@@ -20,3 +20,21 @@
 .note-editor p:last-child {
   margin-bottom: 0;
 }
+
+/* The panel of notes beside the text. */
+.notes-empty {
+  margin: var(--space-4) 0;
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
+
+.notes-list {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notes-item {
+  padding: var(--space-2) 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+}

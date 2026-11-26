@@ -39,7 +39,15 @@ import { GoalMeter, GoalReached } from "../focus/Goal";
 import { AmbienceSheet } from "../ambience/AmbienceSheet";
 import { ElementsPanel } from "../elements/ElementsPanel";
 import { suggestedAttributes } from "../elements/kinds";
-import { isElementsShortcut, panelWasOpen, rememberPanel } from "../elements/panel";
+import { isElementsShortcut } from "../elements/panel";
+import { NotesPanel } from "../notes/NotesPanel";
+import { SidePanelTabs } from "../workspace/SidePanelTabs";
+import {
+  isNotesShortcut,
+  rememberedSidePanel,
+  rememberSidePanel,
+  type SideTab,
+} from "../workspace/side-panel";
 import { useBoard } from "../elements/useBoard";
 import { notesOf } from "../notes/notes-list";
 import { useWorkNotes } from "../notes/useWorkNotes";
@@ -110,12 +118,17 @@ export function WritingView({
   const [problem, setProblem] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(preferences.outline === "docked");
   const [deleted, setDeleted] = useState<DocumentEntry | null>(null);
-  // One sheet at a time on the right of the text: the fichas, the versions, the format or the ambience.
-  // Whether the fichas were open is kept for this window.
-  const [sheet, setSheet] = useState<"elements" | "versions" | "format" | "ambience" | null>(() =>
-    panelWasOpen() ? "elements" : null,
+  // One sheet at a time on the right of the text: the fichas or the notes (two tabs of one panel), the
+  // versions, the format or the ambience. Whether the panel was open, and at which tab, is kept for this window.
+  const [sheet, setSheet] = useState<SideTab | "versions" | "format" | "ambience" | null>(
+    rememberedSidePanel,
   );
   const elementsOpen = sheet === "elements";
+  const sideTab: SideTab | null = sheet === "elements" || sheet === "notes" ? sheet : null;
+  const lastSideTab = useRef<SideTab>(sideTab ?? "elements");
+  useEffect(() => {
+    if (sideTab) lastSideTab.current = sideTab;
+  }, [sideTab]);
   const { board, loaded: boardLoaded } = useBoard(project.id);
   const { notes: workNotes, loaded: notesLoaded } = useWorkNotes(project.id);
   const [openElement, setOpenElement] = useState<string | null>(null);
@@ -144,15 +157,20 @@ export function WritingView({
     sheet: null,
   });
 
-  useEffect(() => rememberPanel(elementsOpen), [elementsOpen]);
+  useEffect(() => rememberSidePanel(sideTab), [sideTab]);
 
-  // The fichas open with the keyboard in their search, and give it back to the text on closing.
-  const toggleElements = useCallback(() => {
+  // The fichas open with the keyboard in their search, and give it back to the text on closing. The
+  // shortcut of the tab that shows closes the panel; the other changes tab.
+  const toggleSide = useCallback((tab: SideTab) => {
     setViewing(null);
-    setSheet((open) => (open === "elements" ? null : "elements"));
-    setSearchRequest((asked) => asked + 1);
+    setSheet((open) => (open === tab ? null : tab));
+    if (tab === "elements") setSearchRequest((asked) => asked + 1);
     focusText();
   }, []);
+  const toggleElements = useCallback(() => toggleSide("elements"), [toggleSide]);
+  const toggleNotes = useCallback(() => toggleSide("notes"), [toggleSide]);
+  // The button of the bar opens the panel where it was last, and closes it.
+  const toggleSidePanel = () => toggleSide(sideTab ?? lastSideTab.current);
 
   // First document to show.
   useEffect(() => {
@@ -262,7 +280,8 @@ export function WritingView({
           isOutlineShortcut(event) ||
           isVersionsShortcut(event) ||
           isSaveVersionShortcut(event) ||
-          isElementsShortcut(event)
+          isElementsShortcut(event) ||
+          isNotesShortcut(event)
         ) {
           event.preventDefault();
         }
@@ -282,7 +301,8 @@ export function WritingView({
           isPageViewShortcut(event) ||
           isOutlineShortcut(event) ||
           isVersionsShortcut(event) ||
-          isElementsShortcut(event)
+          isElementsShortcut(event) ||
+          isNotesShortcut(event)
         ) {
           event.preventDefault();
         }
@@ -298,6 +318,9 @@ export function WritingView({
       } else if (isElementsShortcut(event)) {
         event.preventDefault();
         toggleElements();
+      } else if (isNotesShortcut(event)) {
+        event.preventDefault();
+        toggleNotes();
       } else if (isVersionsShortcut(event)) {
         event.preventDefault();
         setSheet((open) => (open === "versions" ? null : "versions"));
@@ -310,7 +333,7 @@ export function WritingView({
     const self = opening.current.origin;
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
-  }, [toggleElements]);
+  }, [toggleElements, toggleNotes]);
 
   async function createElement(name: string | null) {
     try {
@@ -520,9 +543,9 @@ export function WritingView({
               </button>
               <button
                 className="action"
-                aria-expanded={elementsOpen}
-                title="Fichas (Ctrl+Mayús+E)"
-                onClick={toggleElements}
+                aria-expanded={sideTab !== null}
+                title="Fichas (Ctrl+Mayús+E) y notas (Ctrl+Mayús+N)"
+                onClick={toggleSidePanel}
               >
                 Fichas
               </button>
@@ -671,6 +694,16 @@ export function WritingView({
               void elementTrash.trash(id, name);
             }}
             onRestore={(id) => void elementTrash.restore(id)}
+            tabs={<SidePanelTabs tab="elements" onShow={(tab) => setSheet(tab)} />}
+          />
+        )}
+
+        {sheet === "notes" && (
+          <NotesPanel
+            notes={workNotes}
+            loaded={notesLoaded}
+            tabs={<SidePanelTabs tab="notes" onShow={(tab) => setSheet(tab)} />}
+            onClose={closeSheet}
           />
         )}
 

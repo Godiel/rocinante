@@ -151,3 +151,24 @@
   flex: none;
   white-space: nowrap;
 }
+
+/* The two tabs of the panel beside the text: its fichas and its notes. */
+.side-tabs {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.side-tab {
+  padding: 0 0 1px;
+  font: inherit;
+  color: var(--color-ink-faint);
+  background: none;
+  border: 0;
+  border-bottom: var(--hairline) solid transparent;
+  cursor: pointer;
+}
+
+.side-tab[aria-selected="true"] {
+  color: var(--color-ink);
+  border-bottom-color: var(--color-rubric);
+}

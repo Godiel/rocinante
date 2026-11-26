@@ -66,12 +66,12 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Comprobación en la app real.
 
 ## 7. Panel de la derecha con pestañas
-- [ ] Un panel con las pestañas Fichas y Notas recoge el panel de la 004.
-- [ ] Ctrl+Mayús+E abre Fichas y Ctrl+Mayús+N, Notas; el atajo de la pestaña que se ve cierra el panel.
-- [ ] El botón de la barra abre y cierra el panel.
-- [ ] La pestaña y el estado abierto o cerrado se recuerdan por ventana.
-- [ ] El índice puede seguir abierto a la izquierda.
-- [ ] Tests de comportamiento y comprobación en la app real.
+- [x] Un panel con las pestañas Fichas y Notas recoge el panel de la 004.
+- [x] Ctrl+Mayús+E abre Fichas y Ctrl+Mayús+N, Notas; el atajo de la pestaña que se ve cierra el panel.
+- [x] El botón de la barra abre y cierra el panel.
+- [x] La pestaña y el estado abierto o cerrado se recuerdan por ventana.
+- [x] El índice puede seguir abierto a la izquierda.
+- [x] Tests de comportamiento y comprobación en la app real.
 
 ## 8. La lista de notas
 - [ ] Cada nota con el principio de su texto, a qué está unida y sus fichas.

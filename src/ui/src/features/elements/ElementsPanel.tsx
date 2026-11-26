@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Board, ElementKind, ElementSummary } from "../../bridge/generated/protocol";
 import { useElementImage } from "./images";
 import { KIND_NAMES, KINDS, kindLabel } from "./kinds";
@@ -23,6 +23,8 @@ export interface ElementsPanelProps {
   onProblem(message: string | null): void;
   onTrash(id: string, name: string): void;
   onRestore(id: string): void;
+  /** The tabs of the panel, shown in place of its title. */
+  tabs?: ReactNode;
 }
 
 /**
@@ -43,6 +45,7 @@ export function ElementsPanel({
   onProblem,
   onTrash,
   onRestore,
+  tabs,
 }: ElementsPanelProps) {
   // A ficha that went to the trash, here or in another window, gives its place back to the list.
   const shownId = openId && board.elements.some((element) => element.id === openId) ? openId : null;
@@ -76,7 +79,7 @@ export function ElementsPanel({
             ← Fichas
           </button>
         ) : (
-          <h2 className="sheet-title">Fichas</h2>
+          (tabs ?? <h2 className="sheet-title">Fichas</h2>)
         )}
         <button type="button" className="action" onClick={onClose} title="Cerrar (Ctrl+Mayús+E)">
           Cerrar
