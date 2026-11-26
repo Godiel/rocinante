@@ -90,7 +90,7 @@ internal static class Wire
         new(version.Id.Value, version.DocumentId.Value, Kind(version.Kind), version.Name, version.CreatedAt, Of(version.Statistics));
 
     public static NoteDto Of(Note note) =>
-        new(note.Id.Value, note.DocumentId.Value, note.Text, note.IsAnchored, note.CreatedAt, note.UpdatedAt);
+        new(note.Id.Value, note.DocumentId!.Value.Value, note.Text, note.IsAnchored, note.CreatedAt, note.UpdatedAt);
 
     public static JsonNode Content(DocumentContent content) => JsonNode.Parse(content.Json)!;
 

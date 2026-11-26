@@ -469,7 +469,7 @@ export interface Note {
    */
   anchored: boolean;
   /**
-   * Place of the note's anchor among the anchors of its document's text; null when it is not anchored.
+   * Place of the note's anchor among the anchors of its document's text, from the last save of the text; null when it is not anchored or its anchor has not been saved yet.
    */
   order: number | null;
   resolvedAt: Timestamp | null;

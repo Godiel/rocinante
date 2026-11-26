@@ -1,5 +1,6 @@
 using Rocinante.Application.Ports;
 using Rocinante.Domain;
+using Rocinante.Domain.Content;
 using Rocinante.Domain.Notes;
 
 namespace Rocinante.Application;
@@ -10,14 +11,14 @@ public sealed class NoteUseCases(Workspace workspace, IChangeNotifier notifier, 
     public Note Create(DocumentId documentId, string text, bool anchored, string origin)
     {
         workspace.ActiveEntry(documentId);
-        var note = Note.Create(documentId, text, anchored, clock.GetUtcNow());
+        var note = Note.Create(documentId, DocumentContent.FromPlainText(text), anchored, [], clock.GetUtcNow());
         return Store(note, origin);
     }
 
     public Note Update(NoteId id, string text, string origin)
     {
         var note = workspace.Session.Notes.Load(id);
-        note.Edit(text, clock.GetUtcNow());
+        note.Edit(DocumentContent.FromPlainText(text), clock.GetUtcNow());
         return Store(note, origin);
     }
 
@@ -26,7 +27,7 @@ public sealed class NoteUseCases(Workspace workspace, IChangeNotifier notifier, 
         var session = workspace.Session;
         var note = session.Notes.Load(id);
         session.InTransaction(() => session.Notes.Delete(id));
-        notifier.NotesChanged(note.DocumentId, session.Notes.ListByDocument(note.DocumentId), origin);
+        notifier.NotesChanged(note.DocumentId!.Value, session.Notes.ListByDocument(note.DocumentId.Value), origin);
     }
 
     public IReadOnlyList<Note> List(DocumentId documentId)
@@ -43,7 +44,7 @@ public sealed class NoteUseCases(Workspace workspace, IChangeNotifier notifier, 
             session.Notes.Save(note);
             return note;
         });
-        notifier.NotesChanged(note.DocumentId, session.Notes.ListByDocument(note.DocumentId), origin);
+        notifier.NotesChanged(note.DocumentId!.Value, session.Notes.ListByDocument(note.DocumentId.Value), origin);
         return note;
     }
 }

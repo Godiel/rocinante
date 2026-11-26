@@ -23,7 +23,7 @@ public sealed class NoteRepository(ProjectDatabase database) : INoteRepository
                 updated_at = excluded.updated_at;
             """,
             ("$id", Columns.Id(note.Id.Value)),
-            ("$documentId", Columns.Id(note.DocumentId.Value)),
+            ("$documentId", Columns.Id(note.DocumentId!.Value.Value)),
             ("$text", note.Text),
             ("$anchored", note.IsAnchored),
             ("$createdAt", Columns.Time(note.CreatedAt)),
@@ -70,8 +70,13 @@ public sealed class NoteRepository(ProjectDatabase database) : INoteRepository
         Note.Rehydrate(
             new NoteId(reader.GetId(0)),
             new DocumentId(reader.GetId(1)),
-            reader.GetString(2),
+            content: null,
+            legacyText: reader.GetString(2),
             reader.GetBoolean(3),
+            anchorOrder: null,
+            resolvedAt: null,
+            elements: [],
             reader.GetTime(4),
-            reader.GetTime(5));
+            reader.GetTime(5),
+            deletedAt: null);
 }

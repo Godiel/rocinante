@@ -122,7 +122,40 @@ public sealed class DocumentContentTests
 
         var content = Doc(Block("paragraph", Text("revisar esta fecha", AnchorMark(passage)), AnchorNode(point)));
 
-        content.NoteAnchors.ShouldBe([passage, point], ignoreOrder: true);
+        content.NoteAnchors.ShouldBe([passage, point]);
+    }
+
+    [Fact]
+    public void Gives_each_anchor_once_in_the_order_it_first_appears()
+    {
+        var first = NoteId.New(Moments.At(5));
+        var second = NoteId.New(Moments.At(1));
+
+        var content = Doc(
+            Block("paragraph", AnchorNode(first), Text("uno", AnchorMark(second))),
+            Block("paragraph", Text("dos", AnchorMark(first), AnchorMark(second))));
+
+        content.NoteAnchors.ShouldBe([first, second]);
+    }
+
+    [Fact]
+    public void Its_plain_text_has_one_line_per_paragraph_and_leaves_footnotes_out()
+    {
+        var content = Doc(
+            Block("paragraph", Text("En un lugar "), Text("de la Mancha", Mark("italic")), Footnote("Nota del autor.")),
+            Paragraph("   "),
+            Block("heading", Text("Capítulo II")));
+
+        content.PlainText.ShouldBe("En un lugar de la Mancha\nCapítulo II");
+    }
+
+    [Fact]
+    public void Plain_text_makes_a_paragraph_of_each_line()
+    {
+        var content = DocumentContent.FromPlainText("revisar esta fecha\r\n\n  \naquí Antonio");
+
+        content.ShouldBe(Paragraphs("revisar esta fecha", "aquí Antonio"));
+        content.PlainText.ShouldBe("revisar esta fecha\naquí Antonio");
     }
 
     [Fact]

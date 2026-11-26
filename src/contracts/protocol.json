@@ -1964,7 +1964,7 @@
           "description": "False when the anchored passage was deleted, or for a loose idea."
         },
         "order": {
-          "description": "Place of the note's anchor among the anchors of its document's text; null when it is not anchored.",
+          "description": "Place of the note's anchor among the anchors of its document's text, from the last save of the text; null when it is not anchored or its anchor has not been saved yet.",
           "anyOf": [
             {
               "type": "integer",

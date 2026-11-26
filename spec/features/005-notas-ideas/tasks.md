@@ -15,15 +15,15 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Regenerar los tipos de TypeScript y subir `protocolVersion` a 8.
 
 ## 2. Dominio
-- [ ] `Note` en `Rocinante.Domain/Notes`:
+- [x] `Note` en `Rocinante.Domain/Notes`:
   - documento opcional;
   - contenido obligatorio y no vacío; su texto plano, de 10 000 caracteres como máximo;
   - hasta 50 fichas enlazadas, sin repetir;
   - `Resolve` y `Reopen`, `Delete` y `Restore`.
-- [ ] Una nota antigua, solo con texto, se lee como un párrafo por línea.
-- [ ] `DocumentContent` da las anclas en el orden del texto; `Reconcile` guarda el orden de cada nota.
-- [ ] Glosario de `tech-stack.md`: idea suelta y nota resuelta, antes de usarlos en el código.
-- [ ] Tests de dominio, con la cobertura de la constitución.
+- [x] Una nota antigua, solo con texto, se lee como un párrafo por línea.
+- [x] `DocumentContent` da las anclas en el orden del texto; `Reconcile` guarda el orden de cada nota.
+- [x] Glosario de `tech-stack.md`: idea suelta y nota resuelta, antes de usarlos en el código.
+- [x] Tests de dominio, con la cobertura de la constitución.
 
 ## 3. Persistencia (esquema v4)
 - [ ] Migración `0004-notes.sql`:

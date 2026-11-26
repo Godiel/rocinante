@@ -161,6 +161,9 @@ Las preferencias personales que no dependen de la obra (tema, ambiente y sonidos
 | Posición de una tarjeta en el tablero | `BoardPosition` |
 | Referencia (mención en el texto) | `Reference` |
 | Nota o idea del autor (anclada en el texto o suelta) | `Note` |
+| Idea suelta (una nota de la obra, sin capítulo ni pasaje) | `Note` sin `DocumentId` |
+| Nota resuelta (ya atendida; se aparta de la lista) | `Note.IsResolved` |
+| Nota apartada (borrada, a la espera de deshacer) | `Note.IsDeleted` |
 | Nota al pie (parte del texto de la obra) | `Footnote` |
 | Versión de un documento | `DocumentVersion` |
 | Tablero | `Board` |
