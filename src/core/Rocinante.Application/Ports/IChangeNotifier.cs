@@ -1,9 +1,11 @@
 using Rocinante.Application.Settings;
+using Rocinante.Application.Squire;
 using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
 using Rocinante.Domain.Elements;
 using Rocinante.Domain.Notes;
+using Rocinante.Domain.Squire;
 
 namespace Rocinante.Application.Ports;
 
@@ -37,6 +39,9 @@ public interface IChangeNotifier
 
     /// <summary>Elements, relationships or kinds of relationship of the open work changed.</summary>
     void ElementsChanged(ElementsChange change, string origin);
+
+    /// <summary>The squire changed: its state, new proposals, or proposals no longer waiting.</summary>
+    void SquireChanged(SquireState state, IReadOnlyList<Proposal> proposals, IReadOnlyList<ProposalId> removed, string origin);
 
     /// <summary>The writer's own dictionary changed.</summary>
     void DictionaryChanged(IReadOnlyList<string> words, string origin);

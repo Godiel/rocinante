@@ -58,6 +58,15 @@ public sealed class WriterSettings
 
     public const int MaxDictionaryWordLength = 60;
 
+    /// <summary>The provider and model of the squire, if the writer chose them.</summary>
+    public SquireChoice? Squire => _current.Squire;
+
+    public void ChooseSquire(SquireChoice choice)
+    {
+        ArgumentNullException.ThrowIfNull(choice);
+        Save(_current with { Squire = choice });
+    }
+
     /// <summary>The writer's own dictionary, in order.</summary>
     public IReadOnlyList<string> Dictionary => _current.Dictionary;
 

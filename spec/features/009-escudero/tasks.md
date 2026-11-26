@@ -18,7 +18,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/009-escudero`.
 - [x] Anthropic, OpenAI y compatibles (xAI, otros), Gemini y Ollama, con tests de cada uno.
 
 ## 6. Casos de uso y sidecar
-- [ ] Ajustes, prueba, modelos, encendido por obra, cola en segundo plano y propuestas.
+- [x] Ajustes, prueba, modelos, encendido por obra, cola en segundo plano y propuestas.
 
 ## 7. Ajustes del escudero
 - [ ] Proveedor, modelo, clave, «Probar» y encender en esta obra con aviso.

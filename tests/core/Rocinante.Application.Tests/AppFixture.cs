@@ -1,4 +1,5 @@
 using Rocinante.Application.Settings;
+using Rocinante.Application.Squire;
 using Rocinante.Infrastructure.Files;
 using Rocinante.Infrastructure.Persistence;
 using Rocinante.Infrastructure.Settings;
@@ -24,6 +25,7 @@ internal sealed class AppFixture : IDisposable
         Notes = new NoteUseCases(_workspace, Notifier, Clock);
         Ambience = new AmbienceUseCases(Settings, new AmbienceFolder(PathOf("datos")), Notifier);
         Elements = new ElementUseCases(_workspace, new ChosenFiles(), Notifier, Clock);
+        Squire = new SquireUseCases(_workspace, Settings, Secrets, SquireClient, Elements, Notifier, Clock, new ImmediateGate());
         App = new SettingsUseCases(_workspace, Projects, Ambience, Settings, Notifier, DefaultFolder, launchFile);
     }
 
@@ -52,6 +54,12 @@ internal sealed class AppFixture : IDisposable
     public ElementUseCases Elements { get; }
 
     public SettingsUseCases App { get; }
+
+    public MemorySecretStore Secrets { get; } = new();
+
+    public FakeSquireClient SquireClient { get; } = new();
+
+    public SquireUseCases Squire { get; }
 
     public string PathOf(string name) => System.IO.Path.Combine(Folder, name);
 

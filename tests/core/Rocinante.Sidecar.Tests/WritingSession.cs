@@ -111,6 +111,22 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("version.get", Params(("id", version)));
         harness.Call("version.restore", Params(("id", version), ("origin", Main)));
         harness.Call("element.references", Params(("id", quixote)));
+
+        // The squire, with a local model, reads a paragraph and proposes; the writer takes one and drops another.
+        harness.SquireClient.Answer =
+            """{"elements":[{"name":"Dulcinea","kind":"character"},{"name":"El Toboso","kind":"place"}],"relationships":[],"attributes":[]}""";
+        harness.Call("squire.settings");
+        harness.Call("squire.models", Params(("provider", "ollama"), ("endpoint", "http://127.0.0.1:11434")));
+        harness.Call("squire.setKey", Params(("provider", "openai"), ("key", "sk-prueba"), ("origin", Main)));
+        harness.Call("squire.forgetKey", Params(("provider", "openai"), ("origin", Main)));
+        harness.Call("squire.configure", Params(("provider", "ollama"), ("model", "llama3.1"), ("endpoint", null), ("origin", Main)));
+        harness.Call("squire.test");
+        harness.Call("squire.enable", Params(("enabled", true), ("origin", Main)));
+        harness.Call("squire.analyze", Params(("documentId", first), ("text", "Soñaba con Dulcinea del Toboso."), ("origin", Main)));
+        harness.SettleSquire();
+        var proposals = harness.Call("proposals.get")!.AsArray();
+        harness.Call("proposal.accept", Params(("id", Id(proposals[0])), ("origin", Main)));
+        harness.Call("proposal.dismiss", Params(("id", Id(proposals[1])), ("origin", Main)));
         harness.Call("board.mentions");
         harness.Call("suggestions.get");
         harness.Call("suggestion.dismiss", Params(("name", "Dulcinea"), ("origin", Other)));

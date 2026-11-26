@@ -5,7 +5,7 @@ using System.Text.Json.Nodes;
 namespace Rocinante.Sidecar;
 
 /// <summary>Writes JSON-RPC messages, one per line. stdout carries protocol messages only.</summary>
-internal sealed class MessageWriter(TextWriter output)
+internal sealed class MessageWriter(TextWriter output, object? gate = null)
 {
     public void Result(JsonNode? id, JsonNode? result) =>
         Write(new JsonObject { ["jsonrpc"] = "2.0", ["id"] = id, ["result"] = result });
@@ -28,5 +28,14 @@ internal sealed class MessageWriter(TextWriter output)
     // are instead of \uXXXX, which keeps a chapter in Spanish compact and readable in logs.
     private static readonly JsonSerializerOptions _options = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
-    private void Write(JsonObject message) => output.WriteLine(message.ToJsonString(_options));
+    private readonly object _line = gate ?? new object();
+
+    // A line at a time: the squire may announce from another thread.
+    private void Write(JsonObject message)
+    {
+        lock (_line)
+        {
+            output.WriteLine(message.ToJsonString(_options));
+        }
+    }
 }

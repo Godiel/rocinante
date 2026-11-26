@@ -178,6 +178,46 @@ internal sealed record SuggestionsChangedNotification(string Origin);
 
 internal sealed record WordParams(string Word, string Origin);
 
+internal sealed record SquireSettingsDto(
+    string? Provider, string? Model, string? Endpoint, bool HasKey, bool Enabled, string Status, string? Problem, int Pending);
+
+internal sealed record ConfigureSquireParams(string Provider, string Model, string? Endpoint, string Origin);
+
+internal sealed record SquireKeyParams(string Provider, string Key, string Origin);
+
+internal sealed record SquireProviderParams(string Provider, string Origin);
+
+internal sealed record SquireModelsParams(string Provider, string? Endpoint);
+
+internal sealed record SquireTestResult(bool Ok, string? Reason);
+
+internal sealed record EnableSquireParams(bool Enabled, string Origin);
+
+internal sealed record AnalyzeParams(Guid DocumentId, string Text, string Origin);
+
+internal sealed record ProposedElementDto(string Name, string Kind, string? OtherKind);
+
+internal sealed record ProposedRelationshipDto(string From, string To, string Forward, string? Inverse);
+
+internal sealed record ProposedDetailDto(string Element, string Name, string Value);
+
+internal sealed record ProposalDto(
+    Guid Id,
+    string Kind,
+    Guid DocumentId,
+    string Passage,
+    DateTimeOffset CreatedAt,
+    ProposedElementDto? Element,
+    ProposedRelationshipDto? Relationship,
+    ProposedDetailDto? Attribute);
+
+internal sealed record ProposalChangesDto(string? Name, string? Kind, string? OtherKind, string? Forward, string? Inverse, string? Value);
+
+internal sealed record AcceptProposalParams(Guid Id, ProposalChangesDto? Changes, string Origin);
+
+internal sealed record SquireChangedNotification(
+    SquireSettingsDto Settings, IReadOnlyList<ProposalDto> Proposals, IReadOnlyList<Guid> Removed, string Origin);
+
 internal sealed record DictionaryChangedNotification(IReadOnlyList<string> Words, string Origin);
 
 internal sealed record NoteChangesDto(JsonObject? Content, bool? Resolved, IReadOnlyList<Guid>? Elements);
@@ -284,6 +324,17 @@ internal sealed record ElementsChangedNotification(
 [JsonSerializable(typeof(DismissSuggestionParams))]
 [JsonSerializable(typeof(SuggestionsChangedNotification))]
 [JsonSerializable(typeof(WordParams))]
+[JsonSerializable(typeof(SquireSettingsDto))]
+[JsonSerializable(typeof(ConfigureSquireParams))]
+[JsonSerializable(typeof(SquireKeyParams))]
+[JsonSerializable(typeof(SquireProviderParams))]
+[JsonSerializable(typeof(SquireModelsParams))]
+[JsonSerializable(typeof(SquireTestResult))]
+[JsonSerializable(typeof(EnableSquireParams))]
+[JsonSerializable(typeof(AnalyzeParams))]
+[JsonSerializable(typeof(IReadOnlyList<ProposalDto>))]
+[JsonSerializable(typeof(AcceptProposalParams))]
+[JsonSerializable(typeof(SquireChangedNotification))]
 [JsonSerializable(typeof(IReadOnlyList<string>))]
 [JsonSerializable(typeof(DictionaryChangedNotification))]
 [JsonSerializable(typeof(SystemInfoResult))]

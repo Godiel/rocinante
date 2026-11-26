@@ -34,6 +34,21 @@ internal sealed class RecordingNotifier : IChangeNotifier
         Events.Add($"notes.changed:{origin}");
     }
 
+    public IReadOnlyList<Rocinante.Domain.Squire.Proposal>? LastProposals { get; private set; }
+
+    public Rocinante.Application.Squire.SquireState? LastSquire { get; private set; }
+
+    public void SquireChanged(
+        Rocinante.Application.Squire.SquireState state,
+        IReadOnlyList<Rocinante.Domain.Squire.Proposal> proposals,
+        IReadOnlyList<ProposalId> removed,
+        string origin)
+    {
+        LastSquire = state;
+        LastProposals = proposals;
+        Events.Add($"squire.changed:{origin}");
+    }
+
     public void DictionaryChanged(IReadOnlyList<string> words, string origin) => Events.Add($"dictionary.changed:{origin}");
 
     public void SuggestionsChanged(string origin) => Events.Add($"suggestions.changed:{origin}");

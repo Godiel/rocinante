@@ -57,6 +57,9 @@ public sealed record PreferencesChange(
     }
 }
 
+/// <summary>The provider of the squire («anthropic», «openai», «gemini», «xai», «compatible» or «ollama»), its model and its address if it has one.</summary>
+public sealed record SquireChoice(string Provider, string Model, string? Endpoint);
+
 /// <summary>Where the writer was in a project: a document and a ProseMirror selection in it.</summary>
 public sealed record Place(DocumentId DocumentId, int Anchor, int Head);
 
@@ -74,13 +77,15 @@ public sealed record RecentProject(string Path, string Title, DateTimeOffset Las
 /// <param name="LastFormat">The format of the last work the writer set up; null if there is none yet.</param>
 /// <param name="Own">The images and sounds the writer added, in the order they were added; null means none.</param>
 /// <param name="Words">The writer's own dictionary, in order; null means none.</param>
+/// <param name="Squire">The provider and model the squire uses; null until the writer chooses. Never the key.</param>
 public sealed record AppSettings(
     Preferences Preferences,
     IReadOnlyList<RecentProject> Recent,
     string? LastProject,
     WorkFormat? LastFormat = null,
     IReadOnlyList<OwnAmbience>? Own = null,
-    IReadOnlyList<string>? Words = null)
+    IReadOnlyList<string>? Words = null,
+    SquireChoice? Squire = null)
 {
     public static AppSettings Empty { get; } = new(Preferences.Default, [], LastProject: null);
 
