@@ -1,0 +1,32 @@
+# 011 · Exportación — Tareas
+
+Checklist derivada de [`plan.md`](plan.md). Rama: `feature/011-exportacion`.
+
+## 1. Contrato (versión 14)
+- [ ] `book.*`, `export.run` y `export.progress`, con ejemplos.
+
+## 2. Dominio
+- [ ] `BookDetails` y `Book` leído de los capítulos, con tests.
+
+## 3. Persistencia (esquema v8)
+- [ ] Tabla `book` y `docs/format`.
+
+## 4. Escritores
+- [ ] Markdown.
+- [ ] EPUB 3.
+- [ ] Word (`.docx`).
+- [ ] PDF: fuentes WOFF → TrueType, composición y escritura.
+
+## 5. Casos de uso y sidecar
+- [ ] Datos del libro, exportación con avance y escritura segura, en la sesión de escritura de los tests.
+
+## 6. Interfaz
+- [ ] Diálogo Exportar con F9, formato, partes, autor, créditos, portada, guardar, avance y «Mostrar en la carpeta».
+
+## 7. Pruebas de extremo a extremo y de rendimiento
+- [ ] Una obra exportada a los cuatro formatos.
+- [ ] Una obra de 150 000 palabras a PDF y a los demás formatos.
+- [ ] Todo en verde en la CI.
+
+## 8. Validación y cierre
+- [ ] Criterios, `tech-stack.md`, hoja de ruta y PR.
