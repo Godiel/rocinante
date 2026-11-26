@@ -86,6 +86,8 @@ export function OpenElementSheet({
               elementId={id}
               documents={mentions.documents}
               onGoTo={(documentId, ordinal) => mentions.onGoTo(id, documentId, ordinal)}
+              elements={board.elements}
+              onOpenElement={onOpen}
             />
           )}
           {notes && (

@@ -181,6 +181,22 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
   const chosen = nodes.filter((node) => node.selected);
   const moving = nodes.some((node) => node.dragging);
   const chosenId = chosen.length === 1 && !moving ? chosen[0]!.id : null;
+  // The cards that share paragraphs of the text with the chosen one stay clear too.
+  const [together, setTogether] = useState<{ id: string; ids: readonly string[] } | null>(null);
+  useEffect(() => {
+    if (chosenId === null) return;
+    let current = true;
+    void request("element.references", { id: chosenId }).then(
+      (references) => {
+        if (current)
+          setTogether({ id: chosenId, ids: references.together.map((other) => other.elementId) });
+      },
+      () => {},
+    );
+    return () => {
+      current = false;
+    };
+  }, [chosenId]);
   const near = useMemo(() => {
     if (chosenId === null) return null;
     const id = chosenId;
@@ -189,8 +205,9 @@ function BoardCanvas({ board, loaded, origin, chooseImage }: BoardTabProps) {
       if (relationship.from === id) set.add(relationship.to);
       if (relationship.to === id) set.add(relationship.from);
     }
+    if (together?.id === id) for (const other of together.ids) set.add(other);
     return { id, set };
-  }, [chosenId, board.relationships]);
+  }, [chosenId, board.relationships, together]);
 
   const shownNodes = useMemo(
     () =>

@@ -25,9 +25,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests y comprobación en un navegador real.
 
 ## 6. Coincidencias
-- [ ] «Coincide con» en la ficha.
-- [ ] Al elegir una tarjeta, las que coinciden siguen a la vista.
-- [ ] Tests y comprobación en un navegador real.
+- [x] «Coincide con» en la ficha.
+- [x] Al elegir una tarjeta, las que coinciden siguen a la vista.
+- [x] Tests y comprobación en un navegador real.
 
 ## 7. Sugerencias
 - [ ] Sección plegable en la pestaña Fichas, con «Crear ficha» y «Descartar».

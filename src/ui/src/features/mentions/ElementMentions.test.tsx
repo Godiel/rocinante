@@ -26,7 +26,10 @@ const references: ElementReferences = {
   total: 3,
   chapters: 2,
   first: { documentId: "d1", ordinal: 0 },
-  together: [],
+  together: [
+    { elementId: "q", paragraphs: 2 },
+    { elementId: "gone", paragraphs: 1 },
+  ],
   documents: [
     {
       documentId: "d1",
@@ -92,5 +95,25 @@ describe("«En el texto»", () => {
     await act(() => vi.advanceTimersByTimeAsync(400));
 
     expect(request).toHaveBeenCalledTimes(2);
+  });
+
+  it("says which fichas share its paragraphs, and opens them", async () => {
+    const user = userEvent.setup();
+    const onOpenElement = vi.fn();
+    request.mockResolvedValue(references);
+    render(
+      <ElementMentions
+        elementId="s"
+        documents={documents}
+        onGoTo={vi.fn()}
+        elements={[{ id: "q", name: "Don Quijote" }]}
+        onOpenElement={onOpenElement}
+      />,
+    );
+
+    await user.click(await screen.findByRole("button", { name: "Don Quijote" }));
+    expect(onOpenElement).toHaveBeenCalledWith("q");
+    expect(screen.getByText("en 2 párrafos")).toBeInTheDocument();
+    expect(screen.queryByText("en 1 párrafo")).not.toBeInTheDocument();
   });
 });
