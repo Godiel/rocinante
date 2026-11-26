@@ -135,8 +135,14 @@ public sealed class MentionFinder
         return true;
     }
 
+    /// <summary>
+    /// How a name is compared: its words folded and joined by one space. Two names with the same key are the
+    /// same name to look for.
+    /// </summary>
+    public static string Key(string name) => string.Join(' ', Tokens(name).Select(token => token.Folded));
+
     /// <summary>The words of a text: runs of letters, decimal digits and combining marks, folded.</summary>
-    private static List<Token> Tokens(string text)
+    internal static List<Token> Tokens(string text)
     {
         var tokens = new List<Token>();
         var index = 0;
@@ -202,7 +208,7 @@ public sealed class MentionFinder
         return folded.ToString();
     }
 
-    private sealed record Token(int Start, int End, string Folded);
+    internal sealed record Token(int Start, int End, string Folded);
 
     private sealed record Candidate(string[] Words, List<ElementId> Elements)
     {

@@ -7,8 +7,8 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Ejemplos válidos e inválidos; tipos de TypeScript regenerados.
 
 ## 2. Dominio
-- [ ] `NameSuggester` con la regla de la spec.
-- [ ] Tests con casos de español.
+- [x] `NameSuggester` con la regla de la spec.
+- [x] Tests con casos de español.
 
 ## 3. Persistencia (esquema v5)
 - [ ] Migración `0005-dismissed-names.sql`; repositorio de lo descartado.
