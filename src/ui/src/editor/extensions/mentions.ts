@@ -3,6 +3,7 @@ import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey, type Transaction } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { findMentions, type MentionIndex } from "../../features/mentions/find-mentions";
+import { blockText } from "./block-text";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -24,25 +25,6 @@ interface MentionsState {
 type Meta = { index: MentionIndex | null } | { visible: boolean };
 
 const key = new PluginKey<MentionsState>("mentions");
-
-/** A text block's words as the core reads them, and where each of its characters is in the document. */
-function blockText(block: ProseMirrorNode, start: number): { text: string; positions: number[] } {
-  let text = "";
-  const positions: number[] = [];
-  block.forEach((child, offset) => {
-    const at = start + 1 + offset;
-    if (child.isText) {
-      const value = child.text ?? "";
-      for (let index = 0; index < value.length; index++) positions.push(at + index);
-      text += value;
-    } else if (child.type.name === "hardBreak") {
-      positions.push(at);
-      text += "\n";
-    }
-    // Footnotes and note anchors are not words of the text: the core leaves them out too.
-  });
-  return { text, positions };
-}
 
 /** The mentions of one text block, as document ranges. */
 function mentionsInBlock(

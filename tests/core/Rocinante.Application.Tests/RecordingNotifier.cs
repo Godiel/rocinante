@@ -34,6 +34,8 @@ internal sealed class RecordingNotifier : IChangeNotifier
         Events.Add($"notes.changed:{origin}");
     }
 
+    public void DictionaryChanged(IReadOnlyList<string> words, string origin) => Events.Add($"dictionary.changed:{origin}");
+
     public void SuggestionsChanged(string origin) => Events.Add($"suggestions.changed:{origin}");
 
     public void PreferencesChanged(Preferences preferences, string origin) => Events.Add($"preferences.changed:{origin}");

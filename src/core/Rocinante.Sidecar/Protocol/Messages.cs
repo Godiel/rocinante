@@ -62,10 +62,16 @@ internal sealed record AmbienceDto(
 internal sealed record OwnAmbienceDto(Guid Id, string Kind, string Name, string File);
 
 internal sealed record PreferencesDto(
-    string Theme, string Outline, bool CounterVisible, bool TypewriterScrolling, AmbienceDto Ambience, bool MentionsVisible);
+    string Theme, string Outline, bool CounterVisible, bool TypewriterScrolling, AmbienceDto Ambience, bool MentionsVisible, bool CorrectionVisible);
 
 internal sealed record PreferencesChangeDto(
-    string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling, AmbienceDto? Ambience, bool? MentionsVisible);
+    string? Theme,
+    string? Outline,
+    bool? CounterVisible,
+    bool? TypewriterScrolling,
+    AmbienceDto? Ambience,
+    bool? MentionsVisible,
+    bool? CorrectionVisible);
 
 internal sealed record PlaceDto(Guid DocumentId, int Anchor, int Head);
 
@@ -170,6 +176,10 @@ internal sealed record DismissSuggestionParams(string Name, string Origin);
 
 internal sealed record SuggestionsChangedNotification(string Origin);
 
+internal sealed record WordParams(string Word, string Origin);
+
+internal sealed record DictionaryChangedNotification(IReadOnlyList<string> Words, string Origin);
+
 internal sealed record NoteChangesDto(JsonObject? Content, bool? Resolved, IReadOnlyList<Guid>? Elements);
 
 internal sealed record UpdateNoteParams(Guid Id, NoteChangesDto Changes, string Origin);
@@ -273,6 +283,9 @@ internal sealed record ElementsChangedNotification(
 [JsonSerializable(typeof(IReadOnlyList<SuggestionDto>))]
 [JsonSerializable(typeof(DismissSuggestionParams))]
 [JsonSerializable(typeof(SuggestionsChangedNotification))]
+[JsonSerializable(typeof(WordParams))]
+[JsonSerializable(typeof(IReadOnlyList<string>))]
+[JsonSerializable(typeof(DictionaryChangedNotification))]
 [JsonSerializable(typeof(SystemInfoResult))]
 [JsonSerializable(typeof(ProjectStateDto))]
 [JsonSerializable(typeof(DocumentEntryDto))]

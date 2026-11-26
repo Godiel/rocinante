@@ -220,4 +220,29 @@ public sealed class SettingsUseCasesTests : IDisposable
         _app = new AppFixture(launchFile, _app.Store.Stored);
         return _app;
     }
+
+    [Fact]
+    public void The_writers_own_dictionary_keeps_each_word_once_in_order_and_announces_changes()
+    {
+        _app.App.AddWord("Rocinante", Main).ShouldBe(["Rocinante"]);
+        _app.App.AddWord("Clavileño", "window-1").ShouldBe(["Clavileño", "Rocinante"]);
+        _app.Notifier.Clear();
+
+        _app.App.AddWord("Rocinante", Main);
+        _app.Notifier.Events.ShouldBeEmpty();
+
+        _app.App.RemoveWord("Rocinante", Main).ShouldBe(["Clavileño"]);
+        _app.Notifier.Events.ShouldBe(["dictionary.changed:main"]);
+        _app.App.RemoveWord("Rocinante", Main).ShouldBe(["Clavileño"]);
+        _app.App.Dictionary().ShouldBe(["Clavileño"]);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("dos palabras")]
+    [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
+    public void The_dictionary_takes_single_words(string word)
+    {
+        Should.Throw<DomainException>(() => _app.App.AddWord(word, Main)).Error.ShouldBe(DomainError.InvalidWord);
+    }
 }

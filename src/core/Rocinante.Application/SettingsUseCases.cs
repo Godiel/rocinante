@@ -73,6 +73,29 @@ public sealed class SettingsUseCases(
 
     public IReadOnlyList<RecentProjectView> Recent() => RecentProjectView.Of(settings);
 
+    /// <summary>The writer's own dictionary.</summary>
+    public IReadOnlyList<string> Dictionary() => settings.Dictionary;
+
+    public IReadOnlyList<string> AddWord(string word, string origin)
+    {
+        if (settings.AddWord(word))
+        {
+            notifier.DictionaryChanged(settings.Dictionary, origin);
+        }
+
+        return settings.Dictionary;
+    }
+
+    public IReadOnlyList<string> RemoveWord(string word, string origin)
+    {
+        if (settings.RemoveWord(word))
+        {
+            notifier.DictionaryChanged(settings.Dictionary, origin);
+        }
+
+        return settings.Dictionary;
+    }
+
     public IReadOnlyList<RecentProjectView> RemoveRecent(string path, string origin)
     {
         settings.Remove(Path.GetFullPath(path));

@@ -49,6 +49,11 @@ internal sealed class WritingSession(ServerHarness harness)
             """)), ("origin", Main)));
         harness.Call("ambience.remove", Params(("id", own), ("origin", Other)));
 
+        // The writer's own dictionary, for the spelling check of every work.
+        harness.Call("dictionary.add", Params(("word", "Clavileño"), ("origin", Main)));
+        harness.Call("dictionary.remove", Params(("word", "Clavileño"), ("origin", Other)));
+        harness.Call("dictionary.get");
+
         var original = harness.PathOf("quijote.rocinante");
         harness.Call("project.create", Params(("path", original), ("title", "El ingenioso hidalgo"), ("origin", Main)));
         harness.Call("project.get");

@@ -360,3 +360,16 @@
   text-decoration-thickness: 1px;
   text-underline-offset: 0.28em;
 }
+
+/* What the correction marks: a fine wavy line under a word, a dotted one under a sign. Only marks. */
+.book-page .misspelled {
+  text-decoration: underline wavy color-mix(in srgb, var(--color-rubric) 70%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  cursor: pointer;
+}
+
+.book-page .punctuation-issue {
+  border-bottom: 1px dotted var(--color-rubric);
+  cursor: pointer;
+}

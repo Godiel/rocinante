@@ -28,6 +28,8 @@ import { NoteStatesExtension } from "../../editor/extensions/note-states";
 import { mentionAt, Mentions } from "../../editor/extensions/mentions";
 import type { MentionIndex } from "../mentions/find-mentions";
 import { MentionCard } from "../mentions/MentionCard";
+import { Correction, type CorrectionSetup } from "../../editor/extensions/correction";
+import { CorrectionSlip, type CorrectionTarget } from "../correction/CorrectionSlip";
 import "./book-editor.css";
 import { registerCursor, shownHead } from "../../editor/cursor";
 
@@ -93,6 +95,14 @@ export interface BookEditorProps {
   mentionElements?: readonly ElementSummary[];
   /** Opens a ficha in the panel beside the text. */
   onOpenElement?(id: string): void;
+  /** The speller and the words the writer accepts; null checks nothing. */
+  correction?: CorrectionSetup | null;
+  /** Whether the marks of the correction show. */
+  correctionVisible?: boolean;
+  /** Adds a word to the writer's own dictionary. */
+  onAddWord?(word: string): void;
+  /** Stops marking a word for the rest of the session. */
+  onIgnoreWord?(word: string): void;
 }
 
 /**
@@ -120,6 +130,10 @@ export function BookEditor({
   revealMention = null,
   mentionElements = NO_ELEMENTS,
   onOpenElement,
+  correction = null,
+  correctionVisible = false,
+  onAddWord,
+  onIgnoreWord,
 }: BookEditorProps) {
   const frame = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | undefined>(undefined);
@@ -160,6 +174,7 @@ export function BookEditor({
       CurrentBlock,
       NoteStatesExtension,
       Mentions,
+      Correction,
     ],
     content: document.content,
     editorProps: {
@@ -300,6 +315,30 @@ export function BookEditor({
     editor?.commands.setMentionsVisible(mentionsVisible);
   }, [editor, mentionsVisible]);
 
+  // The correction: checked again when the speller or the accepted words change, and marked again when
+  // the speller answers about new words.
+  const [correcting, setCorrecting] = useState<
+    (CorrectionTarget & { top: number; left: number }) | null
+  >(null);
+  useEffect(() => {
+    if (!editor) return;
+    editor.commands.setCorrection(correction ?? { checker: null, accepted: new Set() });
+    const checker = correction?.checker;
+    if (!checker) return;
+    let timer: number | undefined;
+    const stop = checker.onAnswers(() => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => editor.commands.refreshCorrection(), 60);
+    });
+    return () => {
+      window.clearTimeout(timer);
+      stop();
+    };
+  }, [editor, correction]);
+  useEffect(() => {
+    editor?.commands.setCorrectionVisible(correctionVisible);
+  }, [editor, correctionVisible]);
+
   // «En el texto» of a ficha: the mention is selected and brought into view, the panel still open.
   const mentionAtRequest = revealMention?.at;
   const mentionElement = revealMention?.elementId;
@@ -375,6 +414,27 @@ export function BookEditor({
   function onClick(event: MouseEvent) {
     if (!editor) return;
     const target = event.target as HTMLElement;
+    const marked = target.closest<HTMLElement>(
+      ".book-page .misspelled, .book-page .punctuation-issue",
+    );
+    if (marked && correctionVisible) {
+      const from = editor.view.posAtDOM(marked, 0);
+      const to = from + (marked.textContent ?? "").length;
+      const near = slipAt(to);
+      setCorrecting(
+        marked.classList.contains("misspelled")
+          ? { kind: "spelling", word: marked.dataset.word ?? "", from, to, ...near }
+          : {
+              kind: "punctuation",
+              message: marked.dataset.message ?? "",
+              fix: marked.dataset.fix ?? null,
+              from,
+              to,
+              ...near,
+            },
+      );
+      return;
+    }
     const anchor = target.closest<HTMLElement>(".ProseMirror [data-note-id]");
     const note = anchor?.dataset.noteId ? notesById.get(anchor.dataset.noteId) : undefined;
     if (note) {
@@ -522,6 +582,34 @@ export function BookEditor({
           onEnter={() => window.clearTimeout(cardTimer.current)}
           onLeave={() => {
             cardTimer.current = window.setTimeout(() => setCard(null), CARD_DELAY_MS);
+          }}
+        />
+      )}
+      {correcting && correction?.checker && (
+        <CorrectionSlip
+          key={`${correcting.from}:${correcting.to}`}
+          target={correcting}
+          top={correcting.top}
+          left={correcting.left}
+          suggest={(word) => correction.checker!.suggest(word)}
+          onReplace={(text) => {
+            const { from, to } = correcting;
+            setCorrecting(null);
+            editor.chain().focus().insertContentAt({ from, to }, text).run();
+          }}
+          onAddWord={(word) => {
+            setCorrecting(null);
+            onAddWord?.(word);
+            editor.commands.focus();
+          }}
+          onIgnore={(word) => {
+            setCorrecting(null);
+            onIgnoreWord?.(word);
+            editor.commands.focus();
+          }}
+          onClose={() => {
+            setCorrecting(null);
+            editor.commands.focus();
           }}
         />
       )}

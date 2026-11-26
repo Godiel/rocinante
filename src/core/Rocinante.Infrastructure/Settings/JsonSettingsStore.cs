@@ -65,7 +65,8 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 settings.Preferences.CounterVisible,
                 settings.Preferences.TypewriterScrolling,
                 ToFile(settings.Preferences.Ambience),
-                settings.Preferences.MentionsVisible),
+                settings.Preferences.MentionsVisible,
+                settings.Preferences.CorrectionVisible),
             settings.LastProject,
             [.. settings.Recent.Select(recent => new RecentFile(
                 recent.Path,
@@ -73,7 +74,8 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 recent.LastOpenedAt,
                 recent.Place is { } place ? new PlaceFile(place.DocumentId.Value, place.Anchor, place.Head) : null))],
             settings.LastFormat is { } format ? ToFile(format) : null,
-            [.. settings.OwnAmbience.Select(own => new OwnFile(own.Id, Name(own.Kind), own.Name, own.FileName))]);
+            [.. settings.OwnAmbience.Select(own => new OwnFile(own.Id, Name(own.Kind), own.Name, own.FileName))],
+            settings.Dictionary);
 
     private static string Name<T>(T value)
         where T : struct, Enum => JsonNamingPolicy.CamelCase.ConvertName(value.ToString());
@@ -191,7 +193,8 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 stored.CounterVisible ?? defaults.CounterVisible,
                 stored.TypewriterScrolling ?? defaults.TypewriterScrolling,
                 ToAmbience(stored.Ambience),
-                stored.MentionsVisible ?? defaults.MentionsVisible)
+                stored.MentionsVisible ?? defaults.MentionsVisible,
+                stored.CorrectionVisible ?? defaults.CorrectionVisible)
             : defaults;
 
         var recent = (file.Recent ?? [])
@@ -208,12 +211,24 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
         var own = ToOwn(file.OwnAmbience);
         preferences = preferences with { Ambience = preferences.Ambience.Without(id => own.Exists(entry => entry.Id == id)) };
 
-        return new AppSettings(preferences, recent, file.LastProject, ToFormat(file.LastFormat), own);
+        var words = (file.Dictionary ?? [])
+            .Where(word => !string.IsNullOrWhiteSpace(word) && word.Length <= WriterSettings.MaxDictionaryWordLength && !word.Any(char.IsWhiteSpace))
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .Take(WriterSettings.MaxDictionaryWords)
+            .ToList();
+        return new AppSettings(preferences, recent, file.LastProject, ToFormat(file.LastFormat), own, words);
     }
 }
 
 internal sealed record SettingsFile(
-    int Version, PreferencesFile? Preferences, string? LastProject, IReadOnlyList<RecentFile>? Recent, FormatFile? LastFormat, IReadOnlyList<OwnFile>? OwnAmbience);
+    int Version,
+    PreferencesFile? Preferences,
+    string? LastProject,
+    IReadOnlyList<RecentFile>? Recent,
+    FormatFile? LastFormat,
+    IReadOnlyList<OwnFile>? OwnAmbience,
+    IReadOnlyList<string>? Dictionary = null);
 
 internal sealed record AmbienceFile(
     string? Background, TypingFile? Typing, IReadOnlyList<AmbientFile>? Ambients, double? AmbientVolume, bool? AmbientMuted, bool? DimOthers, GoalFile? Goal);
@@ -241,7 +256,13 @@ internal sealed record FormatFile(
 internal sealed record MarginsFile(double Top, double Bottom, double Inside, double Outside);
 
 internal sealed record PreferencesFile(
-    string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling, AmbienceFile? Ambience, bool? MentionsVisible = null);
+    string? Theme,
+    string? Outline,
+    bool? CounterVisible,
+    bool? TypewriterScrolling,
+    AmbienceFile? Ambience,
+    bool? MentionsVisible = null,
+    bool? CorrectionVisible = null);
 
 internal sealed record RecentFile(string Path, string Title, DateTimeOffset LastOpenedAt, PlaceFile? Place);
 
