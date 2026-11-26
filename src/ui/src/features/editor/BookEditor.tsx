@@ -68,6 +68,11 @@ export interface BookEditorProps {
   onCreateElement?(name: string): void;
   /** Opens a note in the panel beside the text, to resolve it or link it with fichas. */
   onOpenNote?(id: string): void;
+  /**
+   * Deletes a note, with the notice to undo it. Its anchor stays in the text, hidden, so undoing puts the
+   * mark back where it was.
+   */
+  onDeleteNote?(id: string): void;
   /** A note whose passage the writer asked to see: it is selected and brought into view. */
   reveal?: { noteId: string; at: number } | null;
 }
@@ -90,6 +95,7 @@ export function BookEditor({
   onProblem,
   onCreateElement,
   onOpenNote,
+  onDeleteNote,
   reveal = null,
 }: BookEditorProps) {
   const frame = useRef<HTMLDivElement>(null);
@@ -393,10 +399,8 @@ export function BookEditor({
     const current = slip;
     setSlip(null);
     if (current.kind === "note") {
-      await act(async () => {
-        await request("note.delete", { id: current.note.id, origin });
-        editor.commands.removeNoteAnchors(current.note.id);
-      });
+      if (onDeleteNote) onDeleteNote(current.note.id);
+      else await act(() => request("note.delete", { id: current.note.id, origin }));
     } else if (current.kind === "footnote") {
       deleteFootnote(current.position);
     }

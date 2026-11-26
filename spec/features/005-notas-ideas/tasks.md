@@ -90,9 +90,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real.
 
 ## 10. Borrar y deshacer
-- [ ] «Borrar» llama a `note.delete` y muestra el aviso con Deshacer, que llama a `note.restore`.
-- [ ] El ancla de la nota borrada se queda escondida en el texto; al deshacer, la marca vuelve a su sitio.
-- [ ] Tests de comportamiento y comprobación en la app real.
+- [x] «Borrar» llama a `note.delete` y muestra el aviso con Deshacer, que llama a `note.restore`.
+- [x] El ancla de la nota borrada se queda escondida en el texto; al deshacer, la marca vuelve a su sitio.
+- [x] Tests de comportamiento y comprobación en la app real.
 
 ## 11. Pruebas de extremo a extremo y rendimiento
 - [ ] El recorrido de la spec:

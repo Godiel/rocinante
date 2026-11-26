@@ -672,6 +672,7 @@ export function WritingView({
                   setSheet("notes");
                   setOpenNote({ id });
                 }}
+                onDeleteNote={(id) => void noteTrash.remove(id)}
                 typewriterScrolling={preferences.typewriterScrolling}
                 onCounts={(statistics, total) => {
                   setCounts({ id: document.id, statistics });
