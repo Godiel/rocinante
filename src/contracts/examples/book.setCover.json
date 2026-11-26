@@ -1,0 +1,21 @@
+{
+  "valid": [
+    {
+      "image": "/9j/4AAQSkZJRg==",
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    {
+      "image": "",
+      "origin": "main"
+    },
+    {
+      "image": "no es base64!",
+      "origin": "main"
+    },
+    {
+      "origin": "main"
+    }
+  ]
+}

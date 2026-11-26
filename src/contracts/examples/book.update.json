@@ -1,0 +1,41 @@
+{
+  "valid": [
+    {
+      "changes": {
+        "author": "Miguel de Cervantes"
+      },
+      "origin": "main"
+    },
+    {
+      "changes": {
+        "credits": "© 1605 Miguel de Cervantes.\nPrimera edición."
+      },
+      "origin": "main"
+    },
+    {
+      "changes": {
+        "author": "",
+        "credits": null
+      },
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    {
+      "changes": {},
+      "origin": "main"
+    },
+    {
+      "changes": {
+        "author": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "origin": "main"
+    },
+    {
+      "changes": {
+        "title": "Otro"
+      },
+      "origin": "main"
+    }
+  ]
+}
