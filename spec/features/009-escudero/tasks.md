@@ -9,7 +9,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/009-escudero`.
 - [x] `Proposal` y su ciclo, con tests.
 
 ## 3. Persistencia (esquema v6)
-- [ ] Migración con `proposal`, `squire_paragraph` y el interruptor por obra; `docs/format`.
+- [x] Migración con `proposal`, `squire_paragraph` y el interruptor por obra; `docs/format`.
 
 ## 4. Clave en el almacén del sistema
 - [ ] `ISecretStore` para Windows, macOS y Linux, y en memoria para tests.

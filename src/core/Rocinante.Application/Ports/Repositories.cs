@@ -4,6 +4,7 @@ using Rocinante.Domain.Documents;
 using Rocinante.Domain.Elements;
 using Rocinante.Domain.Notes;
 using Rocinante.Domain.Projects;
+using Rocinante.Domain.Squire;
 using Rocinante.Domain.Versions;
 
 namespace Rocinante.Application.Ports;
@@ -119,4 +120,27 @@ public interface INoteRepository
 
     /// <summary>Deletes for good every note that was set aside. Returns how many there were.</summary>
     int PurgeDeleted();
+}
+
+/// <summary>The squire's proposals and the paragraphs it already read, and whether it may read the work.</summary>
+public interface IProposalRepository
+{
+    /// <summary>Inserts a new proposal or keeps its new state.</summary>
+    void Save(Proposal proposal);
+
+    Proposal Load(ProposalId id);
+
+    /// <summary>The proposals waiting for the writer, the newest first, leaving out those of documents in the trash.</summary>
+    IReadOnlyList<Proposal> Pending();
+
+    /// <summary>The keys of every proposal made for a paragraph, waiting, taken or dropped.</summary>
+    IReadOnlySet<string> KeysOf(DocumentId documentId, string paragraph);
+
+    bool WasRead(DocumentId documentId, string paragraph);
+
+    void MarkRead(DocumentId documentId, string paragraph, DateTimeOffset now);
+
+    bool SquireEnabled();
+
+    void SetSquireEnabled(bool enabled);
 }
