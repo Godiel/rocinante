@@ -1,6 +1,6 @@
 # 005 · Notas e ideas
 
-**Estado:** en especificación
+**Estado:** hecha.
 
 ## Qué hace
 
@@ -49,34 +49,34 @@ Escribir una novela deja un rastro de recordatorios: dudas sobre una fecha, idea
 ## Criterios de aceptación
 
 **Notas**
-- [ ] Se crea una idea suelta desde el panel y una nota desde el texto, como en la 001. Las dos se editan con párrafos, cursiva y negrita.
-- [ ] Una nota se marca como resuelta y se reabre. Las resueltas se ocultan de la lista y su marca se atenúa en el texto.
-- [ ] Borrar una nota se puede deshacer desde el aviso.
-- [ ] Las notas de una obra creada con versiones anteriores se abren sin perder nada.
+- [x] Se crea una idea suelta desde el panel y una nota desde el texto, como en la 001. Las dos se editan con párrafos, cursiva y negrita.
+- [x] Una nota se marca como resuelta y se reabre. Las resueltas se ocultan de la lista y su marca se atenúa en el texto.
+- [x] Borrar una nota se puede deshacer desde el aviso.
+- [x] Las notas de una obra creada con versiones anteriores se abren sin perder nada.
 
 **Panel**
-- [ ] El panel de la derecha tiene las pestañas Fichas y Notas. Ctrl+Mayús+E y Ctrl+Mayús+N lo abren en cada una y lo cierran; el índice puede seguir abierto.
-- [ ] El panel recuerda en cada ventana si estaba abierto y en qué pestaña.
-- [ ] La lista ordena las notas de la más reciente a la más antigua y, al filtrar por capítulo, en el orden del texto.
-- [ ] Los filtros por clase, capítulo y ficha y la búsqueda se combinan. La búsqueda no distingue mayúsculas ni tildes.
-- [ ] «Ir al pasaje» abre el capítulo de la nota y selecciona su pasaje, con el panel abierto.
-- [ ] Con 500 notas y el panel abierto, escribir en la obra sigue igual de fluido.
+- [x] El panel de la derecha tiene las pestañas Fichas y Notas. Ctrl+Mayús+E y Ctrl+Mayús+N lo abren en cada una y lo cierran; el índice puede seguir abierto.
+- [x] El panel recuerda en cada ventana si estaba abierto y en qué pestaña.
+- [x] La lista ordena las notas de la más reciente a la más antigua y, al filtrar por capítulo, en el orden del texto.
+- [x] Los filtros por clase, capítulo y ficha y la búsqueda se combinan. La búsqueda no distingue mayúsculas ni tildes.
+- [x] «Ir al pasaje» abre el capítulo de la nota y selecciona su pasaje, con el panel abierto.
+- [x] Con 500 notas y el panel abierto, escribir en la obra sigue igual de fluido.
 
 **Fichas**
-- [ ] Una nota se enlaza con varias fichas y se desenlaza de cada una. Desde la nota se abre cada ficha.
-- [ ] La ficha muestra sus notas, salta a su pasaje y crea una nota nueva ya enlazada.
-- [ ] Mientras una ficha está en la papelera, no aparece en las notas. Al restaurarla, vuelven sus enlaces.
+- [x] Una nota se enlaza con varias fichas y se desenlaza de cada una. Desde la nota se abre cada ficha.
+- [x] La ficha muestra sus notas, salta a su pasaje y crea una nota nueva ya enlazada.
+- [x] Mientras una ficha está en la papelera, no aparece en las notas. Al restaurarla, vuelven sus enlaces.
 
 **De la obra**
-- [ ] Las notas, sus enlaces y su estado se ven y se actualizan en vivo en todas las ventanas de la obra.
-- [ ] «Guardar como» copia las notas con sus enlaces.
-- [ ] Las notas no cuentan en el contador de palabras.
+- [x] Las notas, sus enlaces y su estado se ven y se actualizan en vivo en todas las ventanas de la obra.
+- [x] «Guardar como» copia las notas con sus enlaces.
+- [x] Las notas no cuentan en el contador de palabras.
 
 **Calidad**
-- [ ] Los métodos y notificaciones nuevos forman parte del contrato de mensajes, con sus pruebas de contrato.
-- [ ] Los cambios del archivo `.rocinante` son una migración numerada, documentada en `docs/format`.
-- [ ] Los logs no contienen el texto de las notas.
-- [ ] Tests de dominio en el núcleo, tests de comportamiento de la interfaz y una prueba de extremo a extremo: crear una idea suelta y una nota en el texto, enlazarlas con una ficha, encontrarlas con los filtros, saltar al pasaje, resolver una y volver a abrir la obra con todo en su sitio.
+- [x] Los métodos y notificaciones nuevos forman parte del contrato de mensajes, con sus pruebas de contrato.
+- [x] Los cambios del archivo `.rocinante` son una migración numerada, documentada en `docs/format`.
+- [x] Los logs no contienen el texto de las notas.
+- [x] Tests de dominio en el núcleo, tests de comportamiento de la interfaz y una prueba de extremo a extremo: crear una idea suelta y una nota en el texto, enlazarlas con una ficha, encontrarlas con los filtros, saltar al pasaje, resolver una y volver a abrir la obra con todo en su sitio.
 
 ## Fuera de alcance
 
