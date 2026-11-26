@@ -40,7 +40,8 @@ import { AmbienceSheet } from "../ambience/AmbienceSheet";
 import { ElementsPanel } from "../elements/ElementsPanel";
 import { suggestedAttributes } from "../elements/kinds";
 import { isElementsShortcut } from "../elements/panel";
-import { NotesPanel } from "../notes/NotesPanel";
+import { NotesPanel, type OpenedNote } from "../notes/NotesPanel";
+import { useNoteTrash } from "../notes/useNoteTrash";
 import { SidePanelTabs } from "../workspace/SidePanelTabs";
 import {
   isNotesShortcut,
@@ -131,6 +132,12 @@ export function WritingView({
   }, [sideTab]);
   const { board, loaded: boardLoaded } = useBoard(project.id);
   const { notes: workNotes, loaded: notesLoaded } = useWorkNotes(project.id);
+  const [openNote, setOpenNote] = useState<OpenedNote | null>(null);
+  // The note whose passage the writer asked to see; `at` tells one request from the next.
+  const [reveal, setReveal] = useState<{ noteId: string; documentId: string; at: number } | null>(
+    null,
+  );
+  const noteTrash = useNoteTrash(origin, setProblem);
   const [openElement, setOpenElement] = useState<string | null>(null);
   const [freshElement, setFreshElement] = useState<{
     id: string;
@@ -190,6 +197,10 @@ export function WritingView({
     currentId && index.trash.some((entry) => entry.id === currentId)
       ? (index.chapters[0]?.id ?? index.fragments[0]?.id ?? null)
       : currentId;
+  const noteDocuments = useMemo(
+    () => [...index.chapters, ...index.fragments].map(({ id, title }) => ({ id, title })),
+    [index],
+  );
   const documentNotes = useMemo(
     () => (shownId ? notesOf(workNotes, shownId) : []),
     [workNotes, shownId],
@@ -656,6 +667,11 @@ export function WritingView({
                 origin={origin}
                 notes={documentNotes}
                 notesLoaded={notesLoaded}
+                reveal={reveal?.documentId === document.id ? reveal : null}
+                onOpenNote={(id) => {
+                  setSheet("notes");
+                  setOpenNote({ id });
+                }}
                 typewriterScrolling={preferences.typewriterScrolling}
                 onCounts={(statistics, total) => {
                   setCounts({ id: document.id, statistics });
@@ -702,8 +718,27 @@ export function WritingView({
           <NotesPanel
             notes={workNotes}
             loaded={notesLoaded}
+            documents={noteDocuments}
+            currentDocumentId={shownId}
+            elements={board.elements}
+            origin={origin}
+            opened={openNote}
             tabs={<SidePanelTabs tab="notes" onShow={(tab) => setSheet(tab)} />}
+            onOpen={setOpenNote}
+            onGoToPassage={(note) => {
+              if (!note.documentId) return;
+              setViewing(null);
+              setCurrentId(note.documentId);
+              setReveal({ noteId: note.id, documentId: note.documentId, at: Date.now() });
+            }}
+            onDelete={(note) => void noteTrash.remove(note.id)}
+            onOpenElement={(id) => {
+              setSheet("elements");
+              setOpenElement(id);
+              setFreshElement(null);
+            }}
             onClose={closeSheet}
+            onProblem={setProblem}
           />
         )}
 
@@ -773,7 +808,7 @@ export function WritingView({
           onHide={() => update({ counterVisible: false })}
         />
 
-        {!deleted && elementTrash.notice}
+        {!deleted && (noteTrash.notice ?? elementTrash.notice)}
         {deleted && (
           <UndoNotice
             key={deleted.id}

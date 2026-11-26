@@ -12,7 +12,7 @@ import type {
   TipTapDocument,
 } from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
-import { bookExtensions, footnotesOf } from "../../editor/extensions";
+import { anchorsOf, bookExtensions, footnotesOf } from "../../editor/extensions";
 import { TypingSounds } from "../../editor/extensions/typing-sounds";
 import { CurrentBlock } from "../../editor/extensions/current-block";
 import { sounds } from "../../audio/engine";
@@ -68,6 +68,8 @@ export interface BookEditorProps {
   onCreateElement?(name: string): void;
   /** Opens a note in the panel beside the text, to resolve it or link it with fichas. */
   onOpenNote?(id: string): void;
+  /** A note whose passage the writer asked to see: it is selected and brought into view. */
+  reveal?: { noteId: string; at: number } | null;
 }
 
 /**
@@ -88,6 +90,7 @@ export function BookEditor({
   onProblem,
   onCreateElement,
   onOpenNote,
+  reveal = null,
 }: BookEditorProps) {
   const frame = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | undefined>(undefined);
@@ -245,6 +248,16 @@ export function BookEditor({
     // Only when the editor first appears; later the writer moves the cursor.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [editor]);
+
+  // «Ir al pasaje»: the passage of the note is selected and brought into view, the panel still open.
+  const revealAt = reveal?.at;
+  const revealNote = reveal?.noteId;
+  useEffect(() => {
+    if (!editor || !revealNote) return;
+    const passage = anchorsOf(editor.state.doc).get(revealNote)?.[0];
+    if (!passage) return;
+    editor.chain().focus().setTextSelection(passage).scrollIntoView().run();
+  }, [editor, revealNote, revealAt]);
 
   // How each anchor looks: faded when its note is resolved, hidden when the note was set aside.
   const noteStates = useMemo(

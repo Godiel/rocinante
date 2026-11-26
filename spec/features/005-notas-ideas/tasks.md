@@ -74,13 +74,13 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real.
 
 ## 8. La lista de notas
-- [ ] Cada nota con el principio de su texto, a qué está unida y sus fichas.
-- [ ] Filtros por clase, capítulo y ficha, búsqueda y «Ver resueltas».
-- [ ] «Nueva idea» crea una nota sin documento y la abre.
-- [ ] La nota abierta sustituye a la lista, con su texto, «Resuelta», sus fichas, «Ir al pasaje» y «Borrar»; una flecha y Esc vuelven.
-- [ ] «Ir al pasaje» cambia de documento si hace falta, selecciona el ancla y la lleva a la vista, con el panel abierto.
-- [ ] Mensaje cuando no hay notas o ningún filtro encuentra nada.
-- [ ] Tests de comportamiento y comprobación en la app real.
+- [x] Cada nota con el principio de su texto, a qué está unida y sus fichas.
+- [x] Filtros por clase, capítulo y ficha, búsqueda y «Ver resueltas».
+- [x] «Nueva idea» crea una nota sin documento y la abre.
+- [x] La nota abierta sustituye a la lista, con su texto, «Resuelta», sus fichas, «Ir al pasaje» y «Borrar»; una flecha y Esc vuelven.
+- [x] «Ir al pasaje» cambia de documento si hace falta, selecciona el ancla y la lleva a la vista, con el panel abierto.
+- [x] Mensaje cuando no hay notas o ningún filtro encuentra nada.
+- [x] Tests de comportamiento y comprobación en la app real.
 
 ## 9. Enlazar con fichas
 - [ ] «Enlazar con una ficha…» en la nota, con el buscador de fichas de la 004.
