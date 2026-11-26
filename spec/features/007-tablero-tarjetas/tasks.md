@@ -21,8 +21,8 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] El escenario `WritingSession` usa los métodos nuevos.
 
 ## 5. Números en las tarjetas
-- [ ] `useBoardMentions` y la línea de la tarjeta.
-- [ ] Tests y comprobación en un navegador real.
+- [x] `useBoardMentions` y la línea de la tarjeta.
+- [x] Tests y comprobación en un navegador real.
 
 ## 6. Coincidencias
 - [ ] «Coincide con» en la ficha.

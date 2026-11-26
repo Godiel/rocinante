@@ -127,6 +127,12 @@
   -webkit-box-orient: vertical;
 }
 
+.board-card-mentions {
+  font-size: var(--text-caption);
+  color: var(--color-ink-faint);
+  white-space: nowrap;
+}
+
 .board-card-kind {
   font-size: var(--text-caption);
   letter-spacing: var(--tracking-small-caps);

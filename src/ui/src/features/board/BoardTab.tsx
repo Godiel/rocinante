@@ -40,6 +40,7 @@ import { changeRelationship, relate, type KindChoice } from "../elements/relate"
 import { RelationshipPicker } from "../elements/RelationshipPicker";
 import { arrowsFor } from "./edges";
 import { ElementCard } from "./ElementCard";
+import { BoardMentionsContext, useBoardMentions } from "./board-mentions";
 import { cardsFor, dress, type CardNode } from "./nodes";
 import { CARD, freePlaceNear } from "./placement";
 import { RelationArrow } from "./RelationArrow";
@@ -86,9 +87,12 @@ const ariaLabels: Partial<AriaLabelConfig> = {
 
 /** The board of the work: the fichas as cards placed where the writer wants. Loaded the first time it opens. */
 export default function BoardTab(props: BoardTabProps) {
+  const mentions = useBoardMentions();
   return (
     <ReactFlowProvider>
-      <BoardCanvas {...props} />
+      <BoardMentionsContext.Provider value={mentions}>
+        <BoardCanvas {...props} />
+      </BoardMentionsContext.Provider>
     </ReactFlowProvider>
   );
 }
