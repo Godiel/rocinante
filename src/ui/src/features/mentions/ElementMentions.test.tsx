@@ -26,6 +26,7 @@ const references: ElementReferences = {
   total: 3,
   chapters: 2,
   first: { documentId: "d1", ordinal: 0 },
+  together: [],
   documents: [
     {
       documentId: "d1",
@@ -73,7 +74,7 @@ describe("«En el texto»", () => {
   });
 
   it("says when the ficha is not in the text yet", async () => {
-    request.mockResolvedValue({ total: 0, chapters: 0, first: null, documents: [] });
+    request.mockResolvedValue({ total: 0, chapters: 0, first: null, documents: [], together: [] });
     render(<ElementMentions elementId="s" documents={documents} onGoTo={vi.fn()} />);
 
     expect(await screen.findByText("Aún no aparece en el texto.")).toBeInTheDocument();

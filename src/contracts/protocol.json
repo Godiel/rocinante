@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 9,
+  "protocolVersion": 10,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -757,6 +757,82 @@
         "type": "null"
       }
     },
+    "board.mentions": {
+      "description": "How many times each element of the work is mentioned in the text, and in how many documents.",
+      "params": null,
+      "result": {
+        "type": "object",
+        "required": ["elements"],
+        "additionalProperties": false,
+        "properties": {
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "total", "chapters"],
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/Id"
+                },
+                "total": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "chapters": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "suggestions.get": {
+      "description": "Proper names repeated in the text that are not the name or an alias of any element, nor dismissed: the most repeated first, twenty at most.",
+      "params": null,
+      "result": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["name", "count"],
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "suggestion.dismiss": {
+      "description": "Stops suggesting a name in this work, for good. Broadcasts suggestions.changed.",
+      "params": {
+        "type": "object",
+        "required": ["name", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
+      }
+    },
     "element.create": {
       "description": "Creates an element. The UI sends the suggested attributes of its kind, empty. Without position the card goes to a free place. Broadcasts elements.changed.",
       "params": {
@@ -1293,6 +1369,19 @@
               "$ref": "#/$defs/RelationshipKind"
             }
           },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
+    },
+    "suggestions.changed": {
+      "description": "A suggestion was dismissed: every window asks for them again.",
+      "params": {
+        "type": "object",
+        "required": ["origin"],
+        "additionalProperties": false,
+        "properties": {
           "origin": {
             "$ref": "#/$defs/WindowLabel"
           }
@@ -2599,7 +2688,7 @@
     },
     "ElementReferences": {
       "type": "object",
-      "required": ["total", "chapters", "first", "documents"],
+      "required": ["total", "chapters", "first", "documents", "together"],
       "additionalProperties": false,
       "properties": {
         "total": {
@@ -2639,6 +2728,24 @@
                 "items": {
                   "$ref": "#/$defs/Mention"
                 }
+              }
+            }
+          }
+        },
+        "together": {
+          "type": "array",
+          "description": "The other elements mentioned in the same paragraphs, the most paragraphs first.",
+          "items": {
+            "type": "object",
+            "required": ["elementId", "paragraphs"],
+            "additionalProperties": false,
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/Id"
+              },
+              "paragraphs": {
+                "type": "integer",
+                "minimum": 1
               }
             }
           }

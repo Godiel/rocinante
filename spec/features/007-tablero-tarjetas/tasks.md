@@ -3,8 +3,8 @@
 Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests en verde, y con una comprobación en un navegador real cuando toca la interfaz, antes de pasar al siguiente. Rama: `feature/007-tablero-tarjetas`.
 
 ## 1. Contrato de mensajes (versión 10)
-- [ ] `board.mentions`, `together` en `element.references`, `suggestions.get`, `suggestion.dismiss` y `suggestions.changed`.
-- [ ] Ejemplos válidos e inválidos; tipos de TypeScript regenerados.
+- [x] `board.mentions`, `together` en `element.references`, `suggestions.get`, `suggestion.dismiss` y `suggestions.changed`.
+- [x] Ejemplos válidos e inválidos; tipos de TypeScript regenerados.
 
 ## 2. Dominio
 - [ ] `NameSuggester` con la regla de la spec.
