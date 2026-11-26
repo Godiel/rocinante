@@ -76,9 +76,9 @@ export function ExportDialog({
   // The progress and the end of the export this dialog started.
   useEffect(() => {
     const known = early.current;
-    const ours = (id: string, apply: () => void) => {
-      if (id === running.current) apply();
-      else if (running.current === null) known.set(id, apply);
+    const ours = (exportId: string, apply: () => void) => {
+      if (exportId === running.current) apply();
+      else if (running.current === null) known.set(exportId, apply);
     };
     const stops = [
       onNotification("export.progress", (progress) => {
