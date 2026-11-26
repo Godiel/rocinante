@@ -6,6 +6,7 @@ using Rocinante.Application;
 using Rocinante.Application.Ports;
 using Rocinante.Application.Squire;
 using Rocinante.Domain;
+using Rocinante.Domain.Books;
 using Rocinante.Domain.Elements;
 using Rocinante.Domain.Squire;
 using Rocinante.Sidecar.Protocol;
@@ -23,7 +24,8 @@ internal sealed record CoreServices(
     ElementUseCases Elements,
     IReportedProblems Problems,
     SquireUseCases Squire,
-    ThreadUseCases Threads);
+    ThreadUseCases Threads,
+    ExportUseCases Export);
 
 /// <summary>
 /// Binds every method of the contract to a use case: params come in already validated against the
@@ -183,6 +185,15 @@ internal static class CoreMethods
 
             return Wire.Of(core.Elements.ChangeRelationship(id, kind, p.Origin, bounds));
         });
+        table.On("book.get", json.BookDetailsDto, () => Wire.Of(core.Export.Details()));
+        table.On("book.update", json.UpdateBookParams, json.BookDetailsDto, (p, node) => Wire.Of(core.Export.Update(
+            p.Changes.Author, node["changes"]!.AsObject().ContainsKey("credits"), p.Changes.Credits, p.Origin)));
+        table.On("book.setCover", json.SetCoverParams, json.BookDetailsDto, p =>
+            Wire.Of(core.Export.SetCover(Convert.FromBase64String(p.Image), p.Origin)));
+        table.On("book.removeCover", json.OriginParams, json.BookDetailsDto, p => Wire.Of(core.Export.RemoveCover(p.Origin)));
+        table.On("book.cover", json.ImageDataDto, () => Wire.Of(new StoredImage(core.Export.Cover(), "image/jpeg")));
+        table.On("export.run", json.ExportParams, json.ExportStartedResult, p => new ExportStartedResult(core.Export.Start(
+            Wire.ToExportFormat(p.Format), new ExportParts(p.Parts.Cover, p.Parts.Credits, p.Parts.Contents), p.Path, p.Origin).Value));
         table.On("threads.get", json.ThreadsDto, () => Wire.Of(core.Threads.Get()));
         table.On("threads.choose", json.ChooseThreadsParams, p =>
             core.Threads.Choose([.. p.Elements.Select(id => new ElementId(id))], p.Origin));

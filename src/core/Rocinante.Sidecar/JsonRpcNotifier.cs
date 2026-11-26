@@ -4,6 +4,7 @@ using Rocinante.Application.Ports;
 using Rocinante.Application.Settings;
 using Rocinante.Application.Squire;
 using Rocinante.Domain;
+using Rocinante.Domain.Books;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
 using Rocinante.Domain.Elements;
@@ -58,6 +59,18 @@ internal sealed class JsonRpcNotifier(MessageWriter writer) : IChangeNotifier
             "milestones.changed",
             new MilestonesChangedNotification([.. milestones.Select(Wire.Of)], [.. removed.Select(id => id.Value)], origin),
             WireJson.Default.MilestonesChangedNotification);
+
+    public void BookChanged(BookDetails details, string origin) =>
+        Send("book.changed", new BookChangedNotification(Wire.Of(details), origin), WireJson.Default.BookChangedNotification);
+
+    public void ExportProgress(ExportId id, int done, int total, string origin) =>
+        Send("export.progress", new ExportProgressNotification(id.Value, done, total, origin), WireJson.Default.ExportProgressNotification);
+
+    public void ExportFinished(ExportId id, string? path, long bytes, DomainError? problem, string origin) =>
+        Send(
+            "export.finished",
+            new ExportFinishedNotification(id.Value, path, bytes, problem is { } error ? JsonRpcServer.Reason(error.ToString()) : null, origin),
+            WireJson.Default.ExportFinishedNotification);
 
     public void SuggestionsChanged(string origin) =>
         Send("suggestions.changed", new SuggestionsChangedNotification(origin), WireJson.Default.SuggestionsChangedNotification);
