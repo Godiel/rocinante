@@ -26,15 +26,15 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de dominio, con la cobertura de la constitución.
 
 ## 3. Persistencia (esquema v4)
-- [ ] Migración `0004-notes.sql`:
+- [x] Migración `0004-notes.sql`:
   - `note` rehecha, con `document_id` opcional, `content`, `anchor_order`, `resolved_at` y `deleted_at`;
   - `note_element`, en cascada con la nota y con la ficha.
-- [ ] Repositorio de notas para la obra entera, con cada cambio en una transacción.
-- [ ] Al abrir la obra se borran de verdad las notas apartadas.
-- [ ] Una obra v3 con notas ancladas, sueltas y largas se abre sin perder ninguna.
-- [ ] «Guardar como» copia las notas y sus enlaces.
-- [ ] `docs/format`: los cambios, columna a columna.
-- [ ] Tests de persistencia: ida y vuelta, migración desde v3, cierre forzado a mitad de un cambio.
+- [x] Repositorio de notas para la obra entera, con cada cambio en una transacción.
+- [x] Al abrir la obra se borran de verdad las notas apartadas.
+- [x] Una obra v3 con notas ancladas, sueltas y largas se abre sin perder ninguna.
+- [x] «Guardar como» copia las notas y sus enlaces.
+- [x] `docs/format`: los cambios, columna a columna.
+- [x] Tests de persistencia: ida y vuelta, migración desde v3, cierre forzado a mitad de un cambio.
 
 ## 4. Casos de uso y sidecar
 - [ ] `NoteUseCases` con los métodos del contrato; cada cambio difunde `notes.changed` con su `origin`.
