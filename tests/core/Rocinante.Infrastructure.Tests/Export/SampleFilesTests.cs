@@ -21,7 +21,7 @@ public sealed class SampleFilesTests
         Directory.CreateDirectory(folder);
         foreach (var (writer, extension) in new (IBookWriter, string)[]
         {
-            (new MarkdownWriter(), "md"), (new EpubWriter(), "epub"), (new DocxWriter(), "docx"),
+            (new MarkdownWriter(), "md"), (new EpubWriter(), "epub"), (new DocxWriter(), "docx"), (new PdfWriter(), "pdf"),
         })
         {
             File.WriteAllBytes(Path.Combine(folder, $"muestra.{extension}"), SampleBooks.Write(writer, SampleBooks.Quixote()));

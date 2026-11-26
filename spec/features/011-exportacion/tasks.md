@@ -3,19 +3,19 @@
 Checklist derivada de [`plan.md`](plan.md). Rama: `feature/011-exportacion`.
 
 ## 1. Contrato (versión 14)
-- [ ] `book.*`, `export.run` y `export.progress`, con ejemplos.
+- [x] `book.*`, `export.run` y `export.progress`, con ejemplos.
 
 ## 2. Dominio
-- [ ] `BookDetails` y `Book` leído de los capítulos, con tests.
+- [x] `BookDetails` y `Book` leído de los capítulos, con tests.
 
 ## 3. Persistencia (esquema v8)
-- [ ] Tabla `book` y `docs/format`.
+- [x] Tabla `book` y `docs/format`.
 
 ## 4. Escritores
-- [ ] Markdown.
-- [ ] EPUB 3.
-- [ ] Word (`.docx`).
-- [ ] PDF: fuentes WOFF → TrueType, composición y escritura.
+- [x] Markdown.
+- [x] EPUB 3.
+- [x] Word (`.docx`).
+- [x] PDF: fuentes WOFF → TrueType, composición y escritura.
 
 ## 5. Casos de uso y sidecar
 - [ ] Datos del libro, exportación con avance y escritura segura, en la sesión de escritura de los tests.
