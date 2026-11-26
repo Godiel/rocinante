@@ -150,8 +150,17 @@ test("the threads of fate: where each ficha goes, what happens to it and when it
     await call(page, "squire.setKey", { provider: "compatible", key: KEY, origin: "seed" });
     await call(page, "squire.enable", { enabled: true, origin: "seed" });
     await page.keyboard.press("F8");
-    await chapterText(page).locator("p").nth(1).click();
-    await page.keyboard.press(process.platform === "darwin" ? "Meta+ArrowRight" : "End");
+    // At the end of the paragraph: without the keyboard, which headless Chromium on macOS does not obey.
+    const death = chapterText(page).locator("p").nth(1);
+    await death.click();
+    await death.evaluate((paragraph) => {
+      const range = document.createRange();
+      range.selectNodeContents(paragraph);
+      range.collapse(false);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+    });
     await page.keyboard.press("Enter");
     await page.keyboard.type(JOURNEY);
     await page.keyboard.press("Enter");
