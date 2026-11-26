@@ -25,8 +25,8 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] El escenario `WritingSession` usa el método nuevo.
 
 ## 5. Reconocer en la interfaz
-- [ ] `features/mentions/findMentions` con los casos de `mentions.json`.
-- [ ] Índice de nombres plegados, rehecho solo cuando cambian las fichas.
+- [x] `features/mentions/findMentions` con los casos de `mentions.json`.
+- [x] Índice de nombres plegados, rehecho solo cuando cambian las fichas.
 
 ## 6. Marcas en el editor
 - [ ] Decoración de las menciones; al escribir solo se buscan los bloques tocados.
