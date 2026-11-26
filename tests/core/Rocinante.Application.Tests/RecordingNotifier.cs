@@ -34,6 +34,8 @@ internal sealed class RecordingNotifier : IChangeNotifier
         Events.Add($"notes.changed:{origin}");
     }
 
+    public void SuggestionsChanged(string origin) => Events.Add($"suggestions.changed:{origin}");
+
     public void PreferencesChanged(Preferences preferences, string origin) => Events.Add($"preferences.changed:{origin}");
 
     public void RecentChanged(IReadOnlyList<RecentProjectView> recent, string origin) => Events.Add($"recent.changed:{origin}");

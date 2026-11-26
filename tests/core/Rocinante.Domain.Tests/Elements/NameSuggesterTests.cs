@@ -100,4 +100,12 @@ public sealed class NameSuggesterTests
         suggestions[0].Count.ShouldBe(5);
         suggestions.Select(suggestion => suggestion.Count).ShouldBeInOrder(SortDirection.Descending);
     }
+
+    [Fact]
+    public void And_joins_two_names_not_one()
+    {
+        var suggestions = Suggest(null, "Vio a Dulcinea y Sancho.", "Con Dulcinea y Sancho.", "Por Dulcinea y Sancho.");
+
+        suggestions.Select(suggestion => suggestion.Name).ShouldBe(["Dulcinea", "Sancho"]);
+    }
 }

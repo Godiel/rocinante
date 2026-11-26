@@ -110,7 +110,11 @@ internal static class Wire
             references.First is { } first ? new MentionPlaceDto(first.DocumentId.Value, first.Ordinal) : null,
             [.. references.ByDocument.Select(document => new DocumentMentionsDto(
                 document.DocumentId.Value,
-                [.. document.Mentions.Select(mention => new MentionDto(mention.Ordinal, mention.Before, mention.Text, mention.After))]))]);
+                [.. document.Mentions.Select(mention => new MentionDto(mention.Ordinal, mention.Before, mention.Text, mention.After))]))],
+            [.. references.Together.Select(other => new CoincidenceDto(other.ElementId.Value, other.Paragraphs))]);
+
+    public static BoardMentionsDto Of(IReadOnlyList<MentionCount> counts) =>
+        new([.. counts.Select(count => new MentionCountDto(count.ElementId.Value, count.Total, count.Documents))]);
 
     public static DocumentContent ToContent(JsonObject content) => DocumentContent.Parse(content.ToJsonString());
 

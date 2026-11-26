@@ -5,7 +5,7 @@ public sealed record NameSuggestion(string Name, int Count);
 
 /// <summary>
 /// Finds the proper names a text repeats, to suggest them as fichas: a word with a capital letter that does
-/// not start a sentence, or several in a row joined by «de», «del», «la», «las», «los» or «y». A name
+/// not start a sentence, or several in a row joined by «de», «del», «la», «las» or «los». A name
 /// counts only inside a sentence: the words that start one are left out, since every sentence starts with
 /// a capital.
 /// </summary>
@@ -18,35 +18,43 @@ public static class NameSuggester
     /// <summary>Longest name suggested, in words.</summary>
     private const int MaxWords = 6;
 
-    private static readonly HashSet<string> _connectors = new(StringComparer.Ordinal) { "de", "del", "la", "las", "los", "y" };
+    private static readonly HashSet<string> _connectors = new(StringComparer.Ordinal) { "de", "del", "la", "las", "los" };
 
     /// <summary>What opens a sentence or a speech: a capital after these starts something, not a name.</summary>
     private static readonly System.Buffers.SearchValues<char> _openers = System.Buffers.SearchValues.Create(".!?¡¿…—«“\":;");
 
     /// <param name="blocks">The paragraphs of the work.</param>
     /// <param name="known">Keys (<see cref="MentionFinder.Key"/>) of names not to suggest: those of the fichas and the dismissed.</param>
-    public static IReadOnlyList<NameSuggestion> Suggest(IEnumerable<string> blocks, IReadOnlySet<string> known)
+    public static IReadOnlyList<NameSuggestion> Suggest(IEnumerable<string> blocks, IReadOnlySet<string> known) =>
+        Suggest(Occurrences(blocks), known);
+
+    /// <summary>Every proper name inside the sentences of some paragraphs: its key and how it is written there.</summary>
+    public static IReadOnlyList<(string Key, string Written)> Occurrences(IEnumerable<string> blocks)
     {
         ArgumentNullException.ThrowIfNull(blocks);
+        return [.. blocks.SelectMany(NamesIn)];
+    }
+
+    /// <summary>The suggestions from names already found, leaving out the <paramref name="known"/> ones.</summary>
+    public static IReadOnlyList<NameSuggestion> Suggest(IEnumerable<(string Key, string Written)> occurrences, IReadOnlySet<string> known)
+    {
+        ArgumentNullException.ThrowIfNull(occurrences);
         ArgumentNullException.ThrowIfNull(known);
 
         var found = new Dictionary<string, Dictionary<string, int>>(StringComparer.Ordinal);
-        foreach (var block in blocks)
+        foreach (var (key, written) in occurrences)
         {
-            foreach (var (key, written) in NamesIn(block))
+            if (known.Contains(key))
             {
-                if (known.Contains(key))
-                {
-                    continue;
-                }
-
-                if (!found.TryGetValue(key, out var forms))
-                {
-                    found[key] = forms = new Dictionary<string, int>(StringComparer.Ordinal);
-                }
-
-                forms[written] = forms.GetValueOrDefault(written) + 1;
+                continue;
             }
+
+            if (!found.TryGetValue(key, out var forms))
+            {
+                found[key] = forms = new Dictionary<string, int>(StringComparer.Ordinal);
+            }
+
+            forms[written] = forms.GetValueOrDefault(written) + 1;
         }
 
         return [.. found.Values

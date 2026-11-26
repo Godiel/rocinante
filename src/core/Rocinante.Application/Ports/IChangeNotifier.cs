@@ -38,6 +38,9 @@ public interface IChangeNotifier
     /// <summary>Elements, relationships or kinds of relationship of the open work changed.</summary>
     void ElementsChanged(ElementsChange change, string origin);
 
+    /// <summary>A suggested name was dismissed: every window asks for the suggestions again.</summary>
+    void SuggestionsChanged(string origin);
+
     /// <summary>The writer added or removed one of their own images or sounds.</summary>
     void AmbienceChanged(IReadOnlyList<OwnAmbienceView> own, string origin);
 }

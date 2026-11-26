@@ -16,9 +16,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] `docs/format` al día.
 
 ## 4. Casos de uso y sidecar
-- [ ] El índice de menciones guarda el párrafo de cada una.
-- [ ] `BoardMentions`, coincidencias en `References`, `Suggestions` y `DismissSuggestion`.
-- [ ] El escenario `WritingSession` usa los métodos nuevos.
+- [x] El índice de menciones guarda el párrafo de cada una.
+- [x] `BoardMentions`, coincidencias en `References`, `Suggestions` y `DismissSuggestion`.
+- [x] El escenario `WritingSession` usa los métodos nuevos.
 
 ## 5. Números en las tarjetas
 - [ ] `useBoardMentions` y la línea de la tarjeta.

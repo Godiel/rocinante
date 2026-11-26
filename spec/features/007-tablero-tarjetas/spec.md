@@ -16,7 +16,7 @@ Completa la pizarra de la 004 con lo que sale del texto, sin IA. Cada **tarjeta*
 
 **Sugerencias de fichas**
 - La pestaña Fichas tiene una sección plegable **Sugerencias**, como la papelera, con los nombres propios que se repiten y no son el nombre ni el alias de ninguna ficha: «Dulcinea (7 veces)».
-- Un **nombre propio** es una palabra con mayúscula inicial que no empieza una frase, o varias seguidas unidas por «de», «del», «la», «las», «los» o «y» («Sancho Panza», «Don Quijote de la Mancha»). Cuenta si aparece **al menos 3 veces** dentro de una frase.
+- Un **nombre propio** es una palabra con mayúscula inicial que no empieza una frase, o varias seguidas unidas por «de», «del», «la», «las» o «los» («Sancho Panza», «Don Quijote de la Mancha»). «y» no une: «Dulcinea y Sancho» son dos nombres. Cuenta si aparece **al menos 3 veces** dentro de una frase.
 - **«Crear ficha»** la crea como personaje con ese nombre y la abre para elegir su tipo. **«Descartar»** la quita de las sugerencias para siempre en esta obra.
 - Se muestran como mucho 20, las más repetidas primero.
 
@@ -48,7 +48,7 @@ El autor pidió avanzar sin detenerse; estas decisiones de alcance se tomaron co
 
 **Sugerencias**
 - [ ] Se sugieren los nombres propios repetidos al menos 3 veces dentro de una frase que no son nombre ni alias de una ficha; no las palabras que solo empiezan frase.
-- [ ] Los nombres de varias palabras unidos por «de», «del», «la», «las», «los» o «y» se sugieren enteros.
+- [ ] Los nombres de varias palabras unidos por «de», «del», «la», «las» o «los» se sugieren enteros.
 - [ ] «Crear ficha» crea la ficha y la sugerencia desaparece; «Descartar» la quita para siempre en esta obra, también tras cerrar y abrir.
 
 **Separar el Tablero**

@@ -26,6 +26,9 @@ public interface IDocumentRepository
 
     /// <summary>Counts of every chapter outside the trash.</summary>
     TextStatistics WorkStatistics();
+
+    /// <summary>The revision of every document, without loading any text: to know which changed.</summary>
+    IReadOnlyDictionary<DocumentId, long> Revisions();
 }
 
 /// <summary>A version as listed, without its text.</summary>
