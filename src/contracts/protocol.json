@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 8,
+  "protocolVersion": 9,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -811,6 +811,22 @@
         "$ref": "#/$defs/Element"
       }
     },
+    "element.references": {
+      "description": "Where an element is mentioned in the text of the work, by its name or an alias: every mention, document by document in the order of the index, with a little of the text around it.",
+      "params": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/ElementReferences"
+      }
+    },
     "element.update": {
       "description": "Changes an element. Changing nothing broadcasts nothing; otherwise broadcasts elements.changed.",
       "params": {
@@ -1434,7 +1450,8 @@
         "outline",
         "counterVisible",
         "typewriterScrolling",
-        "ambience"
+        "ambience",
+        "mentionsVisible"
       ],
       "additionalProperties": false,
       "properties": {
@@ -1452,6 +1469,10 @@
         },
         "ambience": {
           "$ref": "#/$defs/Ambience"
+        },
+        "mentionsVisible": {
+          "type": "boolean",
+          "description": "Whether the mentions of the fichas are marked in the text."
         }
       }
     },
@@ -1631,6 +1652,9 @@
         },
         "ambience": {
           "$ref": "#/$defs/Ambience"
+        },
+        "mentionsVisible": {
+          "type": "boolean"
         }
       }
     },
@@ -2572,6 +2596,90 @@
     },
     "ImageSize": {
       "enum": ["full", "thumbnail"]
+    },
+    "ElementReferences": {
+      "type": "object",
+      "required": ["total", "chapters", "first", "documents"],
+      "additionalProperties": false,
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Mentions in the whole work."
+        },
+        "chapters": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Documents with at least one mention."
+        },
+        "first": {
+          "description": "The first mention in the order of the index, or null if there is none.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MentionPlace"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "documents": {
+          "type": "array",
+          "description": "Only the documents with mentions, in the order of the index: chapters, then fragments.",
+          "items": {
+            "type": "object",
+            "required": ["documentId", "mentions"],
+            "additionalProperties": false,
+            "properties": {
+              "documentId": {
+                "$ref": "#/$defs/Id"
+              },
+              "mentions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/Mention"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "MentionPlace": {
+      "type": "object",
+      "required": ["documentId", "ordinal"],
+      "additionalProperties": false,
+      "properties": {
+        "documentId": {
+          "$ref": "#/$defs/Id"
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "Mention": {
+      "description": "One mention: its place among the mentions of the element in its document, and the text around it.",
+      "type": "object",
+      "required": ["ordinal", "before", "text", "after"],
+      "additionalProperties": false,
+      "properties": {
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "before": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "after": {
+          "type": "string"
+        }
+      }
     }
   }
 }

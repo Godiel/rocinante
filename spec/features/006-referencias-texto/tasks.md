@@ -7,9 +7,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Descritas en el README de `src/contracts`.
 
 ## 2. Contrato de mensajes (versión 9)
-- [ ] `element.references { id }` con `total`, `chapters`, `first` y las menciones por documento con su trozo de texto.
-- [ ] `Preferences.mentionsVisible`.
-- [ ] Ejemplos válidos e inválidos; tipos de TypeScript regenerados.
+- [x] `element.references { id }` con `total`, `chapters`, `first` y las menciones por documento con su trozo de texto.
+- [x] `Preferences.mentionsVisible`.
+- [x] Ejemplos válidos e inválidos; tipos de TypeScript regenerados.
 
 ## 3. Dominio
 - [ ] `MentionFinder` con las reglas compartidas.

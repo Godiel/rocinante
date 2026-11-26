@@ -32,6 +32,7 @@ const DEFAULT_PREFERENCES: Preferences = {
   outline: "docked",
   counterVisible: true,
   typewriterScrolling: true,
+  mentionsVisible: true,
   ambience: DEFAULT_AMBIENCE,
 };
 
