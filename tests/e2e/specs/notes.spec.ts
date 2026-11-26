@@ -19,6 +19,27 @@ function listed(page: Page) {
   return notesPanel(page).getByRole("list", { name: "Notas" }).getByRole("button");
 }
 
+/** Drags the mouse over the first time a word appears in the chapter, as a hand selects it. */
+async function selectWord(page: Page, word: string) {
+  const box = await chapterText(page).evaluate((text, wanted) => {
+    const walker = document.createTreeWalker(text, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const at = node.textContent!.indexOf(wanted);
+      if (at < 0) continue;
+      const range = document.createRange();
+      range.setStart(node, at);
+      range.setEnd(node, at + wanted.length);
+      const { left, right, top, bottom } = range.getBoundingClientRect();
+      return { left, right, y: (top + bottom) / 2 };
+    }
+    throw new Error(`${wanted} is not in the text`);
+  }, word);
+  await page.mouse.move(box.left + 1, box.y);
+  await page.mouse.down();
+  await page.mouse.move(box.right - 1, box.y, { steps: 5 });
+  await page.mouse.up();
+}
+
 /** Links the open note with a ficha found by its name, as the writer does. */
 async function link(page: Page, name: string) {
   const panel = notesPanel(page);
@@ -42,11 +63,8 @@ test("the notes of a work: written, linked, found, resolved and kept as they wer
     origin: "seed",
   });
 
-  // A note on a word of the text, with some cursive.
-  await chapterText(page)
-    .locator("p")
-    .first()
-    .dblclick({ position: { x: 12, y: 12 } });
+  // A note on a word of the text, with some cursive. The word is selected dragging the mouse over it.
+  await selectWord(page, "Antonio");
   await page.keyboard.press("Control+Alt+N");
   const slip = page.getByRole("textbox", { name: "Texto de la nota" });
   await expect(slip).toBeFocused();
