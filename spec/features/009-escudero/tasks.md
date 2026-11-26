@@ -31,7 +31,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/009-escudero`.
 
 ## 10. Pruebas de extremo a extremo
 - [x] Con un proveedor falso compatible con OpenAI.
-- [ ] Todo en verde en la CI.
+- [x] Todo en verde en la CI.
 
 ## 11. Validación y cierre
 - [x] Criterios, `tech-stack.md`, hoja de ruta y PR.
