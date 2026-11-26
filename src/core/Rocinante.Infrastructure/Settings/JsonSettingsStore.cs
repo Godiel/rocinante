@@ -64,7 +64,8 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 settings.Preferences.Outline == OutlineMode.Floating ? "floating" : "docked",
                 settings.Preferences.CounterVisible,
                 settings.Preferences.TypewriterScrolling,
-                ToFile(settings.Preferences.Ambience)),
+                ToFile(settings.Preferences.Ambience),
+                settings.Preferences.MentionsVisible),
             settings.LastProject,
             [.. settings.Recent.Select(recent => new RecentFile(
                 recent.Path,
@@ -189,7 +190,8 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 stored.Outline == "floating" ? OutlineMode.Floating : defaults.Outline,
                 stored.CounterVisible ?? defaults.CounterVisible,
                 stored.TypewriterScrolling ?? defaults.TypewriterScrolling,
-                ToAmbience(stored.Ambience))
+                ToAmbience(stored.Ambience),
+                stored.MentionsVisible ?? defaults.MentionsVisible)
             : defaults;
 
         var recent = (file.Recent ?? [])
@@ -238,7 +240,8 @@ internal sealed record FormatFile(
 
 internal sealed record MarginsFile(double Top, double Bottom, double Inside, double Outside);
 
-internal sealed record PreferencesFile(string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling, AmbienceFile? Ambience);
+internal sealed record PreferencesFile(
+    string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling, AmbienceFile? Ambience, bool? MentionsVisible = null);
 
 internal sealed record RecentFile(string Path, string Title, DateTimeOffset LastOpenedAt, PlaceFile? Place);
 

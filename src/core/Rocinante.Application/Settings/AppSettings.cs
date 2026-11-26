@@ -21,14 +21,20 @@ public enum OutlineMode
 }
 
 /// <summary>How the writer likes to work. They belong to the writer, not to any work.</summary>
-public sealed record Preferences(Theme Theme, OutlineMode Outline, bool CounterVisible, bool TypewriterScrolling, Ambience Ambience)
+public sealed record Preferences(
+    Theme Theme, OutlineMode Outline, bool CounterVisible, bool TypewriterScrolling, Ambience Ambience, bool MentionsVisible = true)
 {
     public static Preferences Default { get; } = new(Theme.Paper, OutlineMode.Docked, CounterVisible: true, TypewriterScrolling: true, Ambience.Default);
 }
 
 /// <summary>Some preferences to change; the ones left null stay as they are.</summary>
 public sealed record PreferencesChange(
-    Theme? Theme = null, OutlineMode? Outline = null, bool? CounterVisible = null, bool? TypewriterScrolling = null, Ambience? Ambience = null)
+    Theme? Theme = null,
+    OutlineMode? Outline = null,
+    bool? CounterVisible = null,
+    bool? TypewriterScrolling = null,
+    Ambience? Ambience = null,
+    bool? MentionsVisible = null)
 {
     public Preferences ApplyTo(Preferences preferences)
     {
@@ -38,7 +44,8 @@ public sealed record PreferencesChange(
             Outline ?? preferences.Outline,
             CounterVisible ?? preferences.CounterVisible,
             TypewriterScrolling ?? preferences.TypewriterScrolling,
-            Ambience ?? preferences.Ambience);
+            Ambience ?? preferences.Ambience,
+            MentionsVisible ?? preferences.MentionsVisible);
     }
 }
 

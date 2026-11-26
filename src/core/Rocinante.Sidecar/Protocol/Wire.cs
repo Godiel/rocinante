@@ -103,6 +103,15 @@ internal static class Wire
             note.CreatedAt,
             note.UpdatedAt);
 
+    public static ElementReferencesDto Of(ElementReferences references) =>
+        new(
+            references.Total,
+            references.Documents,
+            references.First is { } first ? new MentionPlaceDto(first.DocumentId.Value, first.Ordinal) : null,
+            [.. references.ByDocument.Select(document => new DocumentMentionsDto(
+                document.DocumentId.Value,
+                [.. document.Mentions.Select(mention => new MentionDto(mention.Ordinal, mention.Before, mention.Text, mention.After))]))]);
+
     public static DocumentContent ToContent(JsonObject content) => DocumentContent.Parse(content.ToJsonString());
 
     public static IReadOnlyList<ElementId> ToElements(IReadOnlyList<Guid>? elements) =>
@@ -122,7 +131,8 @@ internal static class Wire
             preferences.Outline == OutlineMode.Floating ? "floating" : "docked",
             preferences.CounterVisible,
             preferences.TypewriterScrolling,
-            Of(preferences.Ambience));
+            Of(preferences.Ambience),
+            preferences.MentionsVisible);
 
     public static PreferencesChange ToChange(PreferencesChangeDto change) =>
         new(
@@ -130,7 +140,8 @@ internal static class Wire
             change.Outline switch { null => null, "floating" => OutlineMode.Floating, _ => OutlineMode.Docked },
             change.CounterVisible,
             change.TypewriterScrolling,
-            change.Ambience is { } ambience ? ToAmbience(ambience) : null);
+            change.Ambience is { } ambience ? ToAmbience(ambience) : null,
+            change.MentionsVisible);
 
     private static string Name<T>(T value)
         where T : struct, Enum => JsonNamingPolicy.CamelCase.ConvertName(value.ToString());

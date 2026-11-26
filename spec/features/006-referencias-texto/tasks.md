@@ -18,11 +18,11 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests con los casos de `mentions.json`, con la cobertura de la constitución.
 
 ## 4. Casos de uso y sidecar
-- [ ] `ElementUseCases.References`, en el orden del índice, con trozos de texto.
-- [ ] Caché por revisión de cada documento y versión de las fichas.
-- [ ] `Preferences.MentionsVisible`.
-- [ ] Ningún registro lleva nombres ni trozos del texto.
-- [ ] El escenario `WritingSession` usa el método nuevo.
+- [x] `ElementUseCases.References`, en el orden del índice, con trozos de texto.
+- [x] Caché por revisión de cada documento y versión de las fichas.
+- [x] `Preferences.MentionsVisible`.
+- [x] Ningún registro lleva nombres ni trozos del texto.
+- [x] El escenario `WritingSession` usa el método nuevo.
 
 ## 5. Reconocer en la interfaz
 - [ ] `features/mentions/findMentions` con los casos de `mentions.json`.
