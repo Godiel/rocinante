@@ -15,7 +15,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/009-escudero`.
 - [x] `ISecretStore` para Windows, macOS y Linux, y en memoria para tests.
 
 ## 5. Proveedores
-- [ ] Anthropic, OpenAI y compatibles (xAI, otros), Gemini y Ollama, con tests de cada uno.
+- [x] Anthropic, OpenAI y compatibles (xAI, otros), Gemini y Ollama, con tests de cada uno.
 
 ## 6. Casos de uso y sidecar
 - [ ] Ajustes, prueba, modelos, encendido por obra, cola en segundo plano y propuestas.
