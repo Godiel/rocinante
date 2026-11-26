@@ -5,6 +5,7 @@ import {
   CHAPTER_WORDS,
   changeFormat,
   fillBoard,
+  fillNotes,
   fillWork,
   WORDS_PER_PARAGRAPH,
   WORK_WORDS,
@@ -381,6 +382,30 @@ test.describe("a board full of fichas", () => {
     const p95 = percentile(times, 95);
     report(
       `escribir con el panel de fichas abierto (120 fichas): ${times.length} pulsaciones · mediana ${percentile(times, 50).toFixed(1)} ms · p95 ${p95.toFixed(1)} ms`,
+    );
+    expect(p95).toBeLessThan(MAX_P95_MS);
+    await expect(panel).toBeVisible();
+  });
+});
+
+test.describe("a work full of notes", () => {
+  test.setTimeout(240_000);
+
+  test("typing with 500 notes open beside the text keeps up", async ({ desk }) => {
+    const app = await longWork(desk);
+    await fillNotes(app.page, 500);
+    await cursorInTheMiddle(app.page);
+    await app.page.keyboard.press("Control+Shift+N");
+    const panel = app.page.getByRole("complementary", { name: "Notas de la obra" });
+    await expect(panel.getByRole("list", { name: "Notas" }).getByRole("button")).toHaveCount(400);
+    await cursorInTheMiddle(app.page);
+
+    const sentence = " Y así, del poco dormir y del mucho leer, se le secó el celebro.";
+    const times = await typeAndMeasure(app.page, sentence.repeat(2));
+
+    const p95 = percentile(times, 95);
+    report(
+      `escribir con el panel de notas abierto (500 notas): ${times.length} pulsaciones · mediana ${percentile(times, 50).toFixed(1)} ms · p95 ${p95.toFixed(1)} ms`,
     );
     expect(p95).toBeLessThan(MAX_P95_MS);
     await expect(panel).toBeVisible();

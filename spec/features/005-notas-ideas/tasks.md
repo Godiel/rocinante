@@ -95,15 +95,15 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real.
 
 ## 11. Pruebas de extremo a extremo y rendimiento
-- [ ] El recorrido de la spec:
+- [x] El recorrido de la spec:
   - crear una idea suelta y una nota en el texto;
   - enlazarlas con una ficha;
   - encontrarlas con los filtros;
   - saltar al pasaje;
   - resolver una;
   - volver a abrir la obra con todo en su sitio.
-- [ ] Otra ventana de la misma obra ve los cambios en vivo.
-- [ ] Escribir con 500 notas y el panel de notas abierto mantiene el p95 de la 001.
+- [x] Otra ventana de la misma obra ve los cambios en vivo.
+- [x] Escribir con 500 notas y el panel de notas abierto mantiene el p95 de la 001.
 - [ ] Todo en verde en los tres sistemas en la CI.
 
 ## 12. Validación y cierre

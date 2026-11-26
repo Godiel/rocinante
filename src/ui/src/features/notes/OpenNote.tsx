@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ElementSummary, Note, TipTapDocument } from "../../bridge/generated/protocol";
 import { NoteEditor } from "./NoteEditor";
 import { NoteElements } from "./NoteElements";
@@ -37,11 +37,29 @@ export function OpenNote({
   onProblem,
 }: OpenNoteProps) {
   const [dirty, setDirty] = useState(false);
+  // The box answers the click at once; what another window decides arrives with the note.
+  const stored = note?.resolvedAt != null;
+  const [resolved, setResolved] = useState({ stored, shown: stored });
+  if (resolved.stored !== stored) setResolved({ stored, shown: stored });
   // A new idea keeps its fichas here until it has words and is created with them.
   const [draftLinked, setDraftLinked] = useState<readonly string[]>(draftElements);
   const linked = note?.elements ?? draftLinked;
+  // A new idea left before its words reached the core is still created, but does not open again.
+  const open = useRef(true);
+  useEffect(
+    () => () => {
+      open.current = false;
+    },
+    [],
+  );
   const events = useMemo(
-    () => ({ onProblem, onCreated, onIdle: () => setDirty(false) }),
+    () => ({
+      onProblem,
+      onCreated: (created: Note) => {
+        if (open.current) onCreated(created);
+      },
+      onIdle: () => setDirty(false),
+    }),
     [onProblem, onCreated],
   );
   const saver = useNoteSaver(note?.id ?? null, linked, origin, events);
@@ -81,8 +99,9 @@ export function OpenNote({
           <label className="open-note-resolved">
             <input
               type="checkbox"
-              checked={note.resolvedAt !== null}
+              checked={resolved.shown}
               onChange={(event) => {
+                setResolved({ stored, shown: event.target.checked });
                 saver.change({ resolved: event.target.checked });
                 void saver.flush();
               }}
