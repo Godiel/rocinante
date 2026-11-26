@@ -9,7 +9,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/008-correccion`.
 - [x] Diccionario propio en `settings.json`, con límites y tests; logs sin palabras.
 
 ## 3. Reglas de puntuación
-- [ ] Una función por regla, con casos que marcan y casos correctos que no.
+- [x] Una función por regla, con casos que marcan y casos correctos que no.
 
 ## 4. Ortografía
 - [ ] Worker con nspell y `dictionary-es`; caché de respuestas; palabras que no se miran.
