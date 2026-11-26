@@ -168,3 +168,29 @@ export async function fillNotes(page: Page, count: number) {
     }
   }, count);
 }
+
+/**
+ * Fills the work with fichas: a few named after words of the text, so it is full of mentions, and the rest
+ * with names the text does not use.
+ */
+export async function fillNamedFichas(page: Page, count: number, mentioned: readonly string[]) {
+  await page.evaluate(
+    async ({ total, names }) => {
+      const ask = async (method: string, params: unknown) => {
+        const reply = await (
+          await fetch("/rpc", { method: "POST", body: JSON.stringify({ method, params }) })
+        ).json();
+        if ("error" in reply) throw new Error(JSON.stringify(reply.error));
+        return reply.result;
+      };
+      for (let n = 0; n < total; n++) {
+        await ask("element.create", {
+          kind: "character",
+          name: names[n] ?? `Ficha ${n + 1}`,
+          origin: "seed",
+        });
+      }
+    },
+    { total: count, names: [...mentioned] },
+  );
+}

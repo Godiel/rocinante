@@ -46,8 +46,8 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real.
 
 ## 9. Pruebas de extremo a extremo y rendimiento
-- [ ] El recorrido de la spec.
-- [ ] Escribir con 300 fichas y las marcas visibles mantiene el p95 de la 001.
+- [x] El recorrido de la spec.
+- [x] Escribir con 300 fichas y las marcas visibles mantiene el p95 de la 001.
 - [ ] Todo en verde en los tres sistemas en la CI.
 
 ## 10. Validación y cierre

@@ -5,6 +5,7 @@ import {
   CHAPTER_WORDS,
   changeFormat,
   fillBoard,
+  fillNamedFichas,
   fillNotes,
   fillWork,
   WORDS_PER_PARAGRAPH,
@@ -409,5 +410,42 @@ test.describe("a work full of notes", () => {
     );
     expect(p95).toBeLessThan(MAX_P95_MS);
     await expect(panel).toBeVisible();
+  });
+});
+
+test.describe("a work full of mentions", () => {
+  test.setTimeout(240_000);
+
+  test("typing with 300 fichas marked in the text keeps up", async ({ desk }) => {
+    const app = await longWork(desk);
+    const names = [
+      "hidalgo",
+      "rocín",
+      "galgo",
+      "Mancha",
+      "adarga",
+      "lanza",
+      "olla",
+      "vaca",
+      "lentejas",
+      "palomino",
+    ];
+    await fillNamedFichas(app.page, 300, names);
+    await app.page.reload();
+    await expect(chapterText(app.page).locator("p")).toHaveCount(
+      CHAPTER_WORDS / WORDS_PER_PARAGRAPH,
+    );
+    const marks = chapterText(app.page).locator(".mention");
+    await expect.poll(() => marks.count()).toBeGreaterThan(1000);
+    await cursorInTheMiddle(app.page);
+
+    const sentence = " Y así, del poco dormir y del mucho leer, el hidalgo perdió el juicio.";
+    const times = await typeAndMeasure(app.page, sentence.repeat(2));
+
+    const p95 = percentile(times, 95);
+    report(
+      `escribir con 300 fichas y ${await marks.count()} menciones marcadas: ${times.length} pulsaciones · mediana ${percentile(times, 50).toFixed(1)} ms · p95 ${p95.toFixed(1)} ms`,
+    );
+    expect(p95).toBeLessThan(MAX_P95_MS);
   });
 });
