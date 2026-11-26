@@ -41,6 +41,8 @@ import { ElementsPanel } from "../elements/ElementsPanel";
 import { suggestedAttributes } from "../elements/kinds";
 import { isElementsShortcut, panelWasOpen, rememberPanel } from "../elements/panel";
 import { useBoard } from "../elements/useBoard";
+import { notesOf } from "../notes/notes-list";
+import { useWorkNotes } from "../notes/useWorkNotes";
 import { useElementTrash } from "../elements/useElementTrash";
 import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
@@ -115,6 +117,7 @@ export function WritingView({
   );
   const elementsOpen = sheet === "elements";
   const { board, loaded: boardLoaded } = useBoard(project.id);
+  const { notes: workNotes } = useWorkNotes(project.id);
   const [openElement, setOpenElement] = useState<string | null>(null);
   const [freshElement, setFreshElement] = useState<{
     id: string;
@@ -169,6 +172,10 @@ export function WritingView({
     currentId && index.trash.some((entry) => entry.id === currentId)
       ? (index.chapters[0]?.id ?? index.fragments[0]?.id ?? null)
       : currentId;
+  const documentNotes = useMemo(
+    () => (shownId ? notesOf(workNotes, shownId) : []),
+    [workNotes, shownId],
+  );
   const shownRef = useRef(shownId);
   useEffect(() => {
     shownRef.current = shownId;
@@ -624,6 +631,7 @@ export function WritingView({
                 kind={kindOf(document.id)}
                 place={place?.documentId === document.id ? place : null}
                 origin={origin}
+                notes={documentNotes}
                 typewriterScrolling={preferences.typewriterScrolling}
                 onCounts={(statistics, total) => {
                   setCounts({ id: document.id, statistics });

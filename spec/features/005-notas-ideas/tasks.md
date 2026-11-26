@@ -50,9 +50,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
   - otra ventana recibe cada cambio.
 
 ## 5. Estado de las notas en la interfaz
-- [ ] `features/notes/useWorkNotes`: carga `notes.get` y aplica `notes.changed`. Lo comparten el editor, el panel y la ficha.
-- [ ] El editor toma del estado las notas de su documento; desaparece `useNotes`.
-- [ ] Funciones puras con sus tests:
+- [x] `features/notes/useWorkNotes`: carga `notes.get` y aplica `notes.changed`. Lo comparten el editor, el panel y la ficha.
+- [x] El editor toma del estado las notas de su documento; desaparece `useNotes`.
+- [x] Funciones puras con sus tests:
   - el orden: más recientes primero o, con un capítulo, el orden del texto;
   - los filtros por clase, capítulo y ficha, combinados;
   - la búsqueda sin mayúsculas ni tildes.

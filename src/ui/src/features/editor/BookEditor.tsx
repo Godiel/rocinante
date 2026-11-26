@@ -21,7 +21,6 @@ import type { SaveState } from "../counter/Counter";
 import { BubbleToolbar } from "./BubbleToolbar";
 import { TextPopover } from "./TextPopover";
 import { TypewriterCaret } from "./TypewriterCaret";
-import { useNotes } from "./useNotes";
 import { contentFromText } from "../notes/content";
 import "./book-editor.css";
 import { registerCursor, shownHead } from "../../editor/cursor";
@@ -54,6 +53,8 @@ export interface BookEditorProps {
   /** Where the writer left off in this document, if known. */
   place: Place | null;
   origin: string;
+  /** The notes of this document, in the order they were written. */
+  notes: Note[];
   typewriterScrolling: boolean;
   /** Counts after a save here, or after a change from another window. */
   onCounts(document: Statistics, work: Statistics): void;
@@ -73,6 +74,7 @@ export function BookEditor({
   kind,
   place,
   origin,
+  notes,
   typewriterScrolling,
   onCounts,
   onSaveState,
@@ -95,7 +97,6 @@ export function BookEditor({
   const platen = useRef(typewriterScrolling);
   platen.current = typewriterScrolling;
   const [slip, setSlip] = useState<Slip | null>(null);
-  const notes = useNotes(document.id);
   const notesById = useMemo(() => new Map(notes.map((note) => [note.id, note])), [notes]);
   const callbacks = useRef({
     onCounts,
