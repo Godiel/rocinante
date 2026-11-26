@@ -1,0 +1,22 @@
+/* The text of a note: a few lines in the hand of the interface, not the type of the work. */
+.note-editor .ProseMirror {
+  min-height: 4.5em;
+  max-height: 16em;
+  overflow-y: auto;
+  padding: var(--space-1) 0;
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  text-indent: 0;
+  text-align: left;
+  outline: none;
+  border-bottom: var(--hairline) solid var(--color-ink-soft);
+}
+
+.note-editor p {
+  margin: 0 0 var(--space-2);
+  text-indent: 0;
+}
+
+.note-editor p:last-child {
+  margin-bottom: 0;
+}

@@ -58,12 +58,12 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
   - la búsqueda sin mayúsculas ni tildes.
 
 ## 6. El texto de la nota
-- [ ] `NoteEditor`: párrafos, cursiva y negrita, con las extensiones de la descripción de la ficha; marcado con `data-own-keys`.
-- [ ] Se guarda solo tras una pausa, con `pending-saves`: nada queda sin guardar al cerrar.
-- [ ] La ventanita de la 001 usa `NoteEditor` para las notas y ofrece «Abrir en el panel». Las notas al pie no cambian.
-- [ ] Una decoración atenúa las marcas de las notas resueltas y esconde las de las borradas; no se recalcula al escribir.
-- [ ] Tests de comportamiento, incluidos los atajos de la obra, que no actúan dentro de la nota.
-- [ ] Comprobación en la app real.
+- [x] `NoteEditor`: párrafos, cursiva y negrita, con las extensiones de la descripción de la ficha; marcado con `data-own-keys`.
+- [x] Se guarda solo tras una pausa, con `pending-saves`: nada queda sin guardar al cerrar.
+- [x] La ventanita de la 001 usa `NoteEditor` para las notas y ofrece «Abrir en el panel». Las notas al pie no cambian.
+- [x] Una decoración atenúa las marcas de las notas resueltas y esconde las de las borradas; no se recalcula al escribir.
+- [x] Tests de comportamiento, incluidos los atajos de la obra, que no actúan dentro de la nota.
+- [x] Comprobación en la app real.
 
 ## 7. Panel de la derecha con pestañas
 - [ ] Un panel con las pestañas Fichas y Notas recoge el panel de la 004.

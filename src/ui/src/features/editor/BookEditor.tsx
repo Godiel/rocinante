@@ -9,6 +9,7 @@ import type {
   Note,
   Place,
   Statistics,
+  TipTapDocument,
 } from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
 import { bookExtensions, footnotesOf } from "../../editor/extensions";
@@ -21,7 +22,8 @@ import type { SaveState } from "../counter/Counter";
 import { BubbleToolbar } from "./BubbleToolbar";
 import { TextPopover } from "./TextPopover";
 import { TypewriterCaret } from "./TypewriterCaret";
-import { contentFromText } from "../notes/content";
+import { NoteSlip } from "../notes/NoteSlip";
+import { NoteStatesExtension } from "../../editor/extensions/note-states";
 import "./book-editor.css";
 import { registerCursor, shownHead } from "../../editor/cursor";
 
@@ -55,6 +57,8 @@ export interface BookEditorProps {
   origin: string;
   /** The notes of this document, in the order they were written. */
   notes: Note[];
+  /** Whether the notes of the work have arrived: until then no anchor is taken for one set aside. */
+  notesLoaded?: boolean;
   typewriterScrolling: boolean;
   /** Counts after a save here, or after a change from another window. */
   onCounts(document: Statistics, work: Statistics): void;
@@ -62,6 +66,8 @@ export interface BookEditorProps {
   onProblem(message: string | null): void;
   /** Makes a ficha named after the selected text, from the floating menu. The text does not change. */
   onCreateElement?(name: string): void;
+  /** Opens a note in the panel beside the text, to resolve it or link it with fichas. */
+  onOpenNote?(id: string): void;
 }
 
 /**
@@ -75,11 +81,13 @@ export function BookEditor({
   place,
   origin,
   notes,
+  notesLoaded = true,
   typewriterScrolling,
   onCounts,
   onSaveState,
   onProblem,
   onCreateElement,
+  onOpenNote,
 }: BookEditorProps) {
   const frame = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | undefined>(undefined);
@@ -115,6 +123,7 @@ export function BookEditor({
       ...bookExtensions(),
       TypingSounds.configure({ play: (stroke) => sounds.play(stroke) }),
       CurrentBlock,
+      NoteStatesExtension,
     ],
     content: document.content,
     editorProps: {
@@ -237,12 +246,28 @@ export function BookEditor({
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [editor]);
 
+  // How each anchor looks: faded when its note is resolved, hidden when the note was set aside.
+  const noteStates = useMemo(
+    () => ({
+      resolved: notes.filter((note) => note.resolvedAt !== null).map((note) => note.id),
+      shown: notesLoaded ? notes.map((note) => note.id) : null,
+    }),
+    [notes, notesLoaded],
+  );
+  const noteStatesKey = JSON.stringify(noteStates);
+  const noteStatesRef = useRef(noteStates);
+  noteStatesRef.current = noteStates;
+  useEffect(() => {
+    editor?.commands.setNoteStates(noteStatesRef.current);
+  }, [editor, noteStatesKey]);
+
   // Changes made in other windows arrive here.
   useEffect(() => {
     if (!editor) return;
     const unlisten = onNotification("document.changed", (change) => {
       if (change.document.id !== document.id || change.origin === origin) return;
       editor.commands.setContent(change.document.content, { emitUpdate: false });
+      editor.commands.setNoteStates(noteStatesRef.current);
       callbacks.current.onCounts(change.document.statistics, change.work);
     });
     return () => {
@@ -321,36 +346,33 @@ export function BookEditor({
       .run();
   }
 
-  async function saveSlip(text: string) {
+  async function saveNote(content: TipTapDocument) {
     if (!editor || !slip) return;
     const current = slip;
     setSlip(null);
-    switch (current.kind) {
-      case "newNote":
-        await act(async () => {
-          const note = await request("note.create", {
-            documentId: document.id,
-            content: contentFromText(text),
-            anchored: true,
-            origin,
-          });
-          editor.chain().focus().anchorNote(note.id, current.range).run();
+    if (current.kind === "newNote") {
+      await act(async () => {
+        const note = await request("note.create", {
+          documentId: document.id,
+          content,
+          anchored: true,
+          origin,
         });
-        break;
-      case "note":
-        await act(() =>
-          request("note.update", {
-            id: current.note.id,
-            changes: { content: contentFromText(text) },
-            origin,
-          }),
-        );
-        editor.commands.focus();
-        break;
-      case "footnote":
-        editor.chain().focus().setFootnoteText(current.position, text).run();
-        break;
+        editor.chain().focus().anchorNote(note.id, current.range).run();
+      });
+    } else if (current.kind === "note") {
+      await act(() =>
+        request("note.update", { id: current.note.id, changes: { content }, origin }),
+      );
+      editor.commands.focus();
     }
+  }
+
+  function saveFootnote(text: string) {
+    if (!editor || slip?.kind !== "footnote") return;
+    const position = slip.position;
+    setSlip(null);
+    editor.chain().focus().setFootnoteText(position, text).run();
   }
 
   async function deleteSlip() {
@@ -398,20 +420,34 @@ export function BookEditor({
         onOpen={(note, top) => setSlip({ kind: "note", note, top, left: 0 })}
         frame={frame}
       />
-      {slip && (
+      {slip?.kind === "footnote" && (
         <TextPopover
           key={`${slip.kind}:${slip.top}:${slip.left}`}
-          title={slip.kind === "footnote" ? `Nota al pie ${slip.number}` : "Nota"}
-          initial={
-            slip.kind === "note" ? slip.note.text : slip.kind === "footnote" ? slip.text : ""
-          }
+          title={`Nota al pie ${slip.number}`}
+          initial={slip.text}
           top={slip.top}
           left={slip.left}
-          onSave={(text) => void saveSlip(text)}
+          onSave={saveFootnote}
           onCancel={closeSlip}
-          onDelete={
-            slip.kind === "note" || (slip.kind === "footnote" && !slip.isNew)
-              ? () => void deleteSlip()
+          onDelete={slip.isNew ? undefined : () => void deleteSlip()}
+        />
+      )}
+      {(slip?.kind === "note" || slip?.kind === "newNote") && (
+        <NoteSlip
+          key={`${slip.kind}:${slip.kind === "note" ? slip.note.id : ""}:${slip.top}:${slip.left}`}
+          initial={slip.kind === "note" ? slip.note : null}
+          top={slip.top}
+          left={slip.left}
+          onSave={(content) => void saveNote(content)}
+          onCancel={closeSlip}
+          onDelete={slip.kind === "note" ? () => void deleteSlip() : undefined}
+          onOpenInPanel={
+            slip.kind === "note" && onOpenNote
+              ? () => {
+                  const id = slip.note.id;
+                  setSlip(null);
+                  onOpenNote(id);
+                }
               : undefined
           }
         />

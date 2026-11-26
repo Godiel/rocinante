@@ -117,7 +117,7 @@ export function WritingView({
   );
   const elementsOpen = sheet === "elements";
   const { board, loaded: boardLoaded } = useBoard(project.id);
-  const { notes: workNotes } = useWorkNotes(project.id);
+  const { notes: workNotes, loaded: notesLoaded } = useWorkNotes(project.id);
   const [openElement, setOpenElement] = useState<string | null>(null);
   const [freshElement, setFreshElement] = useState<{
     id: string;
@@ -632,6 +632,7 @@ export function WritingView({
                 place={place?.documentId === document.id ? place : null}
                 origin={origin}
                 notes={documentNotes}
+                notesLoaded={notesLoaded}
                 typewriterScrolling={preferences.typewriterScrolling}
                 onCounts={(statistics, total) => {
                   setCounts({ id: document.id, statistics });
