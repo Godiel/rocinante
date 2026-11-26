@@ -1,0 +1,21 @@
+{
+  "valid": [
+    { "provider": "anthropic", "model": "claude-sonnet-5-5", "origin": "main" },
+    {
+      "provider": "ollama",
+      "model": "llama3.1",
+      "endpoint": "http://127.0.0.1:11434",
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    { "provider": "chatgpt", "model": "x", "origin": "main" },
+    {
+      "provider": "ollama",
+      "model": "x",
+      "endpoint": "ftp://x",
+      "origin": "main"
+    },
+    { "provider": "openai", "origin": "main" }
+  ]
+}

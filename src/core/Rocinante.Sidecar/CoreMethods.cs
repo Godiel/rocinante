@@ -4,8 +4,10 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization.Metadata;
 using Rocinante.Application;
 using Rocinante.Application.Ports;
+using Rocinante.Application.Squire;
 using Rocinante.Domain;
 using Rocinante.Domain.Elements;
+using Rocinante.Domain.Squire;
 using Rocinante.Sidecar.Protocol;
 
 namespace Rocinante.Sidecar;
@@ -19,7 +21,8 @@ internal sealed record CoreServices(
     SettingsUseCases Settings,
     AmbienceUseCases Ambience,
     ElementUseCases Elements,
-    IReportedProblems Problems);
+    IReportedProblems Problems,
+    SquireUseCases Squire);
 
 /// <summary>
 /// Binds every method of the contract to a use case: params come in already validated against the
@@ -119,6 +122,26 @@ internal static class CoreMethods
             p.Position is { } position ? new BoardPosition(position.X, position.Y) : null,
             p.Origin)));
         table.On("element.get", json.IdParams, json.ElementDto, p => Wire.Of(core.Elements.Get(new ElementId(p.Id))));
+        table.On("squire.settings", json.SquireSettingsDto, () => Wire.Of(core.Squire.State()));
+        table.On("squire.configure", json.ConfigureSquireParams, json.SquireSettingsDto, p =>
+            Wire.Of(core.Squire.Configure(Wire.ToProvider(p.Provider), p.Model, p.Endpoint, p.Origin)));
+        table.On("squire.setKey", json.SquireKeyParams, json.SquireSettingsDto, p =>
+            Wire.Of(core.Squire.SetKey(Wire.ToProvider(p.Provider), p.Key, p.Origin)));
+        table.On("squire.forgetKey", json.SquireProviderParams, json.SquireSettingsDto, p =>
+            Wire.Of(core.Squire.ForgetKey(Wire.ToProvider(p.Provider), p.Origin)));
+        table.On("squire.test", json.SquireTestResult, () =>
+        {
+            var problem = core.Squire.TestAsync(CancellationToken.None).GetAwaiter().GetResult();
+            return new SquireTestResult(problem is null, problem is { } error ? JsonRpcServer.Reason(error.ToString()) : null);
+        });
+        table.On("squire.models", json.SquireModelsParams, json.IReadOnlyListString, p =>
+            core.Squire.ModelsAsync(Wire.ToProvider(p.Provider), p.Endpoint, CancellationToken.None).GetAwaiter().GetResult());
+        table.On("squire.enable", json.EnableSquireParams, json.SquireSettingsDto, p => Wire.Of(core.Squire.Enable(p.Enabled, p.Origin)));
+        table.On("squire.analyze", json.AnalyzeParams, p => core.Squire.Analyze(new DocumentId(p.DocumentId), p.Text, p.Origin));
+        table.On("proposals.get", json.IReadOnlyListProposalDto, () => [.. core.Squire.Pending().Select(Wire.Of)]);
+        table.On("proposal.accept", json.AcceptProposalParams, p =>
+            core.Squire.Accept(new ProposalId(p.Id), p.Changes is { } changes ? Wire.ToCorrection(changes) : null, p.Origin));
+        table.On("proposal.dismiss", json.IdOriginParams, p => core.Squire.Dismiss(new ProposalId(p.Id), p.Origin));
         table.On("board.mentions", json.BoardMentionsDto, () => Wire.Of(core.Elements.BoardMentions()));
         table.On("suggestions.get", json.IReadOnlyListSuggestionDto, () =>
             [.. core.Elements.Suggestions().Select(suggestion => new SuggestionDto(suggestion.Name, suggestion.Count))]);

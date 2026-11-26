@@ -44,6 +44,9 @@ import { isElementsShortcut } from "../elements/panel";
 import { NotesPanel, type OpenedNote } from "../notes/NotesPanel";
 import { useNoteTrash } from "../notes/useNoteTrash";
 import { SidePanelTabs } from "../workspace/SidePanelTabs";
+import { SquirePanel } from "../squire/SquirePanel";
+import { ProposalList } from "../squire/ProposalList";
+import { useSquire } from "../squire/useSquire";
 import {
   isNotesShortcut,
   rememberedSidePanel,
@@ -131,7 +134,8 @@ export function WritingView({
     rememberedSidePanel,
   );
   const elementsOpen = sheet === "elements";
-  const sideTab: SideTab | null = sheet === "elements" || sheet === "notes" ? sheet : null;
+  const sideTab: SideTab | null =
+    sheet === "elements" || sheet === "notes" || sheet === "squire" ? sheet : null;
   const lastSideTab = useRef<SideTab>(sideTab ?? "elements");
   useEffect(() => {
     if (sideTab) lastSideTab.current = sideTab;
@@ -178,6 +182,13 @@ export function WritingView({
   );
 
   const { notes: workNotes, loaded: notesLoaded } = useWorkNotes(project.id);
+  const squire = useSquire(project.id);
+  // The passage of a proposal the writer asked to see; `at` tells one request from the next.
+  const [revealPassage, setRevealPassage] = useState<{
+    documentId: string;
+    text: string;
+    at: number;
+  } | null>(null);
   const [openNote, setOpenNote] = useState<OpenedNote | null>(null);
   // The note whose passage the writer asked to see; `at` tells one request from the next.
   const [reveal, setReveal] = useState<{ noteId: string; documentId: string; at: number } | null>(
@@ -645,6 +656,14 @@ export function WritingView({
               </button>
               <button
                 className="action"
+                aria-expanded={sheet === "squire"}
+                title="Escudero: propuestas y ajustes"
+                onClick={() => toggleSide("squire")}
+              >
+                {squire.settings.pending > 0 ? `Escudero · ${squire.settings.pending}` : "Escudero"}
+              </button>
+              <button
+                className="action"
                 aria-expanded={sheet === "ambience"}
                 onClick={toggleAmbience}
               >
@@ -782,6 +801,17 @@ export function WritingView({
                 onSaveState={onSaveState}
                 onProblem={setProblem}
                 onCreateElement={(name) => void createElement(name)}
+                revealPassage={revealPassage?.documentId === document.id ? revealPassage : null}
+                onParagraphDone={
+                  squire.settings.enabled
+                    ? (text) =>
+                        void request("squire.analyze", {
+                          documentId: document.id,
+                          text,
+                          origin,
+                        }).catch(() => {})
+                    : undefined
+                }
               />
             </div>
           )}
@@ -812,7 +842,13 @@ export function WritingView({
               void elementTrash.trash(id, name);
             }}
             onRestore={(id) => void elementTrash.restore(id)}
-            tabs={<SidePanelTabs tab="elements" onShow={(tab) => setSheet(tab)} />}
+            tabs={
+              <SidePanelTabs
+                tab="elements"
+                pending={squire.settings.pending}
+                onShow={(tab) => setSheet(tab)}
+              />
+            }
             mentions={{
               documents: noteDocuments,
               onGoTo: (elementId, documentId, ordinal) => {
@@ -853,7 +889,13 @@ export function WritingView({
             elements={board.elements}
             origin={origin}
             opened={openNote}
-            tabs={<SidePanelTabs tab="notes" onShow={(tab) => setSheet(tab)} />}
+            tabs={
+              <SidePanelTabs
+                tab="notes"
+                pending={squire.settings.pending}
+                onShow={(tab) => setSheet(tab)}
+              />
+            }
             onOpen={setOpenNote}
             onGoToPassage={goToPassage}
             onDelete={(note) => void noteTrash.remove(note.id)}
@@ -865,6 +907,40 @@ export function WritingView({
             onClose={closeSheet}
             onProblem={setProblem}
           />
+        )}
+
+        {sheet === "squire" && (
+          <SquirePanel
+            settings={squire.settings}
+            proposals={squire.proposals}
+            loaded={squire.loaded}
+            origin={origin}
+            tabs={
+              <SidePanelTabs
+                tab="squire"
+                pending={squire.settings.pending}
+                onShow={(tab) => setSheet(tab)}
+              />
+            }
+            onClose={closeSheet}
+            onProblem={setProblem}
+          >
+            <ProposalList
+              proposals={squire.proposals}
+              enabled={squire.settings.enabled}
+              origin={origin}
+              onGoToPassage={(proposal) => {
+                setViewing(null);
+                setCurrentId(proposal.documentId);
+                setRevealPassage((last) => ({
+                  documentId: proposal.documentId,
+                  text: proposal.passage,
+                  at: (last?.at ?? 0) + 1,
+                }));
+              }}
+              onProblem={setProblem}
+            />
+          </SquirePanel>
         )}
 
         {sheet === "format" && (

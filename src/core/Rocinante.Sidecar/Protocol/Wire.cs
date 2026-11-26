@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using Rocinante.Application;
 using Rocinante.Application.Ports;
 using Rocinante.Application.Settings;
+using Rocinante.Application.Squire;
 using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
@@ -10,6 +11,7 @@ using Rocinante.Domain.Elements;
 using Rocinante.Domain.Formats;
 using Rocinante.Domain.Notes;
 using Rocinante.Domain.Projects;
+using Rocinante.Domain.Squire;
 using Rocinante.Domain.Versions;
 
 namespace Rocinante.Sidecar.Protocol;
@@ -115,6 +117,41 @@ internal static class Wire
 
     public static BoardMentionsDto Of(IReadOnlyList<MentionCount> counts) =>
         new([.. counts.Select(count => new MentionCountDto(count.ElementId.Value, count.Total, count.Documents))]);
+
+    public static SquireSettingsDto Of(SquireState state) =>
+        new(
+            state.Provider is { } provider ? SquireUseCases.NameOf(provider) : null,
+            state.Model,
+            state.Endpoint,
+            state.HasKey,
+            state.Enabled,
+            Name(state.Status),
+            state.Problem is { } problem ? JsonRpcServer.Reason(problem.ToString()) : null,
+            state.Pending);
+
+    public static ProposalDto Of(Proposal proposal) =>
+        new(
+            proposal.Id.Value,
+            Name(proposal.Kind),
+            proposal.DocumentId.Value,
+            proposal.Passage,
+            proposal.CreatedAt,
+            proposal.Element is { } element ? new ProposedElementDto(element.Name, Name(element.Kind), element.OtherKind) : null,
+            proposal.Relationship is { } relation
+                ? new ProposedRelationshipDto(relation.From, relation.To, relation.Forward, relation.Inverse)
+                : null,
+            proposal.Attribute is { } detail ? new ProposedDetailDto(detail.Element, detail.Name, detail.Value) : null);
+
+    public static SquireProvider ToProvider(string provider) => SquireUseCases.ProviderOf(provider);
+
+    public static ProposalCorrection ToCorrection(ProposalChangesDto changes) =>
+        new(
+            changes.Name,
+            changes.Kind is { } kind ? ParseElementKind(kind) : null,
+            changes.OtherKind,
+            changes.Forward,
+            changes.Inverse,
+            changes.Value);
 
     public static DocumentContent ToContent(JsonObject content) => DocumentContent.Parse(content.ToJsonString());
 

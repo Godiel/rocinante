@@ -75,7 +75,8 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 recent.Place is { } place ? new PlaceFile(place.DocumentId.Value, place.Anchor, place.Head) : null))],
             settings.LastFormat is { } format ? ToFile(format) : null,
             [.. settings.OwnAmbience.Select(own => new OwnFile(own.Id, Name(own.Kind), own.Name, own.FileName))],
-            settings.Dictionary);
+            settings.Dictionary,
+            settings.Squire is { } squire ? new SquireFile(squire.Provider, squire.Model, squire.Endpoint) : null);
 
     private static string Name<T>(T value)
         where T : struct, Enum => JsonNamingPolicy.CamelCase.ConvertName(value.ToString());
@@ -217,7 +218,10 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
             .Order(StringComparer.Ordinal)
             .Take(WriterSettings.MaxDictionaryWords)
             .ToList();
-        return new AppSettings(preferences, recent, file.LastProject, ToFormat(file.LastFormat), own, words);
+        var squire = file.Squire is { Provider: { } provider, Model: { } model } && !string.IsNullOrWhiteSpace(model)
+            ? new SquireChoice(provider, model, file.Squire.Endpoint)
+            : null;
+        return new AppSettings(preferences, recent, file.LastProject, ToFormat(file.LastFormat), own, words, squire);
     }
 }
 
@@ -228,7 +232,10 @@ internal sealed record SettingsFile(
     IReadOnlyList<RecentFile>? Recent,
     FormatFile? LastFormat,
     IReadOnlyList<OwnFile>? OwnAmbience,
-    IReadOnlyList<string>? Dictionary = null);
+    IReadOnlyList<string>? Dictionary = null,
+    SquireFile? Squire = null);
+
+internal sealed record SquireFile(string? Provider, string? Model, string? Endpoint);
 
 internal sealed record AmbienceFile(
     string? Background, TypingFile? Typing, IReadOnlyList<AmbientFile>? Ambients, double? AmbientVolume, bool? AmbientMuted, bool? DimOthers, GoalFile? Goal);

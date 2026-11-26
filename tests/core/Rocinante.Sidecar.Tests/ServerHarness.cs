@@ -23,7 +23,9 @@ internal sealed class ServerHarness : IDisposable
             launchFile,
             Problems,
             new AmbienceFolder(PathOf("datos")),
-            new ChosenFiles());
+            new ChosenFiles(),
+            Secrets,
+            SquireClient);
         _core = new Core(_output, Log, options, Contract);
     }
 
@@ -46,6 +48,21 @@ internal sealed class ServerHarness : IDisposable
     public List<(string Method, JsonObject Response)> Responses { get; } = [];
 
     public string PathOf(string name) => Path.Combine(Folder, name);
+
+    public MemorySecretStore Secrets { get; } = new();
+
+    public FakeSquireClient SquireClient { get; } = new();
+
+    /// <summary>Waits for the squire to read what it was given, and keeps what it announced meanwhile.</summary>
+    public void SettleSquire()
+    {
+        _core.WhenSquireIdle().GetAwaiter().GetResult();
+        var messages = _output.ToString()
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(text => JsonNode.Parse(text)!.AsObject());
+        Notifications.AddRange(messages.Where(message => message["id"] is null && message["method"] is not null));
+        _output.GetStringBuilder().Clear();
+    }
 
     /// <summary>Sends a raw line and returns every message the server wrote in reply.</summary>
     public List<JsonObject> SendRaw(string line)

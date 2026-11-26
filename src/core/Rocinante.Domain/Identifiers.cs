@@ -50,3 +50,11 @@ public readonly record struct NoteId(Guid Value)
 
     public override string ToString() => Value.ToString();
 }
+
+/// <summary>Identifies a proposal of the squire.</summary>
+public readonly record struct ProposalId(Guid Value)
+{
+    public static ProposalId New(DateTimeOffset now) => new(Guid.CreateVersion7(now));
+
+    public override string ToString() => Value.ToString();
+}

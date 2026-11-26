@@ -12,6 +12,7 @@ Orden y estado de las features. Cada entrada apunta a su carpeta en `features/`,
 - **006 · Referencias en el texto** — [spec](../features/006-referencias-texto/spec.md).
 - **007 · Tablero de tarjetas** — [spec](../features/007-tablero-tarjetas/spec.md). Cerrar la ventana separada del Tablero con el botón del sistema queda por comprobar en la app instalada.
 - **008 · Corrección** — [spec](../features/008-correccion/spec.md).
+- **009 · Escudero** — [spec](../features/009-escudero/spec.md). Las llamadas a cada proveedor real se prueban con respuestas grabadas; falta probarlas con claves reales del autor.
 
 ## Versión 1 — «Primera salida» 🔜
 
@@ -32,7 +33,7 @@ Las pestañas se pueden arrastrar fuera de la ventana principal para convertirla
 6. **006 · Referencias en el texto** — el vínculo entre el texto y las tarjetas, en ambos sentidos. En el editor, las menciones de un elemento se reconocen y, al pasar el cursor, muestran su ficha. En la tarjeta aparecen todas sus referencias en el texto (cada pasaje donde se menciona, con salto directo a él), sus metadatos (atributos, alias, primera aparición, capítulos) y sus notas. _(Hecha.)_
 7. **007 · Tablero de tarjetas** — completa la pizarra de la 004 con lo que sale del texto: número de menciones, capítulos y pasajes donde aparece cada elemento, coincidencias en un mismo párrafo y sugerencias de nombres propios sin ficha. La pestaña se puede separar en su propia ventana, llevar a otra pantalla y volver a acoplar. Todo funciona sin IA. _(Hecha.)_
 8. **008 · Corrección** — ortografía, gramática y puntuación en local, sin reescribir el estilo del autor. _(Hecha.)_
-9. **009 · Escudero** — conexión con un proveedor de IA en la nube (con la clave del usuario) o con un modelo local. Analiza cada párrafo en segundo plano al terminarlo y crea fichas, relaciones y atributos.
+9. **009 · Escudero** — conexión con un proveedor de IA en la nube (con la clave del usuario) o con un modelo local. Analiza cada párrafo en segundo plano al terminarlo y propone fichas, relaciones y atributos, que el autor acepta, corrige o descarta. _(Hecha.)_
 10. **010 · Hilos del destino** — el recorrido de cada personaje a lo largo de la historia: dónde aparece, qué le ocurre y cómo cambian sus relaciones.
 11. **011 · Exportación** — `.docx`, PDF, EPUB y `.md`, respetando el formato de hoja elegido.
 12. **012 · Distribución** — instaladores para Windows, macOS y Linux. Instalar y escribir, sin nada más.

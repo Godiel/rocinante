@@ -29,6 +29,7 @@ import { mentionAt, Mentions } from "../../editor/extensions/mentions";
 import type { MentionIndex } from "../mentions/find-mentions";
 import { MentionCard } from "../mentions/MentionCard";
 import { Correction, type CorrectionSetup } from "../../editor/extensions/correction";
+import { ParagraphDone, passageRange } from "../../editor/extensions/paragraph-done";
 import { CorrectionSlip, type CorrectionTarget } from "../correction/CorrectionSlip";
 import "./book-editor.css";
 import { registerCursor, shownHead } from "../../editor/cursor";
@@ -103,6 +104,10 @@ export interface BookEditorProps {
   onAddWord?(word: string): void;
   /** Stops marking a word for the rest of the session. */
   onIgnoreWord?(word: string): void;
+  /** Told the text of each paragraph the writer finishes, for the squire; nothing is told without it. */
+  onParagraphDone?(text: string): void;
+  /** A passage of a proposal of the squire the writer asked to see: its paragraph is selected. */
+  revealPassage?: { text: string; at: number } | null;
 }
 
 /**
@@ -132,6 +137,8 @@ export function BookEditor({
   onOpenElement,
   correction = null,
   correctionVisible = false,
+  onParagraphDone,
+  revealPassage = null,
   onAddWord,
   onIgnoreWord,
 }: BookEditorProps) {
@@ -165,6 +172,10 @@ export function BookEditor({
   callbacks.current.onCounts = onCounts;
   callbacks.current.onSaveState = onSaveState;
   callbacks.current.onProblem = onProblem;
+  const paragraphDone = useRef(onParagraphDone);
+  useEffect(() => {
+    paragraphDone.current = onParagraphDone;
+  }, [onParagraphDone]);
 
   const editor = useEditor({
     // The typing sound lives only here: the page view and the versions reuse the schema in silence.
@@ -175,6 +186,7 @@ export function BookEditor({
       NoteStatesExtension,
       Mentions,
       Correction,
+      ParagraphDone.configure({ onDone: (text) => paragraphDone.current?.(text) }),
     ],
     content: document.content,
     editorProps: {
@@ -306,6 +318,15 @@ export function BookEditor({
     if (!passage) return;
     editor.chain().focus().setTextSelection(passage).scrollIntoView().run();
   }, [editor, revealNote, revealAt]);
+
+  // «Ir al pasaje» of a proposal: the paragraph it comes from, if it is still there.
+  const passageAt = revealPassage?.at;
+  const passageText = revealPassage?.text;
+  useEffect(() => {
+    if (!editor || passageText === undefined) return;
+    const range = passageRange(editor.state.doc, passageText);
+    if (range) editor.chain().focus().setTextSelection(range).scrollIntoView().run();
+  }, [editor, passageText, passageAt]);
 
   // The mentions of the fichas: looked for again when the names change, shown as the writer wants.
   useEffect(() => {

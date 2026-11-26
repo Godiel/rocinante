@@ -26,6 +26,16 @@ export const messages: Record<ErrorReason, string> = {
   noteIsNotDeleted: "Esa nota no está borrada.",
   invalidWord: "El diccionario guarda palabras sueltas de hasta 60 letras.",
   dictionaryFull: "El diccionario propio está lleno: tiene 5000 palabras.",
+  squireNotConfigured:
+    "El escudero aún no tiene proveedor ni modelo. Elígelos en Ajustes del escudero.",
+  squireKeyMissing: "Falta la clave de API de ese proveedor.",
+  squireRefused: "El proveedor rechazó la petición: revisa la clave y el modelo.",
+  squireUnavailable:
+    "No se pudo hablar con el proveedor. Revisa la conexión o, con Ollama, que esté abierto.",
+  secretStoreUnavailable:
+    "No se pudo usar el almacén de claves del sistema. En Linux hace falta secret-tool (paquete libsecret-tools).",
+  proposalNotFound: "Esa propuesta ya no está.",
+  proposalElementMissing: "La propuesta habla de una ficha que no existe: acepta primero la ficha.",
   formatOutOfRange:
     "Alguna medida del formato no es posible: la hoja mide entre 7 y 30 cm por lado, la letra entre 8 y 16 puntos y el interlineado entre 1 y 2.",
   textAreaTooSmall:

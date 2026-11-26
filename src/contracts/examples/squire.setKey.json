@@ -1,0 +1,7 @@
+{
+  "valid": [{ "provider": "openai", "key": "sk-prueba", "origin": "main" }],
+  "invalid": [
+    { "provider": "openai", "key": "", "origin": "main" },
+    { "provider": "openai", "origin": "main" }
+  ]
+}

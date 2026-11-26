@@ -2,7 +2,7 @@
 
 Un proyecto de Rocinante es **un único archivo** que contiene la obra completa: capítulos, fragmentos, papelera, versiones y notas. Por dentro es una base de datos [SQLite 3](https://sqlite.org/fileformat.html), así que se puede abrir con cualquier herramienta de SQLite para inspeccionarla o recuperar el texto sin depender de la app.
 
-Este documento describe la **versión 5 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql), [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql), [`0003-elements.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0003-elements.sql) [`0004-notes.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0004-notes.sql) y [`0005-dismissed-names.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0005-dismissed-names.sql).
+Este documento describe la **versión 6 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql), [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql), [`0003-elements.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0003-elements.sql) [`0004-notes.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0004-notes.sql) [`0005-dismissed-names.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0005-dismissed-names.sql) y [`0006-squire.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0006-squire.sql).
 
 ## Cómo se reconoce
 
@@ -217,6 +217,30 @@ _Desde la versión 5._ Los nombres que el escritor descartó como sugerencias de
 | `dismissed_at` | INTEGER | |
 
 Las menciones, las coincidencias y las sugerencias no se guardan: se deducen del texto y de las fichas cada vez.
+
+### `proposal`
+_Desde la versión 6._ Lo que el escudero dedujo de un párrafo: una ficha, una relación o un atributo, a la espera del escritor, aceptado o descartado. Se borra con su documento. Nada de esto entra en las fichas hasta que el escritor lo acepta.
+
+| Columna | Tipo | |
+|---|---|---|
+| `id` | TEXT, PK | |
+| `document_id` | TEXT → `document.id` | |
+| `paragraph` | TEXT | Huella SHA-256 del párrafo del que sale |
+| `passage` | TEXT, hasta 2000 | El párrafo, tal como se leyó |
+| `created_at` | INTEGER | |
+| `kind` | TEXT | `element`, `relationship` o `attribute` |
+| `proposal_key` | TEXT | Lo que la hace igual a otra: la clase y los nombres plegados. Lo descartado de un párrafo no se vuelve a proponer |
+| `state` | TEXT | `pending`, `accepted` o `dismissed` |
+| `element_name`, `element_kind`, `element_other` | TEXT | La ficha propuesta |
+| `relation_from`, `relation_to`, `relation_forward`, `relation_inverse` | TEXT | La relación propuesta, por los nombres de sus fichas |
+| `detail_element`, `detail_name`, `detail_value` | TEXT | El atributo propuesto |
+
+Índices `proposal_waiting (state, created_at)` y `proposal_by_paragraph (document_id, paragraph)`.
+
+### `squire_paragraph`
+_Desde la versión 6._ Los párrafos que el escudero ya leyó, por su huella: si no cambian, no se vuelven a mandar. Clave `(document_id, paragraph)`; se borran con su documento.
+
+Desde la versión 6, `project.squire_enabled` (0/1) dice si el escudero puede leer la obra; empieza en 0. La clave de API del proveedor **nunca** está en el archivo: vive en el almacén de credenciales del sistema.
 
 ## Qué no está en el archivo
 

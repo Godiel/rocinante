@@ -15,6 +15,13 @@ public sealed class CommandLineTests
             .ShouldBe(new CommandLine("C:/Datos", "C:/Obras/Don Quijote.rocinante"));
     }
 
+    [Fact]
+    public void Keeps_the_keys_in_memory_only_when_asked()
+    {
+        CommandLine.Parse(["--keys-in-memory"])!.KeysInMemory.ShouldBeTrue();
+        CommandLine.Parse(["--data-dir", "C:/Datos"])!.KeysInMemory.ShouldBeFalse();
+    }
+
     [Theory]
     [InlineData("--data-dir")]
     [InlineData("--verbose")]

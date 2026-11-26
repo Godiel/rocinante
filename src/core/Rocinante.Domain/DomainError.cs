@@ -39,4 +39,11 @@ public enum DomainError
     NoteIsNotDeleted,
     InvalidWord,
     DictionaryFull,
+    SquireNotConfigured,
+    SquireKeyMissing,
+    SquireRefused,
+    SquireUnavailable,
+    SecretStoreUnavailable,
+    ProposalNotFound,
+    ProposalElementMissing,
 }
