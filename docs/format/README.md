@@ -2,7 +2,7 @@
 
 Un proyecto de Rocinante es **un único archivo** que contiene la obra completa: capítulos, fragmentos, papelera, versiones y notas. Por dentro es una base de datos [SQLite 3](https://sqlite.org/fileformat.html), así que se puede abrir con cualquier herramienta de SQLite para inspeccionarla o recuperar el texto sin depender de la app.
 
-Este documento describe la **versión 6 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql), [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql), [`0003-elements.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0003-elements.sql) [`0004-notes.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0004-notes.sql) [`0005-dismissed-names.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0005-dismissed-names.sql) y [`0006-squire.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0006-squire.sql).
+Este documento describe la **versión 7 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql), [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql), [`0003-elements.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0003-elements.sql) [`0004-notes.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0004-notes.sql) [`0005-dismissed-names.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0005-dismissed-names.sql), [`0006-squire.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0006-squire.sql) y [`0007-threads.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0007-threads.sql).
 
 ## Cómo se reconoce
 
@@ -205,6 +205,7 @@ _Desde la versión 3._ Dos elementos unidos por una clase. La relación de un el
 | `id` | TEXT, PK | |
 | `from_id`, `to_id` | TEXT → `element.id` | Distintos. Se borran con sus elementos |
 | `kind` | TEXT | `builtin:<nombre>` para una clase común o `own:<relationship_kind.id>` para una del escritor |
+| `starts_at`, `ends_at` | TEXT → `document.id`, nulos | _Desde la versión 7._ Los capítulos entre los que vale, ambos incluidos. Nulo: desde el principio o hasta el final de la obra. Si el capítulo se borra, quedan nulos |
 
 Índices `relationship_by_from (from_id)` y `relationship_by_to (to_id)`.
 
@@ -228,19 +229,39 @@ _Desde la versión 6._ Lo que el escudero dedujo de un párrafo: una ficha, una 
 | `paragraph` | TEXT | Huella SHA-256 del párrafo del que sale |
 | `passage` | TEXT, hasta 2000 | El párrafo, tal como se leyó |
 | `created_at` | INTEGER | |
-| `kind` | TEXT | `element`, `relationship` o `attribute` |
+| `kind` | TEXT | `element`, `relationship`, `attribute` o, desde la versión 7, `milestone` |
 | `proposal_key` | TEXT | Lo que la hace igual a otra: la clase y los nombres plegados. Lo descartado de un párrafo no se vuelve a proponer |
 | `state` | TEXT | `pending`, `accepted` o `dismissed` |
 | `element_name`, `element_kind`, `element_other` | TEXT | La ficha propuesta |
 | `relation_from`, `relation_to`, `relation_forward`, `relation_inverse` | TEXT | La relación propuesta, por los nombres de sus fichas |
 | `detail_element`, `detail_name`, `detail_value` | TEXT | El atributo propuesto |
+| `milestone_element`, `milestone_text` | TEXT | _Desde la versión 7._ El hito propuesto: el nombre de su ficha y lo que le ocurre |
 
-Índices `proposal_waiting (state, created_at)` y `proposal_by_paragraph (document_id, paragraph)`.
+Índices `proposal_waiting (state, created_at)` y `proposal_by_paragraph (document_id, paragraph)`. La versión 7 copia la tabla en una nueva para admitir los hitos, porque SQLite no deja cambiar una restricción `CHECK`.
 
 ### `squire_paragraph`
 _Desde la versión 6._ Los párrafos que el escudero ya leyó, por su huella: si no cambian, no se vuelven a mandar. Clave `(document_id, paragraph)`; se borran con su documento.
 
 Desde la versión 6, `project.squire_enabled` (0/1) dice si el escudero puede leer la obra; empieza en 0. La clave de API del proveedor **nunca** está en el archivo: vive en el almacén de credenciales del sistema.
+
+### `milestone`
+_Desde la versión 7._ Un hito: lo que le ocurre a una ficha en un párrafo de un capítulo. Se borra con su ficha o con su documento.
+
+| Columna | Tipo | |
+|---|---|---|
+| `id` | TEXT, PK | |
+| `element_id` | TEXT → `element.id` | |
+| `document_id` | TEXT → `document.id` | |
+| `paragraph` | TEXT, hasta 20000 | El texto del párrafo, tal como se encontró la última vez |
+| `block` | INTEGER ≥ 0 | Su posición en el documento, tal como se encontró la última vez |
+| `text` | TEXT, 1–300 | Lo que le ocurre |
+| `lost` | INTEGER (0/1) | 1 si ningún párrafo del documento es ya el suyo |
+| `created_at` | INTEGER | |
+
+Índice `milestone_by_document (document_id, block)`. Cada vez que se guarda el documento, el núcleo vuelve a buscar el párrafo de cada hito: primero el mismo texto y, si no lo hay, el que conserva más de sus palabras (al menos la mitad; un párrafo partido en dos sigue en la mitad que conserva más), el más cercano a su posición. Si no hay ninguno, el hito queda perdido (`lost = 1`) en su capítulo.
+
+### `thread_choice`
+_Desde la versión 7._ Las fichas que se muestran en los hilos del destino, en orden (`position`). Se borran con su ficha. Mientras `project.threads_chosen` (0/1) es 0, el escritor no ha elegido y se muestran los cinco personajes más nombrados.
 
 ## Qué no está en el archivo
 

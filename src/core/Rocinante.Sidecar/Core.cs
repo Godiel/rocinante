@@ -53,6 +53,7 @@ internal sealed class Core : IDisposable, IWorkGate
         var ambience = new AmbienceUseCases(settings, options.Ambience, notifier);
         ambience.Tidy();
         var elements = new ElementUseCases(_workspace, options.ChosenFiles, notifier, options.Clock);
+        var threads = new ThreadUseCases(_workspace, elements, notifier, options.Clock);
         var services = new CoreServices(
             projects,
             new DocumentUseCases(_workspace, notifier, options.Clock),
@@ -68,9 +69,11 @@ internal sealed class Core : IDisposable, IWorkGate
                 options.Secrets ?? SystemSecretStore.ForThisSystem(),
                 options.SquireClient ?? new HttpSquireClient(_http),
                 elements,
+                threads,
                 notifier,
                 options.Clock,
-                this));
+                this),
+            threads);
 
         _server = new JsonRpcServer(writer, contract, CoreMethods.Create(contract, services), log);
     }

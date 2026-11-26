@@ -5,6 +5,7 @@ using Rocinante.Domain.Elements;
 using Rocinante.Domain.Notes;
 using Rocinante.Domain.Projects;
 using Rocinante.Domain.Squire;
+using Rocinante.Domain.Threads;
 using Rocinante.Domain.Versions;
 
 namespace Rocinante.Application.Ports;
@@ -143,4 +144,21 @@ public interface IProposalRepository
     bool SquireEnabled();
 
     void SetSquireEnabled(bool enabled);
+}
+
+/// <summary>The milestones of the work and the elements the writer chose to see in the threads.</summary>
+public interface IThreadRepository
+{
+    /// <summary>Every milestone, of elements and documents in the work or in the trash.</summary>
+    IReadOnlyList<Milestone> Milestones();
+
+    /// <summary>Inserts a new milestone or keeps what changed of it.</summary>
+    void Save(Milestone milestone);
+
+    void Delete(MilestoneId id);
+
+    /// <summary>The elements chosen, in order, or null while the writer has not chosen.</summary>
+    IReadOnlyList<ElementId>? Chosen();
+
+    void Choose(IReadOnlyList<ElementId> elements);
 }

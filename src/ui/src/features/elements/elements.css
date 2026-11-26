@@ -552,3 +552,11 @@
   display: flex;
   gap: var(--space-3);
 }
+
+/* The chapters a relationship holds between, under it. */
+.element-relation-when {
+  margin: var(--space-1) 0 var(--space-2);
+  padding: 0;
+  border: 0;
+  font-size: var(--text-caption);
+}

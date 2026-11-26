@@ -23,6 +23,9 @@ public sealed record RelationshipKindChoice(RelationshipKindId? Existing, string
     public static RelationshipKindChoice New(string forward, string? inverse) => new(null, forward, inverse);
 }
 
+/// <summary>The chapters a relationship holds between, both included; null is the start or the end of the work.</summary>
+public sealed record RelationshipBounds(DocumentId? Starts, DocumentId? Ends);
+
 /// <summary>
 /// The elements of the work: creating and changing them, their images, their place on the board, the trash
 /// and their relationships. Every change is stored at once and announced to every window.
@@ -41,6 +44,9 @@ public sealed class ElementUseCases(Workspace workspace, IChosenFiles files, ICh
     public Element Get(ElementId id) => workspace.Board.Find(id);
 
     private readonly ReferenceIndex _references = new();
+
+    /// <summary>The index of mentions, kept between requests, that the threads also read.</summary>
+    internal ReferenceIndex Index => _references;
 
     /// <summary>Where an element is mentioned in the work, by its name or an alias, in the order of the index.</summary>
     public ElementReferences References(ElementId id)
@@ -250,14 +256,17 @@ public sealed class ElementUseCases(Workspace workspace, IChosenFiles files, ICh
     }
 
     /// <summary>Joins two elements, writing down a new kind of the writer's first if the choice asks for one.</summary>
-    public Relationship Relate(ElementId from, ElementId to, RelationshipKindChoice kind, string origin)
+    public Relationship Relate(
+        ElementId from, ElementId to, RelationshipKindChoice kind, string origin, DocumentId? starts = null, DocumentId? ends = null)
     {
         ArgumentNullException.ThrowIfNull(kind);
+        Relationship.EnsureBounds(starts, ends, ChapterAt());
 
         var (relationship, ownKinds) = workspace.ChangeBoard((board, repository) =>
         {
             var (kindId, created) = Resolve(board, repository, kind);
             var related = board.Relate(from, to, kindId, clock.GetUtcNow());
+            board.SetBounds(related.Id, starts, ends);
             repository.Save(related);
             return (related, created);
         });
@@ -265,14 +274,32 @@ public sealed class ElementUseCases(Workspace workspace, IChosenFiles files, ICh
         return relationship;
     }
 
-    public Relationship ChangeRelationship(RelationshipId id, RelationshipKindChoice kind, string origin)
+    /// <summary>
+    /// Changes the kind of a relationship, the chapters it holds between, or both: a null <paramref name="kind"/>
+    /// keeps the kind, and null <paramref name="bounds"/> keep the chapters.
+    /// </summary>
+    public Relationship ChangeRelationship(RelationshipId id, RelationshipKindChoice? kind, string origin, RelationshipBounds? bounds = null)
     {
-        ArgumentNullException.ThrowIfNull(kind);
+        if (bounds is not null)
+        {
+            Relationship.EnsureBounds(bounds.Starts, bounds.Ends, ChapterAt());
+        }
 
         var (relationship, ownKinds) = workspace.ChangeBoard((board, repository) =>
         {
-            var (kindId, created) = Resolve(board, repository, kind);
-            var changed = board.ChangeKind(id, kindId);
+            var changed = board.FindRelationship(id);
+            IReadOnlyList<RelationshipKind> created = [];
+            if (kind is not null)
+            {
+                (var kindId, created) = Resolve(board, repository, kind);
+                changed = board.ChangeKind(id, kindId);
+            }
+
+            if (bounds is not null)
+            {
+                changed = board.SetBounds(id, bounds.Starts, bounds.Ends);
+            }
+
             repository.Save(changed);
             return (changed, created);
         });
@@ -289,6 +316,24 @@ public sealed class ElementUseCases(Workspace workspace, IChosenFiles files, ICh
             return id;
         });
         notifier.ElementsChanged(ElementsChange.None with { RemovedRelationships = [id] }, origin);
+    }
+
+    /// <summary>The place of each chapter in reading order, or null for a document that is not a chapter.</summary>
+    private Func<DocumentId, int?> ChapterAt()
+    {
+        var chapters = workspace.Project.Chapters;
+        return id =>
+        {
+            for (var place = 0; place < chapters.Count; place++)
+            {
+                if (chapters[place].Id == id)
+                {
+                    return place;
+                }
+            }
+
+            return null;
+        };
     }
 
     private (RelationshipKindId Kind, IReadOnlyList<RelationshipKind> Created) Resolve(

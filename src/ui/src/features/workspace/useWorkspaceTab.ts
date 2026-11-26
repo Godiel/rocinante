@@ -1,24 +1,25 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { keepsItsOwnKeys } from "../../editor/own-keys";
-import { isTabShortcut } from "./shortcuts";
+import { isTabShortcut, isThreadsShortcut } from "./shortcuts";
 
-export type WorkspaceTab = "writing" | "board";
+export type WorkspaceTab = "writing" | "board" | "threads";
 
 interface WorkspaceTabOptions {
-  /** In focus mode there is only the text: F2 does nothing. */
+  /** In focus mode there is only the text: F2 and F8 do nothing. */
   focused: boolean;
   /** Gives the keyboard back to the text on coming back to the writing. */
   onBackToWriting(): void;
 }
 
 /**
- * Which of the two tabs of the work shows. The writing is hidden, never unmounted, while the board shows:
+ * Which of the tabs of the work shows. The writing is hidden, never unmounted, while another shows:
  * coming back finds the text scrolled where it was, with the cursor where it was.
  */
 export function useWorkspaceTab({ focused, onBackToWriting }: WorkspaceTabOptions) {
   const [tab, setTab] = useState<WorkspaceTab>("writing");
   // The board is loaded the first time it is asked for, and kept from then on.
   const [boardVisited, setBoardVisited] = useState(false);
+  const [threadsVisited, setThreadsVisited] = useState(false);
   const scrolled = useRef(0);
   const latest = useRef({ focused, onBackToWriting });
   useEffect(() => {
@@ -34,11 +35,16 @@ export function useWorkspaceTab({ focused, onBackToWriting }: WorkspaceTabOption
     if (current.current === "writing") scrolled.current = window.scrollY;
     current.current = next;
     if (next === "board") setBoardVisited(true);
+    if (next === "threads") setThreadsVisited(true);
     setTab(next);
   }, []);
 
   const toggle = useCallback(
     () => show(current.current === "writing" ? "board" : "writing"),
+    [show],
+  );
+  const toggleThreads = useCallback(
+    () => show(current.current === "threads" ? "writing" : "threads"),
     [show],
   );
 
@@ -57,13 +63,16 @@ export function useWorkspaceTab({ focused, onBackToWriting }: WorkspaceTabOption
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!isTabShortcut(event) || keepsItsOwnKeys(event.target)) return;
+      const threads = isThreadsShortcut(event);
+      if ((!threads && !isTabShortcut(event)) || keepsItsOwnKeys(event.target)) return;
       event.preventDefault();
-      if (!latest.current.focused) toggle();
+      if (latest.current.focused) return;
+      if (threads) toggleThreads();
+      else toggle();
     };
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
-  }, [toggle]);
+  }, [toggle, toggleThreads]);
 
-  return { tab, boardVisited, show, toggle };
+  return { tab, boardVisited, threadsVisited, show, toggle };
 }

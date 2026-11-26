@@ -73,5 +73,24 @@ internal sealed class RecordingNotifier : IChangeNotifier
         Events.Add($"elements.changed:{origin}");
     }
 
+    public IReadOnlyList<ElementId>? LastChosen { get; private set; }
+
+    public void ThreadsChanged(IReadOnlyList<ElementId> chosen, string origin)
+    {
+        LastChosen = chosen;
+        Events.Add($"threads.changed:{origin}");
+    }
+
+    public IReadOnlyList<Rocinante.Domain.Threads.Milestone>? LastMilestones { get; private set; }
+
+    public IReadOnlyList<MilestoneId>? LastRemovedMilestones { get; private set; }
+
+    public void MilestonesChanged(IReadOnlyList<Rocinante.Domain.Threads.Milestone> milestones, IReadOnlyList<MilestoneId> removed, string origin)
+    {
+        LastMilestones = milestones;
+        LastRemovedMilestones = removed;
+        Events.Add($"milestones.changed:{origin}");
+    }
+
     public void Clear() => Events.Clear();
 }

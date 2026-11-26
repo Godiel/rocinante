@@ -42,6 +42,7 @@ public sealed class SqliteProjectSession : IProjectSession
         Notes = new NoteRepository(database);
         Elements = new ElementRepository(database);
         Proposals = new ProposalRepository(database);
+        Threads = new ThreadRepository(database);
     }
 
     public string FilePath => _database.FilePath;
@@ -57,6 +58,8 @@ public sealed class SqliteProjectSession : IProjectSession
     public IElementRepository Elements { get; }
 
     public IProposalRepository Proposals { get; }
+
+    public IThreadRepository Threads { get; }
 
     public T InTransaction<T>(Func<T> work) => _database.InTransaction(work);
 

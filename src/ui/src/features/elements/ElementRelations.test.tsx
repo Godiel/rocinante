@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Board, ElementSummary } from "../../bridge/generated/protocol";
@@ -8,6 +8,7 @@ const request = vi.hoisted(() => vi.fn());
 vi.mock("../../bridge/core", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../bridge/core")>()),
   request,
+  onNotification: () => Promise.resolve(() => {}),
 }));
 
 import { ElementRelations } from "./ElementRelations";
@@ -28,9 +29,9 @@ const board: Board = {
     summary("m", "Mateo"),
   ],
   relationships: [
-    { id: "1", from: "c", to: "a", kind: "builtin:child-of" },
-    { id: "2", from: "a", to: "s", kind: "builtin:lives-in" },
-    { id: "3", from: "m", to: "a", kind: "own:1" },
+    { id: "1", from: "c", to: "a", kind: "builtin:child-of", starts: null, ends: null },
+    { id: "2", from: "a", to: "s", kind: "builtin:lives-in", starts: null, ends: null },
+    { id: "3", from: "m", to: "a", kind: "own:1", starts: null, ends: null },
   ],
   ownKinds: [{ id: "own:1", forward: "discípulo de", inverse: "maestro de" }],
   trash: [],
@@ -54,7 +55,7 @@ function show(elementId = "a", shown: Board = board) {
 const rows = () =>
   screen
     .getAllByRole("listitem")
-    .map((item) => item.textContent!.replace(/[✎×]/g, "").replace(/\s+/g, " ").trim());
+    .map((item) => item.textContent!.replace(/[✎×⧗]/g, "").replace(/\s+/g, " ").trim());
 
 beforeEach(() => {
   request.mockReset();
@@ -134,7 +135,9 @@ describe("the relationships of a ficha", () => {
 
   it("says why it could not relate them", async () => {
     const user = userEvent.setup();
-    request.mockRejectedValueOnce(new Error("gone"));
+    request.mockImplementation((method: string) =>
+      method === "relationship.create" ? Promise.reject(new Error("gone")) : Promise.resolve({}),
+    );
     show("c");
 
     await user.click(screen.getByRole("button", { name: "Relacionar con…" }));
@@ -148,5 +151,55 @@ describe("the relationships of a ficha", () => {
     show("a", { ...board, relationships: [] });
 
     expect(screen.getByText("Aún no tiene relaciones.")).toBeInTheDocument();
+  });
+
+  it("says between which chapters a relationship holds, and changes them", async () => {
+    const user = userEvent.setup();
+    request.mockImplementation((method: string) =>
+      Promise.resolve(
+        method === "project.get"
+          ? {
+              index: {
+                chapters: [
+                  { id: "uno", title: "La venta" },
+                  { id: "dos", title: "El camino" },
+                  { id: "tres", title: "La vuelta" },
+                ],
+                fragments: [],
+                trash: [],
+              },
+            }
+          : {},
+      ),
+    );
+    show("a", {
+      ...board,
+      relationships: [
+        { id: "1", from: "c", to: "a", kind: "builtin:child-of", starts: "uno", ends: "dos" },
+        { id: "2", from: "a", to: "s", kind: "builtin:lives-in", starts: "tres", ends: null },
+      ],
+    });
+
+    expect(await screen.findByText(/del capítulo 1 al 2/)).toBeInTheDocument();
+    expect(screen.getByText(/desde el capítulo 3/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Cuándo vale «padre de Claudio»" }));
+    const until = screen.getByLabelText("hasta");
+    expect(within(until).getByRole("option", { name: "1. La venta" })).toBeEnabled();
+    expect(
+      within(screen.getByLabelText("Desde")).getByRole("option", { name: "3. La vuelta" }),
+    ).toBeDisabled();
+    await user.selectOptions(until, "el final");
+    expect(request).toHaveBeenCalledWith("relationship.update", {
+      id: "1",
+      ends: null,
+      origin: "main",
+    });
+    await user.selectOptions(screen.getByLabelText("Desde"), "2. El camino");
+    expect(request).toHaveBeenLastCalledWith("relationship.update", {
+      id: "1",
+      starts: "dos",
+      origin: "main",
+    });
   });
 });

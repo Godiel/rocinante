@@ -109,7 +109,7 @@ internal sealed record ElementDto(
     BoardPositionDto Position,
     ElementImageInfoDto? Image);
 
-internal sealed record RelationshipDto(Guid Id, Guid From, Guid To, string Kind);
+internal sealed record RelationshipDto(Guid Id, Guid From, Guid To, string Kind, Guid? Starts, Guid? Ends);
 
 internal sealed record RelationshipKindDto(string Id, string Forward, string? Inverse);
 
@@ -209,9 +209,13 @@ internal sealed record ProposalDto(
     DateTimeOffset CreatedAt,
     ProposedElementDto? Element,
     ProposedRelationshipDto? Relationship,
-    ProposedDetailDto? Attribute);
+    ProposedDetailDto? Attribute,
+    ProposedMilestoneDto? Milestone);
 
-internal sealed record ProposalChangesDto(string? Name, string? Kind, string? OtherKind, string? Forward, string? Inverse, string? Value);
+internal sealed record ProposedMilestoneDto(string Element, string Text);
+
+internal sealed record ProposalChangesDto(
+    string? Name, string? Kind, string? OtherKind, string? Forward, string? Inverse, string? Value, string? Text);
 
 internal sealed record AcceptProposalParams(Guid Id, ProposalChangesDto? Changes, string Origin);
 
@@ -242,9 +246,36 @@ internal sealed record SetImageParams(Guid Id, string Image, string Thumbnail, s
 
 internal sealed record ElementImageParams(Guid Id, string Size);
 
-internal sealed record RelateParams(Guid From, Guid To, string? Kind, NewRelationshipKindDto? NewKind, string Origin);
+internal sealed record RelateParams(Guid From, Guid To, string? Kind, NewRelationshipKindDto? NewKind, Guid? Starts, Guid? Ends, string Origin);
 
-internal sealed record ChangeRelationshipParams(Guid Id, string? Kind, NewRelationshipKindDto? NewKind, string Origin);
+internal sealed record ChangeRelationshipParams(Guid Id, string? Kind, NewRelationshipKindDto? NewKind, Guid? Starts, Guid? Ends, string Origin);
+
+internal sealed record ChooseThreadsParams(IReadOnlyList<Guid> Elements, string Origin);
+
+internal sealed record MarkMilestoneParams(Guid ElementId, Guid DocumentId, string Passage, string Text, string Origin);
+
+internal sealed record RenameMilestoneParams(Guid Id, string Text, string Origin);
+
+internal sealed record MilestoneDto(Guid Id, Guid ElementId, Guid DocumentId, string Passage, string Text, bool Lost, DateTimeOffset CreatedAt);
+
+internal sealed record ThreadChapterDto(Guid DocumentId, string Title);
+
+internal sealed record ThreadPointDto(Guid DocumentId, int Mentions);
+
+internal sealed record FateThreadDto(Guid ElementId, IReadOnlyList<ThreadPointDto> Points);
+
+internal sealed record ThreadMeetingDto(Guid DocumentId, Guid First, Guid Second, int Paragraphs);
+
+internal sealed record ThreadsDto(
+    IReadOnlyList<Guid> Chosen,
+    IReadOnlyList<ThreadChapterDto> Chapters,
+    IReadOnlyList<FateThreadDto> Threads,
+    IReadOnlyList<ThreadMeetingDto> Meetings,
+    IReadOnlyList<MilestoneDto> Milestones);
+
+internal sealed record ThreadsChangedNotification(IReadOnlyList<Guid> Chosen, string Origin);
+
+internal sealed record MilestonesChangedNotification(IReadOnlyList<MilestoneDto> Milestones, IReadOnlyList<Guid> Removed, string Origin);
 
 // Results.
 internal sealed record SystemInfoResult(int ProtocolVersion, string CoreVersion);
@@ -367,5 +398,12 @@ internal sealed record ElementsChangedNotification(
 [JsonSerializable(typeof(ElementImageParams))]
 [JsonSerializable(typeof(RelateParams))]
 [JsonSerializable(typeof(ChangeRelationshipParams))]
+[JsonSerializable(typeof(ChooseThreadsParams))]
+[JsonSerializable(typeof(MarkMilestoneParams))]
+[JsonSerializable(typeof(RenameMilestoneParams))]
+[JsonSerializable(typeof(MilestoneDto))]
+[JsonSerializable(typeof(ThreadsDto))]
+[JsonSerializable(typeof(ThreadsChangedNotification))]
+[JsonSerializable(typeof(MilestonesChangedNotification))]
 [JsonSerializable(typeof(ElementsChangedNotification))]
 internal sealed partial class WireJson : JsonSerializerContext;

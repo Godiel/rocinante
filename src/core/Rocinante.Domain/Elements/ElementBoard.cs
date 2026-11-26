@@ -171,6 +171,18 @@ public sealed class ElementBoard
         return relationship;
     }
 
+    /// <summary>
+    /// Sets the chapters a relationship holds between; the caller checks them with
+    /// <see cref="Relationship.EnsureBounds"/>, which needs the index of the work.
+    /// </summary>
+    public Relationship SetBounds(RelationshipId id, DocumentId? starts, DocumentId? ends)
+    {
+        var relationship = FindRelationship(id);
+        relationship.Starts = starts;
+        relationship.Ends = ends;
+        return relationship;
+    }
+
     public void Unrelate(RelationshipId id) => _relationships.Remove(FindRelationship(id));
 
     /// <summary>The relationships of an element, including the hidden ones of an element in the trash.</summary>

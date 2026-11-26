@@ -56,6 +56,10 @@ export const messages: Record<ErrorReason, string> = {
   relationshipKindNotFound: "Ese tipo de relación ya no existe en la obra.",
   relationshipRepeated: "Esas dos fichas ya tienen esa relación.",
   sameElement: "Una ficha no se puede relacionar consigo misma.",
+  relationshipBounds:
+    "Una relación empieza y termina en capítulos de la obra, y no puede terminar antes de empezar.",
+  milestoneNotFound: "Ese hito ya no está. Puede que se haya borrado en otra ventana.",
+  milestoneTextRequired: "Escribe qué le ocurre, en una frase corta.",
   notFound: "No se encuentra el archivo. Puede que se haya movido o borrado.",
   alreadyExists:
     "Ya hay un archivo con ese nombre en esa carpeta. Elige otro título u otra carpeta.",

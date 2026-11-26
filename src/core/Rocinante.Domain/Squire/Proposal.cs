@@ -7,6 +7,7 @@ public enum ProposalKind
     Element,
     Relationship,
     Attribute,
+    Milestone,
 }
 
 public enum ProposalState
@@ -25,6 +26,9 @@ public sealed record ProposedRelationship(string From, string To, string Forward
 /// <summary>Something the text says about a ficha: an attribute of it.</summary>
 public sealed record ProposedDetail(string Element, string Name, string Value);
 
+/// <summary>Something that happens to a ficha in the paragraph.</summary>
+public sealed record ProposedMilestone(string Element, string Text);
+
 /// <summary>
 /// Something the squire deduced from a paragraph and proposes to the writer. Nothing of it enters the work
 /// until the writer accepts it; dismissed, it is not proposed again for that paragraph.
@@ -42,6 +46,7 @@ public sealed class Proposal
         ProposedElement? element,
         ProposedRelationship? relationship,
         ProposedDetail? attribute,
+        ProposedMilestone? milestone,
         ProposalState state)
     {
         Id = id;
@@ -52,6 +57,7 @@ public sealed class Proposal
         Element = element;
         Relationship = relationship;
         Attribute = attribute;
+        Milestone = milestone;
         State = state;
     }
 
@@ -73,11 +79,15 @@ public sealed class Proposal
 
     public ProposedDetail? Attribute { get; }
 
+    public ProposedMilestone? Milestone { get; }
+
     public ProposalState State { get; private set; }
 
-    public ProposalKind Kind => Element is not null
-        ? ProposalKind.Element
-        : Relationship is not null ? ProposalKind.Relationship : ProposalKind.Attribute;
+    public ProposalKind Kind =>
+        Element is not null ? ProposalKind.Element
+        : Relationship is not null ? ProposalKind.Relationship
+        : Attribute is not null ? ProposalKind.Attribute
+        : ProposalKind.Milestone;
 
     /// <summary>
     /// What makes two proposals the same, whatever their id: the same kind of thing about the same names. The
@@ -88,7 +98,8 @@ public sealed class Proposal
         ProposalKind.Element => $"element:{MentionFinder.Key(Element!.Name)}",
         ProposalKind.Relationship =>
             $"relationship:{MentionFinder.Key(Relationship!.From)}:{MentionFinder.Key(Relationship.Forward)}:{MentionFinder.Key(Relationship.To)}",
-        _ => $"attribute:{MentionFinder.Key(Attribute!.Element)}:{MentionFinder.Key(Attribute.Name)}",
+        ProposalKind.Attribute => $"attribute:{MentionFinder.Key(Attribute!.Element)}:{MentionFinder.Key(Attribute.Name)}",
+        _ => $"milestone:{MentionFinder.Key(Milestone!.Element)}:{MentionFinder.Key(Milestone.Text)}",
     };
 
     public static Proposal ForElement(DocumentId documentId, string paragraph, string passage, ProposedElement element, DateTimeOffset now)
@@ -133,6 +144,15 @@ public sealed class Proposal
         return Create(documentId, paragraph, passage, now, null, null, valid);
     }
 
+    public static Proposal ForMilestone(DocumentId documentId, string paragraph, string passage, ProposedMilestone milestone, DateTimeOffset now)
+    {
+        ArgumentNullException.ThrowIfNull(milestone);
+        var valid = new ProposedMilestone(
+            Names.Required(milestone.Element, Elements.Element.MaxNameLength, "A proposed milestone"),
+            Names.Required(milestone.Text, Threads.Milestone.MaxTextLength, "A proposed milestone"));
+        return Create(documentId, paragraph, passage, now, null, null, null, valid);
+    }
+
     /// <summary>Rebuilds a proposal from storage.</summary>
     public static Proposal Rehydrate(
         ProposalId id,
@@ -143,8 +163,9 @@ public sealed class Proposal
         ProposedElement? element,
         ProposedRelationship? relationship,
         ProposedDetail? attribute,
+        ProposedMilestone? milestone,
         ProposalState state) =>
-        new(id, documentId, paragraph, passage, createdAt, element, relationship, attribute, state);
+        new(id, documentId, paragraph, passage, createdAt, element, relationship, attribute, milestone, state);
 
     /// <summary>The writer took it: what it says is now in the work.</summary>
     public void Accept() => Decide(ProposalState.Accepted);
@@ -169,11 +190,12 @@ public sealed class Proposal
         DateTimeOffset now,
         ProposedElement? element,
         ProposedRelationship? relationship,
-        ProposedDetail? attribute)
+        ProposedDetail? attribute,
+        ProposedMilestone? milestone = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(paragraph);
         ArgumentNullException.ThrowIfNull(passage);
         var shown = passage.Length <= MaxPassageLength ? passage : passage[..MaxPassageLength];
-        return new Proposal(ProposalId.New(now), documentId, paragraph, shown, now, element, relationship, attribute, ProposalState.Pending);
+        return new Proposal(ProposalId.New(now), documentId, paragraph, shown, now, element, relationship, attribute, milestone, ProposalState.Pending);
     }
 }

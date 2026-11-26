@@ -29,7 +29,13 @@ public enum SquireStatus
 
 /// <summary>What the writer corrected in a proposal before accepting it; null leaves what was proposed.</summary>
 public sealed record ProposalCorrection(
-    string? Name = null, ElementKind? Kind = null, string? OtherKind = null, string? Forward = null, string? Inverse = null, string? Value = null);
+    string? Name = null,
+    ElementKind? Kind = null,
+    string? OtherKind = null,
+    string? Forward = null,
+    string? Inverse = null,
+    string? Value = null,
+    string? Text = null);
 
 /// <summary>
 /// Everything that happens one at a time with the rest of the core: the requests of the windows and what
@@ -60,6 +66,7 @@ public sealed class SquireUseCases(
     ISecretStore secrets,
     ISquireClient client,
     ElementUseCases elements,
+    ThreadUseCases threads,
     IChangeNotifier notifier,
     TimeProvider clock,
     IWorkGate gate)
@@ -212,6 +219,10 @@ public sealed class SquireUseCases(
                     RelationshipKindChoice.New(fix.Forward ?? relationship.Forward, fix.Forward is null ? relationship.Inverse : fix.Inverse),
                     origin);
                 break;
+            case ProposalKind.Milestone:
+                var milestone = proposal.Milestone!;
+                threads.Mark(Named(milestone.Element), proposal.DocumentId, proposal.Passage, fix.Text ?? milestone.Text, origin);
+                break;
             default:
                 var detail = proposal.Attribute!;
                 var target = workspace.Board.InWork(Named(detail.Element));
@@ -363,6 +374,11 @@ public sealed class SquireUseCases(
         foreach (var detail in reading.Details)
         {
             Keep(() => Proposal.ForAttribute(documentId, paragraph, text, detail, now));
+        }
+
+        foreach (var milestone in reading.Milestones)
+        {
+            Keep(() => Proposal.ForMilestone(documentId, paragraph, text, milestone, now));
         }
 
         session.InTransaction(() =>

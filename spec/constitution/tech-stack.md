@@ -67,8 +67,8 @@ Rocinante es código abierto y portafolio profesional, así que la calidad es pa
 | Ruta | Qué hay |
 |---|---|
 | `src/contracts/protocol.json` | El contrato de mensajes entre interfaz y núcleo (JSON Schema, versionado). Cada método tiene ejemplos en `src/contracts/examples/`, y `mentions.json` fija las reglas de las menciones que cumplen los dos lados. |
-| `src/core/Rocinante.Domain` | Reglas de la obra sin dependencias: `Project` (índice de capítulos, fragmentos y papelera), `Document`, `DocumentContent` y `TextStatistics`, `DocumentVersion`, `Note` y los elementos de la obra (`Elements/`: `Element`, `ElementBoard`, `Relationship`, `RelationshipKind`, `MentionFinder`, que reconoce sus nombres en el texto, y `NameSuggester`, que sugiere los nombres propios sin ficha) y las propuestas del escudero (`Squire/Proposal`). |
-| `src/core/Rocinante.Application` | Casos de uso (`ProjectUseCases`, `DocumentUseCases`, `VersionUseCases`, `NoteUseCases`, `ElementUseCases`, `SettingsUseCases`, `SquireUseCases`, con su cola en segundo plano y el encargo a la IA en `SquireAsk`), el `Workspace` compartido por todas las ventanas y los puertos que implementa la infraestructura. |
+| `src/core/Rocinante.Domain` | Reglas de la obra sin dependencias: `Project` (índice de capítulos, fragmentos y papelera), `Document`, `DocumentContent` y `TextStatistics`, `DocumentVersion`, `Note` y los elementos de la obra (`Elements/`: `Element`, `ElementBoard`, `Relationship`, `RelationshipKind`, `MentionFinder`, que reconoce sus nombres en el texto, y `NameSuggester`, que sugiere los nombres propios sin ficha) las propuestas del escudero (`Squire/Proposal`) y los hitos de los hilos del destino (`Threads/Milestone`, con `ParagraphFinder`, que sigue a su párrafo cuando el texto cambia). |
+| `src/core/Rocinante.Application` | Casos de uso (`ProjectUseCases`, `DocumentUseCases`, `VersionUseCases`, `NoteUseCases`, `ElementUseCases`, `SettingsUseCases`, `SquireUseCases`, con su cola en segundo plano y el encargo a la IA en `SquireAsk`, y `ThreadUseCases`, los hilos sobre el índice de menciones de `ElementReferences`), el `Workspace` compartido por todas las ventanas y los puertos que implementa la infraestructura. |
 | `src/core/Rocinante.Application/Settings` | Preferencias del escritor, incluido el ambiente (`Ambience`: fondo, tecleo, ambientes, atenuar y meta), y los fondos y sonidos propios (`AmbienceUseCases`, `FileSignature`). |
 | `src/core/Rocinante.Infrastructure` | SQLite (`Persistence/`, con las migraciones en `Persistence/Migrations/`), `settings.json` de la app (`Settings/`), el registro con Serilog (`Logging/`), las claves en el almacén del sistema (`Secrets/`) y los proveedores de IA (`Squire/HttpSquireClient`). |
 | `src/core/Rocinante.Sidecar` | El proceso del núcleo: servidor JSON-RPC por stdin/stdout, validación contra el contrato y notificaciones a las ventanas. |
@@ -82,6 +82,7 @@ Rocinante es código abierto y portafolio profesional, así que la calidad es pa
 | `src/ui/src/features/mentions` | Las menciones de las fichas: reconocerlas en el texto (`findMentions`), la ficha en pequeño al pasar el ratón y «En el texto» en la ficha. Las marcas del editor viven en `editor/extensions/mentions.ts`. |
 | `src/ui/src/features/correction` | La corrección: reglas de puntuación, el revisor de ortografía en su worker, la ventanita de sugerencias y el diccionario propio del escritor (en `settings.json`). Las marcas del editor viven en `editor/extensions/correction.ts`; F7 las muestra y oculta. |
 | `src/ui/src/features/squire` | El escudero: la pestaña Escudero del panel junto al texto con sus ajustes (proveedor, modelo, clave, «Probar» y el permiso por obra) y las propuestas para aceptar, corregir o descartar. El párrafo terminado lo avisa `editor/extensions/paragraph-done.ts`. |
+| `src/ui/src/features/threads` | Los hilos del destino: la pestaña Hilos (F8), dibujada en SVG con los capítulos en horizontal y una línea por ficha, los hitos, marcar uno desde el texto (`MilestoneSlip`) y las fichas que se siguen. Los capítulos de cada relación se eligen en la ficha (`elements/RelationshipWhen`). |
 | `src/ui/src/features/board` | La pizarra del Tablero con React Flow: tarjetas con sus menciones, flechas, colocación libre, buscador, filtro por tipo, coincidencias al elegir una tarjeta y orden automático con d3-force. |
 | `src/ui/src/features/focus`, `features/ambience` | Modo concentración (F11, barra mínima, meta de la sesión) y ambiente: fondos, hoja translúcida, fondos animados dibujados por código (`animated/`) y créditos. |
 | `src/ui/src/audio` | Motor de sonido con Web Audio: tecleo y ambientes en bucle con fundido. |
@@ -178,6 +179,7 @@ Las preferencias personales que no dependen de la obra (tema, ambiente y sonidos
 | Escudero | `Squire` |
 | Propuesta del escudero (lo que deduce de un párrafo, a la espera del escritor) | `Proposal` |
 | Hilo del destino | `FateThread` (no `Thread`, que choca con `System.Threading.Thread` de .NET) |
+| Hito (lo que le ocurre a una ficha en un pasaje) | `Milestone` |
 
 _El glosario crece con cada feature. Un concepto nuevo se añade aquí antes de usarlo en el código._
 

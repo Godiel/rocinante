@@ -6,6 +6,7 @@ using Rocinante.Domain.Documents;
 using Rocinante.Domain.Elements;
 using Rocinante.Domain.Notes;
 using Rocinante.Domain.Squire;
+using Rocinante.Domain.Threads;
 
 namespace Rocinante.Application.Ports;
 
@@ -48,6 +49,12 @@ public interface IChangeNotifier
 
     /// <summary>A suggested name was dismissed: every window asks for the suggestions again.</summary>
     void SuggestionsChanged(string origin);
+
+    /// <summary>The writer chose other elements to show in the threads.</summary>
+    void ThreadsChanged(IReadOnlyList<ElementId> chosen, string origin);
+
+    /// <summary>Milestones were made, changed or followed their paragraph, or were removed.</summary>
+    void MilestonesChanged(IReadOnlyList<Milestone> milestones, IReadOnlyList<MilestoneId> removed, string origin);
 
     /// <summary>The writer added or removed one of their own images or sounds.</summary>
     void AmbienceChanged(IReadOnlyList<OwnAmbienceView> own, string origin);

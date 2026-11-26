@@ -21,8 +21,8 @@ describe("the arrows of the board", () => {
   it("read forward, with a point only where the kind has two sides", () => {
     const [child, sibling] = arrowsFor(
       [
-        { id: "1", from: "c", to: "a", kind: "builtin:child-of" },
-        { id: "2", from: "a", to: "c", kind: "builtin:sibling-of" },
+        { id: "1", from: "c", to: "a", kind: "builtin:child-of", starts: null, ends: null },
+        { id: "2", from: "a", to: "c", kind: "builtin:sibling-of", starts: null, ends: null },
       ],
       people,
       [],
@@ -36,8 +36,15 @@ describe("the arrows of the board", () => {
   it("bends the ones between the same fichas to either side, and leaves out what has no card", () => {
     const arrows = arrowsFor(
       [
-        ...["1", "2", "3", "4"].map((id) => ({ id, from: "a", to: "c", kind: `own:${id}` })),
-        { id: "5", from: "a", to: "gone", kind: "builtin:friend-of" },
+        ...["1", "2", "3", "4"].map((id) => ({
+          id,
+          from: "a",
+          to: "c",
+          kind: `own:${id}`,
+          starts: null,
+          ends: null,
+        })),
+        { id: "5", from: "a", to: "gone", kind: "builtin:friend-of", starts: null, ends: null },
       ],
       people,
       [],

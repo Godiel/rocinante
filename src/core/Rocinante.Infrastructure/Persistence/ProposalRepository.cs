@@ -9,7 +9,7 @@ namespace Rocinante.Infrastructure.Persistence;
 public sealed class ProposalRepository(ProjectDatabase database) : IProposalRepository
 {
     private const string Fields =
-        "id, document_id, paragraph, passage, created_at, state, element_name, element_kind, element_other, relation_from, relation_to, relation_forward, relation_inverse, detail_element, detail_name, detail_value";
+        "id, document_id, paragraph, passage, created_at, state, element_name, element_kind, element_other, relation_from, relation_to, relation_forward, relation_inverse, detail_element, detail_name, detail_value, milestone_element, milestone_text";
 
     public void Save(Proposal proposal)
     {
@@ -19,7 +19,8 @@ public sealed class ProposalRepository(ProjectDatabase database) : IProposalRepo
             $"""
             INSERT INTO proposal ({Fields}, kind, proposal_key)
             VALUES ($id, $document, $paragraph, $passage, $created, $state, $elementName, $elementKind, $elementOther,
-                    $from, $to, $forward, $inverse, $detailElement, $detailName, $detailValue, $kind, $key)
+                    $from, $to, $forward, $inverse, $detailElement, $detailName, $detailValue, $milestoneElement, $milestoneText,
+                    $kind, $key)
             ON CONFLICT (id) DO UPDATE SET state = excluded.state;
             """,
             ("$id", Columns.Id(proposal.Id.Value)),
@@ -38,11 +39,14 @@ public sealed class ProposalRepository(ProjectDatabase database) : IProposalRepo
             ("$detailElement", proposal.Attribute?.Element),
             ("$detailName", proposal.Attribute?.Name),
             ("$detailValue", proposal.Attribute?.Value),
+            ("$milestoneElement", proposal.Milestone?.Element),
+            ("$milestoneText", proposal.Milestone?.Text),
             ("$kind", proposal.Kind switch
             {
                 ProposalKind.Element => "element",
                 ProposalKind.Relationship => "relationship",
-                _ => "attribute",
+                ProposalKind.Attribute => "attribute",
+                _ => "milestone",
             }),
             ("$key", proposal.Key)));
     }
@@ -130,6 +134,7 @@ public sealed class ProposalRepository(ProjectDatabase database) : IProposalRepo
                 ? null
                 : new ProposedRelationship(reader.GetString(9), reader.GetString(10), reader.GetString(11), reader.GetNullableString(12)),
             reader.IsDBNull(13) ? null : new ProposedDetail(reader.GetString(13), reader.GetString(14), reader.GetString(15)),
+            reader.IsDBNull(16) ? null : new ProposedMilestone(reader.GetString(16), reader.GetString(17)),
             reader.GetString(5) switch
             {
                 "accepted" => ProposalState.Accepted,

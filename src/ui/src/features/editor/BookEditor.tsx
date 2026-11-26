@@ -108,6 +108,8 @@ export interface BookEditorProps {
   onParagraphDone?(text: string): void;
   /** A passage of a proposal of the squire the writer asked to see: its paragraph is selected. */
   revealPassage?: { text: string; at: number } | null;
+  /** Marks a milestone at the paragraph of the selection, from the floating menu: told its text. */
+  onMarkMilestone?(paragraph: string): void;
 }
 
 /**
@@ -127,6 +129,7 @@ export function BookEditor({
   onSaveState,
   onProblem,
   onCreateElement,
+  onMarkMilestone,
   onOpenNote,
   onDeleteNote,
   reveal = null,
@@ -579,6 +582,14 @@ export function BookEditor({
         onNote={() => callbacks.current.openNewNote()}
         onFootnote={() => callbacks.current.openNewFootnote()}
         onCreateElement={onCreateElement}
+        onMilestone={
+          onMarkMilestone
+            ? () => {
+                const paragraph = editor.state.selection.$from.parent.textContent;
+                if (paragraph.trim() !== "") onMarkMilestone(paragraph);
+              }
+            : undefined
+        }
       />
       <Footnotes
         editor={editor}

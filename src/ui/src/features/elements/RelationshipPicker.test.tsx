@@ -7,7 +7,14 @@ import { RelationshipPicker, type RelationshipPickerProps } from "./Relationship
 
 const onChoose = vi.fn();
 const onCancel = vi.fn();
-const childOf: Relationship = { id: "r", from: "c", to: "a", kind: "builtin:child-of" };
+const childOf: Relationship = {
+  id: "r",
+  from: "c",
+  to: "a",
+  kind: "builtin:child-of",
+  starts: null,
+  ends: null,
+};
 
 function show(props: Partial<RelationshipPickerProps> = {}) {
   render(

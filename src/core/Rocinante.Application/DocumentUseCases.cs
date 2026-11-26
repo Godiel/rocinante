@@ -4,6 +4,7 @@ using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
 using Rocinante.Domain.Notes;
 using Rocinante.Domain.Projects;
+using Rocinante.Domain.Threads;
 
 namespace Rocinante.Application;
 
@@ -93,13 +94,13 @@ public sealed class DocumentUseCases(Workspace workspace, IChangeNotifier notifi
         var content = DocumentContent.Parse(contentJson);
         var session = workspace.Session;
 
-        var (document, result, notes) = session.InTransaction(() =>
+        var (document, result, notes, milestones) = session.InTransaction(() =>
         {
             var document = session.Documents.Load(id);
             var result = document.Save(content, clock.GetUtcNow());
             if (!result.Changed)
             {
-                return (document, result, (IReadOnlyList<Note>?)null);
+                return (document, result, (IReadOnlyList<Note>?)null, (IReadOnlyList<Milestone>)[]);
             }
 
             session.Documents.Save(document);
@@ -108,7 +109,7 @@ public sealed class DocumentUseCases(Workspace workspace, IChangeNotifier notifi
                 session.Versions.Add(version);
             }
 
-            return (document, result, NoteReconciliation.Apply(session, id, content));
+            return (document, result, NoteReconciliation.Apply(session, id, content), MilestoneReconciliation.Apply(session, id, content.Blocks));
         });
 
         var work = session.Documents.WorkStatistics();
@@ -124,6 +125,11 @@ public sealed class DocumentUseCases(Workspace workspace, IChangeNotifier notifi
             if (notes is not null)
             {
                 notifier.NotesChanged(notes, [], origin);
+            }
+
+            if (milestones.Count > 0)
+            {
+                notifier.MilestonesChanged(milestones, [], origin);
             }
         }
 

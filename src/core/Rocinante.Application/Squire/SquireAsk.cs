@@ -33,9 +33,10 @@ public interface ISquireClient
 public sealed record SquireReading(
     IReadOnlyList<ProposedElement> Elements,
     IReadOnlyList<ProposedRelationship> Relationships,
-    IReadOnlyList<ProposedDetail> Details)
+    IReadOnlyList<ProposedDetail> Details,
+    IReadOnlyList<ProposedMilestone> Milestones)
 {
-    public static SquireReading Nothing { get; } = new([], [], []);
+    public static SquireReading Nothing { get; } = new([], [], [], []);
 }
 
 /// <summary>The squire's errand: what it is asked about a paragraph, and how its answer is read.</summary>
@@ -48,10 +49,12 @@ public static class SquireAsk
         Responde solo con un objeto JSON, sin explicaciones, con esta forma:
         {"elements":[{"name":"...","kind":"character|place|plot|other","otherKind":null}],
          "relationships":[{"from":"...","to":"...","forward":"...","inverse":null}],
-         "attributes":[{"element":"...","name":"...","value":"..."}]}
+         "attributes":[{"element":"...","name":"...","value":"..."}],
+         "milestones":[{"element":"...","text":"..."}]}
         - elements: personajes, lugares, tramas u otras cosas con nombre propio que aparecen en el párrafo y NO están entre las fichas que ya existen. Para "other", otherKind dice qué es (objeto, época…).
         - relationships: relaciones que el párrafo afirma entre dos nombres (fichas existentes o nuevas). forward se lee desde "from" ("hijo de"); inverse desde "to" ("padre de"), o null si es la misma ("hermano de").
         - attributes: datos que el párrafo afirma de una ficha ("Pelo": "rojo", "Edad": "cuarenta años").
+        - milestones: hechos importantes que le ocurren a una ficha en el párrafo y cambian su historia, en una frase corta ("Muere su padre", "Llega a Madrid"). No anotes lo que solo hace o dice de paso.
         Usa los nombres tal como aparecen en el texto o en las fichas. Si no hay nada, devuelve listas vacías.
         """;
 
@@ -132,7 +135,13 @@ public static class SquireAsk
                 : null)
             .OfType<ProposedDetail>()
             .ToList();
-        return new SquireReading(elements, relationships, details);
+        var milestones = Items(root, "milestones")
+            .Select(item => (Text(item, "element"), Text(item, "text")) is (string element, string text)
+                ? new ProposedMilestone(element, text)
+                : null)
+            .OfType<ProposedMilestone>()
+            .ToList();
+        return new SquireReading(elements, relationships, details, milestones);
     }
 
     private static IEnumerable<JsonObject> Items(JsonObject root, string name) =>

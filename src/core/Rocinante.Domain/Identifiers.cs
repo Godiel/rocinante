@@ -58,3 +58,11 @@ public readonly record struct ProposalId(Guid Value)
 
     public override string ToString() => Value.ToString();
 }
+
+/// <summary>Identifies a milestone: something that happens to an element at a paragraph.</summary>
+public readonly record struct MilestoneId(Guid Value)
+{
+    public static MilestoneId New(DateTimeOffset now) => new(Guid.CreateVersion7(now));
+
+    public override string ToString() => Value.ToString();
+}

@@ -96,7 +96,7 @@ public sealed class ProposalTests
         var id = ProposalId.New(Moments.Start);
         var detail = new ProposedDetail("Antonio", "Pelo", "rojo");
 
-        var proposal = Proposal.Rehydrate(id, _document, Paragraph, Passage, Moments.At(3), null, null, detail, ProposalState.Dismissed);
+        var proposal = Proposal.Rehydrate(id, _document, Paragraph, Passage, Moments.At(3), null, null, detail, null, ProposalState.Dismissed);
 
         proposal.Id.ShouldBe(id);
         proposal.Attribute.ShouldBe(detail);

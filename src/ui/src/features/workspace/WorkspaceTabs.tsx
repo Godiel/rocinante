@@ -2,9 +2,10 @@ import { useRef, type KeyboardEvent } from "react";
 import { panelId, tabId } from "./tabs";
 import type { WorkspaceTab } from "./useWorkspaceTab";
 
-const TABS: { id: WorkspaceTab; label: string }[] = [
-  { id: "writing", label: "Escritura" },
-  { id: "board", label: "Tablero" },
+const TABS: { id: WorkspaceTab; label: string; key: string }[] = [
+  { id: "writing", label: "Escritura", key: "F2" },
+  { id: "board", label: "Tablero", key: "F2" },
+  { id: "threads", label: "Hilos", key: "F8" },
 ];
 
 interface WorkspaceTabsProps {
@@ -12,7 +13,7 @@ interface WorkspaceTabsProps {
   onShow(tab: WorkspaceTab): void;
 }
 
-/** The two faces of the work: the text and the board of its fichas. F2 goes from one to the other. */
+/** The faces of the work: the text, the board of its fichas and the threads. F2 and F8 go to and fro. */
 export function WorkspaceTabs({ tab, onShow }: WorkspaceTabsProps) {
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -52,7 +53,7 @@ export function WorkspaceTabs({ tab, onShow }: WorkspaceTabsProps) {
             aria-selected={selected}
             aria-controls={panelId(candidate.id)}
             tabIndex={selected ? 0 : -1}
-            title={`${candidate.label} (F2)`}
+            title={`${candidate.label} (${candidate.key})`}
             onClick={() => onShow(candidate.id)}
           >
             {candidate.label}

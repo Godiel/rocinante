@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 12,
+  "protocolVersion": 13,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -1049,7 +1049,7 @@
       }
     },
     "relationship.create": {
-      "description": "Joins two elements with a kind, or with a new own kind. Broadcasts elements.changed.",
+      "description": "Joins two elements with a kind, or with a new own kind, optionally between two chapters. Broadcasts elements.changed.",
       "params": {
         "oneOf": [
           {
@@ -1065,6 +1065,28 @@
               },
               "kind": {
                 "$ref": "#/$defs/RelationshipKindId"
+              },
+              "starts": {
+                "description": "The chapter it starts in, or null if it holds from the start of the work.",
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ends": {
+                "description": "The chapter it ends in, or null if it holds to the end of the work.",
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "origin": {
                 "$ref": "#/$defs/WindowLabel"
@@ -1085,6 +1107,28 @@
               "newKind": {
                 "$ref": "#/$defs/NewRelationshipKind"
               },
+              "starts": {
+                "description": "The chapter it starts in, or null if it holds from the start of the work.",
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ends": {
+                "description": "The chapter it ends in, or null if it holds to the end of the work.",
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "origin": {
                 "$ref": "#/$defs/WindowLabel"
               }
@@ -1097,7 +1141,7 @@
       }
     },
     "relationship.update": {
-      "description": "Changes the kind of a relationship, to an existing one or a new own one. Broadcasts elements.changed.",
+      "description": "Changes the kind of a relationship (to an existing one or a new own one), the chapters it holds between, or both. What is left out stays as it was. Broadcasts elements.changed.",
       "params": {
         "oneOf": [
           {
@@ -1110,6 +1154,28 @@
               },
               "kind": {
                 "$ref": "#/$defs/RelationshipKindId"
+              },
+              "starts": {
+                "description": "The chapter it starts in, or null if it holds from the start of the work.",
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ends": {
+                "description": "The chapter it ends in, or null if it holds to the end of the work.",
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "origin": {
                 "$ref": "#/$defs/WindowLabel"
@@ -1127,6 +1193,64 @@
               "newKind": {
                 "$ref": "#/$defs/NewRelationshipKind"
               },
+              "starts": {
+                "description": "The chapter it starts in, or null if it holds from the start of the work.",
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ends": {
+                "description": "The chapter it ends in, or null if it holds to the end of the work.",
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "origin": {
+                "$ref": "#/$defs/WindowLabel"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "origin"],
+            "minProperties": 3,
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/Id"
+              },
+              "starts": {
+                "description": "The chapter it starts in, or null if it holds from the start of the work.",
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ends": {
+                "description": "The chapter it ends in, or null if it holds to the end of the work.",
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Id"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "origin": {
                 "$ref": "#/$defs/WindowLabel"
               }
@@ -1140,6 +1264,109 @@
     },
     "relationship.delete": {
       "description": "Takes a relationship away. Broadcasts elements.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
+      }
+    },
+    "threads.get": {
+      "description": "The threads of the elements the writer chose. Until the writer chooses, the five characters mentioned the most.",
+      "params": null,
+      "result": {
+        "$ref": "#/$defs/Threads"
+      }
+    },
+    "threads.choose": {
+      "description": "The elements shown in the threads, in order. Kept in the work. Broadcasts threads.changed.",
+      "params": {
+        "type": "object",
+        "required": ["elements", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "elements": {
+            "type": "array",
+            "maxItems": 50,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/Id"
+            }
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
+      }
+    },
+    "milestone.create": {
+      "description": "Marks what happens to an element at a paragraph of a chapter, given by its text. Broadcasts milestones.changed.",
+      "params": {
+        "type": "object",
+        "required": ["elementId", "documentId", "passage", "text", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "elementId": {
+            "$ref": "#/$defs/Id"
+          },
+          "documentId": {
+            "$ref": "#/$defs/Id"
+          },
+          "passage": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000,
+            "description": "The text of the paragraph, as it is now."
+          },
+          "text": {
+            "$ref": "#/$defs/MilestoneText"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/Milestone"
+      }
+    },
+    "milestone.update": {
+      "description": "Changes what a milestone says. Broadcasts milestones.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "text", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "text": {
+            "$ref": "#/$defs/MilestoneText"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/Milestone"
+      }
+    },
+    "milestone.delete": {
+      "description": "Removes a milestone. Broadcasts milestones.changed.",
       "params": {
         "type": "object",
         "required": ["id", "origin"],
@@ -1725,6 +1952,50 @@
           }
         }
       }
+    },
+    "threads.changed": {
+      "description": "The writer chose other elements to show in the threads.",
+      "params": {
+        "type": "object",
+        "required": ["chosen", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "chosen": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Id"
+            }
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
+    },
+    "milestones.changed": {
+      "description": "Milestones were made, changed or followed their paragraph (milestones), or were removed (removed).",
+      "params": {
+        "type": "object",
+        "required": ["milestones", "removed", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "milestones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Milestone"
+            }
+          },
+          "removed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Id"
+            }
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -1858,7 +2129,10 @@
         "squireUnavailable",
         "secretStoreUnavailable",
         "proposalNotFound",
-        "proposalElementMissing"
+        "proposalElementMissing",
+        "milestoneNotFound",
+        "milestoneTextRequired",
+        "relationshipBounds"
       ]
     },
     "ErrorData": {
@@ -2969,9 +3243,9 @@
       }
     },
     "Relationship": {
-      "description": "Two elements joined by a kind. It reads forward from `from` and inverse from `to`.",
+      "description": "Two elements joined by a kind. It reads forward from `from` and inverse from `to`. It holds between the chapters `starts` and `ends`, both included; without them, in the whole work.",
       "type": "object",
-      "required": ["id", "from", "to", "kind"],
+      "required": ["id", "from", "to", "kind", "starts", "ends"],
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -2985,6 +3259,28 @@
         },
         "kind": {
           "$ref": "#/$defs/RelationshipKindId"
+        },
+        "starts": {
+          "description": "The chapter it starts in, or null if it holds from the start of the work.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ends": {
+          "description": "The chapter it ends in, or null if it holds to the end of the work.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },
@@ -3235,7 +3531,8 @@
         "createdAt",
         "element",
         "relationship",
-        "attribute"
+        "attribute",
+        "milestone"
       ],
       "additionalProperties": false,
       "properties": {
@@ -3243,7 +3540,7 @@
           "$ref": "#/$defs/Id"
         },
         "kind": {
-          "enum": ["element", "relationship", "attribute"]
+          "enum": ["element", "relationship", "attribute", "milestone"]
         },
         "documentId": {
           "$ref": "#/$defs/Id"
@@ -3348,6 +3645,26 @@
               "type": "null"
             }
           ]
+        },
+        "milestone": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["element", "text"],
+              "additionalProperties": false,
+              "properties": {
+                "element": {
+                  "$ref": "#/$defs/ElementName"
+                },
+                "text": {
+                  "$ref": "#/$defs/MilestoneText"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },
@@ -3392,6 +3709,149 @@
         "value": {
           "type": "string",
           "maxLength": 1000
+        },
+        "text": {
+          "$ref": "#/$defs/MilestoneText"
+        }
+      }
+    },
+    "MilestoneText": {
+      "description": "What happens to an element at a passage, in a short sentence. Surrounding spaces are trimmed; a blank one is refused with milestoneTextRequired.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "Milestone": {
+      "description": "Something that happens to an element at a paragraph of a chapter. It follows its paragraph as the text changes; when the paragraph is gone it stays in its chapter, lost.",
+      "type": "object",
+      "required": [
+        "id",
+        "elementId",
+        "documentId",
+        "passage",
+        "text",
+        "lost",
+        "createdAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "elementId": {
+          "$ref": "#/$defs/Id"
+        },
+        "documentId": {
+          "$ref": "#/$defs/Id"
+        },
+        "passage": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "The paragraph it belongs to, as it was last found."
+        },
+        "text": {
+          "$ref": "#/$defs/MilestoneText"
+        },
+        "lost": {
+          "type": "boolean",
+          "description": "Whether its paragraph is no longer in the chapter."
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "Threads": {
+      "description": "The threads of the chosen elements through the chapters of the work, in the order of the index.",
+      "type": "object",
+      "required": ["chosen", "chapters", "threads", "meetings", "milestones"],
+      "additionalProperties": false,
+      "properties": {
+        "chosen": {
+          "type": "array",
+          "description": "The elements shown, in the order the writer chose them.",
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        },
+        "chapters": {
+          "type": "array",
+          "description": "The chapters of the work in reading order. Fragments have no place in the story.",
+          "items": {
+            "type": "object",
+            "required": ["documentId", "title"],
+            "additionalProperties": false,
+            "properties": {
+              "documentId": {
+                "$ref": "#/$defs/Id"
+              },
+              "title": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "threads": {
+          "type": "array",
+          "description": "One per chosen element: the chapters where it is mentioned, and how many times.",
+          "items": {
+            "type": "object",
+            "required": ["elementId", "points"],
+            "additionalProperties": false,
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/Id"
+              },
+              "points": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["documentId", "mentions"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "documentId": {
+                      "$ref": "#/$defs/Id"
+                    },
+                    "mentions": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "meetings": {
+          "type": "array",
+          "description": "Two chosen elements mentioned in the same paragraphs of a chapter, and in how many.",
+          "items": {
+            "type": "object",
+            "required": ["documentId", "first", "second", "paragraphs"],
+            "additionalProperties": false,
+            "properties": {
+              "documentId": {
+                "$ref": "#/$defs/Id"
+              },
+              "first": {
+                "$ref": "#/$defs/Id"
+              },
+              "second": {
+                "$ref": "#/$defs/Id"
+              },
+              "paragraphs": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "milestones": {
+          "type": "array",
+          "description": "The milestones of the chosen elements, chapter by chapter and in the order of the text.",
+          "items": {
+            "$ref": "#/$defs/Milestone"
+          }
         }
       }
     }

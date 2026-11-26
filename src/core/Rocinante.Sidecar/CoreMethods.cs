@@ -22,7 +22,8 @@ internal sealed record CoreServices(
     AmbienceUseCases Ambience,
     ElementUseCases Elements,
     IReportedProblems Problems,
-    SquireUseCases Squire);
+    SquireUseCases Squire,
+    ThreadUseCases Threads);
 
 /// <summary>
 /// Binds every method of the contract to a use case: params come in already validated against the
@@ -160,9 +161,36 @@ internal static class CoreMethods
         table.On("element.image", json.ElementImageParams, json.ImageDataDto, p => Wire.Of(core.Elements.Image(
             new ElementId(p.Id), p.Size == "thumbnail" ? ImageSize.Thumbnail : ImageSize.Full)));
         table.On("relationship.create", json.RelateParams, json.RelationshipDto, p => Wire.Of(core.Elements.Relate(
-            new ElementId(p.From), new ElementId(p.To), Wire.ToChoice(p.Kind, p.NewKind), p.Origin)));
-        table.On("relationship.update", json.ChangeRelationshipParams, json.RelationshipDto, p => Wire.Of(core.Elements.ChangeRelationship(
-            new RelationshipId(p.Id), Wire.ToChoice(p.Kind, p.NewKind), p.Origin)));
+            new ElementId(p.From),
+            new ElementId(p.To),
+            Wire.ToChoice(p.Kind, p.NewKind),
+            p.Origin,
+            p.Starts is { } starts ? new DocumentId(starts) : null,
+            p.Ends is { } ends ? new DocumentId(ends) : null)));
+        table.On("relationship.update", json.ChangeRelationshipParams, json.RelationshipDto, (p, node) =>
+        {
+            var id = new RelationshipId(p.Id);
+            var kind = p.Kind is null && p.NewKind is null ? null : Wire.ToChoice(p.Kind, p.NewKind);
+            RelationshipBounds? bounds = null;
+            if (node.ContainsKey("starts") || node.ContainsKey("ends"))
+            {
+                // What is left out stays as it was.
+                var current = core.Elements.Board().FindRelationship(id);
+                bounds = new RelationshipBounds(
+                    node.ContainsKey("starts") ? (p.Starts is { } starts ? new DocumentId(starts) : null) : current.Starts,
+                    node.ContainsKey("ends") ? (p.Ends is { } ends ? new DocumentId(ends) : null) : current.Ends);
+            }
+
+            return Wire.Of(core.Elements.ChangeRelationship(id, kind, p.Origin, bounds));
+        });
+        table.On("threads.get", json.ThreadsDto, () => Wire.Of(core.Threads.Get()));
+        table.On("threads.choose", json.ChooseThreadsParams, p =>
+            core.Threads.Choose([.. p.Elements.Select(id => new ElementId(id))], p.Origin));
+        table.On("milestone.create", json.MarkMilestoneParams, json.MilestoneDto, p => Wire.Of(core.Threads.Mark(
+            new ElementId(p.ElementId), new DocumentId(p.DocumentId), p.Passage, p.Text, p.Origin)));
+        table.On("milestone.update", json.RenameMilestoneParams, json.MilestoneDto, p =>
+            Wire.Of(core.Threads.Rename(new MilestoneId(p.Id), p.Text, p.Origin)));
+        table.On("milestone.delete", json.IdOriginParams, p => core.Threads.Remove(new MilestoneId(p.Id), p.Origin));
         table.On("relationship.delete", json.IdOriginParams, p => core.Elements.Unrelate(new RelationshipId(p.Id), p.Origin));
 
         return table.Handlers;
@@ -182,6 +210,13 @@ internal static class CoreMethods
 
         public void On<TParams, TResult>(string method, JsonTypeInfo<TParams> parameters, JsonTypeInfo<TResult> result, Func<TParams, TResult> handler) =>
             Handlers.Add(method, node => JsonSerializer.SerializeToNode(handler(Read(node, parameters)), result));
+
+        /// <summary>A method that also needs to tell a param left out from a null one.</summary>
+        public void On<TParams, TResult>(
+            string method, JsonTypeInfo<TParams> parameters, JsonTypeInfo<TResult> result, Func<TParams, JsonObject, TResult> handler) =>
+            Handlers.Add(method, node => JsonSerializer.SerializeToNode(
+                handler(Read(node, parameters), node as JsonObject ?? throw new JsonException($"Missing params for {typeof(TParams).Name}.")),
+                result));
 
         /// <summary>A method whose result is <c>null</c>.</summary>
         public void On<TParams>(string method, JsonTypeInfo<TParams> parameters, Action<TParams> handler) =>

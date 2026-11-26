@@ -1,0 +1,33 @@
+{
+  "valid": [
+    {
+      "elementId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "passage": "Aquella noche murió el padre de Antonio.",
+      "text": "Muere su padre",
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    {
+      "elementId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "passage": "",
+      "text": "Muere su padre",
+      "origin": "main"
+    },
+    {
+      "elementId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "passage": "Aquella noche.",
+      "text": "",
+      "origin": "main"
+    },
+    {
+      "elementId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "passage": "Aquella noche.",
+      "text": "Muere su padre",
+      "origin": "main"
+    }
+  ]
+}

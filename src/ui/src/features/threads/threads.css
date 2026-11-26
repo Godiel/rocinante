@@ -1,0 +1,240 @@
+/* The threads of fate take the whole window under the bar, like the board. */
+.threads-tab {
+  position: fixed;
+  top: var(--bar-height);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-paper);
+}
+
+.threads-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-2);
+}
+
+.threads-title {
+  margin: 0;
+  font-size: var(--text-ui);
+  font-weight: normal;
+  color: var(--color-ink-soft);
+}
+
+.threads-empty {
+  margin: var(--space-6) auto 0;
+  max-width: var(--measure);
+  padding: 0 var(--space-4);
+  font-style: italic;
+  text-align: center;
+  color: var(--color-ink-soft);
+}
+
+.threads-scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+/* With a chapter, a point or the chooser open, the drawing leaves room on the right. */
+.threads-tab-detail .threads-scroll {
+  margin-right: 20rem;
+}
+
+.threads-drawing {
+  display: block;
+  font-family: inherit;
+}
+
+.threads-drawing [role="button"] {
+  cursor: pointer;
+  outline: none;
+}
+
+.threads-column {
+  fill: transparent;
+  pointer-events: none;
+}
+
+.threads-heading {
+  fill: transparent;
+}
+
+.threads-chapter-number,
+.threads-chapter-title {
+  pointer-events: none;
+}
+
+.threads-column.threads-selected,
+.threads-chapter:hover .threads-heading,
+.threads-chapter:focus-visible .threads-heading {
+  fill: var(--color-paper-shade);
+}
+
+.threads-chapter-number,
+.threads-chapter-title {
+  font-size: var(--text-caption);
+  text-anchor: middle;
+  fill: var(--color-ink-soft);
+}
+
+.threads-chapter-number {
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+}
+
+.threads-name {
+  font-size: var(--text-ui);
+  text-anchor: end;
+  fill: var(--color-ink);
+}
+
+.threads-line-faint {
+  stroke: var(--color-rule);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.threads-line {
+  stroke: var(--color-ink-soft);
+  stroke-width: 1.5;
+}
+
+.threads-meeting {
+  stroke: var(--color-rubric);
+  stroke-width: 2;
+  opacity: 0.55;
+}
+
+.threads-point {
+  fill: var(--color-ink);
+  stroke: var(--color-paper);
+  stroke-width: 2;
+}
+
+.threads-point:hover,
+.threads-point:focus-visible,
+.threads-point.threads-selected {
+  fill: var(--color-rubric);
+}
+
+.threads-limit {
+  fill: none;
+  stroke: var(--color-rubric);
+  stroke-width: 1.5;
+}
+
+.threads-milestone path {
+  fill: var(--color-rubric);
+}
+
+.threads-milestone text {
+  font-size: var(--text-caption);
+  font-style: italic;
+  fill: var(--color-ink);
+}
+
+.threads-milestone:hover text,
+.threads-milestone:focus-visible text,
+.threads-milestone.threads-selected text {
+  fill: var(--color-rubric);
+  text-decoration: underline;
+}
+
+.threads-milestone.threads-lost path {
+  fill: none;
+  stroke: var(--color-ink-faint);
+}
+
+.threads-milestone.threads-lost text {
+  fill: var(--color-ink-faint);
+}
+
+/* The side: a chapter, a point, a milestone or the chooser. */
+.threads-detail,
+.threads-chooser {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 20rem;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-paper);
+  border-left: var(--hairline) solid var(--color-rule);
+}
+
+.threads-detail-close {
+  margin: 0;
+  text-align: right;
+  font-size: var(--text-caption);
+}
+
+.threads-chooser-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.threads-detail-title {
+  margin: var(--space-2) 0 var(--space-3);
+  font-size: var(--text-ui);
+  font-weight: normal;
+}
+
+.threads-relations {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.threads-relations li {
+  padding: var(--space-1) 0;
+}
+
+.threads-mention {
+  padding: var(--space-2) 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  font-size: var(--text-caption);
+}
+
+.threads-milestone-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: var(--space-2) 0;
+}
+
+.threads-chooser-group {
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  border: 0;
+}
+
+.threads-chooser-group legend {
+  margin-bottom: var(--space-1);
+  color: var(--color-ink-soft);
+}
+
+.threads-chooser-item {
+  display: block;
+  padding: 2px 0;
+}
+
+/* The slip to mark a milestone from the text, over it. */
+.milestone-slip {
+  position: fixed;
+  top: calc(var(--bar-height) + var(--space-4));
+  left: 50%;
+  z-index: 30;
+  width: min(26rem, calc(100% - 2 * var(--space-4)));
+  padding: var(--space-3) var(--space-4);
+  transform: translateX(-50%);
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 12%);
+}

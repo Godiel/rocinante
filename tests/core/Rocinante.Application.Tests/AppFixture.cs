@@ -25,7 +25,8 @@ internal sealed class AppFixture : IDisposable
         Notes = new NoteUseCases(_workspace, Notifier, Clock);
         Ambience = new AmbienceUseCases(Settings, new AmbienceFolder(PathOf("datos")), Notifier);
         Elements = new ElementUseCases(_workspace, new ChosenFiles(), Notifier, Clock);
-        Squire = new SquireUseCases(_workspace, Settings, Secrets, SquireClient, Elements, Notifier, Clock, new ImmediateGate());
+        Threads = new ThreadUseCases(_workspace, Elements, Notifier, Clock);
+        Squire = new SquireUseCases(_workspace, Settings, Secrets, SquireClient, Elements, Threads, Notifier, Clock, new ImmediateGate());
         App = new SettingsUseCases(_workspace, Projects, Ambience, Settings, Notifier, DefaultFolder, launchFile);
     }
 
@@ -60,6 +61,8 @@ internal sealed class AppFixture : IDisposable
     public FakeSquireClient SquireClient { get; } = new();
 
     public SquireUseCases Squire { get; }
+
+    public ThreadUseCases Threads { get; }
 
     public string PathOf(string name) => System.IO.Path.Combine(Folder, name);
 
