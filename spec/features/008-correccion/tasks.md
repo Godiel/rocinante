@@ -12,7 +12,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/008-correccion`.
 - [x] Una función por regla, con casos que marcan y casos correctos que no.
 
 ## 4. Ortografía
-- [ ] Worker con nspell y `dictionary-es`; caché de respuestas; palabras que no se miran.
+- [x] Worker con nspell y `dictionary-es`; caché de respuestas; palabras que no se miran.
 
 ## 5. Marcas en el editor
 - [ ] Decoración incremental; F7 y modo concentración.
@@ -21,7 +21,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/008-correccion`.
 - [ ] Sugerencias, arreglos, «Añadir al diccionario» e «Ignorar», con deshacer.
 
 ## 7. Licencia
-- [ ] `licenses/dictionary-es.txt` en la compilación.
+- [x] `licenses/dictionary-es.txt` en la compilación.
 
 ## 8. Pruebas de extremo a extremo y rendimiento
 - [ ] El recorrido de la spec y el p95 con el diccionario cargado.

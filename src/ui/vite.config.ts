@@ -47,9 +47,31 @@ function ambienceCredits(): Plugin {
   };
 }
 
+/**
+ * The Spanish dictionary of LibreOffice (dictionary-es) is read by the spelling worker from its two files,
+ * which the package does not export: an alias reaches its folder. Its licence travels with the app.
+ */
+const dictionaryFolder = dirname(createRequire(import.meta.url).resolve("dictionary-es"));
+
+function dictionaryLicence(): Plugin {
+  return {
+    name: "rocinante-dictionary-licence",
+    apply: "build",
+    generateBundle() {
+      this.emitFile({
+        type: "asset",
+        fileName: "licenses/dictionary-es.txt",
+        source: readFileSync(join(dictionaryFolder, "license"), "utf8"),
+      });
+    },
+  };
+}
+
 // Tauri expects a fixed port and must not have its own output cleared by Vite.
 export default defineConfig({
-  plugins: [react(), fontLicences(), ambienceCredits()],
+  plugins: [react(), fontLicences(), ambienceCredits(), dictionaryLicence()],
+  resolve: { alias: { "@dictionary-es": dictionaryFolder } },
+  worker: { format: "es" },
   clearScreen: false,
   server: { port: 5173, strictPort: true },
   // A desktop app reads its code from the disk, not the network: one bundle of TipTap and
