@@ -258,7 +258,7 @@ _Desde la versión 7._ Un hito: lo que le ocurre a una ficha en un párrafo de u
 | `lost` | INTEGER (0/1) | 1 si ningún párrafo del documento es ya el suyo |
 | `created_at` | INTEGER | |
 
-Índice `milestone_by_document (document_id, block)`. Cada vez que se guarda el documento, el núcleo vuelve a buscar el párrafo de cada hito: primero el mismo texto y, si no lo hay, el que conserva más de sus palabras (al menos el 60 %), el más cercano a su posición. Si no hay ninguno, el hito queda perdido (`lost = 1`) en su capítulo.
+Índice `milestone_by_document (document_id, block)`. Cada vez que se guarda el documento, el núcleo vuelve a buscar el párrafo de cada hito: primero el mismo texto y, si no lo hay, el que conserva más de sus palabras (al menos la mitad; un párrafo partido en dos sigue en la mitad que conserva más), el más cercano a su posición. Si no hay ninguno, el hito queda perdido (`lost = 1`) en su capítulo.
 
 ### `thread_choice`
 _Desde la versión 7._ Las fichas que se muestran en los hilos del destino, en orden (`position`). Se borran con su ficha. Mientras `project.threads_chosen` (0/1) es 0, el escritor no ha elegido y se muestran los cinco personajes más nombrados.

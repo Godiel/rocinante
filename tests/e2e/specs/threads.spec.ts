@@ -151,7 +151,7 @@ test("the threads of fate: where each ficha goes, what happens to it and when it
     await call(page, "squire.enable", { enabled: true, origin: "seed" });
     await page.keyboard.press("F8");
     await chapterText(page).locator("p").nth(1).click();
-    await page.keyboard.press("End");
+    await page.keyboard.press(process.platform === "darwin" ? "Meta+ArrowRight" : "End");
     await page.keyboard.press("Enter");
     await page.keyboard.type(JOURNEY);
     await page.keyboard.press("Enter");

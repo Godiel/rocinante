@@ -19,7 +19,7 @@ Cómo se implementa lo descrito en [`spec.md`](spec.md). Lo que el texto dice (a
 - **El hilo de una ficha** son sus menciones contadas por capítulo. Dos fichas **coinciden** en un capítulo cuando se las nombra en un mismo párrafo. Solo cuentan los capítulos: los fragmentos del cajón no tienen lugar en la historia.
 - **Un hito pertenece a un párrafo.** Guarda su texto y su posición en el documento. Cada vez que se guarda el documento, el núcleo vuelve a buscar el párrafo:
   1. primero el mismo texto;
-  2. si no lo encuentra, el párrafo más parecido (palabras en común), con preferencia por el más cercano a su posición.
+  2. si no lo encuentra, el párrafo que conserva más de sus palabras (al menos la mitad, para que un párrafo partido en dos siga en una de sus mitades), con preferencia por el más cercano a su posición.
 
   Así sigue al párrafo cambio a cambio. Si ningún párrafo se parece lo bastante, el hito queda **sin pasaje**, en su capítulo.
 - **Una relación** gana dos campos opcionales, `starts` y `ends`, que son capítulos. Sin ellos vale para toda la obra. Si un capítulo se borra, ese límite deja de contar.

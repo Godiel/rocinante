@@ -7,8 +7,11 @@ namespace Rocinante.Domain.Threads;
 /// </summary>
 public static class ParagraphFinder
 {
-    /// <summary>The share of its words a paragraph has to keep to still be itself.</summary>
-    public const double Kept = 0.6;
+    /// <summary>
+    /// The share of its words a paragraph has to keep to still be itself: half, so that a paragraph split in two
+    /// goes on in the half that kept the most, or the first one.
+    /// </summary>
+    public const double Kept = 0.5;
 
     /// <summary>A paragraph of fewer words is only found by its exact text: a few words are in many paragraphs.</summary>
     public const int FewWords = 3;

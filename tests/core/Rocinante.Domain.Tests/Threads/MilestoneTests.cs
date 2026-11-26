@@ -75,6 +75,20 @@ public sealed class MilestoneTests
     }
 
     [Fact]
+    public void When_its_paragraph_is_split_in_two_it_goes_on_in_the_half_that_kept_the_most()
+    {
+        var milestone = At(1);
+
+        milestone.Follow(["Llovía.", "Aquella noche murió", "el padre de Antonio, sin decir palabra."]).ShouldBeTrue();
+        milestone.Lost.ShouldBeFalse();
+        milestone.Block.ShouldBe(2);
+
+        var even = At(0, "uno dos tres cuatro");
+        even.Follow(["uno dos", "tres cuatro"]).ShouldBeTrue();
+        even.Block.ShouldBe(0);
+    }
+
+    [Fact]
     public void Between_two_copies_of_its_paragraph_it_keeps_the_nearest()
     {
         var milestone = At(2);
