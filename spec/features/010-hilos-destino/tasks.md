@@ -3,19 +3,19 @@
 Checklist derivada de [`plan.md`](plan.md). Rama: `feature/010-hilos-destino`.
 
 ## 1. Contrato (versión 13)
-- [ ] `threads.get`, `threads.choose`, `milestone.*`, `milestones.changed`, los límites de las relaciones y las propuestas de hito, con ejemplos.
+- [x] `threads.get`, `threads.choose`, `milestone.*`, `milestones.changed`, los límites de las relaciones y las propuestas de hito, con ejemplos.
 
 ## 2. Dominio
-- [ ] `Milestone` y la búsqueda de su párrafo, los límites de una relación y `ProposedMilestone`, con tests.
+- [x] `Milestone` y la búsqueda de su párrafo, los límites de una relación y `ProposedMilestone`, con tests.
 
 ## 3. Persistencia (esquema v7)
-- [ ] Migración con `milestone`, `thread_choice`, los límites en `relationship` y `proposal` reconstruida; `docs/format`.
+- [x] Migración con `milestone`, `thread_choice`, los límites en `relationship` y `proposal` reconstruida; `docs/format`.
 
 ## 4. Casos de uso
-- [ ] Hitos, anclaje al guardar, hilos, fichas elegidas, límites de las relaciones y hitos del escudero.
+- [x] Hitos, anclaje al guardar, hilos, fichas elegidas, límites de las relaciones y hitos del escudero.
 
 ## 5. Sidecar
-- [ ] Métodos y notificaciones, en la sesión de escritura de los tests.
+- [x] Métodos y notificaciones, en la sesión de escritura de los tests.
 
 ## 6. Pestaña Hilos
 - [ ] F8, capítulos y líneas, puntos, coincidencias y elegir fichas.

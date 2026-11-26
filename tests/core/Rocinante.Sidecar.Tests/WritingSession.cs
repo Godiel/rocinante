@@ -112,6 +112,16 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("version.restore", Params(("id", version), ("origin", Main)));
         harness.Call("element.references", Params(("id", quixote)));
 
+        // The threads: the writer chooses whom to follow, marks what happens to him and when a relationship holds.
+        harness.Call("threads.get");
+        harness.Call("threads.choose", Params(("elements", new JsonArray(quixote, sancho)), ("origin", Main)));
+        var milestone = Id(harness.Call("milestone.create", Params(
+            ("elementId", quixote), ("documentId", first), ("passage", "En un lugar de la Mancha"), ("text", "Sale de casa"), ("origin", Main))));
+        harness.Call("milestone.update", Params(("id", milestone), ("text", "Sale de su aldea"), ("origin", Other)));
+        harness.Call("relationship.update", Params(("id", home), ("starts", first), ("ends", second), ("origin", Main)));
+        harness.Call("threads.get");
+        harness.Call("milestone.delete", Params(("id", milestone), ("origin", Main)));
+
         // The squire, with a local model, reads a paragraph and proposes; the writer takes one and drops another.
         harness.SquireClient.Answer =
             """{"elements":[{"name":"Dulcinea","kind":"character"},{"name":"El Toboso","kind":"place"}],"relationships":[],"attributes":[]}""";

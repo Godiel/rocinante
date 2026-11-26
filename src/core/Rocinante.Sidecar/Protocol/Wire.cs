@@ -12,6 +12,7 @@ using Rocinante.Domain.Formats;
 using Rocinante.Domain.Notes;
 using Rocinante.Domain.Projects;
 using Rocinante.Domain.Squire;
+using Rocinante.Domain.Threads;
 using Rocinante.Domain.Versions;
 
 namespace Rocinante.Sidecar.Protocol;
@@ -140,7 +141,8 @@ internal static class Wire
             proposal.Relationship is { } relation
                 ? new ProposedRelationshipDto(relation.From, relation.To, relation.Forward, relation.Inverse)
                 : null,
-            proposal.Attribute is { } detail ? new ProposedDetailDto(detail.Element, detail.Name, detail.Value) : null);
+            proposal.Attribute is { } detail ? new ProposedDetailDto(detail.Element, detail.Name, detail.Value) : null,
+            proposal.Milestone is { } milestone ? new ProposedMilestoneDto(milestone.Element, milestone.Text) : null);
 
     public static SquireProvider ToProvider(string provider) => SquireUseCases.ProviderOf(provider);
 
@@ -151,7 +153,8 @@ internal static class Wire
             changes.OtherKind,
             changes.Forward,
             changes.Inverse,
-            changes.Value);
+            changes.Value,
+            changes.Text);
 
     public static DocumentContent ToContent(JsonObject content) => DocumentContent.Parse(content.ToJsonString());
 
@@ -266,7 +269,34 @@ internal static class Wire
             element.ImageVersion is { } version ? new ElementImageInfoDto(version) : null);
 
     public static RelationshipDto Of(Relationship relationship) =>
-        new(relationship.Id.Value, relationship.From.Value, relationship.To.Value, relationship.Kind.Value);
+        new(
+            relationship.Id.Value,
+            relationship.From.Value,
+            relationship.To.Value,
+            relationship.Kind.Value,
+            relationship.Starts?.Value,
+            relationship.Ends?.Value);
+
+    public static MilestoneDto Of(Milestone milestone) =>
+        new(
+            milestone.Id.Value,
+            milestone.ElementId.Value,
+            milestone.DocumentId.Value,
+            milestone.Paragraph.Length <= Proposal.MaxPassageLength ? milestone.Paragraph : milestone.Paragraph[..Proposal.MaxPassageLength],
+            milestone.Text,
+            milestone.Lost,
+            milestone.CreatedAt);
+
+    public static ThreadsDto Of(ThreadsView view) =>
+        new(
+            [.. view.Chosen.Select(id => id.Value)],
+            [.. view.Chapters.Select(chapter => new ThreadChapterDto(chapter.Id.Value, chapter.Title))],
+            [.. view.Threads.Select(thread => new FateThreadDto(
+                thread.ElementId.Value,
+                [.. thread.Points.Select(point => new ThreadPointDto(point.DocumentId.Value, point.Mentions))]))],
+            [.. view.Meetings.Select(meeting => new ThreadMeetingDto(
+                meeting.DocumentId.Value, meeting.First.Value, meeting.Second.Value, meeting.Paragraphs))],
+            [.. view.Milestones.Select(Of)]);
 
     public static RelationshipKindDto Of(RelationshipKind kind) => new(kind.KindId.Value, kind.Forward, kind.Inverse);
 

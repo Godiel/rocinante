@@ -6,8 +6,10 @@ using Rocinante.Application.Squire;
 using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
+using Rocinante.Domain.Elements;
 using Rocinante.Domain.Notes;
 using Rocinante.Domain.Squire;
+using Rocinante.Domain.Threads;
 using Rocinante.Sidecar.Protocol;
 
 namespace Rocinante.Sidecar;
@@ -47,6 +49,15 @@ internal sealed class JsonRpcNotifier(MessageWriter writer) : IChangeNotifier
 
     public void DictionaryChanged(IReadOnlyList<string> words, string origin) =>
         Send("dictionary.changed", new DictionaryChangedNotification(words, origin), WireJson.Default.DictionaryChangedNotification);
+
+    public void ThreadsChanged(IReadOnlyList<ElementId> chosen, string origin) =>
+        Send("threads.changed", new ThreadsChangedNotification([.. chosen.Select(id => id.Value)], origin), WireJson.Default.ThreadsChangedNotification);
+
+    public void MilestonesChanged(IReadOnlyList<Milestone> milestones, IReadOnlyList<MilestoneId> removed, string origin) =>
+        Send(
+            "milestones.changed",
+            new MilestonesChangedNotification([.. milestones.Select(Wire.Of)], [.. removed.Select(id => id.Value)], origin),
+            WireJson.Default.MilestonesChangedNotification);
 
     public void SuggestionsChanged(string origin) =>
         Send("suggestions.changed", new SuggestionsChangedNotification(origin), WireJson.Default.SuggestionsChangedNotification);

@@ -118,6 +118,65 @@ internal sealed class ReferenceIndex
         return [.. totals.Select(pair => new MentionCount(pair.Key, pair.Value.Total, pair.Value.Documents))];
     }
 
+    /// <summary>
+    /// The threads of the chosen elements through the chapters: how many times each is mentioned in each chapter,
+    /// and how many paragraphs of a chapter mention two of them together.
+    /// </summary>
+    public (IReadOnlyList<FateThread> Threads, IReadOnlyList<ThreadMeeting> Meetings) Threads(
+        ElementBoard board, IReadOnlyList<DocumentId> chapters, IReadOnlyList<ElementId> chosen, IDocumentRepository repository)
+    {
+        UseNames(board);
+        var revisions = repository.Revisions();
+        var place = chosen.Select((id, index) => (id, index)).ToDictionary(pair => pair.id, pair => pair.index);
+        var points = chosen.ToDictionary(id => id, _ => new List<ThreadPoint>());
+        var meetings = new List<ThreadMeeting>();
+
+        foreach (var chapter in chapters)
+        {
+            var mentions = new Dictionary<ElementId, int>();
+            var blocks = new Dictionary<int, HashSet<ElementId>>();
+            foreach (var found in LookAt(chapter, repository, revisions).Mentions!)
+            {
+                foreach (var element in found.Elements.Where(place.ContainsKey))
+                {
+                    mentions[element] = mentions.GetValueOrDefault(element) + 1;
+                    if (!blocks.TryGetValue(found.Block, out var here))
+                    {
+                        blocks[found.Block] = here = [];
+                    }
+
+                    here.Add(element);
+                }
+            }
+
+            foreach (var (element, count) in mentions)
+            {
+                points[element].Add(new ThreadPoint(chapter, count));
+            }
+
+            var pairs = new Dictionary<(ElementId First, ElementId Second), int>();
+            foreach (var here in blocks.Values.Where(set => set.Count > 1))
+            {
+                var ordered = here.OrderBy(element => place[element]).ToList();
+                for (var first = 0; first < ordered.Count; first++)
+                {
+                    for (var second = first + 1; second < ordered.Count; second++)
+                    {
+                        var pair = (ordered[first], ordered[second]);
+                        pairs[pair] = pairs.GetValueOrDefault(pair) + 1;
+                    }
+                }
+            }
+
+            meetings.AddRange(pairs
+                .OrderBy(pair => place[pair.Key.First])
+                .ThenBy(pair => place[pair.Key.Second])
+                .Select(pair => new ThreadMeeting(chapter, pair.Key.First, pair.Key.Second, pair.Value)));
+        }
+
+        return ([.. chosen.Select(id => new FateThread(id, points[id]))], meetings);
+    }
+
     /// <summary>The proper names of the work that no element is called and the writer did not dismiss.</summary>
     public IReadOnlyList<NameSuggestion> Suggestions(
         ElementBoard board, IEnumerable<DocumentId> documents, IDocumentRepository repository, IReadOnlySet<string> dismissed)
