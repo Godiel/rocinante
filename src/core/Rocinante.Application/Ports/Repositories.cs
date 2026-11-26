@@ -26,6 +26,9 @@ public interface IDocumentRepository
 
     /// <summary>Counts of every chapter outside the trash.</summary>
     TextStatistics WorkStatistics();
+
+    /// <summary>The revision of every document, without loading any text: to know which changed.</summary>
+    IReadOnlyDictionary<DocumentId, long> Revisions();
 }
 
 /// <summary>A version as listed, without its text.</summary>
@@ -81,6 +84,12 @@ public interface IElementRepository
 
     /// <summary>Stores a kind of relationship the writer wrote; storing one already there changes nothing.</summary>
     void Save(RelationshipKind kind);
+
+    /// <summary>The names the writer dismissed as suggestions, as <c>MentionFinder.Key</c> gives them.</summary>
+    IReadOnlySet<string> DismissedNames();
+
+    /// <summary>Stops suggesting a name, given as its key; dismissing it twice changes nothing.</summary>
+    void Dismiss(string key, DateTimeOffset now);
 
     /// <summary>Inserts a new relationship or updates its kind.</summary>
     void Save(Relationship relationship);

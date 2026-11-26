@@ -1,0 +1,8 @@
+{
+  "valid": [{ "name": "Dulcinea", "origin": "main" }],
+  "invalid": [
+    { "name": "", "origin": "main" },
+    { "origin": "main" },
+    { "name": "Dulcinea" }
+  ]
+}

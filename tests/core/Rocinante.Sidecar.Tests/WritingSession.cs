@@ -106,6 +106,9 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("version.get", Params(("id", version)));
         harness.Call("version.restore", Params(("id", version), ("origin", Main)));
         harness.Call("element.references", Params(("id", quixote)));
+        harness.Call("board.mentions");
+        harness.Call("suggestions.get");
+        harness.Call("suggestion.dismiss", Params(("name", "Dulcinea"), ("origin", Other)));
 
         // Notes of the work: one on the chapter, now resolved and linked, and a loose idea that is
         // deleted and brought back.

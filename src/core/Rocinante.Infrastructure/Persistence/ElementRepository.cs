@@ -200,6 +200,29 @@ public sealed class ElementRepository(ProjectDatabase database) : IElementReposi
             ("$inverse", kind.Inverse)));
     }
 
+    public IReadOnlySet<string> DismissedNames()
+    {
+        using var command = database.Command("SELECT name FROM dismissed_name;");
+        using var reader = command.ExecuteReader();
+        var names = new HashSet<string>(StringComparer.Ordinal);
+        while (reader.Read())
+        {
+            names.Add(reader.GetString(0));
+        }
+
+        return names;
+    }
+
+    public void Dismiss(string key, DateTimeOffset now)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+        database.InTransaction(() => database.Execute(
+            "INSERT INTO dismissed_name (name, dismissed_at) VALUES ($name, $at) ON CONFLICT (name) DO NOTHING;",
+            ("$name", key),
+            ("$at", Columns.Time(now))));
+    }
+
     public void Save(Relationship relationship)
     {
         ArgumentNullException.ThrowIfNull(relationship);

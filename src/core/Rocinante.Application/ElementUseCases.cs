@@ -52,6 +52,38 @@ public sealed class ElementUseCases(Workspace workspace, IChosenFiles files, ICh
         return _references.Of(id, board, documents, workspace.Session.Documents);
     }
 
+    /// <summary>How many times each element of the work is mentioned, and in how many documents.</summary>
+    public IReadOnlyList<MentionCount> BoardMentions() =>
+        _references.Counts(workspace.Board, DocumentsInWork(), workspace.Session.Documents);
+
+    /// <summary>Proper names the text repeats that are no element's name or alias, nor dismissed.</summary>
+    public IReadOnlyList<NameSuggestion> Suggestions() =>
+        _references.Suggestions(workspace.Board, DocumentsInWork(), workspace.Session.Documents, workspace.Session.Elements.DismissedNames());
+
+    /// <summary>Stops suggesting a name in this work, for good.</summary>
+    public void DismissSuggestion(string name, string origin)
+    {
+        var key = MentionFinder.Key(name);
+        if (key.Length == 0)
+        {
+            throw new DomainException(DomainError.NameRequired, "A name to dismiss needs some letters.");
+        }
+
+        var session = workspace.Session;
+        session.InTransaction(() =>
+        {
+            session.Elements.Dismiss(key, clock.GetUtcNow());
+            return key;
+        });
+        notifier.SuggestionsChanged(origin);
+    }
+
+    private IEnumerable<DocumentId> DocumentsInWork()
+    {
+        var project = workspace.Project;
+        return project.Chapters.Concat(project.Fragments).Select(entry => entry.Id);
+    }
+
     public Element Create(
         ElementKind kind, string? otherKind, string name, IReadOnlyList<ElementAttribute>? attributes, BoardPosition? position, string origin)
     {

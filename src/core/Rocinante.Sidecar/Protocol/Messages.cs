@@ -155,7 +155,20 @@ internal sealed record DocumentMentionsDto(Guid DocumentId, IReadOnlyList<Mentio
 
 internal sealed record MentionPlaceDto(Guid DocumentId, int Ordinal);
 
-internal sealed record ElementReferencesDto(int Total, int Chapters, MentionPlaceDto? First, IReadOnlyList<DocumentMentionsDto> Documents);
+internal sealed record CoincidenceDto(Guid ElementId, int Paragraphs);
+
+internal sealed record ElementReferencesDto(
+    int Total, int Chapters, MentionPlaceDto? First, IReadOnlyList<DocumentMentionsDto> Documents, IReadOnlyList<CoincidenceDto> Together);
+
+internal sealed record MentionCountDto(Guid Id, int Total, int Chapters);
+
+internal sealed record BoardMentionsDto(IReadOnlyList<MentionCountDto> Elements);
+
+internal sealed record SuggestionDto(string Name, int Count);
+
+internal sealed record DismissSuggestionParams(string Name, string Origin);
+
+internal sealed record SuggestionsChangedNotification(string Origin);
 
 internal sealed record NoteChangesDto(JsonObject? Content, bool? Resolved, IReadOnlyList<Guid>? Elements);
 
@@ -256,6 +269,10 @@ internal sealed record ElementsChangedNotification(
 [JsonSerializable(typeof(UpdateNoteParams))]
 [JsonSerializable(typeof(NoteChangesDto))]
 [JsonSerializable(typeof(ElementReferencesDto))]
+[JsonSerializable(typeof(BoardMentionsDto))]
+[JsonSerializable(typeof(IReadOnlyList<SuggestionDto>))]
+[JsonSerializable(typeof(DismissSuggestionParams))]
+[JsonSerializable(typeof(SuggestionsChangedNotification))]
 [JsonSerializable(typeof(SystemInfoResult))]
 [JsonSerializable(typeof(ProjectStateDto))]
 [JsonSerializable(typeof(DocumentEntryDto))]

@@ -216,6 +216,22 @@ public sealed class ElementStorageTests : IDisposable
     }
 
     [Fact]
+    public void Dismissed_names_are_kept_once_survive_closing_and_go_with_a_copy()
+    {
+        Repository.Dismiss("dulcinea", Moments.At(1));
+        Repository.Dismiss("dulcinea", Moments.At(2));
+        Repository.Dismiss("sancho panza", Moments.At(3));
+
+        new ElementRepository(_fixture.Reopen()).DismissedNames().ShouldBe(["dulcinea", "sancho panza"], ignoreOrder: true);
+
+        using var folder = new TempFolder();
+        var copyPath = folder.File("copia.rocinante");
+        _fixture.Database.SaveCopyAs(copyPath);
+        using var copy = ProjectDatabase.Open(copyPath);
+        new ElementRepository(copy).DismissedNames().Count.ShouldBe(2);
+    }
+
+    [Fact]
     public void A_copy_of_the_work_takes_its_elements_and_images()
     {
         var board = new ElementBoard();

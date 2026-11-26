@@ -4,6 +4,7 @@ import { useElementImage } from "./images";
 import { KIND_NAMES, KINDS, kindLabel } from "./kinds";
 import { byName, matches, sharedNames } from "./search";
 import { OpenElementSheet, type OpenElementSheetProps } from "./OpenElementSheet";
+import { Suggestions } from "./Suggestions";
 import "./elements.css";
 
 export interface ElementsPanelProps {
@@ -32,6 +33,8 @@ export interface ElementsPanelProps {
   /** Whether the mentions are marked in the text, and the way to change it. */
   mentionsVisible?: boolean;
   onMentionsVisible?(visible: boolean): void;
+  /** Makes a ficha from a name the text suggests; without it, no suggestions are shown. */
+  onCreateNamed?(name: string): void;
 }
 
 /**
@@ -57,6 +60,7 @@ export function ElementsPanel({
   mentions,
   mentionsVisible,
   onMentionsVisible,
+  onCreateNamed,
 }: ElementsPanelProps) {
   // A ficha that went to the trash, here or in another window, gives its place back to the list.
   const shownId = openId && board.elements.some((element) => element.id === openId) ? openId : null;
@@ -125,6 +129,11 @@ export function ElementsPanel({
           onRestore={onRestore}
           mentionsVisible={mentionsVisible}
           onMentionsVisible={onMentionsVisible}
+          suggestions={
+            onCreateNamed && (
+              <Suggestions origin={origin} onCreate={onCreateNamed} onProblem={onProblem} />
+            )
+          }
         />
       )}
     </aside>
@@ -132,6 +141,8 @@ export function ElementsPanel({
 }
 
 interface ElementListProps {
+  /** The names the text suggests as fichas, folded away before the trash. */
+  suggestions?: ReactNode;
   mentionsVisible?: boolean;
   onMentionsVisible?(visible: boolean): void;
   elements: readonly ElementSummary[];
@@ -155,6 +166,7 @@ function ElementList({
   onRestore,
   mentionsVisible,
   onMentionsVisible,
+  suggestions,
 }: ElementListProps) {
   const [query, setQuery] = useState("");
   // The box answers the click at once; the preference comes back from the core a moment later.
@@ -271,6 +283,7 @@ function ElementList({
         );
       })}
 
+      {suggestions}
       {trash.length > 0 && (
         <details className="elements-trash">
           <summary className="elements-group-title small-caps">Papelera ({trash.length})</summary>

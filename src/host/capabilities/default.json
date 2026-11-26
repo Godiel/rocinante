@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Permissions for every Rocinante window. The UI only reaches the core through the relay commands; it cannot spawn processes or touch the file system. It may show the system dialog to pick a project file or a folder: the writer chooses, and the path goes to the core. A window may destroy itself, so closing it can first wait for the last text to be saved. It may go full screen for focus mode. Through the host's ambience:// protocol it may read the copies of the writer's own images and sounds in the app data folder's ambience/, and nothing else.",
-  "windows": ["main", "window-*"],
+  "windows": ["main", "window-*", "board-*"],
   "permissions": [
     "core:default",
     "core:window:allow-destroy",

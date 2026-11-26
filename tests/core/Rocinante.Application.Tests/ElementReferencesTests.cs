@@ -122,4 +122,59 @@ public sealed class ElementReferencesTests : IDisposable
         Should.Throw<DomainException>(() => _app.Elements.References(ElementId.New(_app.Clock.GetUtcNow())))
             .Error.ShouldBe(DomainError.ElementNotFound);
     }
+
+    [Fact]
+    public void Counts_the_mentions_of_every_card_at_once()
+    {
+        var quixote = Character("Alonso Quijano", "Don Quijote");
+        var sancho = Character("Sancho");
+        var dulcinea = Character("Dulcinea");
+        Write(_first, "Don Quijote y Sancho.", "Sancho otra vez.");
+        Write(_second, "Alonso Quijano soñaba.");
+
+        var counts = _app.Elements.BoardMentions().ToDictionary(count => count.ElementId);
+
+        counts[quixote.Id].ShouldBe(new MentionCount(quixote.Id, 2, 2));
+        counts[sancho.Id].ShouldBe(new MentionCount(sancho.Id, 2, 1));
+        counts[dulcinea.Id].ShouldBe(new MentionCount(dulcinea.Id, 0, 0));
+    }
+
+    [Fact]
+    public void Says_which_fichas_share_its_paragraphs_the_most_first()
+    {
+        var quixote = Character("Quijote");
+        var sancho = Character("Sancho");
+        var dulcinea = Character("Dulcinea");
+        Write(_first, "Quijote y Sancho, y Sancho otra vez.", "Quijote y Sancho.", "Quijote soñaba con Dulcinea.", "Sancho solo.");
+
+        var together = _app.Elements.References(quixote.Id).Together;
+
+        together.ShouldBe([new Coincidence(sancho.Id, 2), new Coincidence(dulcinea.Id, 1)]);
+    }
+
+    [Fact]
+    public void Suggests_the_repeated_proper_names_without_a_ficha_until_dismissed()
+    {
+        Character("Sancho");
+        Write(_first, "Vio a Dulcinea y a Sancho.", "Con Dulcinea y Sancho.", "Por Dulcinea y Sancho, y Maritornes.");
+        _app.Elements.Suggestions().ShouldBe([new NameSuggestion("Dulcinea", 3)]);
+        _app.Notifier.Clear();
+
+        _app.Elements.DismissSuggestion("DULCINEA", "window-1");
+
+        _app.Elements.Suggestions().ShouldBeEmpty();
+        _app.Notifier.Events.ShouldBe(["suggestions.changed:window-1"]);
+        Should.Throw<DomainException>(() => _app.Elements.DismissSuggestion(" — ", Main)).Error.ShouldBe(DomainError.NameRequired);
+    }
+
+    [Fact]
+    public void A_suggestion_goes_once_it_is_the_name_of_a_ficha()
+    {
+        Write(_first, "Vio a Dulcinea.", "Con Dulcinea.", "Por Dulcinea.");
+        _app.Elements.Suggestions().ShouldHaveSingleItem();
+
+        Character("Dulcinea");
+
+        _app.Elements.Suggestions().ShouldBeEmpty();
+    }
 }

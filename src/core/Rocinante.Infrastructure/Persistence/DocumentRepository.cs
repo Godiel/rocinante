@@ -79,6 +79,19 @@ public sealed class DocumentRepository(ProjectDatabase database) : IDocumentRepo
         return new TextStatistics(reader.GetInt32(0), reader.GetInt32(1), reader.GetInt32(2));
     }
 
+    public IReadOnlyDictionary<DocumentId, long> Revisions()
+    {
+        using var command = database.Command("SELECT id, revision FROM document;");
+        using var reader = command.ExecuteReader();
+        var revisions = new Dictionary<DocumentId, long>();
+        while (reader.Read())
+        {
+            revisions[new DocumentId(reader.GetId(0))] = reader.GetInt64(1);
+        }
+
+        return revisions;
+    }
+
     private static DomainException NotFound(DocumentId id) =>
         new(DomainError.DocumentNotFound, $"Document {id} is not in this project.");
 }

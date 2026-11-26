@@ -12,10 +12,20 @@ export interface ElementMentionsProps {
   documents: readonly { id: string; title: string }[];
   /** Takes the text to a mention: its document and its number among those of the ficha there. */
   onGoTo(documentId: string, ordinal: number): void;
+  /** The fichas of the work, for the names of those that share paragraphs with this one. */
+  elements?: readonly { id: string; name: string }[];
+  /** Opens another ficha. */
+  onOpenElement?(id: string): void;
 }
 
 /** «En el texto»: where a ficha is mentioned in the work, and the way to each mention. */
-export function ElementMentions({ elementId, documents, onGoTo }: ElementMentionsProps) {
+export function ElementMentions({
+  elementId,
+  documents,
+  onGoTo,
+  elements = [],
+  onOpenElement,
+}: ElementMentionsProps) {
   const [references, setReferences] = useState<{
     elementId: string;
     value: ElementReferences;
@@ -51,6 +61,8 @@ export function ElementMentions({ elementId, documents, onGoTo }: ElementMention
   const titles = new Map(documents.map((document) => [document.id, document.title]));
   const shown = references?.elementId === elementId ? references.value : null;
   const first = shown?.first ?? null;
+  const names = new Map(elements.map((element) => [element.id, element.name]));
+  const together = (shown?.together ?? []).filter((other) => names.has(other.elementId));
 
   return (
     <section className="element-section element-mentions" aria-labelledby={heading}>
@@ -100,6 +112,27 @@ export function ElementMentions({ elementId, documents, onGoTo }: ElementMention
             </div>
           ))}
         </>
+      )}
+      {together.length > 0 && (
+        <div className="element-together">
+          <h4 className="element-mentions-title small-caps">Coincide con</h4>
+          <ul className="element-mentions-list">
+            {together.map((other) => (
+              <li key={other.elementId}>
+                <button
+                  type="button"
+                  className="element-relation-other"
+                  onClick={() => onOpenElement?.(other.elementId)}
+                >
+                  {names.get(other.elementId)}
+                </button>{" "}
+                <span className="element-quiet">
+                  {other.paragraphs === 1 ? "en 1 párrafo" : `en ${other.paragraphs} párrafos`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </section>
   );

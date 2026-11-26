@@ -14,49 +14,128 @@ public sealed record DocumentMentions(DocumentId DocumentId, IReadOnlyList<Menti
 /// <summary>Where the first mention of an element is: its document and its place there.</summary>
 public sealed record MentionPlace(DocumentId DocumentId, int Ordinal);
 
+/// <summary>Another element mentioned in the same paragraphs, and in how many.</summary>
+public sealed record Coincidence(ElementId ElementId, int Paragraphs);
+
 /// <summary>Every mention of an element in the work, document by document in the order of the index.</summary>
-public sealed record ElementReferences(int Total, int Documents, MentionPlace? First, IReadOnlyList<DocumentMentions> ByDocument);
+public sealed record ElementReferences(
+    int Total,
+    int Documents,
+    MentionPlace? First,
+    IReadOnlyList<DocumentMentions> ByDocument,
+    IReadOnlyList<Coincidence> Together);
+
+/// <summary>How many times an element is mentioned in the work, and in how many documents.</summary>
+public sealed record MentionCount(ElementId ElementId, int Total, int Documents);
 
 /// <summary>
-/// Finds the mentions of the elements in the documents of the work. What a document says only changes when
-/// its text or the names do, so each is looked through once per revision and set of names, and kept.
+/// Looks through the documents of the work for the mentions of the elements and for the proper names without
+/// a ficha. What a document says only changes when its text or the names do, so each is looked through once
+/// per revision and set of names, and kept.
 /// </summary>
 internal sealed class ReferenceIndex
 {
     /// <summary>Characters of text kept on each side of a mention.</summary>
     public const int Around = 60;
 
-    private readonly Dictionary<DocumentId, (long Revision, IReadOnlyList<Found> Mentions)> _documents = [];
+    private readonly Dictionary<DocumentId, Looked> _documents = [];
     private string _namesKey = string.Empty;
     private MentionFinder _finder = new([]);
 
     public ElementReferences Of(ElementId element, ElementBoard board, IEnumerable<DocumentId> documents, IDocumentRepository repository)
     {
         UseNames(board);
+        var revisions = repository.Revisions();
 
         var byDocument = new List<DocumentMentions>();
+        var together = new Dictionary<ElementId, int>();
         foreach (var documentId in documents)
         {
-            var mentions = MentionsIn(documentId, repository)
-                .Where(found => found.Elements.Contains(element))
-                .Select((found, ordinal) => new MentionInText(ordinal, found.Before, found.Text, found.After))
-                .ToList();
-            if (mentions.Count > 0)
+            var looked = LookAt(documentId, repository, revisions);
+            var mentions = looked.Mentions!.Where(found => found.Elements.Contains(element)).ToList();
+            if (mentions.Count == 0)
             {
-                byDocument.Add(new DocumentMentions(documentId, mentions));
+                continue;
+            }
+
+            byDocument.Add(new DocumentMentions(
+                documentId,
+                [.. mentions.Select((found, ordinal) => new MentionInText(ordinal, found.Before, found.Text, found.After))]));
+
+            foreach (var block in mentions.Select(found => found.Block).Distinct())
+            {
+                var others = looked.Mentions!
+                    .Where(found => found.Block == block)
+                    .SelectMany(found => found.Elements)
+                    .Where(other => other != element)
+                    .Distinct();
+                foreach (var other in others)
+                {
+                    together[other] = together.GetValueOrDefault(other) + 1;
+                }
             }
         }
 
         var first = byDocument.Count > 0 ? new MentionPlace(byDocument[0].DocumentId, 0) : null;
-        return new ElementReferences(byDocument.Sum(document => document.Mentions.Count), byDocument.Count, first, byDocument);
+        return new ElementReferences(
+            byDocument.Sum(document => document.Mentions.Count),
+            byDocument.Count,
+            first,
+            byDocument,
+            [.. together
+                .OrderByDescending(pair => pair.Value)
+                .ThenBy(pair => pair.Key.Value)
+                .Select(pair => new Coincidence(pair.Key, pair.Value))]);
     }
 
-    /// <summary>Forgets what it found, as when another work opens.</summary>
-    public void Clear()
+    /// <summary>The mentions of every element in the work at once, for the cards of the board.</summary>
+    public IReadOnlyList<MentionCount> Counts(ElementBoard board, IEnumerable<DocumentId> documents, IDocumentRepository repository)
     {
-        _documents.Clear();
-        _namesKey = string.Empty;
-        _finder = new MentionFinder([]);
+        UseNames(board);
+        var revisions = repository.Revisions();
+
+        var totals = board.Elements.ToDictionary(element => element.Id, _ => (Total: 0, Documents: 0));
+        foreach (var documentId in documents)
+        {
+            var here = new Dictionary<ElementId, int>();
+            foreach (var found in LookAt(documentId, repository, revisions).Mentions!)
+            {
+                foreach (var element in found.Elements)
+                {
+                    here[element] = here.GetValueOrDefault(element) + 1;
+                }
+            }
+
+            foreach (var (element, count) in here)
+            {
+                if (totals.TryGetValue(element, out var total))
+                {
+                    totals[element] = (total.Total + count, total.Documents + 1);
+                }
+            }
+        }
+
+        return [.. totals.Select(pair => new MentionCount(pair.Key, pair.Value.Total, pair.Value.Documents))];
+    }
+
+    /// <summary>The proper names of the work that no element is called and the writer did not dismiss.</summary>
+    public IReadOnlyList<NameSuggestion> Suggestions(
+        ElementBoard board, IEnumerable<DocumentId> documents, IDocumentRepository repository, IReadOnlySet<string> dismissed)
+    {
+        UseNames(board);
+        var revisions = repository.Revisions();
+
+        var known = new HashSet<string>(dismissed, StringComparer.Ordinal);
+        foreach (var element in board.Elements)
+        {
+            known.Add(MentionFinder.Key(element.Name));
+            foreach (var alias in element.Aliases)
+            {
+                known.Add(MentionFinder.Key(alias));
+            }
+        }
+
+        return NameSuggester.Suggest(documents.SelectMany(document => LookAt(document, repository, revisions).Names), known);
     }
 
     private void UseNames(ElementBoard board)
@@ -72,20 +151,26 @@ internal sealed class ReferenceIndex
 
         _namesKey = key;
         _finder = new MentionFinder(elements.Select(element => (element.Id, (IEnumerable<string>)element.Names)));
-        _documents.Clear();
+        // The proper names of a text do not depend on the elements, but the mentions do.
+        foreach (var documentId in _documents.Keys.ToList())
+        {
+            _documents[documentId] = _documents[documentId] with { Mentions = null };
+        }
     }
 
-    private IReadOnlyList<Found> MentionsIn(DocumentId documentId, IDocumentRepository repository)
+    private Looked LookAt(DocumentId documentId, IDocumentRepository repository, IReadOnlyDictionary<DocumentId, long> revisions)
     {
-        var document = repository.Load(documentId);
-        if (_documents.TryGetValue(documentId, out var known) && known.Revision == document.Revision)
+        var revision = revisions.GetValueOrDefault(documentId, -1);
+        if (_documents.TryGetValue(documentId, out var known) && known.Revision == revision && known.Mentions is not null)
         {
-            return known.Mentions;
+            return known;
         }
 
-        var mentions = Find(document.Content);
-        _documents[documentId] = (document.Revision, mentions);
-        return mentions;
+        var content = repository.Load(documentId).Content;
+        var names = known?.Revision == revision ? known.Names : NameSuggester.Occurrences(content.Blocks);
+        var looked = new Looked(revision, Find(content), names);
+        _documents[documentId] = looked;
+        return looked;
     }
 
     private List<Found> Find(DocumentContent content)
@@ -96,16 +181,18 @@ internal sealed class ReferenceIndex
             return found;
         }
 
-        foreach (var block in content.Blocks)
+        for (var block = 0; block < content.Blocks.Count; block++)
         {
-            foreach (var mention in _finder.Find(block))
+            var text = content.Blocks[block];
+            foreach (var mention in _finder.Find(text))
             {
                 var end = mention.Start + mention.Length;
                 found.Add(new Found(
                     mention.Elements,
-                    Before(block, mention.Start),
-                    block.Substring(mention.Start, mention.Length),
-                    After(block, end)));
+                    block,
+                    Before(text, mention.Start),
+                    text.Substring(mention.Start, mention.Length),
+                    After(text, end)));
             }
         }
 
@@ -138,5 +225,8 @@ internal sealed class ReferenceIndex
         return space > 0 ? piece[..space] : piece;
     }
 
-    private sealed record Found(IReadOnlyList<ElementId> Elements, string Before, string Text, string After);
+    private sealed record Found(IReadOnlyList<ElementId> Elements, int Block, string Before, string Text, string After);
+
+    /// <summary>What a revision of a document says; its mentions are null once the names change.</summary>
+    private sealed record Looked(long Revision, List<Found>? Mentions, IReadOnlyList<(string Key, string Written)> Names);
 }

@@ -116,6 +116,10 @@ internal static class CoreMethods
             p.Position is { } position ? new BoardPosition(position.X, position.Y) : null,
             p.Origin)));
         table.On("element.get", json.IdParams, json.ElementDto, p => Wire.Of(core.Elements.Get(new ElementId(p.Id))));
+        table.On("board.mentions", json.BoardMentionsDto, () => Wire.Of(core.Elements.BoardMentions()));
+        table.On("suggestions.get", json.IReadOnlyListSuggestionDto, () =>
+            [.. core.Elements.Suggestions().Select(suggestion => new SuggestionDto(suggestion.Name, suggestion.Count))]);
+        table.On("suggestion.dismiss", json.DismissSuggestionParams, p => core.Elements.DismissSuggestion(p.Name, p.Origin));
         table.On("element.references", json.IdParams, json.ElementReferencesDto, p =>
             Wire.Of(core.Elements.References(new ElementId(p.Id))));
         table.On("element.update", json.UpdateElementParams, json.ElementDto, p =>
