@@ -141,6 +141,16 @@ public abstract class CommandSecretStore : ISecretStore
     /// <summary>Runs a command; the key, if any, goes on its standard input and never in its arguments.</summary>
     protected static (int Exit, string Output) Run(string program, IEnumerable<string> arguments, string? input = null)
     {
+        var (exit, output, _) = RunWithErrors(program, arguments, input);
+        return (exit, output);
+    }
+
+    /// <summary>Like <see cref="Run"/>, also giving what the command wrote on its standard error.</summary>
+    protected static (int Exit, string Output, string Errors) RunWithErrors(
+        string program,
+        IEnumerable<string> arguments,
+        string? input = null)
+    {
         var start = new ProcessStartInfo(program)
         {
             RedirectStandardInput = true,
@@ -162,10 +172,10 @@ public abstract class CommandSecretStore : ISecretStore
             }
 
             process.StandardInput.Close();
+            var errors = process.StandardError.ReadToEndAsync();
             var output = process.StandardOutput.ReadToEnd();
-            process.StandardError.ReadToEnd();
             process.WaitForExit();
-            return (process.ExitCode, output);
+            return (process.ExitCode, output, errors.GetAwaiter().GetResult());
         }
         catch (System.ComponentModel.Win32Exception)
         {
@@ -179,8 +189,34 @@ public sealed class MacKeychainStore(string service) : CommandSecretStore
 {
     public override string? Read(string provider)
     {
-        var (exit, output) = Run("security", ["find-generic-password", "-s", service, "-a", provider, "-w"]);
-        return exit == 0 ? output.TrimEnd('\n') : null;
+        // With -w, security prints a key that is not plain ASCII (an «ñ») as bare hexadecimal, which cannot be
+        // told apart from a key made of hex digits; with -g it says on its error output which of the two it is.
+        var (exit, _, errors) = RunWithErrors("security", ["find-generic-password", "-s", service, "-a", provider, "-g"]);
+        return exit == 0 ? PasswordFrom(errors) : null;
+    }
+
+    /// <summary>
+    /// The key in what <c>security find-generic-password -g</c> says: <c>password: "the key"</c>, or
+    /// <c>password: 0x736B2D…  "…"</c> when it is not plain ASCII, or <c>password: </c> when empty.
+    /// </summary>
+    public static string? PasswordFrom(string said)
+    {
+        const string Label = "password: ";
+        var line = said.Split('\n').Select(part => part.TrimEnd('\r')).FirstOrDefault(part => part.StartsWith(Label, StringComparison.Ordinal));
+        if (line is null)
+        {
+            return null;
+        }
+
+        var rest = line[Label.Length..];
+        if (rest.StartsWith("0x", StringComparison.Ordinal))
+        {
+            var end = rest.IndexOf(' ', StringComparison.Ordinal);
+            var hex = end < 0 ? rest[2..] : rest[2..end];
+            return System.Text.Encoding.UTF8.GetString(Convert.FromHexString(hex));
+        }
+
+        return rest.Length >= 2 && rest[0] == '"' && rest[^1] == '"' ? rest[1..^1] : rest;
     }
 
     public override void Write(string provider, string key)
