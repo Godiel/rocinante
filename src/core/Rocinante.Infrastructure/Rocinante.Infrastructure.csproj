@@ -19,6 +19,8 @@
   <ItemGroup>
     <!-- Schema migrations, applied in order by their numeric prefix. -->
     <EmbeddedResource Include="Persistence\Migrations\*.sql" LogicalName="migrations/%(Filename)%(Extension)" />
+    <!-- The typefaces of the work (WOFF from Fontsource, OFL), for the PDF and the EPUB. -->
+    <EmbeddedResource Include="Export\Fonts\*.woff" LogicalName="fonts/%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

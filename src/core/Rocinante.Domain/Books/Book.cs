@@ -55,6 +55,15 @@ public sealed record BookChapter(string Title, IReadOnlyList<BookBlock> Blocks)
     public IEnumerable<FootnoteCall> Footnotes => Book.CallsIn(Blocks);
 }
 
+/// <summary>The formats a book is written in.</summary>
+public enum ExportFormat
+{
+    Pdf,
+    Epub,
+    Docx,
+    Markdown,
+}
+
 /// <summary>The parts a book carries besides the chapters.</summary>
 public sealed record ExportParts(bool Cover, bool Credits, bool Contents)
 {
@@ -65,7 +74,18 @@ public sealed record ExportParts(bool Cover, bool Credits, bool Contents)
 /// The chapters of the work set as a book, the same for every format: each writer only says it its own way.
 /// Fragments and the author's notes are not part of it.
 /// </summary>
+/// <param name="Identifier">Stays the same from one export of the work to the next: the id of the work.</param>
+/// <param name="Date">When it was exported, for the credits and the data of the book.</param>
+/// <param name="Title">The title of the work.</param>
+/// <param name="Author">The author, as on the cover; it may be empty.</param>
+/// <param name="Credits">The credits page, already resolved to the default if the author wrote none.</param>
+/// <param name="Cover">The cover image, a JPEG, for EPUB; null if there is none.</param>
+/// <param name="Format">The format of the work: page, margins, typeface.</param>
+/// <param name="Parts">The parts it carries besides the chapters.</param>
+/// <param name="Chapters">The chapters in reading order.</param>
 public sealed record Book(
+    string Identifier,
+    DateTimeOffset Date,
     string Title,
     string Author,
     string Credits,
