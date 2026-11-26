@@ -95,6 +95,7 @@ beforeEach(() => {
       return Promise.resolve(
         detail({ ...summary("n", "Ficha nueva", 0, 0), position: params.position as never }),
       );
+    if (method === "board.mentions") return Promise.resolve({ elements: [] });
     return Promise.resolve({});
   });
 });
