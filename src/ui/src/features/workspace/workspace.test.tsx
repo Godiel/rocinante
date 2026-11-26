@@ -2,7 +2,7 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { isTabShortcut } from "./shortcuts";
+import { isTabShortcut, isThreadsShortcut } from "./shortcuts";
 import { useWorkspaceTab } from "./useWorkspaceTab";
 import { WorkspaceTabs } from "./WorkspaceTabs";
 
@@ -21,6 +21,7 @@ function Workspace({ focused = false }: { focused?: boolean }) {
         </div>
       </div>
       {workspace.boardVisited && <p hidden={workspace.tab !== "board"}>La pizarra</p>}
+      {workspace.threadsVisited && <p hidden={workspace.tab !== "threads"}>Los hilos</p>}
     </>
   );
 }
@@ -102,10 +103,33 @@ describe("the tabs of the work", () => {
     expect(screen.getByRole("tab", { name: "Tablero" })).toHaveAttribute("aria-selected", "true");
 
     await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("tab", { name: "Hilos" })).toHaveAttribute("aria-selected", "true");
+    await user.keyboard("{ArrowRight}");
     const writing = screen.getByRole("tab", { name: "Escritura" });
     expect(writing).toHaveAttribute("aria-selected", "true");
     expect(writing).toHaveFocus();
     expect(screen.getByRole("tab", { name: "Tablero" })).toHaveAttribute("tabindex", "-1");
+  });
+
+  it("goes to the threads and back with F8, and from the threads F2 goes back to the writing", () => {
+    render(<Workspace />);
+    const text = screen.getByText("El texto");
+
+    fireEvent.keyDown(window, { key: "F8" });
+    expect(screen.getByRole("tab", { name: "Hilos" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByText("Los hilos")).toBeVisible();
+    expect(text).not.toBeVisible();
+
+    fireEvent.keyDown(window, { key: "F8" });
+    expect(text).toBeVisible();
+
+    fireEvent.keyDown(window, { key: "F8" });
+    pressF2();
+    expect(text).toBeVisible();
+    expect(screen.getByRole("tab", { name: "Hilos" })).toHaveAttribute("title", "Hilos (F8)");
+    expect(isThreadsShortcut(new KeyboardEvent("keydown", { key: "F8", altKey: true }))).toBe(
+      false,
+    );
   });
 
   it("answers to a plain F2 only", () => {

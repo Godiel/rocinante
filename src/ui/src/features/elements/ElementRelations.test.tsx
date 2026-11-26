@@ -28,9 +28,9 @@ const board: Board = {
     summary("m", "Mateo"),
   ],
   relationships: [
-    { id: "1", from: "c", to: "a", kind: "builtin:child-of" },
-    { id: "2", from: "a", to: "s", kind: "builtin:lives-in" },
-    { id: "3", from: "m", to: "a", kind: "own:1" },
+    { id: "1", from: "c", to: "a", kind: "builtin:child-of", starts: null, ends: null },
+    { id: "2", from: "a", to: "s", kind: "builtin:lives-in", starts: null, ends: null },
+    { id: "3", from: "m", to: "a", kind: "own:1", starts: null, ends: null },
   ],
   ownKinds: [{ id: "own:1", forward: "discípulo de", inverse: "maestro de" }],
   trash: [],

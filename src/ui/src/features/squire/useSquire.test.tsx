@@ -26,6 +26,7 @@ function proposal(id: string, minute: number): Proposal {
     element: { name: id, kind: "character", otherKind: null },
     relationship: null,
     attribute: null,
+    milestone: null,
   };
 }
 

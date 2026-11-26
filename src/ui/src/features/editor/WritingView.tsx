@@ -70,11 +70,15 @@ import { ambientSounds, tracksOf } from "../../audio/ambient-sounds";
 import { WorkspaceTabs } from "../workspace/WorkspaceTabs";
 import { panelId, tabId } from "../workspace/tabs";
 import { useWorkspaceTab } from "../workspace/useWorkspaceTab";
+import { useThreads } from "../threads/useThreads";
 import { useDetachedBoard } from "../workspace/board-window";
 import "./writing-view.css";
 
 // The board brings React Flow with it: it is loaded the first time the writer opens it.
 const BoardTab = lazy(() => import("../board/BoardTab"));
+const ThreadsTab = lazy(() =>
+  import("../threads/ThreadsTab").then((module) => ({ default: module.ThreadsTab })),
+);
 
 /** Gives the keyboard back to the text, where the cursor was. */
 function focusText() {
@@ -487,6 +491,9 @@ export function WritingView({
 
   const workspace = useWorkspaceTab({ focused: focus.focused, onBackToWriting: focusText });
   const onBoard = workspace.tab === "board";
+  // On the board or the threads, the text waits, hidden, with its shortcuts.
+  const awayFromText = workspace.tab !== "writing";
+  const threads = useThreads(project.id, workspace.tab === "threads");
   // The board may live in a window of its own; when it comes back, it shows here.
   const showBoard = workspace.show;
   const boardHome = useDetachedBoard(useCallback(() => showBoard("board"), [showBoard]));
@@ -495,8 +502,8 @@ export function WritingView({
     workspace.show("writing");
   };
   useEffect(() => {
-    onBoardRef.current = onBoard;
-  }, [onBoard]);
+    onBoardRef.current = awayFromText;
+  }, [awayFromText]);
 
   // A floating index steps aside as soon as the writer goes back to the text.
   const onFocusIn = (event: React.FocusEvent) => {
@@ -597,7 +604,7 @@ export function WritingView({
     >
       <header className="writing-bar small-caps">
         <span className="writing-bar-start">
-          {!onBoard && (
+          {!awayFromText && (
             <button
               type="button"
               className="action"
@@ -630,7 +637,7 @@ export function WritingView({
           >
             {preferences.theme === "paper" ? "Luz de vela" : "Papel"}
           </button>
-          {!onBoard && (
+          {!awayFromText && (
             <>
               <button
                 className="action"
@@ -714,7 +721,7 @@ export function WritingView({
         id={panelId("writing")}
         role="tabpanel"
         aria-labelledby={tabId("writing")}
-        hidden={onBoard}
+        hidden={awayFromText}
       >
         {outlineOpen && (
           <Outline
@@ -1026,6 +1033,45 @@ export function WritingView({
           />
         )}
       </div>
+
+      {workspace.threadsVisited && (
+        <div
+          id={panelId("threads")}
+          role="tabpanel"
+          aria-labelledby={tabId("threads")}
+          hidden={workspace.tab !== "threads"}
+        >
+          <Suspense fallback={null}>
+            <ThreadsTab
+              threads={threads}
+              board={board}
+              origin={origin}
+              onGoToMention={(elementId, documentId, ordinal) => {
+                workspace.show("writing");
+                setViewing(null);
+                setCurrentId(documentId);
+                setRevealMention((last) => ({
+                  elementId,
+                  documentId,
+                  ordinal,
+                  at: (last?.at ?? 0) + 1,
+                }));
+              }}
+              onGoToPassage={(documentId, passage) => {
+                workspace.show("writing");
+                setViewing(null);
+                setCurrentId(documentId);
+                setRevealPassage((last) => ({
+                  documentId,
+                  text: passage,
+                  at: (last?.at ?? 0) + 1,
+                }));
+              }}
+              onProblem={setProblem}
+            />
+          </Suspense>
+        </div>
+      )}
 
       {workspace.boardVisited && (
         <div

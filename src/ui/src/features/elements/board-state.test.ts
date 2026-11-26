@@ -29,7 +29,7 @@ function change(parts: Partial<ElementsChange>): ElementsChange {
 
 const quixote = element("q", "Don Quijote");
 const sancho = element("s", "Sancho");
-const son = { id: "r", from: "s", to: "q", kind: "builtin:child-of" };
+const son = { id: "r", from: "s", to: "q", kind: "builtin:child-of", starts: null, ends: null };
 
 describe("the board after a change", () => {
   it("adds new elements and replaces changed ones in place", () => {

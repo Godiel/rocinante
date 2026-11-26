@@ -26,6 +26,7 @@ function base(id: string): Proposal {
     element: null,
     relationship: null,
     attribute: null,
+    milestone: null,
   };
 }
 

@@ -7,7 +7,7 @@ import type { Relationship } from "../../bridge/generated/protocol";
 import { changeRelationship, kindOptions, newKindOf, optionRepeats, relate } from "./relate";
 
 const mentor = { id: "own:1", forward: "maestro de", inverse: "discípulo de" };
-const childOf: Relationship = { id: "r", from: "c", to: "a", kind: "builtin:child-of" };
+const childOf: Relationship = { id: "r", from: "c", to: "a", kind: "builtin:child-of", starts: null, ends: null };
 
 beforeEach(() => {
   request.mockReset();

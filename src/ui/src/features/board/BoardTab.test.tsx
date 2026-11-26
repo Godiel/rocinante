@@ -223,7 +223,7 @@ describe("the board", () => {
 describe("the arrows on the board", () => {
   const related: Board = {
     ...boardOf([quixote, sancho]),
-    relationships: [{ id: "r", from: "s", to: "q", kind: "builtin:servant-of" }],
+    relationships: [{ id: "r", from: "s", to: "q", kind: "builtin:servant-of", starts: null, ends: null }],
   };
 
   it("draws each relationship with its words, named for screen readers", () => {
@@ -271,8 +271,8 @@ describe("the helps of the board", () => {
   const crowded: Board = {
     elements: [quixote, sancho, toboso, dulcinea],
     relationships: [
-      { id: "r1", from: "s", to: "q", kind: "builtin:servant-of" },
-      { id: "r2", from: "d", to: "t", kind: "builtin:lives-in" },
+      { id: "r1", from: "s", to: "q", kind: "builtin:servant-of", starts: null, ends: null },
+      { id: "r2", from: "d", to: "t", kind: "builtin:lives-in", starts: null, ends: null },
     ],
     ownKinds: [],
     trash: [],

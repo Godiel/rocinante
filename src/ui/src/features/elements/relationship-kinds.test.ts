@@ -15,7 +15,7 @@ const rival: RelationshipKind = {
 const own = [squire, rival];
 
 function related(id: string, from: string, to: string, kind: string): Relationship {
-  return { id, from, to, kind };
+  return { id, from, to, kind, starts: null, ends: null };
 }
 
 describe("kinds of relationship", () => {
