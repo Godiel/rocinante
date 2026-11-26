@@ -6,12 +6,14 @@ export interface ElementNotesProps {
   notes: readonly Note[];
   /** Opens a note in the panel of notes. */
   onOpen(id: string): void;
+  /** Takes the text to the passage of a note. */
+  onGoToPassage(note: Note): void;
   /** Starts a new idea, linked with the ficha. */
   onNew(): void;
 }
 
 /** The notes about a ficha, in the ficha itself: each opens in the panel of notes, and a new one starts there. */
-export function ElementNotes({ notes, onOpen, onNew }: ElementNotesProps) {
+export function ElementNotes({ notes, onOpen, onGoToPassage, onNew }: ElementNotesProps) {
   const shown = orderNotes(notes);
 
   return (
@@ -21,7 +23,7 @@ export function ElementNotes({ notes, onOpen, onNew }: ElementNotesProps) {
       {shown.length > 0 && (
         <ul className="element-notes-list">
           {shown.map((note) => (
-            <li key={note.id}>
+            <li key={note.id} className="element-notes-item">
               <button
                 type="button"
                 className={`element-note${note.resolvedAt ? " element-note-resolved" : ""}`}
@@ -30,6 +32,17 @@ export function ElementNotes({ notes, onOpen, onNew }: ElementNotesProps) {
               >
                 {preview(note, 90)}
               </button>
+              {note.anchored && (
+                <button
+                  type="button"
+                  className="element-note-passage"
+                  aria-label={`Ir al pasaje de «${preview(note, 40)}»`}
+                  title="Ir al pasaje"
+                  onClick={() => onGoToPassage(note)}
+                >
+                  →
+                </button>
+              )}
             </li>
           ))}
         </ul>

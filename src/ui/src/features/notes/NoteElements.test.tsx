@@ -103,15 +103,20 @@ describe("the notes of a ficha", () => {
     const user = userEvent.setup();
     const onOpen = vi.fn();
     const onNew = vi.fn();
+    const onGoToPassage = vi.fn();
     render(
       <ElementNotes
-        notes={[note("1", "Antonio miente", true), note("2", "Antonio vuelve")]}
+        notes={[
+          note("1", "Antonio miente", true),
+          { ...note("2", "Antonio vuelve"), anchored: true },
+        ]}
         onOpen={onOpen}
+        onGoToPassage={onGoToPassage}
         onNew={onNew}
       />,
     );
 
-    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+    expect(screen.getAllByRole("listitem").map((item) => item.firstChild?.textContent)).toEqual([
       "Antonio vuelve",
       "Antonio miente",
     ]);
@@ -123,10 +128,15 @@ describe("the notes of a ficha", () => {
     expect(onOpen).toHaveBeenCalledWith("2");
     await user.click(screen.getByRole("button", { name: "Nueva nota" }));
     expect(onNew).toHaveBeenCalled();
+    expect(
+      screen.queryByRole("button", { name: /pasaje de «Antonio miente»/ }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Ir al pasaje de «Antonio vuelve»" }));
+    expect(onGoToPassage).toHaveBeenCalledWith(expect.objectContaining({ id: "2" }));
   });
 
   it("says when there are none", () => {
-    render(<ElementNotes notes={[]} onOpen={vi.fn()} onNew={vi.fn()} />);
+    render(<ElementNotes notes={[]} onOpen={vi.fn()} onGoToPassage={vi.fn()} onNew={vi.fn()} />);
 
     expect(screen.getByText("Aún no tiene notas.")).toBeInTheDocument();
   });

@@ -4,6 +4,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onNotification, request } from "../../bridge/core";
 import type {
   DocumentEntry,
+  Note,
   DocumentKind,
   Statistics,
   TipTapDocument,
@@ -345,6 +346,15 @@ export function WritingView({
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
   }, [toggleElements, toggleNotes]);
+
+  // «Ir al pasaje», from a note or from a ficha: its chapter opens and the passage is selected.
+  const goToPassage = (note: Note) => {
+    if (!note.documentId) return;
+    setViewing(null);
+    setCurrentId(note.documentId);
+    const documentId = note.documentId;
+    setReveal((last) => ({ noteId: note.id, documentId, at: (last?.at ?? 0) + 1 }));
+  };
 
   async function createElement(name: string | null) {
     try {
@@ -718,6 +728,7 @@ export function WritingView({
                 setSheet("notes");
                 setOpenNote({ id });
               },
+              onGoToPassage: goToPassage,
               onNew: (elementId) => {
                 setSheet("notes");
                 setOpenNote({ draft: true, elements: [elementId] });
@@ -737,12 +748,7 @@ export function WritingView({
             opened={openNote}
             tabs={<SidePanelTabs tab="notes" onShow={(tab) => setSheet(tab)} />}
             onOpen={setOpenNote}
-            onGoToPassage={(note) => {
-              if (!note.documentId) return;
-              setViewing(null);
-              setCurrentId(note.documentId);
-              setReveal({ noteId: note.id, documentId: note.documentId, at: Date.now() });
-            }}
+            onGoToPassage={goToPassage}
             onDelete={(note) => void noteTrash.remove(note.id)}
             onOpenElement={(id) => {
               setSheet("elements");

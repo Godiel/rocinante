@@ -20,6 +20,7 @@ export interface OpenElementSheetProps {
   notes?: {
     all: readonly Note[];
     onOpen(id: string): void;
+    onGoToPassage(note: Note): void;
     onNew(elementId: string): void;
   };
 }
@@ -77,6 +78,7 @@ export function OpenElementSheet({
             <ElementNotes
               notes={notes.all.filter((note) => note.elements.includes(id))}
               onOpen={notes.onOpen}
+              onGoToPassage={notes.onGoToPassage}
               onNew={() => notes.onNew(id)}
             />
           )}
