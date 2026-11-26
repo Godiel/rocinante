@@ -71,6 +71,7 @@ import { WorkspaceTabs } from "../workspace/WorkspaceTabs";
 import { panelId, tabId } from "../workspace/tabs";
 import { useWorkspaceTab } from "../workspace/useWorkspaceTab";
 import { useThreads } from "../threads/useThreads";
+import { MilestoneSlip } from "../threads/MilestoneSlip";
 import { useDetachedBoard } from "../workspace/board-window";
 import "./writing-view.css";
 
@@ -194,6 +195,8 @@ export function WritingView({
     at: number;
   } | null>(null);
   const [openNote, setOpenNote] = useState<OpenedNote | null>(null);
+  // The paragraph where the writer is marking a milestone, from the floating menu.
+  const [marking, setMarking] = useState<{ paragraph: string; documentId: string } | null>(null);
   // The note whose passage the writer asked to see; `at` tells one request from the next.
   const [reveal, setReveal] = useState<{ noteId: string; documentId: string; at: number } | null>(
     null,
@@ -809,6 +812,7 @@ export function WritingView({
                 onProblem={setProblem}
                 onCreateElement={(name) => void createElement(name)}
                 revealPassage={revealPassage?.documentId === document.id ? revealPassage : null}
+                onMarkMilestone={(paragraph) => setMarking({ paragraph, documentId: document.id })}
                 onParagraphDone={
                   squire.settings.enabled
                     ? (text) =>
@@ -1033,6 +1037,21 @@ export function WritingView({
           />
         )}
       </div>
+
+      {marking && (
+        <MilestoneSlip
+          paragraph={marking.paragraph}
+          documentId={marking.documentId}
+          elements={board.elements}
+          origin={origin}
+          beforeMarking={savePendingNow}
+          onDone={() => {
+            setMarking(null);
+            focusText();
+          }}
+          onProblem={setProblem}
+        />
+      )}
 
       {workspace.threadsVisited && (
         <div

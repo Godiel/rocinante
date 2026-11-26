@@ -214,3 +214,17 @@
   display: block;
   padding: 2px 0;
 }
+
+/* The slip to mark a milestone from the text, over it. */
+.milestone-slip {
+  position: fixed;
+  top: calc(var(--bar-height) + var(--space-4));
+  left: 50%;
+  z-index: 30;
+  width: min(26rem, calc(100% - 2 * var(--space-4)));
+  padding: var(--space-3) var(--space-4);
+  transform: translateX(-50%);
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 12%);
+}

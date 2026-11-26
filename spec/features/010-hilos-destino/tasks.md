@@ -18,10 +18,10 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/010-hilos-destino`.
 - [x] Métodos y notificaciones, en la sesión de escritura de los tests.
 
 ## 6. Pestaña Hilos
-- [ ] F8, capítulos y líneas, puntos, coincidencias y elegir fichas.
+- [x] F8, capítulos y líneas, puntos, coincidencias y elegir fichas.
 
 ## 7. Puntos e hitos
-- [ ] Pasajes de un punto, hitos en la vista, «Marcar hito» desde el texto y desde un punto, y la vista al día al escribir.
+- [x] Pasajes de un punto, hitos en la vista, «Marcar hito» desde el texto y desde un punto, y la vista al día al escribir.
 
 ## 8. Relaciones con fechas
 - [ ] «Desde» y «hasta» en la ficha; relaciones vigentes y marcas en la vista.

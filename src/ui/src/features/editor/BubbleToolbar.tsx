@@ -70,10 +70,18 @@ interface BubbleToolbarProps {
   onFootnote(): void;
   /** Makes a ficha named after the selection; without it the menu does not offer one. */
   onCreateElement?(name: string): void;
+  /** Marks what happens to a ficha at the paragraph of the selection; without it the menu does not offer it. */
+  onMilestone?(): void;
 }
 
 /** A discreet row of formatting that appears over selected text and leaves when it is deselected. */
-export function BubbleToolbar({ editor, onNote, onFootnote, onCreateElement }: BubbleToolbarProps) {
+export function BubbleToolbar({
+  editor,
+  onNote,
+  onFootnote,
+  onCreateElement,
+  onMilestone,
+}: BubbleToolbarProps) {
   const list = actions(onNote, onFootnote);
   const active = useEditorState({
     editor,
@@ -115,6 +123,18 @@ export function BubbleToolbar({ editor, onNote, onFootnote, onCreateElement }: B
             }}
           >
             Crear ficha
+          </button>
+        )}
+        {onMilestone && (
+          <button
+            type="button"
+            className="bubble-button bubble-button-element"
+            aria-label="Marcar un hito en este párrafo"
+            title="Marcar un hito en este párrafo"
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={onMilestone}
+          >
+            Hito
           </button>
         )}
       </div>
