@@ -1,0 +1,207 @@
+/* The text of a note: a few lines in the hand of the interface, not the type of the work. */
+.note-editor .ProseMirror {
+  min-height: 4.5em;
+  max-height: 16em;
+  overflow-y: auto;
+  padding: var(--space-1) 0;
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  text-indent: 0;
+  text-align: left;
+  outline: none;
+  border-bottom: var(--hairline) solid var(--color-ink-soft);
+}
+
+.note-editor p {
+  margin: 0 0 var(--space-2);
+  text-indent: 0;
+}
+
+.note-editor p:last-child {
+  margin-bottom: 0;
+}
+
+/* The panel of notes beside the text. */
+.notes-tools {
+  margin: var(--space-3) 0;
+}
+
+.notes-tools-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.notes-search {
+  flex: 1;
+}
+
+.notes-search input {
+  width: 100%;
+  padding: 2px 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  outline: none;
+}
+
+.notes-search input:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.notes-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: baseline;
+  margin-top: var(--space-2);
+  font-size: var(--text-caption);
+}
+
+.notes-filters select {
+  max-width: 100%;
+  padding: 1px 0;
+  font: inherit;
+  color: var(--color-ink-soft);
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+}
+
+.notes-filters select:focus {
+  color: var(--color-ink);
+  border-bottom-color: var(--color-ink-soft);
+  outline: none;
+}
+
+.notes-resolved {
+  color: var(--color-ink-soft);
+}
+
+.notes-empty {
+  margin: var(--space-4) 0;
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
+
+.notes-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notes-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-2) 0;
+  font: inherit;
+  color: var(--color-ink);
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  cursor: pointer;
+}
+
+.notes-item:hover .notes-item-text,
+.notes-item:focus-visible .notes-item-text {
+  text-decoration: underline dotted var(--color-ink-faint);
+  text-underline-offset: 0.2em;
+}
+
+.notes-item-resolved .notes-item-text {
+  color: var(--color-ink-faint);
+}
+
+.notes-item-where,
+.notes-item-elements {
+  font-size: var(--text-caption);
+  color: var(--color-ink-faint);
+}
+
+.notes-back {
+  padding: 0;
+}
+
+/* One note, open in place of the list. */
+.open-note {
+  margin-top: var(--space-3);
+}
+
+.open-note-where {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-caption);
+  color: var(--color-ink-faint);
+}
+
+.open-note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: baseline;
+  margin-top: var(--space-3);
+}
+
+.open-note-delete {
+  margin-left: auto;
+}
+
+/* The fichas of a note, and the notes of a ficha. */
+.note-elements-list,
+.element-notes-list {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.note-element {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.element-note {
+  display: block;
+  width: 100%;
+  padding: 2px 0;
+  font: inherit;
+  color: var(--color-ink-soft);
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.element-note:hover,
+.element-note:focus-visible {
+  color: var(--color-ink);
+}
+
+.element-note-resolved {
+  color: var(--color-ink-faint);
+}
+
+.element-notes-item {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.element-note-passage {
+  flex: none;
+  padding: 0;
+  font: inherit;
+  color: var(--color-ink-faint);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.element-note-passage:hover,
+.element-note-passage:focus-visible {
+  color: var(--color-ink);
+}

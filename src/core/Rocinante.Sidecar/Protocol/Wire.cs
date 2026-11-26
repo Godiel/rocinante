@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using Rocinante.Application;
 using Rocinante.Application.Ports;
 using Rocinante.Application.Settings;
+using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
 using Rocinante.Domain.Elements;
@@ -90,7 +91,28 @@ internal static class Wire
         new(version.Id.Value, version.DocumentId.Value, Kind(version.Kind), version.Name, version.CreatedAt, Of(version.Statistics));
 
     public static NoteDto Of(Note note) =>
-        new(note.Id.Value, note.DocumentId.Value, note.Text, note.IsAnchored, note.CreatedAt, note.UpdatedAt);
+        new(
+            note.Id.Value,
+            note.DocumentId?.Value,
+            Content(note.Content),
+            note.Text,
+            note.IsAnchored,
+            note.AnchorOrder,
+            note.ResolvedAt,
+            [.. note.Elements.Select(element => element.Value)],
+            note.CreatedAt,
+            note.UpdatedAt);
+
+    public static DocumentContent ToContent(JsonObject content) => DocumentContent.Parse(content.ToJsonString());
+
+    public static IReadOnlyList<ElementId> ToElements(IReadOnlyList<Guid>? elements) =>
+        elements is null ? [] : [.. elements.Select(element => new ElementId(element))];
+
+    public static NoteUpdate ToUpdate(NoteChangesDto changes) =>
+        new(
+            changes.Content is { } content ? ToContent(content) : null,
+            changes.Resolved,
+            changes.Elements is null ? null : ToElements(changes.Elements));
 
     public static JsonNode Content(DocumentContent content) => JsonNode.Parse(content.Json)!;
 

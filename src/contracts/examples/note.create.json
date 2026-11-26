@@ -2,29 +2,67 @@
   "valid": [
     {
       "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
-      "text": "Revisar esta fecha",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [{ "type": "text", "text": "Revisar esta fecha" }]
+          }
+        ]
+      },
       "anchored": true,
       "origin": "main"
     },
     {
-      "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
-      "text": "Aquí Antonio aún no conoce a Claudio",
+      "documentId": null,
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              { "type": "text", "text": "Aquí Antonio " },
+              {
+                "type": "text",
+                "marks": [{ "type": "italic" }],
+                "text": "aún"
+              },
+              { "type": "text", "text": " no conoce a Claudio" }
+            ]
+          }
+        ]
+      },
       "anchored": false,
+      "elements": [
+        "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+        "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6d"
+      ],
       "origin": "window-1"
     }
   ],
   "invalid": [
     {
       "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
-      "text": "",
+      "text": "Revisar esta fecha",
       "anchored": true,
       "origin": "main"
     },
     {
       "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
-      "text": "Sin anclar",
+      "content": { "type": "doc" },
       "origin": "main"
     },
-    { "text": "Sin documento", "anchored": false, "origin": "main" }
+    { "content": { "type": "doc" }, "anchored": false, "origin": "main" },
+    {
+      "documentId": null,
+      "content": { "type": "doc" },
+      "anchored": false,
+      "elements": [
+        "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+        "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c"
+      ],
+      "origin": "main"
+    }
   ]
 }

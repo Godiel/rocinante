@@ -4,6 +4,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onNotification, request } from "../../bridge/core";
 import type {
   DocumentEntry,
+  Note,
   DocumentKind,
   Statistics,
   TipTapDocument,
@@ -39,8 +40,19 @@ import { GoalMeter, GoalReached } from "../focus/Goal";
 import { AmbienceSheet } from "../ambience/AmbienceSheet";
 import { ElementsPanel } from "../elements/ElementsPanel";
 import { suggestedAttributes } from "../elements/kinds";
-import { isElementsShortcut, panelWasOpen, rememberPanel } from "../elements/panel";
+import { isElementsShortcut } from "../elements/panel";
+import { NotesPanel, type OpenedNote } from "../notes/NotesPanel";
+import { useNoteTrash } from "../notes/useNoteTrash";
+import { SidePanelTabs } from "../workspace/SidePanelTabs";
+import {
+  isNotesShortcut,
+  rememberedSidePanel,
+  rememberSidePanel,
+  type SideTab,
+} from "../workspace/side-panel";
 import { useBoard } from "../elements/useBoard";
+import { notesOf } from "../notes/notes-list";
+import { useWorkNotes } from "../notes/useWorkNotes";
 import { useElementTrash } from "../elements/useElementTrash";
 import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
@@ -108,13 +120,25 @@ export function WritingView({
   const [problem, setProblem] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(preferences.outline === "docked");
   const [deleted, setDeleted] = useState<DocumentEntry | null>(null);
-  // One sheet at a time on the right of the text: the fichas, the versions, the format or the ambience.
-  // Whether the fichas were open is kept for this window.
-  const [sheet, setSheet] = useState<"elements" | "versions" | "format" | "ambience" | null>(() =>
-    panelWasOpen() ? "elements" : null,
+  // One sheet at a time on the right of the text: the fichas or the notes (two tabs of one panel), the
+  // versions, the format or the ambience. Whether the panel was open, and at which tab, is kept for this window.
+  const [sheet, setSheet] = useState<SideTab | "versions" | "format" | "ambience" | null>(
+    rememberedSidePanel,
   );
   const elementsOpen = sheet === "elements";
+  const sideTab: SideTab | null = sheet === "elements" || sheet === "notes" ? sheet : null;
+  const lastSideTab = useRef<SideTab>(sideTab ?? "elements");
+  useEffect(() => {
+    if (sideTab) lastSideTab.current = sideTab;
+  }, [sideTab]);
   const { board, loaded: boardLoaded } = useBoard(project.id);
+  const { notes: workNotes, loaded: notesLoaded } = useWorkNotes(project.id);
+  const [openNote, setOpenNote] = useState<OpenedNote | null>(null);
+  // The note whose passage the writer asked to see; `at` tells one request from the next.
+  const [reveal, setReveal] = useState<{ noteId: string; documentId: string; at: number } | null>(
+    null,
+  );
+  const noteTrash = useNoteTrash(origin, setProblem);
   const [openElement, setOpenElement] = useState<string | null>(null);
   const [freshElement, setFreshElement] = useState<{
     id: string;
@@ -141,15 +165,20 @@ export function WritingView({
     sheet: null,
   });
 
-  useEffect(() => rememberPanel(elementsOpen), [elementsOpen]);
+  useEffect(() => rememberSidePanel(sideTab), [sideTab]);
 
-  // The fichas open with the keyboard in their search, and give it back to the text on closing.
-  const toggleElements = useCallback(() => {
+  // The fichas open with the keyboard in their search, and give it back to the text on closing. The
+  // shortcut of the tab that shows closes the panel; the other changes tab.
+  const toggleSide = useCallback((tab: SideTab) => {
     setViewing(null);
-    setSheet((open) => (open === "elements" ? null : "elements"));
-    setSearchRequest((asked) => asked + 1);
+    setSheet((open) => (open === tab ? null : tab));
+    if (tab === "elements") setSearchRequest((asked) => asked + 1);
     focusText();
   }, []);
+  const toggleElements = useCallback(() => toggleSide("elements"), [toggleSide]);
+  const toggleNotes = useCallback(() => toggleSide("notes"), [toggleSide]);
+  // The button of the bar opens the panel where it was last, and closes it.
+  const toggleSidePanel = () => toggleSide(sideTab ?? lastSideTab.current);
 
   // First document to show.
   useEffect(() => {
@@ -169,6 +198,14 @@ export function WritingView({
     currentId && index.trash.some((entry) => entry.id === currentId)
       ? (index.chapters[0]?.id ?? index.fragments[0]?.id ?? null)
       : currentId;
+  const noteDocuments = useMemo(
+    () => [...index.chapters, ...index.fragments].map(({ id, title }) => ({ id, title })),
+    [index],
+  );
+  const documentNotes = useMemo(
+    () => (shownId ? notesOf(workNotes, shownId) : []),
+    [workNotes, shownId],
+  );
   const shownRef = useRef(shownId);
   useEffect(() => {
     shownRef.current = shownId;
@@ -255,7 +292,8 @@ export function WritingView({
           isOutlineShortcut(event) ||
           isVersionsShortcut(event) ||
           isSaveVersionShortcut(event) ||
-          isElementsShortcut(event)
+          isElementsShortcut(event) ||
+          isNotesShortcut(event)
         ) {
           event.preventDefault();
         }
@@ -275,7 +313,8 @@ export function WritingView({
           isPageViewShortcut(event) ||
           isOutlineShortcut(event) ||
           isVersionsShortcut(event) ||
-          isElementsShortcut(event)
+          isElementsShortcut(event) ||
+          isNotesShortcut(event)
         ) {
           event.preventDefault();
         }
@@ -291,6 +330,9 @@ export function WritingView({
       } else if (isElementsShortcut(event)) {
         event.preventDefault();
         toggleElements();
+      } else if (isNotesShortcut(event)) {
+        event.preventDefault();
+        toggleNotes();
       } else if (isVersionsShortcut(event)) {
         event.preventDefault();
         setSheet((open) => (open === "versions" ? null : "versions"));
@@ -303,7 +345,16 @@ export function WritingView({
     const self = opening.current.origin;
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
-  }, [toggleElements]);
+  }, [toggleElements, toggleNotes]);
+
+  // «Ir al pasaje», from a note or from a ficha: its chapter opens and the passage is selected.
+  const goToPassage = (note: Note) => {
+    if (!note.documentId) return;
+    setViewing(null);
+    setCurrentId(note.documentId);
+    const documentId = note.documentId;
+    setReveal((last) => ({ noteId: note.id, documentId, at: (last?.at ?? 0) + 1 }));
+  };
 
   async function createElement(name: string | null) {
     try {
@@ -513,9 +564,9 @@ export function WritingView({
               </button>
               <button
                 className="action"
-                aria-expanded={elementsOpen}
-                title="Fichas (Ctrl+Mayús+E)"
-                onClick={toggleElements}
+                aria-expanded={sideTab !== null}
+                title="Fichas (Ctrl+Mayús+E) y notas (Ctrl+Mayús+N)"
+                onClick={toggleSidePanel}
               >
                 Fichas
               </button>
@@ -624,6 +675,14 @@ export function WritingView({
                 kind={kindOf(document.id)}
                 place={place?.documentId === document.id ? place : null}
                 origin={origin}
+                notes={documentNotes}
+                notesLoaded={notesLoaded}
+                reveal={reveal?.documentId === document.id ? reveal : null}
+                onOpenNote={(id) => {
+                  setSheet("notes");
+                  setOpenNote({ id });
+                }}
+                onDeleteNote={(id) => void noteTrash.remove(id)}
                 typewriterScrolling={preferences.typewriterScrolling}
                 onCounts={(statistics, total) => {
                   setCounts({ id: document.id, statistics });
@@ -662,6 +721,42 @@ export function WritingView({
               void elementTrash.trash(id, name);
             }}
             onRestore={(id) => void elementTrash.restore(id)}
+            tabs={<SidePanelTabs tab="elements" onShow={(tab) => setSheet(tab)} />}
+            notes={{
+              all: workNotes,
+              onOpen: (id) => {
+                setSheet("notes");
+                setOpenNote({ id });
+              },
+              onGoToPassage: goToPassage,
+              onNew: (elementId) => {
+                setSheet("notes");
+                setOpenNote({ draft: true, elements: [elementId] });
+              },
+            }}
+          />
+        )}
+
+        {sheet === "notes" && (
+          <NotesPanel
+            notes={workNotes}
+            loaded={notesLoaded}
+            documents={noteDocuments}
+            currentDocumentId={shownId}
+            elements={board.elements}
+            origin={origin}
+            opened={openNote}
+            tabs={<SidePanelTabs tab="notes" onShow={(tab) => setSheet(tab)} />}
+            onOpen={setOpenNote}
+            onGoToPassage={goToPassage}
+            onDelete={(note) => void noteTrash.remove(note.id)}
+            onOpenElement={(id) => {
+              setSheet("elements");
+              setOpenElement(id);
+              setFreshElement(null);
+            }}
+            onClose={closeSheet}
+            onProblem={setProblem}
           />
         )}
 
@@ -731,7 +826,7 @@ export function WritingView({
           onHide={() => update({ counterVisible: false })}
         />
 
-        {!deleted && elementTrash.notice}
+        {!deleted && (noteTrash.notice ?? elementTrash.notice)}
         {deleted && (
           <UndoNotice
             key={deleted.id}

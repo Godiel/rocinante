@@ -28,7 +28,7 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
     {
         Json = json;
         _root = root;
-        (Statistics, NoteAnchors) = Analyze(root);
+        (Statistics, NoteAnchors, PlainText) = Analyze(root);
     }
 
     /// <summary>A document with a single empty paragraph, as a new chapter starts.</summary>
@@ -39,8 +39,38 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
 
     public TextStatistics Statistics { get; }
 
-    /// <summary>Notes anchored somewhere in this text.</summary>
-    public IReadOnlySet<NoteId> NoteAnchors { get; }
+    /// <summary>Notes anchored somewhere in this text, each once, in the order their first anchor appears.</summary>
+    public IReadOnlyList<NoteId> NoteAnchors { get; }
+
+    /// <summary>The words of the text, one line per paragraph that has any, without footnotes.</summary>
+    public string PlainText { get; }
+
+    /// <summary>A document of one paragraph per line of <paramref name="text"/>, leaving out blank lines.</summary>
+    public static DocumentContent FromPlainText(string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+
+        var paragraphs = new JsonArray();
+        foreach (var line in text.Split('\n'))
+        {
+            var trimmed = line.TrimEnd('\r');
+            if (!string.IsNullOrWhiteSpace(trimmed))
+            {
+                paragraphs.Add((JsonNode)new JsonObject
+                {
+                    ["type"] = "paragraph",
+                    ["content"] = new JsonArray(new JsonObject { ["type"] = "text", ["text"] = trimmed }),
+                });
+            }
+        }
+
+        if (paragraphs.Count == 0)
+        {
+            paragraphs.Add((JsonNode)new JsonObject { ["type"] = "paragraph" });
+        }
+
+        return Parse(new JsonObject { ["type"] = "doc", ["content"] = paragraphs }.ToJsonString());
+    }
 
     /// <summary>Parses editor JSON. Throws <see cref="DomainError.InvalidContent"/> if it is not a TipTap document.</summary>
     public static DocumentContent Parse(string json)
@@ -76,11 +106,11 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
     private static string? TypeOf(JsonObject node) =>
         node["type"] is JsonValue value && value.TryGetValue(out string? type) ? type : null;
 
-    private static (TextStatistics, IReadOnlySet<NoteId>) Analyze(JsonObject root)
+    private static (TextStatistics, IReadOnlyList<NoteId>, string) Analyze(JsonObject root)
     {
         var analysis = new Analysis();
         analysis.Visit(root, block: null);
-        return (analysis.Statistics, analysis.Anchors);
+        return (analysis.Statistics, analysis.Anchors, string.Join('\n', analysis.Lines));
     }
 
     /// <summary>Single pass over the tree that counts text blocks and collects note anchors.</summary>
@@ -88,7 +118,11 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
     {
         public TextStatistics Statistics { get; private set; } = TextStatistics.Zero;
 
-        public HashSet<NoteId> Anchors { get; } = [];
+        public List<NoteId> Anchors { get; } = [];
+
+        public List<string> Lines { get; } = [];
+
+        private readonly HashSet<NoteId> _seen = [];
 
         public void Visit(JsonObject node, StringBuilder? block)
         {
@@ -157,7 +191,11 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
                 && value.TryGetValue(out string? id)
                 && Guid.TryParse(id, out var guid))
             {
-                Anchors.Add(new NoteId(guid));
+                var note = new NoteId(guid);
+                if (_seen.Add(note))
+                {
+                    Anchors.Add(note);
+                }
             }
         }
 
@@ -169,6 +207,7 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
             }
 
             Statistics += new TextStatistics(CountWords(text), Characters(text), Paragraphs: 1);
+            Lines.Add(text);
         }
 
         // A footnote's words belong to the work, but it is not a paragraph of its own.

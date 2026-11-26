@@ -167,6 +167,30 @@
   cursor: pointer;
 }
 
+/* A resolved note: its mark fades. One set aside, waiting for an undo: its mark is not shown. */
+.book-page .note-anchor:has(.note-anchor-resolved),
+.book-page .note-anchor-resolved .note-anchor {
+  text-decoration-color: var(--color-rule);
+}
+
+.book-page .note-point.note-anchor-resolved::after {
+  color: var(--color-ink-faint);
+}
+
+.book-page .note-anchor:has(.note-anchor-gone),
+.book-page .note-anchor-gone .note-anchor {
+  text-decoration: none;
+  cursor: text;
+}
+
+.book-page .note-point.note-anchor-gone {
+  cursor: text;
+}
+
+.book-page .note-point.note-anchor-gone::after {
+  content: none;
+}
+
 .book-page .note-point::after {
   content: "◦";
   color: var(--color-rubric);

@@ -189,14 +189,14 @@ public sealed class RepositoriesTests : IDisposable
     public void Notes_are_saved_updated_listed_and_deleted()
     {
         var notes = new NoteRepository(_fixture.Database);
-        var first = Note.Create(_fixture.First.Id, "revisar esta fecha", anchored: true, Moments.At(1));
-        var second = Note.Create(_fixture.First.Id, "aquí Antonio aún no conoce a Claudio", anchored: true, Moments.At(2));
-        var elsewhere = Note.Create(_fixture.Second.Id, "otra", anchored: false, Moments.At(3));
+        var first = Note.Create(_fixture.First.Id, Paragraphs("revisar esta fecha"), anchored: true, [], Moments.At(1));
+        var second = Note.Create(_fixture.First.Id, Paragraphs("aquí Antonio aún no conoce a Claudio"), anchored: true, [], Moments.At(2));
+        var elsewhere = Note.Create(_fixture.Second.Id, Paragraphs("otra"), anchored: false, [], Moments.At(3));
         notes.Save(first);
         notes.Save(second);
         notes.Save(elsewhere);
 
-        first.Edit("revisar la fecha de la batalla", Moments.At(4));
+        first.Edit(Paragraphs("revisar la fecha de la batalla"), Moments.At(4));
         first.Reconcile(DocumentContent.Empty);
         notes.Save(first);
 
@@ -227,7 +227,7 @@ public sealed class RepositoriesTests : IDisposable
         {
             documents.Save(document);
             new VersionRepository(database).Add(document.SaveVersion("x", Moments.At(6)));
-            new NoteRepository(database).Save(Note.Create(_fixture.First.Id, "nota", anchored: false, Moments.At(6)));
+            new NoteRepository(database).Save(Note.Create(_fixture.First.Id, Paragraphs("nota"), anchored: false, [], Moments.At(6)));
             throw new InvalidOperationException("Fallo a mitad de la operación.");
         }));
 

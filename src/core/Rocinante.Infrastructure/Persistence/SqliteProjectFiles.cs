@@ -8,7 +8,24 @@ public sealed class SqliteProjectFiles : IProjectFiles
 {
     public IProjectSession Create(string path, Project project) => new SqliteProjectSession(ProjectDatabase.Create(path, project));
 
-    public IProjectSession Open(string path) => new SqliteProjectSession(ProjectDatabase.Open(path));
+    /// <summary>
+    /// Opens a project. The notes set aside in the last session, waiting for an undo that can no
+    /// longer come, are deleted for good.
+    /// </summary>
+    public IProjectSession Open(string path)
+    {
+        var session = new SqliteProjectSession(ProjectDatabase.Open(path));
+        try
+        {
+            session.Notes.PurgeDeleted();
+            return session;
+        }
+        catch
+        {
+            session.Dispose();
+            throw;
+        }
+    }
 }
 
 /// <summary>An open <see cref="ProjectDatabase"/> with its repositories.</summary>

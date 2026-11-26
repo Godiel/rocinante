@@ -39,23 +39,43 @@ public sealed class DocumentUseCases(Workspace workspace, IChangeNotifier notifi
             },
             origin);
 
-    public Project Delete(DocumentId id, string origin) =>
-        ChangeIndex(
+    /// <summary>Sends a document to the trash; its notes stop being shown until it comes back.</summary>
+    public Project Delete(DocumentId id, string origin)
+    {
+        var project = ChangeIndex(
             project =>
             {
                 project.Delete(id, clock.GetUtcNow());
                 return project;
             },
             origin);
+        var gone = ShownNotes(id);
+        if (gone.Count > 0)
+        {
+            notifier.NotesChanged([], [.. gone.Select(note => note.Id)], origin);
+        }
 
-    public Project Restore(DocumentId id, string origin) =>
-        ChangeIndex(
+        return project;
+    }
+
+    /// <summary>Brings a document back from the trash, with its notes.</summary>
+    public Project Restore(DocumentId id, string origin)
+    {
+        var project = ChangeIndex(
             project =>
             {
                 project.Restore(id);
                 return project;
             },
             origin);
+        var back = ShownNotes(id);
+        if (back.Count > 0)
+        {
+            notifier.NotesChanged(back, [], origin);
+        }
+
+        return project;
+    }
 
     public Document Get(DocumentId id)
     {
@@ -103,12 +123,15 @@ public sealed class DocumentUseCases(Workspace workspace, IChangeNotifier notifi
 
             if (notes is not null)
             {
-                notifier.NotesChanged(id, notes, origin);
+                notifier.NotesChanged(notes, [], origin);
             }
         }
 
         return new DocumentSaved(document, result.Changed, work, automatic);
     }
+
+    private List<Note> ShownNotes(DocumentId id) =>
+        [.. workspace.Session.Notes.ListByDocument(id).Where(note => !note.IsDeleted)];
 
     private T ChangeIndex<T>(Func<Project, T> change, string origin)
     {
@@ -118,19 +141,22 @@ public sealed class DocumentUseCases(Workspace workspace, IChangeNotifier notifi
     }
 }
 
-/// <summary>Keeps each note's anchored flag in step with the text it belongs to.</summary>
+/// <summary>Keeps each note's anchor, and its place among the others, in step with the text it belongs to.</summary>
 internal static class NoteReconciliation
 {
-    /// <summary>Stores the notes whose state changed. Returns every note of the document if any did, or null.</summary>
+    /// <summary>
+    /// Stores the notes whose anchor changed, set aside or not. Returns those that are shown, or
+    /// null if none of them changed.
+    /// </summary>
     public static IReadOnlyList<Note>? Apply(IProjectSession session, DocumentId documentId, DocumentContent content)
     {
-        var notes = session.Notes.ListByDocument(documentId);
-        var changed = notes.Where(note => note.Reconcile(content)).ToList();
+        var changed = session.Notes.ListByDocument(documentId).Where(note => note.Reconcile(content)).ToList();
         foreach (var note in changed)
         {
             session.Notes.Save(note);
         }
 
-        return changed.Count > 0 ? notes : null;
+        var shown = changed.Where(note => !note.IsDeleted).ToList();
+        return shown.Count > 0 ? shown : null;
     }
 }

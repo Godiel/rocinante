@@ -93,11 +93,21 @@ public interface INoteRepository
     /// <summary>Inserts a new note or updates an existing one.</summary>
     void Save(Note note);
 
+    /// <summary>A note, shown or set aside.</summary>
     Note Load(NoteId id);
 
-    /// <summary>Notes of a document, in the order they were written.</summary>
+    /// <summary>
+    /// The notes the writer sees, in the order they were written: loose ideas and the notes of the
+    /// documents in the work, leaving out those set aside and those of documents in the trash.
+    /// </summary>
+    IReadOnlyList<Note> ListShown();
+
+    /// <summary>Every note of a document, set aside or not, in the order they were written.</summary>
     IReadOnlyList<Note> ListByDocument(DocumentId documentId);
 
-    /// <summary>Deletes a note for good. Returns whether it existed.</summary>
+    /// <summary>Deletes a note for good, with its links. Returns whether it existed.</summary>
     bool Delete(NoteId id);
+
+    /// <summary>Deletes for good every note that was set aside. Returns how many there were.</summary>
+    int PurgeDeleted();
 }

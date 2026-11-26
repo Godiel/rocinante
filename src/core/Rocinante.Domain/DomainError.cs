@@ -35,4 +35,6 @@ public enum DomainError
     RelationshipKindNotFound,
     RelationshipRepeated,
     SameElement,
+    NoteIsDeleted,
+    NoteIsNotDeleted,
 }

@@ -25,7 +25,11 @@ public interface IChangeNotifier
 
     void VersionsChanged(DocumentId documentId, string origin);
 
-    void NotesChanged(DocumentId documentId, IReadOnlyList<Note> notes, string origin);
+    /// <summary>
+    /// Notes changed, and only these: <paramref name="notes"/> are shown as they are now, and
+    /// <paramref name="removed"/> stopped being shown (set aside, or gone with their document to the trash).
+    /// </summary>
+    void NotesChanged(IReadOnlyList<Note> notes, IReadOnlyList<NoteId> removed, string origin);
 
     void PreferencesChanged(Preferences preferences, string origin);
 

@@ -65,7 +65,7 @@ public sealed class VersionUseCases(Workspace workspace, IChangeNotifier notifie
             notifier.VersionsChanged(document.Id, origin);
             if (notes is not null)
             {
-                notifier.NotesChanged(document.Id, notes, origin);
+                notifier.NotesChanged(notes, [], origin);
             }
         }
 

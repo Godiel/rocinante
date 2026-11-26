@@ -1,4 +1,5 @@
 using Rocinante.Domain;
+using Rocinante.Domain.Content;
 using Rocinante.Domain.Projects;
 using Rocinante.Domain.Versions;
 
@@ -71,7 +72,7 @@ public sealed class VersionAndNoteUseCasesTests : IDisposable
     [Fact]
     public void Restoring_a_version_with_the_passage_anchors_its_note_again()
     {
-        var note = _app.Notes.Create(_chapter, "revisar", anchored: true, Main);
+        var note = _app.Notes.Create(_chapter, DocumentContent.FromPlainText("revisar"), anchored: true, [], Main);
         _app.Documents.Save(_chapter, TipTap.Anchored("pasaje", note.Id.Value), Main);
         var withPassage = _app.Versions.Create(_chapter, name: null, Main);
         _app.Documents.Save(_chapter, TipTap.Paragraphs("sin pasaje"), Main);
@@ -79,7 +80,7 @@ public sealed class VersionAndNoteUseCasesTests : IDisposable
 
         _app.Versions.Restore(withPassage.Id, Main);
 
-        _app.Notes.List(_chapter).ShouldHaveSingleItem().IsAnchored.ShouldBeTrue();
+        _app.Notes.All().ShouldHaveSingleItem().IsAnchored.ShouldBeTrue();
         _app.Notifier.Events.ShouldContain("notes.changed:main");
     }
 
@@ -92,33 +93,5 @@ public sealed class VersionAndNoteUseCasesTests : IDisposable
         Should.Throw<DomainException>(() => _app.Versions.Create(_chapter, null, Main)).Error.ShouldBe(DomainError.DocumentIsDeleted);
         Should.Throw<DomainException>(() => _app.Versions.Restore(version.Id, Main)).Error.ShouldBe(DomainError.DocumentIsDeleted);
         _app.Versions.List(_chapter).ShouldHaveSingleItem();
-    }
-
-    [Fact]
-    public void Notes_are_created_edited_listed_and_deleted_with_an_announcement_each_time()
-    {
-        var first = _app.Notes.Create(_chapter, "revisar esta fecha", anchored: true, Main);
-        _app.Clock.AdvanceMinutes(1);
-        var second = _app.Notes.Create(_chapter, "Antonio no conoce a Claudio", anchored: false, Main);
-        _app.Clock.AdvanceMinutes(1);
-        var edited = _app.Notes.Update(first.Id, "revisar la fecha de la batalla", "window-1");
-        _app.Notes.Delete(second.Id, Main);
-
-        edited.Text.ShouldBe("revisar la fecha de la batalla");
-        edited.UpdatedAt.ShouldBe(_app.Clock.GetUtcNow());
-        _app.Notes.List(_chapter).ShouldHaveSingleItem().Id.ShouldBe(first.Id);
-        _app.Notifier.Events.ShouldBe(["notes.changed:main", "notes.changed:main", "notes.changed:window-1", "notes.changed:main"]);
-        _app.Notifier.LastNotes.ShouldNotBeNull().ShouldHaveSingleItem().Id.ShouldBe(first.Id);
-    }
-
-    [Fact]
-    public void Notes_need_a_document_in_the_work()
-    {
-        _app.Documents.Delete(_chapter, Main);
-
-        Should.Throw<DomainException>(() => _app.Notes.Create(_chapter, "nota", anchored: false, Main))
-            .Error.ShouldBe(DomainError.DocumentIsDeleted);
-        Should.Throw<DomainException>(() => _app.Notes.Update(NoteId.New(_app.Clock.GetUtcNow()), "x", Main))
-            .Error.ShouldBe(DomainError.NoteNotFound);
     }
 }

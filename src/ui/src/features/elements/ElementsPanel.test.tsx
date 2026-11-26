@@ -12,7 +12,8 @@ vi.mock("../../bridge/core", async (importOriginal) => ({
 }));
 
 import { ElementsPanel, type ElementsPanelProps } from "./ElementsPanel";
-import { isElementsShortcut, nameFromSelection, panelWasOpen, rememberPanel } from "./panel";
+import { isElementsShortcut, nameFromSelection } from "./panel";
+import { isNotesShortcut, rememberedSidePanel, rememberSidePanel } from "../workspace/side-panel";
 
 function summary(id: string, name: string, more: Partial<ElementSummary> = {}): ElementSummary {
   return {
@@ -300,11 +301,26 @@ describe("the panel's keys and memory", () => {
     ).toBe(false);
   });
 
-  it("remembers in this window whether it was open", () => {
-    rememberPanel(true);
-    expect(panelWasOpen()).toBe(true);
-    rememberPanel(false);
-    expect(panelWasOpen()).toBe(false);
+  it("remembers in this window whether it was open, and at which tab", () => {
+    rememberSidePanel("notes");
+    expect(rememberedSidePanel()).toBe("notes");
+    rememberSidePanel("elements");
+    expect(rememberedSidePanel()).toBe("elements");
+    rememberSidePanel(null);
+    expect(rememberedSidePanel()).toBeNull();
+  });
+
+  it("opens where the panel of the fichas was open before it had tabs", () => {
+    sessionStorage.setItem("rocinante-elements-panel", "open");
+    expect(rememberedSidePanel()).toBe("elements");
+    rememberSidePanel(null);
+    expect(sessionStorage.getItem("rocinante-elements-panel")).toBeNull();
+  });
+
+  it("opens the notes with Ctrl+Mayús+N, and leaves Ctrl+Alt+N to the note in the text", () => {
+    expect(isNotesShortcut(key({ ctrlKey: true, shiftKey: true, code: "KeyN" }))).toBe(true);
+    expect(isNotesShortcut(key({ metaKey: true, shiftKey: true, code: "KeyN" }))).toBe(true);
+    expect(isNotesShortcut(key({ ctrlKey: true, altKey: true, code: "KeyN" }))).toBe(false);
   });
 
   it("names a ficha after the selection, on one line", () => {

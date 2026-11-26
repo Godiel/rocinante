@@ -1,6 +1,6 @@
 # 004 · Elementos de la obra
 
-**Estado:** en especificación
+**Estado:** hecha.
 
 ## Qué hace
 

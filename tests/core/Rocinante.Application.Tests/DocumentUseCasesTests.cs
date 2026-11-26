@@ -116,7 +116,7 @@ public sealed class DocumentUseCasesTests : IDisposable
     public void Deleting_a_passage_leaves_its_note_loose_and_undoing_anchors_it_again()
     {
         var chapter = _app.Documents.Create(DocumentKind.Chapter, "Uno", null, Main);
-        var note = _app.Notes.Create(chapter.Id, "revisar esta fecha", anchored: true, Main);
+        var note = _app.Notes.Create(chapter.Id, DocumentContent.FromPlainText("revisar esta fecha"), anchored: true, [], Main);
         _app.Documents.Save(chapter.Id, TipTap.Anchored("el 3 de mayo", note.Id.Value), Main);
         _app.Notifier.Clear();
 
@@ -124,11 +124,12 @@ public sealed class DocumentUseCasesTests : IDisposable
 
         _app.Notifier.Events.ShouldBe(["document.changed:main", "notes.changed:main"]);
         _app.Notifier.LastNotes.ShouldNotBeNull().ShouldHaveSingleItem().IsAnchored.ShouldBeFalse();
-        _app.Notes.List(chapter.Id).ShouldHaveSingleItem().IsAnchored.ShouldBeFalse();
+        _app.Notes.All().ShouldHaveSingleItem().IsAnchored.ShouldBeFalse();
 
         _app.Documents.Save(chapter.Id, TipTap.Anchored("el 3 de mayo", note.Id.Value), Main);
 
-        _app.Notes.List(chapter.Id).ShouldHaveSingleItem().IsAnchored.ShouldBeTrue();
+        _app.Notes.All().ShouldHaveSingleItem().IsAnchored.ShouldBeTrue();
+        _app.Notes.All().ShouldHaveSingleItem().AnchorOrder.ShouldBe(0);
     }
 
     [Fact]

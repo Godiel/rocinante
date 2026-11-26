@@ -131,3 +131,40 @@ export async function fillBoard(page: Page, cards: number, arrows: number) {
     { count: cards, joins: arrows },
   );
 }
+
+/**
+ * Fills the work with notes, as a writer who has been at it for months: half are loose ideas, half belong
+ * to its chapters, loose in them; one in five is resolved.
+ */
+export async function fillNotes(page: Page, count: number) {
+  await page.evaluate(async (total) => {
+    const ask = async (method: string, params: unknown) => {
+      const reply = await (
+        await fetch("/rpc", { method: "POST", body: JSON.stringify({ method, params }) })
+      ).json();
+      if ("error" in reply) throw new Error(JSON.stringify(reply.error));
+      return reply.result;
+    };
+    const project = await ask("project.get", null);
+    const chapters: string[] = project.index.chapters.map((entry: { id: string }) => entry.id);
+    for (let n = 0; n < total; n++) {
+      const note = await ask("note.create", {
+        documentId: n % 2 === 0 ? null : chapters[n % chapters.length],
+        content: {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: `Nota ${n + 1}: revisar lo que pasa en la venta.` }],
+            },
+          ],
+        },
+        anchored: false,
+        origin: "seed",
+      });
+      if (n % 5 === 0) {
+        await ask("note.update", { id: note.id, changes: { resolved: true }, origin: "seed" });
+      }
+    }
+  }, count);
+}

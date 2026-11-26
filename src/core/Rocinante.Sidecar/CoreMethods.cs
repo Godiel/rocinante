@@ -93,12 +93,17 @@ internal static class CoreMethods
             return new VersionRestoredResult(Wire.Of(restored.Document), restored.Before is { } before ? Wire.Of(before) : null);
         });
 
-        table.On("note.create", json.CreateNoteParams, json.NoteDto, p =>
-            Wire.Of(core.Notes.Create(new DocumentId(p.DocumentId), p.Text, p.Anchored, p.Origin)));
-        table.On("note.update", json.UpdateNoteParams, json.NoteDto, p => Wire.Of(core.Notes.Update(new NoteId(p.Id), p.Text, p.Origin)));
+        table.On("notes.get", json.IReadOnlyListNoteDto, () => [.. core.Notes.All().Select(Wire.Of)]);
+        table.On("note.create", json.CreateNoteParams, json.NoteDto, p => Wire.Of(core.Notes.Create(
+            p.DocumentId is { } document ? new DocumentId(document) : null,
+            Wire.ToContent(p.Content),
+            p.Anchored,
+            Wire.ToElements(p.Elements),
+            p.Origin)));
+        table.On("note.update", json.UpdateNoteParams, json.NoteDto, p =>
+            Wire.Of(core.Notes.Update(new NoteId(p.Id), Wire.ToUpdate(p.Changes), p.Origin)));
         table.On("note.delete", json.IdOriginParams, p => core.Notes.Delete(new NoteId(p.Id), p.Origin));
-        table.On("note.list", json.DocumentReferenceParams, json.IReadOnlyListNoteDto, p =>
-            [.. core.Notes.List(new DocumentId(p.DocumentId)).Select(Wire.Of)]);
+        table.On("note.restore", json.IdOriginParams, json.NoteDto, p => Wire.Of(core.Notes.Restore(new NoteId(p.Id), p.Origin)));
 
         table.On("board.get", json.BoardDto, () => Wire.Of(core.Elements.Board()));
         table.On("board.move", json.MoveCardsParams, p => core.Elements.Move(

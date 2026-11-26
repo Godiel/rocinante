@@ -2,7 +2,7 @@
 
 Un proyecto de Rocinante es **un único archivo** que contiene la obra completa: capítulos, fragmentos, papelera, versiones y notas. Por dentro es una base de datos [SQLite 3](https://sqlite.org/fileformat.html), así que se puede abrir con cualquier herramienta de SQLite para inspeccionarla o recuperar el texto sin depender de la app.
 
-Este documento describe la **versión 3 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql) [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql) y [`0003-elements.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0003-elements.sql).
+Este documento describe la **versión 4 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql), [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql), [`0003-elements.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0003-elements.sql) y [`0004-notes.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0004-notes.sql).
 
 ## Cómo se reconoce
 
@@ -101,17 +101,32 @@ Instantáneas completas del texto. Nunca se modifican.
 Índice `document_version_by_document (document_id, created_at)`.
 
 ### `note`
-Notas del autor sobre un documento. Su texto vive aquí y **nunca** dentro de `document.content`: el documento solo guarda un ancla con el atributo `noteId`: la marca `noteAnchor` sobre un pasaje o el nodo en línea `notePoint` en un punto. Así las notas no cuentan como texto de la obra ni salen en las exportaciones.
+Las notas del autor. Desde la versión 4, una nota puede pertenecer a un documento (anclada en su texto o suelta en él) o a ninguno: es una **idea suelta** de la obra. Su texto vive aquí y **nunca** dentro de `document.content`: el documento solo guarda un ancla con el atributo `noteId`: la marca `noteAnchor` sobre un pasaje o el nodo en línea `notePoint` en un punto. Así las notas no cuentan como texto de la obra ni salen en las exportaciones.
 
 | Columna | Tipo | |
 |---|---|---|
 | `id` | TEXT, PK | El mismo que lleva el ancla en el texto |
-| `document_id` | TEXT → `document.id` | Se borran con su documento |
-| `text` | TEXT | |
-| `anchored` | INTEGER 0/1 | 0 si el pasaje anclado ya no está: la nota queda suelta |
+| `document_id` | TEXT → `document.id`, opcional | Nulo en una idea suelta. Se borran con su documento |
+| `text` | TEXT, 1–10 000 | Texto plano de la nota, una línea por párrafo: lo que se busca y lo que muestra la lista |
+| `content` | TEXT, opcional | _Desde la versión 4._ El texto con formato, en JSON de TipTap (párrafos, cursiva y negrita). Nulo en una nota escrita antes de la versión 4 y no editada desde entonces: se lee como un párrafo por línea de `text` |
+| `anchored` | INTEGER 0/1 | 0 si el pasaje anclado ya no está (la nota queda suelta en su documento) y siempre en una idea suelta |
+| `anchor_order` | INTEGER ≥ 0, opcional | _Desde la versión 4._ Lugar del ancla entre las anclas del texto del documento, al último guardado. Solo en notas ancladas |
+| `resolved_at` | INTEGER, opcional | _Desde la versión 4._ Cuándo se marcó como resuelta; nulo mientras está abierta |
 | `created_at`, `updated_at` | INTEGER | |
+| `deleted_at` | INTEGER, opcional | _Desde la versión 4._ Cuándo se borró. La nota queda apartada, a la espera de deshacer, y su ancla se queda escondida en el texto. Se borra de verdad la próxima vez que se abre la obra |
 
-Índice `note_by_document (document_id, created_at)`.
+Índices `note_by_document (document_id, created_at)` y `note_by_creation (created_at)`.
+
+### `note_element`
+_Desde la versión 4._ Las fichas con las que está enlazada cada nota, en el orden en que el escritor las enlazó. Se borran con su nota y con su ficha; el enlace con una ficha en la papelera se conserva.
+
+| Columna | Tipo | |
+|---|---|---|
+| `note_id` | TEXT → `note.id` | |
+| `element_id` | TEXT → `element.id` | Con `note_id` forma la clave |
+| `position` | INTEGER ≥ 0 | Orden |
+
+Índice `note_element_by_element (element_id)`.
 
 ### `work_format`
 _Desde la versión 2._ Cómo se compone la obra: la hoja del libro que será, sus márgenes y su letra. Exactamente una fila, como `project`. Las obras creadas con la versión 1 reciben al migrar el formato por defecto: A5 de novela.

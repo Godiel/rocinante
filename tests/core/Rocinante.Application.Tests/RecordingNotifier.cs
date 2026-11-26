@@ -15,6 +15,8 @@ internal sealed class RecordingNotifier : IChangeNotifier
 
     public IReadOnlyList<Note>? LastNotes { get; private set; }
 
+    public IReadOnlyList<NoteId>? LastRemovedNotes { get; private set; }
+
     public void ProjectOpened(ProjectSnapshot project, string origin) => Events.Add($"project.opened:{origin}");
 
     public void ProjectChanged(ProjectSnapshot project, string origin) => Events.Add($"project.changed:{origin}");
@@ -25,9 +27,10 @@ internal sealed class RecordingNotifier : IChangeNotifier
 
     public void VersionsChanged(DocumentId documentId, string origin) => Events.Add($"versions.changed:{origin}");
 
-    public void NotesChanged(DocumentId documentId, IReadOnlyList<Note> notes, string origin)
+    public void NotesChanged(IReadOnlyList<Note> notes, IReadOnlyList<NoteId> removed, string origin)
     {
         LastNotes = notes;
+        LastRemovedNotes = removed;
         Events.Add($"notes.changed:{origin}");
     }
 
