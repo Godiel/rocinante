@@ -2,7 +2,7 @@
 import { Editor } from "@tiptap/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { bookExtensions } from ".";
-import { ParagraphDone, worthReading } from "./paragraph-done";
+import { ParagraphDone, passageRange, worthReading } from "./paragraph-done";
 
 let current: Editor | undefined;
 
@@ -61,5 +61,17 @@ describe("a finished paragraph", () => {
     expect(worthReading("Capítulo")).toBe(false);
     expect(worthReading("* * *")).toBe(false);
     expect(worthReading("Llegó Claudio.")).toBe(true);
+  });
+
+  it("is found again for «Ir al pasaje», even a little changed", () => {
+    const editor = edit(() => {});
+    const exact = passageRange(editor.state.doc, "Antonio llegó con su hijo Claudio.")!;
+    expect(editor.state.doc.textBetween(exact.from, exact.to)).toBe(
+      "Antonio llegó con su hijo Claudio.",
+    );
+    editor.commands.insertContentAt(exact.to - 1, " el pelirrojo");
+    const alike = passageRange(editor.state.doc, "Antonio llegó con su hijo Claudio.")!;
+    expect(editor.state.doc.textBetween(alike.from, alike.to)).toContain("pelirrojo");
+    expect(passageRange(editor.state.doc, "Nada de esto está")).toBeNull();
   });
 });

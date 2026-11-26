@@ -1,4 +1,5 @@
 import { Extension } from "@tiptap/core";
+import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import type { EditorState } from "@tiptap/pm/state";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { blockText } from "./block-text";
@@ -72,3 +73,26 @@ export const ParagraphDone = Extension.create<ParagraphDoneOptions>({
     ];
   },
 });
+
+/** Where a paragraph the squire read is now: the one with that text, or failing that, one that begins like it. */
+export function passageRange(
+  doc: ProseMirrorNode,
+  passage: string,
+): { from: number; to: number } | null {
+  const wanted = passage.trim();
+  // Half of it, at most 40 letters: enough to know it, little enough to survive a change at its end.
+  const opening =
+    wanted.length >= 10 ? wanted.slice(0, Math.min(40, Math.ceil(wanted.length / 2))) : "";
+  let exact: { from: number; to: number } | null = null;
+  let alike: { from: number; to: number } | null = null;
+  doc.descendants((node, pos) => {
+    if (exact) return false;
+    if (!node.isTextblock) return true;
+    const text = blockText(node, pos).text.trim();
+    const range = { from: pos + 1, to: pos + node.nodeSize - 1 };
+    if (text === wanted) exact = range;
+    else if (!alike && opening.length > 0 && text.startsWith(opening)) alike = range;
+    return false;
+  });
+  return exact ?? alike;
+}

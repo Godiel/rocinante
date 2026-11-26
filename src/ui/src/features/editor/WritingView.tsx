@@ -45,6 +45,7 @@ import { NotesPanel, type OpenedNote } from "../notes/NotesPanel";
 import { useNoteTrash } from "../notes/useNoteTrash";
 import { SidePanelTabs } from "../workspace/SidePanelTabs";
 import { SquirePanel } from "../squire/SquirePanel";
+import { ProposalList } from "../squire/ProposalList";
 import { useSquire } from "../squire/useSquire";
 import {
   isNotesShortcut,
@@ -182,6 +183,12 @@ export function WritingView({
 
   const { notes: workNotes, loaded: notesLoaded } = useWorkNotes(project.id);
   const squire = useSquire(project.id);
+  // The passage of a proposal the writer asked to see; `at` tells one request from the next.
+  const [revealPassage, setRevealPassage] = useState<{
+    documentId: string;
+    text: string;
+    at: number;
+  } | null>(null);
   const [openNote, setOpenNote] = useState<OpenedNote | null>(null);
   // The note whose passage the writer asked to see; `at` tells one request from the next.
   const [reveal, setReveal] = useState<{ noteId: string; documentId: string; at: number } | null>(
@@ -649,6 +656,14 @@ export function WritingView({
               </button>
               <button
                 className="action"
+                aria-expanded={sheet === "squire"}
+                title="Escudero: propuestas y ajustes"
+                onClick={() => toggleSide("squire")}
+              >
+                {squire.settings.pending > 0 ? `Escudero · ${squire.settings.pending}` : "Escudero"}
+              </button>
+              <button
+                className="action"
                 aria-expanded={sheet === "ambience"}
                 onClick={toggleAmbience}
               >
@@ -786,6 +801,7 @@ export function WritingView({
                 onSaveState={onSaveState}
                 onProblem={setProblem}
                 onCreateElement={(name) => void createElement(name)}
+                revealPassage={revealPassage?.documentId === document.id ? revealPassage : null}
                 onParagraphDone={
                   squire.settings.enabled
                     ? (text) =>
@@ -908,7 +924,23 @@ export function WritingView({
             }
             onClose={closeSheet}
             onProblem={setProblem}
-          />
+          >
+            <ProposalList
+              proposals={squire.proposals}
+              enabled={squire.settings.enabled}
+              origin={origin}
+              onGoToPassage={(proposal) => {
+                setViewing(null);
+                setCurrentId(proposal.documentId);
+                setRevealPassage((last) => ({
+                  documentId: proposal.documentId,
+                  text: proposal.passage,
+                  at: (last?.at ?? 0) + 1,
+                }));
+              }}
+              onProblem={setProblem}
+            />
+          </SquirePanel>
         )}
 
         {sheet === "format" && (

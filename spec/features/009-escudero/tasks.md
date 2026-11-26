@@ -27,7 +27,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/009-escudero`.
 - [x] Intro o pausa de 8 segundos manda el párrafo.
 
 ## 9. Pestaña Escudero
-- [ ] Propuestas, aceptar, corregir, descartar, ir al pasaje, estado y contador.
+- [x] Propuestas, aceptar, corregir, descartar, ir al pasaje, estado y contador.
 
 ## 10. Pruebas de extremo a extremo
 - [ ] Con un proveedor falso compatible con OpenAI.
