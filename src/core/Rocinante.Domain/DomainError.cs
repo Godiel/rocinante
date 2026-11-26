@@ -49,4 +49,6 @@ public enum DomainError
     MilestoneNotFound,
     MilestoneTextRequired,
     RelationshipBounds,
+    ExportFailed,
+    ExportNotFound,
 }
