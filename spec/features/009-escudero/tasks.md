@@ -21,7 +21,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/009-escudero`.
 - [x] Ajustes, prueba, modelos, encendido por obra, cola en segundo plano y propuestas.
 
 ## 7. Ajustes del escudero
-- [ ] Proveedor, modelo, clave, «Probar» y encender en esta obra con aviso.
+- [x] Proveedor, modelo, clave, «Probar» y encender en esta obra con aviso.
 
 ## 8. Párrafo terminado
 - [ ] Intro o pausa de 8 segundos manda el párrafo.

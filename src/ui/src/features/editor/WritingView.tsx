@@ -44,6 +44,8 @@ import { isElementsShortcut } from "../elements/panel";
 import { NotesPanel, type OpenedNote } from "../notes/NotesPanel";
 import { useNoteTrash } from "../notes/useNoteTrash";
 import { SidePanelTabs } from "../workspace/SidePanelTabs";
+import { SquirePanel } from "../squire/SquirePanel";
+import { useSquire } from "../squire/useSquire";
 import {
   isNotesShortcut,
   rememberedSidePanel,
@@ -131,7 +133,8 @@ export function WritingView({
     rememberedSidePanel,
   );
   const elementsOpen = sheet === "elements";
-  const sideTab: SideTab | null = sheet === "elements" || sheet === "notes" ? sheet : null;
+  const sideTab: SideTab | null =
+    sheet === "elements" || sheet === "notes" || sheet === "squire" ? sheet : null;
   const lastSideTab = useRef<SideTab>(sideTab ?? "elements");
   useEffect(() => {
     if (sideTab) lastSideTab.current = sideTab;
@@ -178,6 +181,7 @@ export function WritingView({
   );
 
   const { notes: workNotes, loaded: notesLoaded } = useWorkNotes(project.id);
+  const squire = useSquire(project.id);
   const [openNote, setOpenNote] = useState<OpenedNote | null>(null);
   // The note whose passage the writer asked to see; `at` tells one request from the next.
   const [reveal, setReveal] = useState<{ noteId: string; documentId: string; at: number } | null>(
@@ -812,7 +816,13 @@ export function WritingView({
               void elementTrash.trash(id, name);
             }}
             onRestore={(id) => void elementTrash.restore(id)}
-            tabs={<SidePanelTabs tab="elements" onShow={(tab) => setSheet(tab)} />}
+            tabs={
+              <SidePanelTabs
+                tab="elements"
+                pending={squire.settings.pending}
+                onShow={(tab) => setSheet(tab)}
+              />
+            }
             mentions={{
               documents: noteDocuments,
               onGoTo: (elementId, documentId, ordinal) => {
@@ -853,7 +863,13 @@ export function WritingView({
             elements={board.elements}
             origin={origin}
             opened={openNote}
-            tabs={<SidePanelTabs tab="notes" onShow={(tab) => setSheet(tab)} />}
+            tabs={
+              <SidePanelTabs
+                tab="notes"
+                pending={squire.settings.pending}
+                onShow={(tab) => setSheet(tab)}
+              />
+            }
             onOpen={setOpenNote}
             onGoToPassage={goToPassage}
             onDelete={(note) => void noteTrash.remove(note.id)}
@@ -862,6 +878,24 @@ export function WritingView({
               setOpenElement(id);
               setFreshElement(null);
             }}
+            onClose={closeSheet}
+            onProblem={setProblem}
+          />
+        )}
+
+        {sheet === "squire" && (
+          <SquirePanel
+            settings={squire.settings}
+            proposals={squire.proposals}
+            loaded={squire.loaded}
+            origin={origin}
+            tabs={
+              <SidePanelTabs
+                tab="squire"
+                pending={squire.settings.pending}
+                onShow={(tab) => setSheet(tab)}
+              />
+            }
             onClose={closeSheet}
             onProblem={setProblem}
           />

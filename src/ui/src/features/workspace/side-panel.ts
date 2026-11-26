@@ -1,5 +1,5 @@
-/** What the panel beside the text shows: the fichas of the work or its notes. */
-export type SideTab = "elements" | "notes";
+/** What the panel beside the text shows: the fichas of the work, its notes or the squire. */
+export type SideTab = "elements" | "notes" | "squire";
 
 /** Ctrl+Mayús+N (⌘+Mayús+N on a Mac) opens and closes the notes beside the text, whatever the layout. */
 export function isNotesShortcut(event: KeyboardEvent): boolean {
@@ -19,7 +19,7 @@ const BEFORE_TABS = "rocinante-elements-panel";
 export function rememberedSidePanel(): SideTab | null {
   try {
     const tab = sessionStorage.getItem(KEY);
-    if (tab === "elements" || tab === "notes") return tab;
+    if (tab === "elements" || tab === "notes" || tab === "squire") return tab;
     return sessionStorage.getItem(BEFORE_TABS) === "open" ? "elements" : null;
   } catch {
     return null;
