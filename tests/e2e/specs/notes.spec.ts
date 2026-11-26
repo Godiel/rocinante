@@ -69,9 +69,9 @@ test("the notes of a work: written, linked, found, resolved and kept as they wer
   const slip = page.getByRole("textbox", { name: "Texto de la nota" });
   await expect(slip).toBeFocused();
   await page.keyboard.type("Aquí aún no conoce a ");
-  await page.keyboard.press("Control+I");
+  await page.keyboard.press("ControlOrMeta+I");
   await page.keyboard.type("Claudio");
-  await page.keyboard.press("Control+Enter");
+  await page.keyboard.press("ControlOrMeta+Enter");
   await expect(chapterText(page).locator("[data-note-id]")).toHaveText("Antonio");
 
   // A loose idea from the panel, linked with Antonio.
