@@ -183,7 +183,19 @@ test("the threads of fate: where each ficha goes, what happens to it and when it
     expect(view.milestones.map((milestone) => milestone.text)).toEqual(
       expect.arrayContaining(["Muere su padre", "Parte hacia Madrid"]),
     );
-    expect(view.milestones.find((milestone) => milestone.text === "Muere su padre")).toMatchObject({
+    // If it lost its paragraph, the message says what the chapter holds, to tell why.
+    const chapter = await call<{ content: { content?: { content?: { text?: string }[] }[] } }>(
+      page,
+      "document.get",
+      { id: first.id },
+    );
+    const paragraphs = (chapter.content.content ?? []).map((block) =>
+      (block.content ?? []).map((inline) => inline.text ?? "").join(""),
+    );
+    expect(
+      view.milestones.find((milestone) => milestone.text === "Muere su padre"),
+      `párrafos del capítulo: ${JSON.stringify(paragraphs)}`,
+    ).toMatchObject({
       passage: DEATH,
       lost: false,
     });
