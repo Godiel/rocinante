@@ -1,6 +1,11 @@
 {
   "valid": [
-    { "changes": { "theme": "candlelight" }, "origin": "main" },
+    {
+      "changes": {
+        "theme": "candlelight"
+      },
+      "origin": "main"
+    },
     {
       "changes": {
         "outline": "floating",
@@ -13,15 +18,28 @@
       "changes": {
         "ambience": {
           "background": "builtin:rain-window",
-          "typing": { "sound": "typewriter", "volume": 0.6, "muted": false },
+          "typing": {
+            "sound": "typewriter",
+            "volume": 0.6,
+            "muted": false
+          },
           "ambients": [
-            { "id": "builtin:rain", "level": 0.8 },
-            { "id": "own:0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b", "level": 0.3 }
+            {
+              "id": "builtin:rain",
+              "level": 0.8
+            },
+            {
+              "id": "own:0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+              "level": 0.3
+            }
           ],
           "ambientVolume": 0.5,
           "ambientMuted": false,
           "dimOthers": true,
-          "goal": { "kind": "words", "amount": 500 }
+          "goal": {
+            "kind": "words",
+            "amount": 500
+          }
         }
       },
       "origin": "main"
@@ -30,33 +48,73 @@
       "changes": {
         "ambience": {
           "background": "builtin:parchment",
-          "typing": { "sound": "quill", "volume": 0, "muted": true },
+          "typing": {
+            "sound": "quill",
+            "volume": 0,
+            "muted": true
+          },
           "ambients": [],
           "ambientVolume": 1,
           "ambientMuted": true,
           "dimOthers": false,
-          "goal": { "kind": "none" }
+          "goal": {
+            "kind": "none"
+          }
         }
+      },
+      "origin": "main"
+    },
+    {
+      "changes": {
+        "mentionsVisible": false
       },
       "origin": "main"
     }
   ],
   "invalid": [
-    { "changes": {}, "origin": "main" },
-    { "changes": { "theme": "neon" }, "origin": "main" },
-    { "changes": { "font": "Comic Sans" }, "origin": "main" },
-    { "changes": { "counterVisible": "no" }, "origin": "main" },
-    { "changes": { "theme": "paper" } },
+    {
+      "changes": {},
+      "origin": "main"
+    },
+    {
+      "changes": {
+        "theme": "neon"
+      },
+      "origin": "main"
+    },
+    {
+      "changes": {
+        "font": "Comic Sans"
+      },
+      "origin": "main"
+    },
+    {
+      "changes": {
+        "counterVisible": "no"
+      },
+      "origin": "main"
+    },
+    {
+      "changes": {
+        "theme": "paper"
+      }
+    },
     {
       "changes": {
         "ambience": {
           "background": "rain-window",
-          "typing": { "sound": "typewriter", "volume": 0.6, "muted": false },
+          "typing": {
+            "sound": "typewriter",
+            "volume": 0.6,
+            "muted": false
+          },
           "ambients": [],
           "ambientVolume": 0.5,
           "ambientMuted": false,
           "dimOthers": false,
-          "goal": { "kind": "none" }
+          "goal": {
+            "kind": "none"
+          }
         }
       },
       "origin": "main"
@@ -65,12 +123,18 @@
       "changes": {
         "ambience": {
           "background": "builtin:parchment",
-          "typing": { "sound": "typewriter", "volume": 1.5, "muted": false },
+          "typing": {
+            "sound": "typewriter",
+            "volume": 1.5,
+            "muted": false
+          },
           "ambients": [],
           "ambientVolume": 0.5,
           "ambientMuted": false,
           "dimOthers": false,
-          "goal": { "kind": "none" }
+          "goal": {
+            "kind": "none"
+          }
         }
       },
       "origin": "main"
@@ -79,12 +143,19 @@
       "changes": {
         "ambience": {
           "background": "builtin:parchment",
-          "typing": { "sound": "typewriter", "volume": 0.5, "muted": false },
+          "typing": {
+            "sound": "typewriter",
+            "volume": 0.5,
+            "muted": false
+          },
           "ambients": [],
           "ambientVolume": 0.5,
           "ambientMuted": false,
           "dimOthers": false,
-          "goal": { "kind": "minutes", "amount": 2 }
+          "goal": {
+            "kind": "minutes",
+            "amount": 2
+          }
         }
       },
       "origin": "main"
@@ -93,12 +164,18 @@
       "changes": {
         "ambience": {
           "background": "builtin:parchment",
-          "typing": { "sound": "typewriter", "volume": 0.5, "muted": false },
+          "typing": {
+            "sound": "typewriter",
+            "volume": 0.5,
+            "muted": false
+          },
           "ambients": [],
           "ambientVolume": 0.5,
           "ambientMuted": false,
           "dimOthers": false,
-          "goal": { "kind": "words" }
+          "goal": {
+            "kind": "words"
+          }
         }
       },
       "origin": "main"
@@ -107,12 +184,18 @@
       "changes": {
         "ambience": {
           "background": "builtin:parchment",
-          "typing": { "sound": "harp", "volume": 0.5, "muted": false },
+          "typing": {
+            "sound": "harp",
+            "volume": 0.5,
+            "muted": false
+          },
           "ambients": [],
           "ambientVolume": 0.5,
           "ambientMuted": false,
           "dimOthers": false,
-          "goal": { "kind": "none" }
+          "goal": {
+            "kind": "none"
+          }
         }
       },
       "origin": "main"
@@ -121,21 +204,54 @@
       "changes": {
         "ambience": {
           "background": "builtin:parchment",
-          "typing": { "sound": "typewriter", "volume": 0.5, "muted": false },
+          "typing": {
+            "sound": "typewriter",
+            "volume": 0.5,
+            "muted": false
+          },
           "ambients": [
-            { "id": "builtin:a", "level": 1 },
-            { "id": "builtin:b", "level": 1 },
-            { "id": "builtin:c", "level": 1 },
-            { "id": "builtin:d", "level": 1 },
-            { "id": "builtin:e", "level": 1 },
-            { "id": "builtin:f", "level": 1 },
-            { "id": "builtin:g", "level": 1 }
+            {
+              "id": "builtin:a",
+              "level": 1
+            },
+            {
+              "id": "builtin:b",
+              "level": 1
+            },
+            {
+              "id": "builtin:c",
+              "level": 1
+            },
+            {
+              "id": "builtin:d",
+              "level": 1
+            },
+            {
+              "id": "builtin:e",
+              "level": 1
+            },
+            {
+              "id": "builtin:f",
+              "level": 1
+            },
+            {
+              "id": "builtin:g",
+              "level": 1
+            }
           ],
           "ambientVolume": 0.5,
           "ambientMuted": false,
           "dimOthers": false,
-          "goal": { "kind": "none" }
+          "goal": {
+            "kind": "none"
+          }
         }
+      },
+      "origin": "main"
+    },
+    {
+      "changes": {
+        "mentionsVisible": "no"
       },
       "origin": "main"
     }

@@ -352,3 +352,11 @@
 .book-footnote-empty {
   font-style: italic;
 }
+
+/* The name of a ficha in the text: a fine line in the red of the rubric, quieter than the letters. */
+.book-page .mention {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-rubric) 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
+}

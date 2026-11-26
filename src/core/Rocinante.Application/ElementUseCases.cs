@@ -40,6 +40,18 @@ public sealed class ElementUseCases(Workspace workspace, IChosenFiles files, ICh
 
     public Element Get(ElementId id) => workspace.Board.Find(id);
 
+    private readonly ReferenceIndex _references = new();
+
+    /// <summary>Where an element is mentioned in the work, by its name or an alias, in the order of the index.</summary>
+    public ElementReferences References(ElementId id)
+    {
+        var board = workspace.Board;
+        board.Find(id);
+        var project = workspace.Project;
+        var documents = project.Chapters.Concat(project.Fragments).Select(entry => entry.Id);
+        return _references.Of(id, board, documents, workspace.Session.Documents);
+    }
+
     public Element Create(
         ElementKind kind, string? otherKind, string name, IReadOnlyList<ElementAttribute>? attributes, BoardPosition? position, string origin)
     {

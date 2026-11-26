@@ -28,7 +28,7 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("system.ping");
         harness.Call("diagnostics.report", Params(("source", "interface"), ("level", "warning"), ("message", "A window started slowly")));
         harness.Call("app.start", Params(("origin", Main)));
-        harness.Call("preferences.update", Params(("changes", JsonNode.Parse("""{ "theme": "candlelight", "outline": "floating" }""")), ("origin", Main)));
+        harness.Call("preferences.update", Params(("changes", JsonNode.Parse("""{ "theme": "candlelight", "outline": "floating", "mentionsVisible": false }""")), ("origin", Main)));
 
         // The writer brings a sound of their own, mixes it with the rain, and later takes it away.
         var recording = harness.PathOf("lluvia en el tejado.ogg");
@@ -105,6 +105,7 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("version.list", Params(("documentId", first)));
         harness.Call("version.get", Params(("id", version)));
         harness.Call("version.restore", Params(("id", version), ("origin", Main)));
+        harness.Call("element.references", Params(("id", quixote)));
 
         // Notes of the work: one on the chapter, now resolved and linked, and a loose idea that is
         // deleted and brought back.

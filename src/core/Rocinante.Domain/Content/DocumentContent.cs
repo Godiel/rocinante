@@ -28,7 +28,8 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
     {
         Json = json;
         _root = root;
-        (Statistics, NoteAnchors, PlainText) = Analyze(root);
+        (Statistics, NoteAnchors, Blocks) = Analyze(root);
+        PlainText = string.Join('\n', Blocks);
     }
 
     /// <summary>A document with a single empty paragraph, as a new chapter starts.</summary>
@@ -44,6 +45,12 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
 
     /// <summary>The words of the text, one line per paragraph that has any, without footnotes.</summary>
     public string PlainText { get; }
+
+    /// <summary>
+    /// The text of each paragraph or heading that has any words, in order, without footnotes or note anchors;
+    /// a line break inside one is a <c>\n</c>. Mentions are looked for here.
+    /// </summary>
+    public IReadOnlyList<string> Blocks { get; }
 
     /// <summary>A document of one paragraph per line of <paramref name="text"/>, leaving out blank lines.</summary>
     public static DocumentContent FromPlainText(string text)
@@ -106,11 +113,11 @@ public sealed class DocumentContent : IEquatable<DocumentContent>
     private static string? TypeOf(JsonObject node) =>
         node["type"] is JsonValue value && value.TryGetValue(out string? type) ? type : null;
 
-    private static (TextStatistics, IReadOnlyList<NoteId>, string) Analyze(JsonObject root)
+    private static (TextStatistics, IReadOnlyList<NoteId>, IReadOnlyList<string>) Analyze(JsonObject root)
     {
         var analysis = new Analysis();
         analysis.Visit(root, block: null);
-        return (analysis.Statistics, analysis.Anchors, string.Join('\n', analysis.Lines));
+        return (analysis.Statistics, analysis.Anchors, analysis.Lines);
     }
 
     /// <summary>Single pass over the tree that counts text blocks and collects note anchors.</summary>

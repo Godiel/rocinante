@@ -12,21 +12,21 @@ Todos los esquemas siguen JSON Schema 2020-12.
 
 ## Cómo se usa
 
-| Lado | Qué hace con el contrato |
-|---|---|
-| Interfaz | `npm run contracts:generate` genera `src/ui/src/bridge/generated/protocol.ts`, y el cliente del relé solo acepta métodos y parámetros definidos aquí. |
-| Núcleo | Lleva `protocol.json` incrustado y valida los `params` de cada petición antes de atenderla. |
-| Pruebas | [`examples/`](examples/) contiene parámetros de ejemplo, válidos e inválidos, que ambos lados validan. El núcleo recorre además una sesión de escritura completa que usa todos los métodos y comprueba que cada respuesta y cada notificación reales cumplen el contrato. |
+| Lado     | Qué hace con el contrato                                                                                                                                                                                                                                                  |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Interfaz | `npm run contracts:generate` genera `src/ui/src/bridge/generated/protocol.ts`, y el cliente del relé solo acepta métodos y parámetros definidos aquí.                                                                                                                     |
+| Núcleo   | Lleva `protocol.json` incrustado y valida los `params` de cada petición antes de atenderla.                                                                                                                                                                               |
+| Pruebas  | [`examples/`](examples/) contiene parámetros de ejemplo, válidos e inválidos, que ambos lados validan. El núcleo recorre además una sesión de escritura completa que usa todos los métodos y comprueba que cada respuesta y cada notificación reales cumplen el contrato. |
 
 ## Errores
 
 Además de los códigos estándar de JSON-RPC, el núcleo devuelve tres códigos para los fallos esperados, con el motivo en `error.data.reason`:
 
-| Código | Cuándo | Ejemplos de `reason` |
-|---|---|---|
-| `ProjectNotOpen` (-32001) | La petición necesita un proyecto abierto y no lo hay | `projectNotOpen` |
-| `RuleViolated` (-32002) | Se incumple una regla del dominio | `titleRequired`, `documentIsDeleted`, `positionOutOfRange` |
-| `ProjectFileProblem` (-32003) | El archivo no se puede crear o abrir | `notFound`, `notAProject`, `newerVersion`, `corrupted` |
+| Código                        | Cuándo                                               | Ejemplos de `reason`                                       |
+| ----------------------------- | ---------------------------------------------------- | ---------------------------------------------------------- |
+| `ProjectNotOpen` (-32001)     | La petición necesita un proyecto abierto y no lo hay | `projectNotOpen`                                           |
+| `RuleViolated` (-32002)       | Se incumple una regla del dominio                    | `titleRequired`, `documentIsDeleted`, `positionOutOfRange` |
+| `ProjectFileProblem` (-32003) | El archivo no se puede crear o abrir                 | `notFound`, `notAProject`, `newerVersion`, `corrupted`     |
 
 La lista completa está en `$defs.ErrorReason`; un test del núcleo comprueba que coincide con todos los motivos que puede dar. La interfaz convierte cada motivo en un mensaje en español; el `message` en inglés es solo para los logs.
 
@@ -40,3 +40,13 @@ Cada método que cambia algo recibe la ventana de origen (`origin`) y lo anuncia
 2. Si el cambio es incompatible, incrementa `protocolVersion`.
 3. Ejecuta `npm run contracts:generate` y confirma el archivo generado.
 4. CI falla si el archivo generado no está al día o si alguna capa incumple el contrato.
+
+## Menciones
+
+[`mentions.json`](mentions.json) fija cómo se reconocen en el texto los nombres y alias de las fichas (feature 006). La interfaz los marca mientras se escribe y el núcleo los cuenta para la ficha; los dos lados pasan los mismos casos:
+
+- Una mención es una secuencia de palabras enteras: letras y números de Unicode, con sus marcas combinadas.
+- Se comparan sin mayúsculas ni tildes, pero la ñ es una letra propia («peña» no es «pena»).
+- Entre las palabras de un nombre vale cualquier separación de hasta tres caracteres que no sean letras ni números, sin saltos de línea: «Don Quijote» es «Don Quijote».
+- Cuando dos nombres se solapan, gana el más largo; un nombre con una sola letra no se busca.
+- Si varias fichas comparten un nombre, la mención es de todas.

@@ -12,6 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The rules for mentions are shared with the interface, which passes the same cases. -->
+    <None Include="..\..\..\src\contracts\mentions.json" Link="contract\mentions.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Shouldly" />
     <Using Include="Xunit" />
   </ItemGroup>

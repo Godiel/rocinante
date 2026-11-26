@@ -23,7 +23,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
     {
         var place = new Place(DocumentId.New(Moments.Start), 12, 30);
         var settings = new AppSettings(
-            new Preferences(Theme.Candlelight, OutlineMode.Floating, CounterVisible: false, TypewriterScrolling: false, Ambience.Default),
+            new Preferences(Theme.Candlelight, OutlineMode.Floating, CounterVisible: false, TypewriterScrolling: false, Ambience.Default, MentionsVisible: false),
             [
                 new RecentProject(_folder.File("Don Quijote.rocinante"), "Don Quijote", Moments.At(5), place),
                 new RecentProject(_folder.File("galatea.rocinante"), "La Galatea", Moments.At(1), Place: null),

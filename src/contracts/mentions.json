@@ -1,0 +1,122 @@
+{
+  "description": "How the names and aliases of the fichas are found in the text. The interface (features/mentions) and the core (MentionFinder) must find exactly these mentions. `names` maps a ficha to its name and aliases; each expected mention gives the fichas it belongs to, where it starts in `text` (UTF-16 units, as JavaScript and .NET count them) and how long it is.",
+  "cases": [
+    {
+      "name": "a name as a whole word",
+      "text": "Antonio llegó a la venta.",
+      "names": { "antonio": ["Antonio"] },
+      "mentions": [{ "elements": ["antonio"], "start": 0, "length": 7 }]
+    },
+    {
+      "name": "not inside another word",
+      "text": "Mañana vendrá Ana con Anabel.",
+      "names": { "ana": ["Ana"] },
+      "mentions": [{ "elements": ["ana"], "start": 14, "length": 3 }]
+    },
+    {
+      "name": "without minding case or accents",
+      "text": "QUIJANO, quijano y Quijáno.",
+      "names": { "quijano": ["Quijano"] },
+      "mentions": [
+        { "elements": ["quijano"], "start": 0, "length": 7 },
+        { "elements": ["quijano"], "start": 9, "length": 7 },
+        { "elements": ["quijano"], "start": 19, "length": 7 }
+      ]
+    },
+    {
+      "name": "an accent in the name matches the word without it",
+      "text": "Angela y Ángela.",
+      "names": { "angela": ["Ángela"] },
+      "mentions": [
+        { "elements": ["angela"], "start": 0, "length": 6 },
+        { "elements": ["angela"], "start": 9, "length": 6 }
+      ]
+    },
+    {
+      "name": "aliases count as the ficha",
+      "text": "El hidalgo, que era Alonso Quijano, salió.",
+      "names": { "quijote": ["Don Quijote", "Alonso Quijano", "el hidalgo"] },
+      "mentions": [
+        { "elements": ["quijote"], "start": 0, "length": 10 },
+        { "elements": ["quijote"], "start": 20, "length": 14 }
+      ]
+    },
+    {
+      "name": "the longest name wins when two overlap",
+      "text": "Don Quijote de la Mancha volvió a la Mancha.",
+      "names": {
+        "quijote": ["Don Quijote de la Mancha", "Don Quijote"],
+        "mancha": ["La Mancha"]
+      },
+      "mentions": [
+        { "elements": ["quijote"], "start": 0, "length": 24 },
+        { "elements": ["mancha"], "start": 34, "length": 9 }
+      ]
+    },
+    {
+      "name": "a name of one letter is not looked for",
+      "text": "Y entonces llegó X a la venta.",
+      "names": { "x": ["X", "Y"] },
+      "mentions": []
+    },
+    {
+      "name": "two fichas with the same name share the mention",
+      "text": "Juan saludó.",
+      "names": { "juan-padre": ["Juan"], "juan-hijo": ["Juan", "Juanito"] },
+      "mentions": [
+        { "elements": ["juan-padre", "juan-hijo"], "start": 0, "length": 4 }
+      ]
+    },
+    {
+      "name": "dialogue dashes and punctuation are not part of words",
+      "text": "—¿Sancho? —dijo—. ¡Sancho!",
+      "names": { "sancho": ["Sancho"] },
+      "mentions": [
+        { "elements": ["sancho"], "start": 2, "length": 6 },
+        { "elements": ["sancho"], "start": 19, "length": 6 }
+      ]
+    },
+    {
+      "name": "the spaces inside a name may be any spaces",
+      "text": "Llegó Don  Quijote, y luego Don Quijote.",
+      "names": { "quijote": ["Don Quijote"] },
+      "mentions": [
+        { "elements": ["quijote"], "start": 6, "length": 12 },
+        { "elements": ["quijote"], "start": 28, "length": 11 }
+      ]
+    },
+    {
+      "name": "a name with a number",
+      "text": "El tercio 7 y el tercio 70.",
+      "names": { "tercio": ["tercio 7"] },
+      "mentions": [{ "elements": ["tercio"], "start": 3, "length": 8 }]
+    },
+    {
+      "name": "the ñ is a letter of its own",
+      "text": "La peña y la pena.",
+      "names": { "pena": ["Peña"] },
+      "mentions": [{ "elements": ["pena"], "start": 3, "length": 4 }]
+    },
+    {
+      "name": "letters written apart are the same letter",
+      "text": "Angéla llegó.",
+      "names": { "angela": ["Ángela"] },
+      "mentions": [{ "elements": ["angela"], "start": 0, "length": 7 }]
+    },
+    {
+      "name": "names with apostrophes and hyphens",
+      "text": "O'Brien y Jean-Paul hablaron.",
+      "names": { "obrien": ["O'Brien"], "jp": ["Jean-Paul"] },
+      "mentions": [
+        { "elements": ["obrien"], "start": 0, "length": 7 },
+        { "elements": ["jp"], "start": 10, "length": 9 }
+      ]
+    },
+    {
+      "name": "names that are only spaces or punctuation are not looked for",
+      "text": "Nada aquí.",
+      "names": { "vacio": ["  ", "—"] },
+      "mentions": []
+    }
+  ]
+}

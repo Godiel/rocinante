@@ -61,9 +61,11 @@ internal sealed record AmbienceDto(
 
 internal sealed record OwnAmbienceDto(Guid Id, string Kind, string Name, string File);
 
-internal sealed record PreferencesDto(string Theme, string Outline, bool CounterVisible, bool TypewriterScrolling, AmbienceDto Ambience);
+internal sealed record PreferencesDto(
+    string Theme, string Outline, bool CounterVisible, bool TypewriterScrolling, AmbienceDto Ambience, bool MentionsVisible);
 
-internal sealed record PreferencesChangeDto(string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling, AmbienceDto? Ambience);
+internal sealed record PreferencesChangeDto(
+    string? Theme, string? Outline, bool? CounterVisible, bool? TypewriterScrolling, AmbienceDto? Ambience, bool? MentionsVisible);
 
 internal sealed record PlaceDto(Guid DocumentId, int Anchor, int Head);
 
@@ -146,6 +148,14 @@ internal sealed record SaveDocumentParams(Guid Id, JsonObject Content, string Or
 internal sealed record CreateVersionParams(Guid DocumentId, string? Name, string Origin);
 
 internal sealed record CreateNoteParams(Guid? DocumentId, JsonObject Content, bool Anchored, IReadOnlyList<Guid>? Elements, string Origin);
+
+internal sealed record MentionDto(int Ordinal, string Before, string Text, string After);
+
+internal sealed record DocumentMentionsDto(Guid DocumentId, IReadOnlyList<MentionDto> Mentions);
+
+internal sealed record MentionPlaceDto(Guid DocumentId, int Ordinal);
+
+internal sealed record ElementReferencesDto(int Total, int Chapters, MentionPlaceDto? First, IReadOnlyList<DocumentMentionsDto> Documents);
 
 internal sealed record NoteChangesDto(JsonObject? Content, bool? Resolved, IReadOnlyList<Guid>? Elements);
 
@@ -245,6 +255,7 @@ internal sealed record ElementsChangedNotification(
 [JsonSerializable(typeof(CreateNoteParams))]
 [JsonSerializable(typeof(UpdateNoteParams))]
 [JsonSerializable(typeof(NoteChangesDto))]
+[JsonSerializable(typeof(ElementReferencesDto))]
 [JsonSerializable(typeof(SystemInfoResult))]
 [JsonSerializable(typeof(ProjectStateDto))]
 [JsonSerializable(typeof(DocumentEntryDto))]
