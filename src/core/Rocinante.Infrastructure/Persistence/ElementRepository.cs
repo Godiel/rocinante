@@ -58,7 +58,7 @@ public sealed class ElementRepository(ProjectDatabase database) : IElementReposi
         }
 
         var relationships = new List<Relationship>();
-        using (var command = database.Command("SELECT id, from_id, to_id, kind FROM relationship ORDER BY id;"))
+        using (var command = database.Command("SELECT id, from_id, to_id, kind, starts_at, ends_at FROM relationship ORDER BY id;"))
         using (var reader = command.ExecuteReader())
         {
             while (reader.Read())
@@ -67,7 +67,9 @@ public sealed class ElementRepository(ProjectDatabase database) : IElementReposi
                     new RelationshipId(reader.GetId(0)),
                     new ElementId(reader.GetId(1)),
                     new ElementId(reader.GetId(2)),
-                    RelationshipKindId.Parse(reader.GetString(3))));
+                    RelationshipKindId.Parse(reader.GetString(3)),
+                    reader.IsDBNull(4) ? null : new DocumentId(reader.GetId(4)),
+                    reader.IsDBNull(5) ? null : new DocumentId(reader.GetId(5))));
             }
         }
 
@@ -229,13 +231,15 @@ public sealed class ElementRepository(ProjectDatabase database) : IElementReposi
 
         database.InTransaction(() => database.Execute(
             """
-            INSERT INTO relationship (id, from_id, to_id, kind) VALUES ($id, $from, $to, $kind)
-            ON CONFLICT (id) DO UPDATE SET kind = excluded.kind;
+            INSERT INTO relationship (id, from_id, to_id, kind, starts_at, ends_at) VALUES ($id, $from, $to, $kind, $starts, $ends)
+            ON CONFLICT (id) DO UPDATE SET kind = excluded.kind, starts_at = excluded.starts_at, ends_at = excluded.ends_at;
             """,
             ("$id", Columns.Id(relationship.Id.Value)),
             ("$from", Columns.Id(relationship.From.Value)),
             ("$to", Columns.Id(relationship.To.Value)),
-            ("$kind", relationship.Kind.Value)));
+            ("$kind", relationship.Kind.Value),
+            ("$starts", relationship.Starts is { } starts ? Columns.Id(starts.Value) : null),
+            ("$ends", relationship.Ends is { } ends ? Columns.Id(ends.Value) : null)));
     }
 
     public void Delete(RelationshipId id) =>

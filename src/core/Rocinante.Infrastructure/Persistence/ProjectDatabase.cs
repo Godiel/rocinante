@@ -31,7 +31,13 @@ public sealed class ProjectDatabase : IDisposable
     public string FilePath { get; }
 
     /// <summary>Creates a new project file. Fails if a file already exists at <paramref name="path"/>.</summary>
-    public static ProjectDatabase Create(string path, Project project)
+    public static ProjectDatabase Create(string path, Project project) => Create(path, project, Migrations.All);
+
+    /// <summary>Creates a project file with the schema of an older version, to test opening it.</summary>
+    internal static ProjectDatabase CreateAtVersion(string path, Project project, int version) =>
+        Create(path, project, [.. Migrations.All.Where(migration => migration.Version <= version)]);
+
+    private static ProjectDatabase Create(string path, Project project, IReadOnlyList<Migration> migrations)
     {
         ArgumentNullException.ThrowIfNull(project);
 
@@ -47,7 +53,7 @@ public sealed class ProjectDatabase : IDisposable
         {
             database.Execute(string.Create(CultureInfo.InvariantCulture, $"PRAGMA application_id = {ApplicationId};"));
             database.Configure();
-            Migrations.Apply(database);
+            Migrations.Apply(database, migrations);
             new ProjectRepository(database).Save(project);
             return database;
         }

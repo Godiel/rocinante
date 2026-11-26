@@ -46,4 +46,7 @@ public enum DomainError
     SecretStoreUnavailable,
     ProposalNotFound,
     ProposalElementMissing,
+    MilestoneNotFound,
+    MilestoneTextRequired,
+    RelationshipBounds,
 }
