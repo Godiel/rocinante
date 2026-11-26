@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 7,
+  "protocolVersion": 8,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -603,21 +603,42 @@
         }
       }
     },
+    "notes.get": {
+      "description": "Every note of the work: loose ideas and the notes of its documents. Leaves out deleted notes and the notes of documents in the trash.",
+      "params": null,
+      "result": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/Note"
+        }
+      }
+    },
     "note.create": {
-      "description": "Creates a note on a document. An anchored note expects the editor to place its anchor in the text with the returned id. Broadcasts notes.changed.",
+      "description": "Creates a note: on a document, or a loose idea of the work when documentId is null. An anchored note expects the editor to place its anchor in the text with the returned id. Broadcasts notes.changed.",
       "params": {
         "type": "object",
-        "required": ["documentId", "text", "anchored", "origin"],
+        "required": ["documentId", "content", "anchored", "origin"],
         "additionalProperties": false,
         "properties": {
           "documentId": {
-            "$ref": "#/$defs/Id"
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Id"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
-          "text": {
-            "$ref": "#/$defs/NoteText"
+          "content": {
+            "$ref": "#/$defs/TipTapDocument"
           },
           "anchored": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Only a note on a document can be anchored."
+          },
+          "elements": {
+            "$ref": "#/$defs/NoteElements"
           },
           "origin": {
             "$ref": "#/$defs/WindowLabel"
@@ -629,17 +650,17 @@
       }
     },
     "note.update": {
-      "description": "Changes the text of a note. Broadcasts notes.changed.",
+      "description": "Changes a note. Changing nothing broadcasts nothing; otherwise broadcasts notes.changed.",
       "params": {
         "type": "object",
-        "required": ["id", "text", "origin"],
+        "required": ["id", "changes", "origin"],
         "additionalProperties": false,
         "properties": {
           "id": {
             "$ref": "#/$defs/Id"
           },
-          "text": {
-            "$ref": "#/$defs/NoteText"
+          "changes": {
+            "$ref": "#/$defs/NoteChanges"
           },
           "origin": {
             "$ref": "#/$defs/WindowLabel"
@@ -651,7 +672,7 @@
       }
     },
     "note.delete": {
-      "description": "Deletes a note for good. Broadcasts notes.changed.",
+      "description": "Sets a note aside: it stops being shown, and its anchor stays hidden in the text so restoring it puts it back. Set-aside notes are deleted for good the next time the work is opened. Broadcasts notes.changed.",
       "params": {
         "type": "object",
         "required": ["id", "origin"],
@@ -669,16 +690,23 @@
         "type": "null"
       }
     },
-    "note.list": {
-      "description": "Notes of a document, in the order they were written.",
+    "note.restore": {
+      "description": "Brings back a note that was set aside. Broadcasts notes.changed.",
       "params": {
-        "$ref": "#/$defs/DocumentReference"
+        "type": "object",
+        "required": ["id", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
       },
       "result": {
-        "type": "array",
-        "items": {
-          "$ref": "#/$defs/Note"
-        }
+        "$ref": "#/$defs/Note"
       }
     },
     "board.get": {
@@ -1120,19 +1148,22 @@
       }
     },
     "notes.changed": {
-      "description": "The notes of a document changed: created, edited, deleted, anchored or loosened.",
+      "description": "Notes changed: created, edited, resolved, linked, anchored or loosened (notes), or set aside or gone with their document to the trash (removed). Each list has only what changed.",
       "params": {
         "type": "object",
-        "required": ["documentId", "notes", "origin"],
+        "required": ["notes", "removed", "origin"],
         "additionalProperties": false,
         "properties": {
-          "documentId": {
-            "$ref": "#/$defs/Id"
-          },
           "notes": {
             "type": "array",
             "items": {
               "$ref": "#/$defs/Note"
+            }
+          },
+          "removed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Id"
             }
           },
           "origin": {
@@ -1284,7 +1315,35 @@
     "NoteText": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 10000
+      "maxLength": 10000,
+      "description": "Plain text of a note, which the core derives from its content."
+    },
+    "NoteElements": {
+      "description": "Elements a note is linked with, each once.",
+      "type": "array",
+      "maxItems": 50,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Id"
+      }
+    },
+    "NoteChanges": {
+      "description": "The parts of a note that change; what is left out stays as it is.",
+      "type": "object",
+      "required": [],
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "$ref": "#/$defs/TipTapDocument"
+        },
+        "resolved": {
+          "type": "boolean"
+        },
+        "elements": {
+          "$ref": "#/$defs/NoteElements"
+        }
+      },
+      "minProperties": 1
     },
     "Position": {
       "description": "Zero-based place among the documents of one kind.",
@@ -1325,6 +1384,8 @@
         "versionOfAnotherDocument",
         "versionNotFound",
         "noteNotFound",
+        "noteIsDeleted",
+        "noteIsNotDeleted",
         "formatOutOfRange",
         "textAreaTooSmall",
         "ambientRepeated",
@@ -1368,7 +1429,13 @@
     },
     "Preferences": {
       "type": "object",
-      "required": ["theme", "outline", "counterVisible", "typewriterScrolling", "ambience"],
+      "required": [
+        "theme",
+        "outline",
+        "counterVisible",
+        "typewriterScrolling",
+        "ambience"
+      ],
       "additionalProperties": false,
       "properties": {
         "theme": {
@@ -1481,7 +1548,15 @@
     "Ambience": {
       "description": "The writer's focus mode and sounds: the background behind the sheet, the typing sound, the ambient mix, dimming the other paragraphs and the session goal. Ambients may not repeat (ambientRepeated); an own: id must exist (ambienceNotFound).",
       "type": "object",
-      "required": ["background", "typing", "ambients", "ambientVolume", "ambientMuted", "dimOthers", "goal"],
+      "required": [
+        "background",
+        "typing",
+        "ambients",
+        "ambientVolume",
+        "ambientMuted",
+        "dimOthers",
+        "goal"
+      ],
       "additionalProperties": false,
       "properties": {
         "background": {
@@ -1853,8 +1928,12 @@
       "required": [
         "id",
         "documentId",
+        "content",
         "text",
         "anchored",
+        "order",
+        "resolvedAt",
+        "elements",
         "createdAt",
         "updatedAt"
       ],
@@ -1864,14 +1943,50 @@
           "$ref": "#/$defs/Id"
         },
         "documentId": {
-          "$ref": "#/$defs/Id"
+          "description": "Null for a loose idea of the work.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content": {
+          "$ref": "#/$defs/TipTapDocument"
         },
         "text": {
           "$ref": "#/$defs/NoteText"
         },
         "anchored": {
           "type": "boolean",
-          "description": "False when the anchored passage was deleted: the note is loose."
+          "description": "False when the anchored passage was deleted, or for a loose idea."
+        },
+        "order": {
+          "description": "Place of the note's anchor among the anchors of its document's text; null when it is not anchored.",
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "resolvedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "elements": {
+          "$ref": "#/$defs/NoteElements"
         },
         "createdAt": {
           "$ref": "#/$defs/Timestamp"
@@ -2187,7 +2302,15 @@
     "ElementSummary": {
       "description": "What the list and the board show of an element.",
       "type": "object",
-      "required": ["id", "kind", "otherKind", "name", "aliases", "position", "image"],
+      "required": [
+        "id",
+        "kind",
+        "otherKind",
+        "name",
+        "aliases",
+        "position",
+        "image"
+      ],
       "additionalProperties": false,
       "properties": {
         "id": {

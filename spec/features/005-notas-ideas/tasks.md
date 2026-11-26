@@ -3,16 +3,16 @@
 Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests en verde, y con una comprobación en la app real cuando toca la interfaz, antes de pasar al siguiente. Rama: `feature/005-notas-ideas`.
 
 ## 1. Contrato de mensajes (versión 8)
-- [ ] `Note` pasa a `{ id, documentId | null, content, text, anchored, order | null, resolvedAt | null, elements, createdAt, updatedAt }`.
-- [ ] Métodos:
+- [x] `Note` pasa a `{ id, documentId | null, content, text, anchored, order | null, resolvedAt | null, elements, createdAt, updatedAt }`.
+- [x] Métodos:
   - `notes.get`, que sustituye a `note.list`;
   - `note.create { documentId | null, content, anchored, elements?, origin }`;
   - `note.update { id, changes { content?, resolved?, elements? }, origin }`;
   - `note.delete` y `note.restore`.
-- [ ] Notificación `notes.changed { origin, notes, removed }`, solo con lo que cambió.
-- [ ] Motivos de error `noteIsDeleted` y `noteIsNotDeleted`, con sus mensajes en español en `messages.ts`.
-- [ ] Ejemplos válidos e inválidos de cada método.
-- [ ] Regenerar los tipos de TypeScript y subir `protocolVersion` a 8.
+- [x] Notificación `notes.changed { origin, notes, removed }`, solo con lo que cambió.
+- [x] Motivos de error `noteIsDeleted` y `noteIsNotDeleted`, con sus mensajes en español en `messages.ts`.
+- [x] Ejemplos válidos e inválidos de cada método.
+- [x] Regenerar los tipos de TypeScript y subir `protocolVersion` a 8.
 
 ## 2. Dominio
 - [ ] `Note` en `Rocinante.Domain/Notes`:

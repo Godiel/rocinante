@@ -22,6 +22,7 @@ import { BubbleToolbar } from "./BubbleToolbar";
 import { TextPopover } from "./TextPopover";
 import { TypewriterCaret } from "./TypewriterCaret";
 import { useNotes } from "./useNotes";
+import { contentFromText } from "../notes/content";
 import "./book-editor.css";
 import { registerCursor, shownHead } from "../../editor/cursor";
 
@@ -328,7 +329,7 @@ export function BookEditor({
         await act(async () => {
           const note = await request("note.create", {
             documentId: document.id,
-            text,
+            content: contentFromText(text),
             anchored: true,
             origin,
           });
@@ -336,7 +337,13 @@ export function BookEditor({
         });
         break;
       case "note":
-        await act(() => request("note.update", { id: current.note.id, text, origin }));
+        await act(() =>
+          request("note.update", {
+            id: current.note.id,
+            changes: { content: contentFromText(text) },
+            origin,
+          }),
+        );
         editor.commands.focus();
         break;
       case "footnote":

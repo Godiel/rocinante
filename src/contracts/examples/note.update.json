@@ -2,16 +2,48 @@
   "valid": [
     {
       "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
-      "text": "Revisar la fecha de la batalla",
+      "changes": {
+        "content": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                { "type": "text", "text": "Revisar la fecha de la batalla" }
+              ]
+            }
+          ]
+        }
+      },
       "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": { "resolved": true },
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": { "elements": [] },
+      "origin": "window-1"
     }
   ],
   "invalid": [
     {
       "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
-      "text": "",
+      "changes": {},
       "origin": "main"
     },
-    { "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b", "origin": "main" }
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "text": "Revisar la fecha de la batalla",
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": { "resolved": "sí" },
+      "origin": "main"
+    },
+    { "changes": { "resolved": false }, "origin": "main" }
   ]
 }

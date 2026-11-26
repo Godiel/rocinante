@@ -22,6 +22,8 @@ export const messages: Record<ErrorReason, string> = {
   versionOfAnotherDocument: "Esa versión es de otro capítulo.",
   versionNotFound: "Esa versión ya no existe.",
   noteNotFound: "Esa nota ya no existe.",
+  noteIsDeleted: "Esa nota está borrada. Puede que se haya borrado en otra ventana.",
+  noteIsNotDeleted: "Esa nota no está borrada.",
   formatOutOfRange:
     "Alguna medida del formato no es posible: la hoja mide entre 7 y 30 cm por lado, la letra entre 8 y 16 puntos y el interlineado entre 1 y 2.",
   textAreaTooSmall:

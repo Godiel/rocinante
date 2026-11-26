@@ -1,8 +1,0 @@
-{
-  "valid": [{ "documentId": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b" }],
-  "invalid": [
-    {},
-    { "documentId": "no-es-un-uuid" },
-    { "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b" }
-  ]
-}
