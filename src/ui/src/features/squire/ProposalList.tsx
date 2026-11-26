@@ -46,6 +46,14 @@ function Said({ proposal }: { proposal: Proposal }) {
       </>
     );
   }
+  if (proposal.milestone) {
+    const { element, text } = proposal.milestone;
+    return (
+      <>
+        Hito de <strong>{element}</strong>: {text}
+      </>
+    );
+  }
   return null;
 }
 
@@ -65,6 +73,7 @@ function Correction({ proposal, busy, onAccept, onCancel }: CorrectionProps) {
   const [forward, setForward] = useState(proposal.relationship?.forward ?? "");
   const [inverse, setInverse] = useState(proposal.relationship?.inverse ?? "");
   const [value, setValue] = useState(proposal.attribute?.value ?? "");
+  const [text, setText] = useState(proposal.milestone?.text ?? "");
 
   function changes(): ProposalChanges {
     const made: ProposalChanges = {};
@@ -80,13 +89,15 @@ function Correction({ proposal, busy, onAccept, onCancel }: CorrectionProps) {
       if (back !== proposal.relationship.inverse) made.inverse = back;
     }
     if (proposal.attribute && value.trim() !== proposal.attribute.value) made.value = value.trim();
+    if (proposal.milestone && text.trim() !== proposal.milestone.text) made.text = text.trim();
     return made;
   }
 
   const empty =
     (proposal.element && name.trim() === "") ||
     (proposal.relationship && forward.trim() === "") ||
-    (proposal.attribute && value.trim() === "");
+    (proposal.attribute && value.trim() === "") ||
+    (proposal.milestone && text.trim() === "");
 
   return (
     <form
@@ -177,6 +188,19 @@ function Correction({ proposal, busy, onAccept, onCancel }: CorrectionProps) {
             value={value}
             autoFocus
             onChange={(event) => setValue(event.target.value)}
+          />
+        </p>
+      )}
+      {proposal.milestone && (
+        <p className="format-field">
+          <label htmlFor={`${id}-text`}>¿Qué le ocurre?</label>
+          <input
+            id={`${id}-text`}
+            className="squire-text"
+            value={text}
+            maxLength={300}
+            autoFocus
+            onChange={(event) => setText(event.target.value)}
           />
         </p>
       )}

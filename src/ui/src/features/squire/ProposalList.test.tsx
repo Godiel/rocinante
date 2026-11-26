@@ -45,6 +45,12 @@ const attribute: Proposal = {
   attribute: { element: "Antonio", name: "Pelo", value: "pelirrojo" },
 };
 
+const milestone: Proposal = {
+  ...base("h"),
+  kind: "milestone",
+  milestone: { element: "Antonio", text: "Llega con su hijo" },
+};
+
 function list(proposals: Proposal[] = [element, relationship, attribute]) {
   const onGoToPassage = vi.fn();
   const onProblem = vi.fn();
@@ -117,6 +123,23 @@ describe("the proposals of the squire", () => {
     expect(request).toHaveBeenLastCalledWith("proposal.accept", {
       id: "r",
       changes: { forward: "sobrino de" },
+      origin,
+    });
+  });
+
+  it("proposes a milestone, and accepts it as the writer said it", async () => {
+    const user = userEvent.setup();
+    list([milestone]);
+
+    expect(item(/Hito de/)).toHaveTextContent("Hito de Antonio: Llega con su hijo");
+    await user.click(screen.getByRole("button", { name: "Corregir" }));
+    const text = screen.getByLabelText("¿Qué le ocurre?");
+    await user.clear(text);
+    await user.type(text, "Vuelve a la venta");
+    await user.click(screen.getByRole("button", { name: "Aceptar así" }));
+    expect(request).toHaveBeenCalledWith("proposal.accept", {
+      id: "h",
+      changes: { text: "Vuelve a la venta" },
       origin,
     });
   });

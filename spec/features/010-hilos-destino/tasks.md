@@ -27,7 +27,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/010-hilos-destino`.
 - [x] «Desde» y «hasta» en la ficha; relaciones vigentes y marcas en la vista.
 
 ## 9. Propuestas de hito
-- [ ] En la pestaña Escudero: aceptar, corregir y descartar.
+- [x] En la pestaña Escudero: aceptar, corregir y descartar.
 
 ## 10. Pruebas de extremo a extremo y de rendimiento
 - [ ] Hilos, hito, fechas de una relación y hito propuesto por un escudero falso.
