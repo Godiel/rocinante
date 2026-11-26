@@ -8,7 +8,8 @@ import type { SpellRequest, SpellReply } from "./spelling-messages";
 
 const speller = (async () => {
   const [aff, dic] = await Promise.all(
-    [affUrl, dicUrl].map(async (url) => new Uint8Array(await (await fetch(url)).arrayBuffer())),
+    // nspell takes text in a browser: it only knows Node buffers otherwise.
+    [affUrl, dicUrl].map(async (url) => (await fetch(url)).text()),
   );
   return nspell(aff!, dic);
 })();

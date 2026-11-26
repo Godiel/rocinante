@@ -15,10 +15,10 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/008-correccion`.
 - [x] Worker con nspell y `dictionary-es`; caché de respuestas; palabras que no se miran.
 
 ## 5. Marcas en el editor
-- [ ] Decoración incremental; F7 y modo concentración.
+- [x] Decoración incremental; F7 y modo concentración.
 
 ## 6. La ventanita
-- [ ] Sugerencias, arreglos, «Añadir al diccionario» e «Ignorar», con deshacer.
+- [x] Sugerencias, arreglos, «Añadir al diccionario» e «Ignorar», con deshacer.
 
 ## 7. Licencia
 - [x] `licenses/dictionary-es.txt` en la compilación.

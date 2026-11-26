@@ -54,6 +54,9 @@ import { useBoard } from "../elements/useBoard";
 import { notesOf } from "../notes/notes-list";
 import { useWorkNotes } from "../notes/useWorkNotes";
 import { mentionIndex } from "../mentions/find-mentions";
+import { acceptedWords, spellChecker } from "../correction/spelling";
+import { useDictionary } from "../correction/useDictionary";
+import { isCorrectionShortcut } from "../correction/shortcuts";
 import { useElementTrash } from "../elements/useElementTrash";
 import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
@@ -156,6 +159,23 @@ export function WritingView({
       ),
     [namesKey],
   );
+  // The correction: the writer's own dictionary, the words ignored this session and the names of the fichas
+  // are accepted; the speller is shared by every editor of the window.
+  const dictionary = useDictionary();
+  const [ignored, setIgnored] = useState<readonly string[]>([]);
+  const correction = useMemo(
+    () => ({
+      checker: spellChecker(),
+      accepted: acceptedWords(
+        [...dictionary, ...ignored],
+        (JSON.parse(namesKey) as [string, string, string[]][]).flatMap(([, name, aliases]) => [
+          name,
+          ...aliases,
+        ]),
+      ),
+    }),
+    [dictionary, ignored, namesKey],
+  );
 
   const { notes: workNotes, loaded: notesLoaded } = useWorkNotes(project.id);
   const [openNote, setOpenNote] = useState<OpenedNote | null>(null);
@@ -184,6 +204,11 @@ export function WritingView({
   const focusedRef = useRef(false);
   // Whether the board shows, for the same shortcuts: those of the text wait for it.
   const onBoardRef = useRef(false);
+  // F7 shows and hides the marks of the correction; the handler of the keys reads the latest preference.
+  const correctionVisibleRef = useRef(preferences.correctionVisible);
+  useEffect(() => {
+    correctionVisibleRef.current = preferences.correctionVisible;
+  }, [preferences.correctionVisible]);
   // What focus mode put away, to bring it back on leaving.
   const putAway = useRef<{ outline: boolean; sheet: typeof sheet }>({
     outline: false,
@@ -345,7 +370,13 @@ export function WritingView({
         }
         return;
       }
-      if (isPageViewShortcut(event)) {
+      if (isCorrectionShortcut(event)) {
+        event.preventDefault();
+        void request("preferences.update", {
+          changes: { correctionVisible: !correctionVisibleRef.current },
+          origin: self,
+        });
+      } else if (isPageViewShortcut(event)) {
         // In a browser F5 reloads the page: here it is the page view.
         event.preventDefault();
         setPagesOpen((open) => !open);
@@ -720,6 +751,14 @@ export function WritingView({
                 notes={documentNotes}
                 notesLoaded={notesLoaded}
                 reveal={reveal?.documentId === document.id ? reveal : null}
+                correction={correction}
+                correctionVisible={preferences.correctionVisible && !focus.focused}
+                onAddWord={(word) =>
+                  void request("dictionary.add", { word, origin }).catch((error: unknown) =>
+                    setProblem(messageFor(error)),
+                  )
+                }
+                onIgnoreWord={(word) => setIgnored((words) => [...words, word])}
                 mentionIndex={mentions}
                 revealMention={revealMention?.documentId === document.id ? revealMention : null}
                 mentionElements={board.elements}
