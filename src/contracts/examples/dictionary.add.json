@@ -1,0 +1,8 @@
+{
+  "valid": [{ "word": "Clavileño", "origin": "main" }],
+  "invalid": [
+    { "word": "", "origin": "main" },
+    { "word": "dos palabras", "origin": "main" },
+    { "word": "Clavileño" }
+  ]
+}

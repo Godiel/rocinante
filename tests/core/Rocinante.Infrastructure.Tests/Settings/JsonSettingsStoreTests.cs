@@ -23,16 +23,18 @@ public sealed class JsonSettingsStoreTests : IDisposable
     {
         var place = new Place(DocumentId.New(Moments.Start), 12, 30);
         var settings = new AppSettings(
-            new Preferences(Theme.Candlelight, OutlineMode.Floating, CounterVisible: false, TypewriterScrolling: false, Ambience.Default, MentionsVisible: false),
+            new Preferences(Theme.Candlelight, OutlineMode.Floating, CounterVisible: false, TypewriterScrolling: false, Ambience.Default, MentionsVisible: false, CorrectionVisible: false),
             [
                 new RecentProject(_folder.File("Don Quijote.rocinante"), "Don Quijote", Moments.At(5), place),
                 new RecentProject(_folder.File("galatea.rocinante"), "La Galatea", Moments.At(1), Place: null),
             ],
-            _folder.File("Don Quijote.rocinante"));
+            _folder.File("Don Quijote.rocinante"),
+            Words: ["Clavileño", "Rocinante"]);
 
         Store().Save(settings);
         var loaded = Store().Load();
 
+        loaded.Dictionary.ShouldBe(["Clavileño", "Rocinante"]);
         loaded.Preferences.ShouldBe(settings.Preferences);
         loaded.LastProject.ShouldBe(settings.LastProject);
         loaded.Recent.ShouldBe(settings.Recent);

@@ -54,6 +54,54 @@ public sealed class WriterSettings
         return Preferences;
     }
 
+    public const int MaxDictionaryWords = 5000;
+
+    public const int MaxDictionaryWordLength = 60;
+
+    /// <summary>The writer's own dictionary, in order.</summary>
+    public IReadOnlyList<string> Dictionary => _current.Dictionary;
+
+    /// <summary>Adds a word to the writer's own dictionary; adding it twice changes nothing.</summary>
+    /// <returns>Whether it changed.</returns>
+    public bool AddWord(string word)
+    {
+        var valid = ValidWord(word);
+        if (Dictionary.Contains(valid, StringComparer.Ordinal))
+        {
+            return false;
+        }
+
+        if (Dictionary.Count >= MaxDictionaryWords)
+        {
+            throw new DomainException(DomainError.DictionaryFull, $"The dictionary holds at most {MaxDictionaryWords} words.");
+        }
+
+        Save(_current with { Words = [.. Dictionary.Append(valid).Order(StringComparer.Ordinal)] });
+        return true;
+    }
+
+    /// <summary>Takes a word out of the writer's own dictionary.</summary>
+    /// <returns>Whether it changed.</returns>
+    public bool RemoveWord(string word)
+    {
+        var valid = ValidWord(word);
+        if (!Dictionary.Contains(valid, StringComparer.Ordinal))
+        {
+            return false;
+        }
+
+        Save(_current with { Words = [.. Dictionary.Where(known => known != valid)] });
+        return true;
+    }
+
+    private static string ValidWord(string? word)
+    {
+        var trimmed = word?.Trim() ?? string.Empty;
+        return trimmed.Length is > 0 and <= MaxDictionaryWordLength && !trimmed.Any(char.IsWhiteSpace)
+            ? trimmed
+            : throw new DomainException(DomainError.InvalidWord, "A word of the dictionary is one word of up to 60 characters.");
+    }
+
     public OwnAmbience? FindOwn(Guid id) => Own.FirstOrDefault(own => own.Id == id);
 
     public void AddOwn(OwnAmbience own)

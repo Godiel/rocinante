@@ -38,6 +38,9 @@ public interface IChangeNotifier
     /// <summary>Elements, relationships or kinds of relationship of the open work changed.</summary>
     void ElementsChanged(ElementsChange change, string origin);
 
+    /// <summary>The writer's own dictionary changed.</summary>
+    void DictionaryChanged(IReadOnlyList<string> words, string origin);
+
     /// <summary>A suggested name was dismissed: every window asks for the suggestions again.</summary>
     void SuggestionsChanged(string origin);
 

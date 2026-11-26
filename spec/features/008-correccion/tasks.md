@@ -3,10 +3,10 @@
 Checklist derivada de [`plan.md`](plan.md). Rama: `feature/008-correccion`.
 
 ## 1. Contrato (versión 11)
-- [ ] `dictionary.get`, `dictionary.add`, `dictionary.remove`, `dictionary.changed` y `Preferences.correctionVisible`.
+- [x] `dictionary.get`, `dictionary.add`, `dictionary.remove`, `dictionary.changed` y `Preferences.correctionVisible`.
 
 ## 2. Núcleo
-- [ ] Diccionario propio en `settings.json`, con límites y tests; logs sin palabras.
+- [x] Diccionario propio en `settings.json`, con límites y tests; logs sin palabras.
 
 ## 3. Reglas de puntuación
 - [ ] Una función por regla, con casos que marcan y casos correctos que no.

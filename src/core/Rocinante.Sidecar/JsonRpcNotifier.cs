@@ -37,6 +37,9 @@ internal sealed class JsonRpcNotifier(MessageWriter writer) : IChangeNotifier
             new NotesChangedNotification([.. notes.Select(Wire.Of)], [.. removed.Select(id => id.Value)], origin),
             WireJson.Default.NotesChangedNotification);
 
+    public void DictionaryChanged(IReadOnlyList<string> words, string origin) =>
+        Send("dictionary.changed", new DictionaryChangedNotification(words, origin), WireJson.Default.DictionaryChangedNotification);
+
     public void SuggestionsChanged(string origin) =>
         Send("suggestions.changed", new SuggestionsChangedNotification(origin), WireJson.Default.SuggestionsChangedNotification);
 

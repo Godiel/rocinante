@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 10,
+  "protocolVersion": 11,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -1156,6 +1156,60 @@
       "result": {
         "type": "null"
       }
+    },
+    "dictionary.get": {
+      "description": "The writer's own dictionary: words the spelling check accepts in every work, in order.",
+      "params": null,
+      "result": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/DictionaryWord"
+        }
+      }
+    },
+    "dictionary.add": {
+      "description": "Adds a word to the writer's own dictionary. Broadcasts dictionary.changed.",
+      "params": {
+        "type": "object",
+        "required": ["word", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "word": {
+            "$ref": "#/$defs/DictionaryWord"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/DictionaryWord"
+        }
+      }
+    },
+    "dictionary.remove": {
+      "description": "Takes a word out of the writer's own dictionary. Broadcasts dictionary.changed.",
+      "params": {
+        "type": "object",
+        "required": ["word", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "word": {
+            "$ref": "#/$defs/DictionaryWord"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/DictionaryWord"
+        }
+      }
     }
   },
   "notifications": {
@@ -1387,6 +1441,25 @@
           }
         }
       }
+    },
+    "dictionary.changed": {
+      "description": "The writer's own dictionary changed: every window checks the spelling with these words.",
+      "params": {
+        "type": "object",
+        "required": ["words", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "words": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/DictionaryWord"
+            }
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -1491,6 +1564,8 @@
         "noteNotFound",
         "noteIsDeleted",
         "noteIsNotDeleted",
+        "invalidWord",
+        "dictionaryFull",
         "formatOutOfRange",
         "textAreaTooSmall",
         "ambientRepeated",
@@ -1540,7 +1615,8 @@
         "counterVisible",
         "typewriterScrolling",
         "ambience",
-        "mentionsVisible"
+        "mentionsVisible",
+        "correctionVisible"
       ],
       "additionalProperties": false,
       "properties": {
@@ -1562,6 +1638,10 @@
         "mentionsVisible": {
           "type": "boolean",
           "description": "Whether the mentions of the fichas are marked in the text."
+        },
+        "correctionVisible": {
+          "type": "boolean",
+          "description": "Whether the spelling and punctuation marks show in the text."
         }
       }
     },
@@ -1743,6 +1823,9 @@
           "$ref": "#/$defs/Ambience"
         },
         "mentionsVisible": {
+          "type": "boolean"
+        },
+        "correctionVisible": {
           "type": "boolean"
         }
       }
@@ -2787,6 +2870,13 @@
           "type": "string"
         }
       }
+    },
+    "DictionaryWord": {
+      "description": "A word, as written, without spaces.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "pattern": "^\\S+$"
     }
   }
 }

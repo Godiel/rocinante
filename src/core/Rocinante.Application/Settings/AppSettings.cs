@@ -22,7 +22,13 @@ public enum OutlineMode
 
 /// <summary>How the writer likes to work. They belong to the writer, not to any work.</summary>
 public sealed record Preferences(
-    Theme Theme, OutlineMode Outline, bool CounterVisible, bool TypewriterScrolling, Ambience Ambience, bool MentionsVisible = true)
+    Theme Theme,
+    OutlineMode Outline,
+    bool CounterVisible,
+    bool TypewriterScrolling,
+    Ambience Ambience,
+    bool MentionsVisible = true,
+    bool CorrectionVisible = true)
 {
     public static Preferences Default { get; } = new(Theme.Paper, OutlineMode.Docked, CounterVisible: true, TypewriterScrolling: true, Ambience.Default);
 }
@@ -34,7 +40,8 @@ public sealed record PreferencesChange(
     bool? CounterVisible = null,
     bool? TypewriterScrolling = null,
     Ambience? Ambience = null,
-    bool? MentionsVisible = null)
+    bool? MentionsVisible = null,
+    bool? CorrectionVisible = null)
 {
     public Preferences ApplyTo(Preferences preferences)
     {
@@ -45,7 +52,8 @@ public sealed record PreferencesChange(
             CounterVisible ?? preferences.CounterVisible,
             TypewriterScrolling ?? preferences.TypewriterScrolling,
             Ambience ?? preferences.Ambience,
-            MentionsVisible ?? preferences.MentionsVisible);
+            MentionsVisible ?? preferences.MentionsVisible,
+            CorrectionVisible ?? preferences.CorrectionVisible);
     }
 }
 
@@ -65,11 +73,20 @@ public sealed record RecentProject(string Path, string Title, DateTimeOffset Las
 /// <param name="LastProject">The project that was open when the app quit; null if the writer closed it.</param>
 /// <param name="LastFormat">The format of the last work the writer set up; null if there is none yet.</param>
 /// <param name="Own">The images and sounds the writer added, in the order they were added; null means none.</param>
+/// <param name="Words">The writer's own dictionary, in order; null means none.</param>
 public sealed record AppSettings(
-    Preferences Preferences, IReadOnlyList<RecentProject> Recent, string? LastProject, WorkFormat? LastFormat = null, IReadOnlyList<OwnAmbience>? Own = null)
+    Preferences Preferences,
+    IReadOnlyList<RecentProject> Recent,
+    string? LastProject,
+    WorkFormat? LastFormat = null,
+    IReadOnlyList<OwnAmbience>? Own = null,
+    IReadOnlyList<string>? Words = null)
 {
     public static AppSettings Empty { get; } = new(Preferences.Default, [], LastProject: null);
 
     /// <summary>The writer's own images and sounds; never null.</summary>
     public IReadOnlyList<OwnAmbience> OwnAmbience => Own ?? [];
+
+    /// <summary>The writer's own dictionary: words the spelling check accepts in every work; never null.</summary>
+    public IReadOnlyList<string> Dictionary => Words ?? [];
 }

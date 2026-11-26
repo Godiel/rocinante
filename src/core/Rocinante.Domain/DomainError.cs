@@ -37,4 +37,6 @@ public enum DomainError
     SameElement,
     NoteIsDeleted,
     NoteIsNotDeleted,
+    InvalidWord,
+    DictionaryFull,
 }

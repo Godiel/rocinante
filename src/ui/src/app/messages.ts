@@ -24,6 +24,8 @@ export const messages: Record<ErrorReason, string> = {
   noteNotFound: "Esa nota ya no existe.",
   noteIsDeleted: "Esa nota está borrada. Puede que se haya borrado en otra ventana.",
   noteIsNotDeleted: "Esa nota no está borrada.",
+  invalidWord: "El diccionario guarda palabras sueltas de hasta 60 letras.",
+  dictionaryFull: "El diccionario propio está lleno: tiene 5000 palabras.",
   formatOutOfRange:
     "Alguna medida del formato no es posible: la hoja mide entre 7 y 30 cm por lado, la letra entre 8 y 16 puntos y el interlineado entre 1 y 2.",
   textAreaTooSmall:

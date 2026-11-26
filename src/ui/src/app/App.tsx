@@ -35,6 +35,7 @@ const DEFAULT_PREFERENCES: Preferences = {
   counterVisible: true,
   typewriterScrolling: true,
   mentionsVisible: true,
+  correctionVisible: true,
   ambience: DEFAULT_AMBIENCE,
 };
 

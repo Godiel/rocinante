@@ -37,6 +37,9 @@ internal static class CoreMethods
         table.On("diagnostics.report", json.ReportParams, p => core.Problems.Report(p.Source, p.Level, p.Message, p.Detail));
 
         table.On("app.start", json.OriginParams, json.StartStateDto, p => Wire.Of(core.Settings.Start(p.Origin)));
+        table.On("dictionary.get", json.IReadOnlyListString, () => core.Settings.Dictionary());
+        table.On("dictionary.add", json.WordParams, json.IReadOnlyListString, p => core.Settings.AddWord(p.Word, p.Origin));
+        table.On("dictionary.remove", json.WordParams, json.IReadOnlyListString, p => core.Settings.RemoveWord(p.Word, p.Origin));
         table.On("preferences.update", json.UpdatePreferencesParams, json.PreferencesDto, p =>
             Wire.Of(core.Settings.UpdatePreferences(Wire.ToChange(p.Changes), p.Origin)));
         table.On("recent.list", json.IReadOnlyListRecentProjectDto, () => Wire.Of(core.Settings.Recent()));

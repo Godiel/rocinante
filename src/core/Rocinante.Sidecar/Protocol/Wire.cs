@@ -136,7 +136,8 @@ internal static class Wire
             preferences.CounterVisible,
             preferences.TypewriterScrolling,
             Of(preferences.Ambience),
-            preferences.MentionsVisible);
+            preferences.MentionsVisible,
+            preferences.CorrectionVisible);
 
     public static PreferencesChange ToChange(PreferencesChangeDto change) =>
         new(
@@ -145,7 +146,8 @@ internal static class Wire
             change.CounterVisible,
             change.TypewriterScrolling,
             change.Ambience is { } ambience ? ToAmbience(ambience) : null,
-            change.MentionsVisible);
+            change.MentionsVisible,
+            change.CorrectionVisible);
 
     private static string Name<T>(T value)
         where T : struct, Enum => JsonNamingPolicy.CamelCase.ConvertName(value.ToString());
