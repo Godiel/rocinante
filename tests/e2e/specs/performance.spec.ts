@@ -514,3 +514,59 @@ test.describe("a long work with its spelling checked", () => {
     expect(p95).toBeLessThan(MAX_P95_MS);
   });
 });
+
+test.describe("the threads of a long work", () => {
+  test.setTimeout(240_000);
+
+  test("the threads of a work of 150000 words and 300 fichas open in under a second, and typing keeps up after", async ({
+    desk,
+  }) => {
+    const app = await longWork(desk);
+    const names = [
+      "hidalgo",
+      "rocín",
+      "galgo",
+      "Mancha",
+      "adarga",
+      "lanza",
+      "olla",
+      "vaca",
+      "lentejas",
+      "palomino",
+    ];
+    await fillNamedFichas(app.page, 300, names);
+    const board = await call<{ elements: { id: string; name: string }[] }>(app.page, "board.get");
+    const chosen = board.elements
+      .filter((element) => names.includes(element.name))
+      .map((e) => e.id);
+    await call(app.page, "threads.choose", { elements: chosen, origin: "seed" });
+    await app.page.reload();
+    await expect(chapterText(app.page).locator("p")).toHaveCount(
+      CHAPTER_WORDS / WORDS_PER_PARAGRAPH,
+    );
+
+    const started = Date.now();
+    await app.page.keyboard.press("F8");
+    await expect(app.page.getByRole("button", { name: /^hidalgo en «Capítulo 2»/ })).toBeVisible();
+    const opened = Date.now() - started;
+    const points = await app.page.locator(".threads-point").count();
+    report(
+      `hilos de 10 fichas en ${WORK_WORDS} palabras con 300 fichas: ${points} puntos · ${opened} ms`,
+    );
+    expect(points).toBeGreaterThan(50);
+    expect(opened).toBeLessThan(VIRTUAL_MAC ? 3000 : 1000);
+
+    // Back to the text, the threads wait without asking the core while the writer types.
+    await app.page.keyboard.press("F8");
+    await cursorInTheMiddle(app.page);
+    const times = await typeAndMeasure(
+      app.page,
+      " Y así, del poco dormir y del mucho leer, el hidalgo perdió el juicio.",
+    );
+    const p95 = percentile(times, 95);
+    report(
+      `escribir tras abrir los hilos: ${times.length} pulsaciones · mediana ${percentile(times, 50).toFixed(1)} ms · p95 ${p95.toFixed(1)} ms`,
+    );
+    expect(p95).toBeLessThan(MAX_P95_MS);
+  });
+});
