@@ -189,12 +189,12 @@ test("the threads of fate: where each ficha goes, what happens to it and when it
       "document.get",
       { id: first.id },
     );
-    const paragraphs = (chapter.content.content ?? []).map((block) =>
+    const holds = (chapter.content.content ?? []).map((block) =>
       (block.content ?? []).map((inline) => inline.text ?? "").join(""),
     );
     expect(
       view.milestones.find((milestone) => milestone.text === "Muere su padre"),
-      `párrafos del capítulo: ${JSON.stringify(paragraphs)}`,
+      `párrafos del capítulo: ${JSON.stringify(holds)}`,
     ).toMatchObject({
       passage: DEATH,
       lost: false,
