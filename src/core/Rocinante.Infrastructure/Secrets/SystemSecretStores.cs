@@ -219,3 +219,15 @@ public sealed class LinuxSecretToolStore(string service) : CommandSecretStore
     public override void Delete(string provider) =>
         Run("secret-tool", ["clear", "service", service, "provider", provider]);
 }
+
+/// <summary>Keys that last only while the core runs, never written anywhere: for the end-to-end tests.</summary>
+public sealed class SessionSecretStore : ISecretStore
+{
+    private readonly Dictionary<string, string> _keys = [];
+
+    public string? Read(string provider) => _keys.GetValueOrDefault(provider);
+
+    public void Write(string provider, string key) => _keys[provider] = key;
+
+    public void Delete(string provider) => _keys.Remove(provider);
+}

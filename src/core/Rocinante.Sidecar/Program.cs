@@ -2,6 +2,7 @@ using System.Text;
 using Rocinante.Infrastructure.Files;
 using Rocinante.Infrastructure.Logging;
 using Rocinante.Infrastructure.Persistence;
+using Rocinante.Infrastructure.Secrets;
 using Rocinante.Infrastructure.Settings;
 using Rocinante.Sidecar;
 using Serilog.Events;
@@ -9,14 +10,15 @@ using Serilog.Events;
 // The Rocinante core: a JSON-RPC 2.0 server over stdin/stdout, started by the Tauri host.
 // stdout carries protocol messages only; problems go to the log in the app data folder.
 //
-//   rocinante-core [--data-dir <folder>] [--open <project.rocinante>]
+//   rocinante-core [--data-dir <folder>] [--open <project.rocinante>] [--keys-in-memory]
 //
 // --data-dir  where the app keeps its settings and its log (the host passes its app data folder).
 // --open      a project the app was launched with, opened by the first window.
+// --keys-in-memory  the API keys of the squire last only while the core runs, for the end-to-end tests.
 var arguments = CommandLine.Parse(args);
 if (arguments is null)
 {
-    Console.Error.WriteLine("usage: rocinante-core [--data-dir <folder>] [--open <project.rocinante>]");
+    Console.Error.WriteLine("usage: rocinante-core [--data-dir <folder>] [--open <project.rocinante>] [--keys-in-memory]");
     return 2;
 }
 
@@ -39,7 +41,8 @@ var options = new CoreOptions(
     arguments.OpenFile,
     new LoggedProblems(log),
     new AmbienceFolder(dataDirectory),
-    new ChosenFiles());
+    new ChosenFiles(),
+    arguments.KeysInMemory ? new SessionSecretStore() : null);
 
 var contract = ProtocolContract.LoadEmbedded();
 using var core = new Core(output, new LogWriter(log, LogEventLevel.Error), options, contract);

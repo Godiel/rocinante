@@ -1,13 +1,14 @@
 namespace Rocinante.Sidecar;
 
 /// <summary>Arguments of the core process.</summary>
-internal sealed record CommandLine(string? DataDirectory, string? OpenFile)
+internal sealed record CommandLine(string? DataDirectory, string? OpenFile, bool KeysInMemory = false)
 {
-    /// <summary>Reads <c>--data-dir</c> and <c>--open</c>. Returns null if anything else is passed.</summary>
+    /// <summary>Reads <c>--data-dir</c>, <c>--open</c> and <c>--keys-in-memory</c>. Returns null if anything else is passed.</summary>
     public static CommandLine? Parse(IReadOnlyList<string> args)
     {
         string? dataDirectory = null;
         string? openFile = null;
+        var keysInMemory = false;
 
         for (var index = 0; index < args.Count; index++)
         {
@@ -22,11 +23,14 @@ internal sealed record CommandLine(string? DataDirectory, string? OpenFile)
                     openFile = value;
                     index++;
                     break;
+                case "--keys-in-memory":
+                    keysInMemory = true;
+                    break;
                 default:
                     return null;
             }
         }
 
-        return new CommandLine(dataDirectory, openFile);
+        return new CommandLine(dataDirectory, openFile, keysInMemory);
     }
 }

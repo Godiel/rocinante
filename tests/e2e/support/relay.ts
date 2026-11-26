@@ -66,7 +66,8 @@ export interface Relay {
 }
 
 function coreCommand(dataDirectory: string): [string, string[]] {
-  const args = ["--data-dir", dataDirectory];
+  // The keys of the squire stay in the core's memory: the tests leave nothing in the system's store.
+  const args = ["--data-dir", dataDirectory, "--keys-in-memory"];
   const custom = process.env.ROCINANTE_CORE;
   if (custom) return [custom, args];
   return ["dotnet", [CORE_LIBRARY, ...args]];

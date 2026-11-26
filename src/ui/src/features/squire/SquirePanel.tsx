@@ -32,6 +32,8 @@ export function SquirePanel({
 }: SquirePanelProps) {
   const connected = settings.provider !== null && settings.model !== null;
   const [asked, setAsked] = useState(false);
+  // Settings opened because it was not connected stay open once it is: the key and the switch come next.
+  if (loaded && !connected && !asked) setAsked(true);
   const showSettings = loaded && (asked || !connected);
 
   return (

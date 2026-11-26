@@ -52,7 +52,8 @@ describe("the settings of the squire", () => {
     });
 
     rerender(<Panel settings={{ ...NO_SQUIRE, provider: "gemini", model: "gemini-2.5-flash" }} />);
-    await user.click(screen.getByRole("button", { name: "Ajustes" }));
+    // Still in the settings: the key comes next.
+    expect(screen.getByRole("button", { name: "Propuestas" })).toBeInTheDocument();
     const key = screen.getByLabelText("Tu clave");
     expect(key).toHaveAttribute("type", "password");
     await user.type(key, "g-clave");
