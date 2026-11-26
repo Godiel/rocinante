@@ -1,6 +1,6 @@
 # 011 · Exportación
 
-**Estado:** propuesta.
+**Estado:** hecha. Quedan por comprobar a mano EPUBCheck y abrir el `.docx` en Word (ver los criterios).
 
 ## Qué hace
 
@@ -57,25 +57,25 @@ Un libro escrito tiene que poder salir: a imprenta, a un lector de libros electr
 ## Criterios de aceptación
 
 **Contenido**
-- [ ] Los cuatro formatos llevan los capítulos en orden, con sus títulos, notas al pie, cursivas, negritas, citas, listas y separadores de escena, y sin los fragmentos ni las notas del autor.
-- [ ] La portada, los créditos y el índice salen cuando se piden y no salen cuando se quitan. El autor y los créditos se recuerdan en la obra.
+- [x] Los cuatro formatos llevan los capítulos en orden, con sus títulos, notas al pie, cursivas, negritas, citas, listas y separadores de escena, y sin los fragmentos ni las notas del autor.
+- [x] La portada, los créditos y el índice salen cuando se piden y no salen cuando se quitan. El autor y los créditos se recuerdan en la obra.
 
 **Formato**
-- [ ] El PDF respeta el tamaño de hoja, los márgenes enfrentados, la tipografía incrustada, el cuerpo, el interlineado, la sangría, la justificación y la capitular. Cada capítulo empieza en página nueva y las hojas van numeradas.
-- [ ] El EPUB es válido para EPUB 3 (EPUBCheck sin errores), con título, autor, idioma, índice navegable y, si se eligió, imagen de portada.
-- [ ] El `.docx` se abre en Word y en LibreOffice con el tamaño de hoja, los márgenes, la tipografía, los estilos de título y las notas al pie.
-- [ ] El `.md` se lee bien en cualquier visor de Markdown, con las notas al pie en sintaxis `[^1]`.
+- [x] El PDF respeta el tamaño de hoja, los márgenes enfrentados, la tipografía incrustada, el cuerpo, el interlineado, la sangría, la justificación y la capitular. Cada capítulo empieza en página nueva y las hojas van numeradas.
+- [ ] El EPUB es válido para EPUB 3 (EPUBCheck sin errores), con título, autor, idioma, índice navegable y, si se eligió, imagen de portada. _Los tests comprueban la estructura que pide EPUB 3; EPUBCheck, que es un programa Java, queda por pasar a mano._
+- [ ] El `.docx` se abre en Word y en LibreOffice con el tamaño de hoja, los márgenes, la tipografía, los estilos de título y las notas al pie. _Comprobado en LibreOffice; en Word, pendiente._
+- [x] El `.md` se lee bien en cualquier visor de Markdown, con las notas al pie en sintaxis `[^1]`.
 
 **Exportar**
-- [ ] «Exportar» y F9 abren el diálogo; se elige formato, partes y lugar, se ve el avance y al terminar se puede mostrar el archivo.
-- [ ] Una obra de 150 000 palabras se exporta a PDF en menos de 30 segundos, y a los demás formatos en menos de 10, sin bloquear la escritura en otras ventanas.
-- [ ] Si la exportación falla, se dice por qué y no queda un archivo a medias.
+- [x] «Exportar» y F9 abren el diálogo; se elige formato, partes y lugar, se ve el avance y al terminar se puede mostrar el archivo.
+- [x] Una obra de 150 000 palabras se exporta a PDF en menos de 30 segundos, y a los demás formatos en menos de 10, sin bloquear la escritura en otras ventanas.
+- [x] Si la exportación falla, se dice por qué y no queda un archivo a medias.
 
 **Calidad**
-- [ ] Los métodos nuevos forman parte del contrato. El autor, los créditos y la portada se guardan en el `.rocinante` con una migración documentada.
-- [ ] Las dependencias nuevas tienen licencias compatibles con MIT.
-- [ ] Los registros no contienen el texto de la obra ni las rutas de los archivos.
-- [ ] Tests del núcleo para cada formato (estructura, contenido y formato), y una prueba de extremo a extremo que exporta una obra a los cuatro.
+- [x] Los métodos nuevos forman parte del contrato. El autor, los créditos y la portada se guardan en el `.rocinante` con una migración documentada.
+- [x] Las dependencias nuevas tienen licencias compatibles con MIT.
+- [x] Los registros no contienen el texto de la obra ni las rutas de los archivos.
+- [x] Tests del núcleo para cada formato (estructura, contenido y formato), y una prueba de extremo a extremo que exporta una obra a los cuatro.
 
 ## Fuera de alcance
 

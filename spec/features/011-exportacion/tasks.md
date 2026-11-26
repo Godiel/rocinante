@@ -24,9 +24,9 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/011-exportacion`.
 - [x] Diálogo Exportar con F9, formato, partes, autor, créditos, portada, guardar, avance y «Mostrar en la carpeta».
 
 ## 7. Pruebas de extremo a extremo y de rendimiento
-- [ ] Una obra exportada a los cuatro formatos.
-- [ ] Una obra de 150 000 palabras a PDF y a los demás formatos.
+- [x] Una obra exportada a los cuatro formatos.
+- [x] Una obra de 150 000 palabras a PDF y a los demás formatos.
 - [ ] Todo en verde en la CI.
 
 ## 8. Validación y cierre
-- [ ] Criterios, `tech-stack.md`, hoja de ruta y PR.
+- [x] Criterios, `tech-stack.md`, hoja de ruta y PR.
