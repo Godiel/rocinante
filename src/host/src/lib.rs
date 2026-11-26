@@ -28,15 +28,25 @@ async fn core_request(
     relay.request(method, params).await
 }
 
-/// Opens another window on the same project.
+/// Opens another window on the same project. With `board`, the window shows only the board: its label
+/// starts with `board-`, which is how the interface knows.
 ///
 /// Must be `async`: building a window from a synchronous command deadlocks on Windows.
 #[tauri::command]
-async fn open_window(app: AppHandle) -> Result<(), String> {
-    let label = format!("window-{}", WINDOW_COUNTER.fetch_add(1, Ordering::Relaxed));
+async fn open_window(app: AppHandle, board: Option<bool>) -> Result<(), String> {
+    let board = board.unwrap_or(false);
+    let label = format!(
+        "{}-{}",
+        if board { "board" } else { "window" },
+        WINDOW_COUNTER.fetch_add(1, Ordering::Relaxed)
+    );
     WebviewWindowBuilder::new(&app, &label, WebviewUrl::default())
-        .title("Rocinante")
-        .inner_size(900.0, 700.0)
+        .title(if board {
+            "Rocinante · Tablero"
+        } else {
+            "Rocinante"
+        })
+        .inner_size(if board { 1100.0 } else { 900.0 }, 700.0)
         .build()
         .map(|_| ())
         .map_err(|error| error.to_string())

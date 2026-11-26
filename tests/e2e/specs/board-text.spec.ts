@@ -66,3 +66,52 @@ test("the text suggests fichas for the names it repeats", async ({ desk }) => {
   await expect(chapterText(again.page)).toBeVisible();
   expect(await call(again.page, "suggestions.get")).toEqual([]);
 });
+
+test("the board goes to a window of its own and comes back", async ({ desk }) => {
+  const app = await desk.open();
+  const { page } = app;
+  await createWork(desk, page, "Dos pantallas");
+  await call(page, "element.create", { kind: "character", name: "Sancho", origin: "seed" });
+  await page.keyboard.press("F2");
+  await expect(card(page, "Sancho")).toBeVisible();
+
+  // «Separar» leaves the window of the work on the text; the board opens in its own.
+  await page.getByRole("button", { name: "Separar" }).click();
+  await expect(page.getByRole("tab", { name: "Escritura" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  const board = await desk.openWindow(app, "board-1");
+  await expect(card(board, "Sancho")).toBeVisible();
+  await expect(board.getByRole("tab")).toHaveCount(0);
+  await page.getByRole("tab", { name: "Tablero" }).click();
+  await expect(page.getByText("El Tablero está en otra ventana.")).toBeVisible();
+
+  // What changes in one window shows in the other.
+  await board.getByRole("button", { name: "Nueva ficha" }).click();
+  await board.getByRole("textbox", { name: "Nombre", exact: true }).fill("Rocinante");
+  await page.getByRole("tab", { name: "Escritura" }).click();
+  await page.keyboard.press("Control+Shift+E");
+  await expect(
+    page
+      .getByRole("complementary", { name: "Fichas de la obra" })
+      .getByRole("button", { name: /^Rocinante/ }),
+  ).toBeVisible();
+
+  // «Acoplar» brings it back, showing.
+  await page.getByRole("tab", { name: "Tablero" }).click();
+  await board.getByRole("button", { name: "Acoplar" }).click();
+  await expect(card(page, "Rocinante")).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Tablero" })).toHaveAttribute("aria-selected", "true");
+
+  // Closing a separated board also brings it back, and «Traerlo aquí» asks it home.
+  const again = await desk.openWindow(app, "board-2");
+  await expect(page.getByText("El Tablero está en otra ventana.")).toBeVisible();
+  await again.close({ runBeforeUnload: true });
+  await expect(card(page, "Sancho")).toBeVisible();
+  const third = await desk.openWindow(app, "board-3");
+  await expect(page.getByText("El Tablero está en otra ventana.")).toBeVisible();
+  await page.getByRole("button", { name: "Traerlo aquí" }).click();
+  await expect(card(page, "Sancho")).toBeVisible();
+  expect(third.isClosed()).toBe(false);
+});

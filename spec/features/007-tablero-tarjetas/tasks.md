@@ -34,9 +34,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests y comprobación en un navegador real.
 
 ## 8. Separar el Tablero
-- [ ] `open_window` del anfitrión acepta `board`.
-- [ ] Ventana del Tablero con «Acoplar»; la de la obra con «Traerlo aquí».
-- [ ] Tests y comprobación en un navegador real.
+- [x] `open_window` del anfitrión acepta `board`.
+- [x] Ventana del Tablero con «Acoplar»; la de la obra con «Traerlo aquí».
+- [x] Tests y comprobación en un navegador real.
 
 ## 9. Pruebas de extremo a extremo y rendimiento
 - [ ] El recorrido de la spec.

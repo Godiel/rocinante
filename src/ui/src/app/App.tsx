@@ -18,6 +18,8 @@ import type {
 } from "../bridge/generated/protocol";
 import { applyTheme } from "../design/themes";
 import { Welcome, type Pickers } from "../features/welcome/Welcome";
+import { BoardWindow } from "../features/workspace/BoardWindow";
+import { isBoardWindow } from "../features/workspace/board-window";
 import { WritingView } from "../features/editor/WritingView";
 import { messageFor, messages } from "./messages";
 import { LogFolderButton, Trouble } from "./Trouble";
@@ -158,6 +160,15 @@ export function App({ origin, pickers }: AppProps) {
           />
         );
       case "writing":
+        if (isBoardWindow(origin))
+          return (
+            <BoardWindow
+              key={screen.project.path}
+              project={screen.project}
+              origin={origin}
+              pickers={pickers}
+            />
+          );
         return (
           <WritingView
             key={screen.project.path}

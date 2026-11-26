@@ -64,6 +64,7 @@ import { ambientSounds, tracksOf } from "../../audio/ambient-sounds";
 import { WorkspaceTabs } from "../workspace/WorkspaceTabs";
 import { panelId, tabId } from "../workspace/tabs";
 import { useWorkspaceTab } from "../workspace/useWorkspaceTab";
+import { useDetachedBoard } from "../workspace/board-window";
 import "./writing-view.css";
 
 // The board brings React Flow with it: it is loaded the first time the writer opens it.
@@ -444,6 +445,13 @@ export function WritingView({
 
   const workspace = useWorkspaceTab({ focused: focus.focused, onBackToWriting: focusText });
   const onBoard = workspace.tab === "board";
+  // The board may live in a window of its own; when it comes back, it shows here.
+  const showBoard = workspace.show;
+  const boardHome = useDetachedBoard(useCallback(() => showBoard("board"), [showBoard]));
+  const separateBoard = () => {
+    void invoke("open_window", { board: true });
+    workspace.show("writing");
+  };
   useEffect(() => {
     onBoardRef.current = onBoard;
   }, [onBoard]);
@@ -562,6 +570,16 @@ export function WritingView({
           {!focus.focused && <WorkspaceTabs tab={workspace.tab} onShow={workspace.show} />}
         </span>
         <nav aria-label="Proyecto">
+          {onBoard && !boardHome.detached && (
+            <button
+              type="button"
+              className="action"
+              title="Abrir el Tablero en su propia ventana"
+              onClick={separateBoard}
+            >
+              Separar
+            </button>
+          )}
           <button
             className="action"
             onClick={() =>
@@ -901,14 +919,23 @@ export function WritingView({
           aria-labelledby={tabId("board")}
           hidden={!onBoard}
         >
-          <Suspense fallback={null}>
-            <BoardTab
-              board={board}
-              loaded={boardLoaded}
-              origin={origin}
-              chooseImage={pickers.chooseElementImage}
-            />
-          </Suspense>
+          {boardHome.detached ? (
+            <div className="board-elsewhere">
+              <p>El Tablero está en otra ventana.</p>
+              <button type="button" className="action action-main" onClick={boardHome.bringBack}>
+                Traerlo aquí
+              </button>
+            </div>
+          ) : (
+            <Suspense fallback={null}>
+              <BoardTab
+                board={board}
+                loaded={boardLoaded}
+                origin={origin}
+                chooseImage={pickers.chooseElementImage}
+              />
+            </Suspense>
+          )}
         </div>
       )}
     </div>
