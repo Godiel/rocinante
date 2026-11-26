@@ -24,7 +24,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/010-hilos-destino`.
 - [x] Pasajes de un punto, hitos en la vista, «Marcar hito» desde el texto y desde un punto, y la vista al día al escribir.
 
 ## 8. Relaciones con fechas
-- [ ] «Desde» y «hasta» en la ficha; relaciones vigentes y marcas en la vista.
+- [x] «Desde» y «hasta» en la ficha; relaciones vigentes y marcas en la vista.
 
 ## 9. Propuestas de hito
 - [ ] En la pestaña Escudero: aceptar, corregir y descartar.

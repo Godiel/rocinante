@@ -6,6 +6,9 @@ import { kindLabel } from "./kinds";
 import { changeRelationship, relate, type KindChoice } from "./relate";
 import { labelFrom } from "./relationship-kinds";
 import { RelationshipPicker } from "./RelationshipPicker";
+import { RelationshipWhen } from "./RelationshipWhen";
+import { whenText } from "./relationship-when";
+import { useChapters } from "./useChapters";
 import { byName, matches } from "./search";
 
 export interface ElementRelationsProps {
@@ -35,6 +38,9 @@ export function ElementRelations({
   const [finding, setFinding] = useState(false);
   const [query, setQuery] = useState("");
   const [picking, setPicking] = useState<Picking | null>(null);
+  // The relationship whose chapters the writer is choosing.
+  const [when, setWhen] = useState<string | null>(null);
+  const chapters = useChapters();
 
   const byId = useMemo(
     () => new Map(board.elements.map((element) => [element.id, element])),
@@ -116,6 +122,19 @@ export function ElementRelations({
               >
                 {other.name}
               </button>
+              {whenText(relationship, chapters) !== "" && (
+                <span className="element-quiet"> · {whenText(relationship, chapters)}</span>
+              )}
+              <button
+                type="button"
+                className="element-relation-change"
+                aria-label={`Cuándo vale «${label} ${other.name}»`}
+                aria-expanded={when === relationship.id}
+                title="Los capítulos en que vale"
+                onClick={() => setWhen(when === relationship.id ? null : relationship.id)}
+              >
+                ⧗
+              </button>
               <button
                 type="button"
                 className="element-relation-change"
@@ -134,6 +153,16 @@ export function ElementRelations({
               >
                 ×
               </button>
+              {when === relationship.id && (
+                <RelationshipWhen
+                  relationship={relationship}
+                  said={`${label} ${other.name}`}
+                  chapters={chapters}
+                  origin={origin}
+                  onProblem={onProblem}
+                  onDone={() => setWhen(null)}
+                />
+              )}
             </li>
           ))}
         </ul>

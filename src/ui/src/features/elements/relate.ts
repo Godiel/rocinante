@@ -65,8 +65,8 @@ export function relate(from: string, to: string, choice: KindChoice, origin: str
 }
 
 /**
- * Gives a relationship another kind. Read the other way round it is a new relationship: the new one is made
- * first, so a failure leaves the old one where it was.
+ * Gives a relationship another kind. Read the other way round it is a new relationship, between the same
+ * chapters: the new one is made first, so a failure leaves the old one where it was.
  */
 export async function changeRelationship(
   relationship: Relationship,
@@ -85,6 +85,8 @@ export async function changeRelationship(
     from: relationship.to,
     to: relationship.from,
     kind: choice.kind,
+    starts: relationship.starts,
+    ends: relationship.ends,
     origin,
   });
   await request("relationship.delete", { id: relationship.id, origin });
