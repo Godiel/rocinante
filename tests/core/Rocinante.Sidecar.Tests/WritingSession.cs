@@ -91,7 +91,8 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("document.delete", Params(("id", second), ("origin", Main)));
         harness.Call("document.restore", Params(("id", second), ("origin", Main)));
 
-        var note = Id(harness.Call("note.create", Params(("documentId", first), ("text", "Revisar esta fecha"), ("anchored", true), ("origin", Main))));
+        var note = Id(harness.Call("note.create", Params(
+            ("documentId", first), ("content", JsonNode.Parse(TipTap.Paragraphs("Revisar esta fecha"))), ("anchored", true), ("origin", Main))));
         harness.Call("document.save", Params(("id", first), ("content", JsonNode.Parse(TipTap.Anchored("En un lugar de la Mancha", Guid.Parse(note)))), ("origin", Main)));
         harness.Call("document.get", Params(("id", first)));
         harness.Call("project.manuscript");
@@ -105,8 +106,23 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("version.get", Params(("id", version)));
         harness.Call("version.restore", Params(("id", version), ("origin", Main)));
 
-        harness.Call("note.update", Params(("id", note), ("text", "Revisar la fecha de la batalla"), ("origin", Main)));
-        harness.Call("note.list", Params(("documentId", first)));
+        // Notes of the work: one on the chapter, now resolved and linked, and a loose idea that is
+        // deleted and brought back.
+        harness.Call("note.update", Params(
+            ("id", note),
+            ("changes", new JsonObject
+            {
+                ["content"] = JsonNode.Parse(TipTap.Paragraphs("Revisar la fecha de la batalla")),
+                ["resolved"] = true,
+                ["elements"] = new JsonArray(quixote),
+            }),
+            ("origin", Main)));
+        var idea = Id(harness.Call("note.create", Params(
+            ("documentId", null), ("content", JsonNode.Parse(TipTap.Paragraphs("Un final en el Toboso"))), ("anchored", false),
+            ("elements", new JsonArray(quixote)), ("origin", Other))));
+        harness.Call("note.delete", Params(("id", idea), ("origin", Main)));
+        harness.Call("note.restore", Params(("id", idea), ("origin", Main)));
+        harness.Call("notes.get");
         harness.Call("note.delete", Params(("id", note), ("origin", Main)));
 
         harness.Call("project.saveAs", Params(("path", harness.PathOf("copias/quijote-copia.rocinante")), ("origin", Main)));

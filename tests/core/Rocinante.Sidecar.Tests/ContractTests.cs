@@ -78,6 +78,18 @@ public sealed class ContractTests : IDisposable
     }
 
     [Fact]
+    public void The_log_of_a_whole_writing_session_keeps_nothing_the_writer_wrote()
+    {
+        new WritingSession(_harness).Run();
+
+        var log = _harness.Log.ToString();
+        foreach (var written in new[] { "Revisar", "batalla", "Toboso", "Alonso Quijano", "En un lugar de la Mancha", "quijote.rocinante" })
+        {
+            log.ShouldNotContain(written, Case.Insensitive);
+        }
+    }
+
+    [Fact]
     public void Every_error_reason_the_core_can_give_is_in_the_contract()
     {
         var reasons = Contract()["$defs"]!["ErrorReason"]!["enum"]!.AsArray().Select(node => node!.GetValue<string>()).ToList();

@@ -37,13 +37,13 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de persistencia: ida y vuelta, migración desde v3, cierre forzado a mitad de un cambio.
 
 ## 4. Casos de uso y sidecar
-- [ ] `NoteUseCases` con los métodos del contrato; cada cambio difunde `notes.changed` con su `origin`.
-- [ ] Guardar un documento actualiza el orden de las anclas, además de la reconciliación de la 001.
-- [ ] Las notas de un documento en la papelera salen de `notes.get` y vuelven al restaurarlo.
-- [ ] Los enlaces con una ficha en la papelera se conservan.
-- [ ] Ningún registro lleva el texto de las notas.
-- [ ] El escenario `WritingSession` usa todos los métodos y la notificación nuevos.
-- [ ] Tests:
+- [x] `NoteUseCases` con los métodos del contrato; cada cambio difunde `notes.changed` con su `origin`.
+- [x] Guardar un documento actualiza el orden de las anclas, además de la reconciliación de la 001.
+- [x] Las notas de un documento en la papelera salen de `notes.get` y vuelven al restaurarlo.
+- [x] Los enlaces con una ficha en la papelera se conservan.
+- [x] Ningún registro lleva el texto de las notas.
+- [x] El escenario `WritingSession` usa todos los métodos y la notificación nuevos.
+- [x] Tests:
   - límites y errores con su motivo;
   - resolver, reabrir, borrar y restaurar;
   - notas de documentos en la papelera;

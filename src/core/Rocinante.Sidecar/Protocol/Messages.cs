@@ -37,7 +37,17 @@ internal sealed record DocumentStateDto(Guid Id, JsonNode Content, long Revision
 
 internal sealed record VersionSummaryDto(Guid Id, Guid DocumentId, string Kind, string? Name, DateTimeOffset CreatedAt, StatisticsDto Statistics);
 
-internal sealed record NoteDto(Guid Id, Guid DocumentId, string Text, bool Anchored, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt);
+internal sealed record NoteDto(
+    Guid Id,
+    Guid? DocumentId,
+    JsonNode Content,
+    string Text,
+    bool Anchored,
+    int? Order,
+    DateTimeOffset? ResolvedAt,
+    IReadOnlyList<Guid> Elements,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt);
 
 internal sealed record TypingDto(string Sound, double Volume, bool Muted);
 
@@ -135,9 +145,11 @@ internal sealed record SaveDocumentParams(Guid Id, JsonObject Content, string Or
 
 internal sealed record CreateVersionParams(Guid DocumentId, string? Name, string Origin);
 
-internal sealed record CreateNoteParams(Guid DocumentId, string Text, bool Anchored, string Origin);
+internal sealed record CreateNoteParams(Guid? DocumentId, JsonObject Content, bool Anchored, IReadOnlyList<Guid>? Elements, string Origin);
 
-internal sealed record UpdateNoteParams(Guid Id, string Text, string Origin);
+internal sealed record NoteChangesDto(JsonObject? Content, bool? Resolved, IReadOnlyList<Guid>? Elements);
+
+internal sealed record UpdateNoteParams(Guid Id, NoteChangesDto Changes, string Origin);
 
 internal sealed record CardPositionDto(Guid Id, double X, double Y);
 
@@ -185,7 +197,7 @@ internal sealed record DocumentChangedNotification(DocumentStateDto Document, St
 
 internal sealed record VersionsChangedNotification(Guid DocumentId, string Origin);
 
-internal sealed record NotesChangedNotification(Guid DocumentId, IReadOnlyList<NoteDto> Notes, string Origin);
+internal sealed record NotesChangedNotification(IReadOnlyList<NoteDto> Notes, IReadOnlyList<Guid> Removed, string Origin);
 
 internal sealed record ElementsChangedNotification(
     IReadOnlyList<ElementSummaryDto> Elements,
@@ -232,6 +244,7 @@ internal sealed record ElementsChangedNotification(
 [JsonSerializable(typeof(CreateVersionParams))]
 [JsonSerializable(typeof(CreateNoteParams))]
 [JsonSerializable(typeof(UpdateNoteParams))]
+[JsonSerializable(typeof(NoteChangesDto))]
 [JsonSerializable(typeof(SystemInfoResult))]
 [JsonSerializable(typeof(ProjectStateDto))]
 [JsonSerializable(typeof(DocumentEntryDto))]

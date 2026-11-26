@@ -31,10 +31,10 @@ internal sealed class JsonRpcNotifier(MessageWriter writer) : IChangeNotifier
     public void VersionsChanged(DocumentId documentId, string origin) =>
         Send("versions.changed", new VersionsChangedNotification(documentId.Value, origin), WireJson.Default.VersionsChangedNotification);
 
-    public void NotesChanged(DocumentId documentId, IReadOnlyList<Note> notes, string origin) =>
+    public void NotesChanged(IReadOnlyList<Note> notes, IReadOnlyList<NoteId> removed, string origin) =>
         Send(
             "notes.changed",
-            new NotesChangedNotification(documentId.Value, [.. notes.Select(Wire.Of)], origin),
+            new NotesChangedNotification([.. notes.Select(Wire.Of)], [.. removed.Select(id => id.Value)], origin),
             WireJson.Default.NotesChangedNotification);
 
     public void PreferencesChanged(Preferences preferences, string origin) =>
