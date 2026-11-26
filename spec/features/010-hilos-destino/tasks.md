@@ -32,7 +32,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/010-hilos-destino`.
 ## 10. Pruebas de extremo a extremo y de rendimiento
 - [x] Hilos, hito, fechas de una relación y hito propuesto por un escudero falso.
 - [x] Hilos en una obra de 150 000 palabras y 300 fichas.
-- [ ] Todo en verde en la CI.
+- [x] Todo en verde en la CI.
 
 ## 11. Validación y cierre
 - [x] Criterios, `tech-stack.md`, hoja de ruta y PR.
