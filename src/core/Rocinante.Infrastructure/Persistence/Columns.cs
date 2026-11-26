@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using Rocinante.Domain.Elements;
 using Rocinante.Domain.Formats;
 using Rocinante.Domain.Projects;
 using Rocinante.Domain.Versions;
@@ -50,6 +51,24 @@ internal static class Columns
         Typeface.LibreBaskerville => "libre_baskerville",
         Typeface.CourierPrime => "courier_prime",
         _ => throw new ArgumentOutOfRangeException(nameof(typeface), typeface, "Unknown typeface."),
+    };
+
+    public static string Kind(ElementKind kind) => kind switch
+    {
+        ElementKind.Character => "character",
+        ElementKind.Place => "place",
+        ElementKind.Plot => "plot",
+        ElementKind.Other => "other",
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown element kind."),
+    };
+
+    public static ElementKind GetElementKind(this SqliteDataReader reader, int ordinal) => reader.GetString(ordinal) switch
+    {
+        "character" => ElementKind.Character,
+        "place" => ElementKind.Place,
+        "plot" => ElementKind.Plot,
+        "other" => ElementKind.Other,
+        var other => throw new InvalidDataException($"Unknown element kind '{other}'."),
     };
 
     public static long Flag(bool value) => value ? 1 : 0;

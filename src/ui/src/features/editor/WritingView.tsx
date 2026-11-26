@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onNotification, request } from "../../bridge/core";
@@ -17,6 +17,7 @@ import type {
 import type { Pickers } from "../welcome/Welcome";
 import { messageFor } from "../../app/messages";
 import { LogFolderButton } from "../../app/Trouble";
+import { keepsItsOwnKeys } from "../../editor/own-keys";
 import { savePendingNow } from "../../editor/pending-saves";
 import { isOutlineShortcut } from "../outline/shortcut";
 import { Outline } from "../outline/Outline";
@@ -36,13 +37,31 @@ import { useFocusMode } from "../focus/useFocusMode";
 import { useSessionGoal, type Session } from "../focus/useSessionGoal";
 import { GoalMeter, GoalReached } from "../focus/Goal";
 import { AmbienceSheet } from "../ambience/AmbienceSheet";
+import { ElementsPanel } from "../elements/ElementsPanel";
+import { suggestedAttributes } from "../elements/kinds";
+import { isElementsShortcut, panelWasOpen, rememberPanel } from "../elements/panel";
+import { useBoard } from "../elements/useBoard";
+import { useElementTrash } from "../elements/useElementTrash";
 import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
 import { ambienceUrl } from "../ambience/own-url";
 import { AnimatedBackdrop } from "../ambience/animated/AnimatedBackdrop";
 import { sounds } from "../../audio/engine";
 import { ambientSounds, tracksOf } from "../../audio/ambient-sounds";
+import { WorkspaceTabs } from "../workspace/WorkspaceTabs";
+import { panelId, tabId } from "../workspace/tabs";
+import { useWorkspaceTab } from "../workspace/useWorkspaceTab";
 import "./writing-view.css";
+
+// The board brings React Flow with it: it is loaded the first time the writer opens it.
+const BoardTab = lazy(() => import("../board/BoardTab"));
+
+/** Gives the keyboard back to the text, where the cursor was. */
+function focusText() {
+  window.document
+    .querySelector<HTMLElement>(".book-page .ProseMirror")
+    ?.focus({ preventScroll: true });
+}
 
 /** A version shown in place of the page, with the text it is compared with. */
 interface Viewing {
@@ -89,8 +108,20 @@ export function WritingView({
   const [problem, setProblem] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(preferences.outline === "docked");
   const [deleted, setDeleted] = useState<DocumentEntry | null>(null);
-  // One sheet at a time on the right of the text: the versions, the format or the ambience.
-  const [sheet, setSheet] = useState<"versions" | "format" | "ambience" | null>(null);
+  // One sheet at a time on the right of the text: the fichas, the versions, the format or the ambience.
+  // Whether the fichas were open is kept for this window.
+  const [sheet, setSheet] = useState<"elements" | "versions" | "format" | "ambience" | null>(() =>
+    panelWasOpen() ? "elements" : null,
+  );
+  const elementsOpen = sheet === "elements";
+  const { board, loaded: boardLoaded } = useBoard(project.id);
+  const [openElement, setOpenElement] = useState<string | null>(null);
+  const [freshElement, setFreshElement] = useState<{
+    id: string;
+    field: "name" | "kind";
+  } | null>(null);
+  const [searchRequest, setSearchRequest] = useState(0);
+  const elementTrash = useElementTrash(origin, setProblem);
   const versionsOpen = sheet === "versions";
   const [pagesOpen, setPagesOpen] = useState(false);
   const [nameRequest, setNameRequest] = useState(0);
@@ -102,11 +133,23 @@ export function WritingView({
   const [screen] = useState(tauriWindow);
   // Whether focus mode is on, for the shortcuts, which are bound once.
   const focusedRef = useRef(false);
+  // Whether the board shows, for the same shortcuts: those of the text wait for it.
+  const onBoardRef = useRef(false);
   // What focus mode put away, to bring it back on leaving.
   const putAway = useRef<{ outline: boolean; sheet: typeof sheet }>({
     outline: false,
     sheet: null,
   });
+
+  useEffect(() => rememberPanel(elementsOpen), [elementsOpen]);
+
+  // The fichas open with the keyboard in their search, and give it back to the text on closing.
+  const toggleElements = useCallback(() => {
+    setViewing(null);
+    setSheet((open) => (open === "elements" ? null : "elements"));
+    setSearchRequest((asked) => asked + 1);
+    focusText();
+  }, []);
 
   // First document to show.
   useEffect(() => {
@@ -204,6 +247,20 @@ export function WritingView({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (keepsItsOwnKeys(event.target)) return;
+      if (onBoardRef.current) {
+        // The shortcuts of the text wait for the writer to come back to it; F5 does not reload either.
+        if (
+          isPageViewShortcut(event) ||
+          isOutlineShortcut(event) ||
+          isVersionsShortcut(event) ||
+          isSaveVersionShortcut(event) ||
+          isElementsShortcut(event)
+        ) {
+          event.preventDefault();
+        }
+        return;
+      }
       if (focusedRef.current) {
         // In focus mode the big views stay away; a version is still kept, without the sheet.
         if (isSaveVersionShortcut(event)) {
@@ -217,7 +274,8 @@ export function WritingView({
         } else if (
           isPageViewShortcut(event) ||
           isOutlineShortcut(event) ||
-          isVersionsShortcut(event)
+          isVersionsShortcut(event) ||
+          isElementsShortcut(event)
         ) {
           event.preventDefault();
         }
@@ -230,6 +288,9 @@ export function WritingView({
       } else if (isOutlineShortcut(event)) {
         event.preventDefault();
         setOutlineOpen((open) => !open);
+      } else if (isElementsShortcut(event)) {
+        event.preventDefault();
+        toggleElements();
       } else if (isVersionsShortcut(event)) {
         event.preventDefault();
         setSheet((open) => (open === "versions" ? null : "versions"));
@@ -242,7 +303,26 @@ export function WritingView({
     const self = opening.current.origin;
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
-  }, []);
+  }, [toggleElements]);
+
+  async function createElement(name: string | null) {
+    try {
+      const created = await request("element.create", {
+        kind: "character",
+        name: name ?? "Ficha nueva",
+        attributes: suggestedAttributes("character"),
+        origin,
+      });
+      setViewing(null);
+      setSheet("elements");
+      setOpenElement(created.id);
+      // From the text the name is already right: what is left is to say what it is.
+      setFreshElement({ id: created.id, field: name === null ? "name" : "kind" });
+      setProblem(null);
+    } catch (error) {
+      setProblem(messageFor(error));
+    }
+  }
 
   // Opening the index takes the keyboard to it; closing gives it back to the text.
   const outlineWasOpen = useRef(outlineOpen);
@@ -258,16 +338,13 @@ export function WritingView({
     }
   }, [outlineOpen]);
 
-  const focusText = () =>
-    window.document
-      .querySelector<HTMLElement>(".book-page .ProseMirror")
-      ?.focus({ preventScroll: true });
-
   // Focus mode puts away the index and the sheets, and brings them back as they were. The text
   // keeps the keyboard, so the cursor stays where it was.
   const focus = useFocusMode({
     window: screen,
     onEnter: () => {
+      // Focus mode is for the text: from the board it goes back to it.
+      workspace.show("writing");
       putAway.current = { outline: outlineOpen, sheet };
       outlineWasOpen.current = false;
       setOutlineOpen(false);
@@ -289,6 +366,12 @@ export function WritingView({
   useEffect(() => {
     focusedRef.current = focus.focused;
   }, [focus.focused]);
+
+  const workspace = useWorkspaceTab({ focused: focus.focused, onBackToWriting: focusText });
+  const onBoard = workspace.tab === "board";
+  useEffect(() => {
+    onBoardRef.current = onBoard;
+  }, [onBoard]);
 
   // A floating index steps aside as soon as the writer goes back to the text.
   const onFocusIn = (event: React.FocusEvent) => {
@@ -389,16 +472,19 @@ export function WritingView({
     >
       <header className="writing-bar small-caps">
         <span className="writing-bar-start">
-          <button
-            type="button"
-            className="action"
-            aria-expanded={outlineOpen}
-            title="Índice (Ctrl+Mayús+I)"
-            onClick={() => setOutlineOpen((open) => !open)}
-          >
-            Índice
-          </button>
-          <span>{project.title}</span>
+          {!onBoard && (
+            <button
+              type="button"
+              className="action"
+              aria-expanded={outlineOpen}
+              title="Índice (Ctrl+Mayús+I)"
+              onClick={() => setOutlineOpen((open) => !open)}
+            >
+              Índice
+            </button>
+          )}
+          <span className="writing-bar-title">{project.title}</span>
+          {!focus.focused && <WorkspaceTabs tab={workspace.tab} onShow={workspace.show} />}
         </span>
         <nav aria-label="Proyecto">
           <button
@@ -409,49 +495,65 @@ export function WritingView({
           >
             {preferences.theme === "paper" ? "Luz de vela" : "Papel"}
           </button>
-          <button
-            className="action"
-            aria-pressed={preferences.typewriterScrolling}
-            onClick={() => update({ typewriterScrolling: !preferences.typewriterScrolling })}
-          >
-            Rodillo {preferences.typewriterScrolling ? "sí" : "no"}
-          </button>
-          <button
-            className="action"
-            aria-pressed={preferences.counterVisible}
-            onClick={() => update({ counterVisible: !preferences.counterVisible })}
-          >
-            Contador {preferences.counterVisible ? "sí" : "no"}
-          </button>
-          <button className="action" aria-expanded={sheet === "ambience"} onClick={toggleAmbience}>
-            Ambiente
-          </button>
-          <button className="action" title="Modo concentración (F11)" onClick={focus.enter}>
-            Concentración
-          </button>
-          <button
-            className="action"
-            aria-pressed={pagesOpen}
-            title="Vista de página (F5)"
-            onClick={() => (pagesOpen ? closePages() : setPagesOpen(true))}
-          >
-            Páginas
-          </button>
-          <button
-            className="action"
-            aria-expanded={sheet === "format"}
-            onClick={() => (sheet === "format" ? closeSheet() : openSheet("format"))}
-          >
-            Formato
-          </button>
-          <button
-            className="action"
-            aria-expanded={versionsOpen}
-            title="Versiones (F6)"
-            onClick={() => (versionsOpen ? closeVersions() : setSheet("versions"))}
-          >
-            Versiones
-          </button>
+          {!onBoard && (
+            <>
+              <button
+                className="action"
+                aria-pressed={preferences.typewriterScrolling}
+                onClick={() => update({ typewriterScrolling: !preferences.typewriterScrolling })}
+              >
+                Rodillo {preferences.typewriterScrolling ? "sí" : "no"}
+              </button>
+              <button
+                className="action"
+                aria-pressed={preferences.counterVisible}
+                onClick={() => update({ counterVisible: !preferences.counterVisible })}
+              >
+                Contador {preferences.counterVisible ? "sí" : "no"}
+              </button>
+              <button
+                className="action"
+                aria-expanded={elementsOpen}
+                title="Fichas (Ctrl+Mayús+E)"
+                onClick={toggleElements}
+              >
+                Fichas
+              </button>
+              <button
+                className="action"
+                aria-expanded={sheet === "ambience"}
+                onClick={toggleAmbience}
+              >
+                Ambiente
+              </button>
+              <button className="action" title="Modo concentración (F11)" onClick={focus.enter}>
+                Concentración
+              </button>
+              <button
+                className="action"
+                aria-pressed={pagesOpen}
+                title="Vista de página (F5)"
+                onClick={() => (pagesOpen ? closePages() : setPagesOpen(true))}
+              >
+                Páginas
+              </button>
+              <button
+                className="action"
+                aria-expanded={sheet === "format"}
+                onClick={() => (sheet === "format" ? closeSheet() : openSheet("format"))}
+              >
+                Formato
+              </button>
+              <button
+                className="action"
+                aria-expanded={versionsOpen}
+                title="Versiones (F6)"
+                onClick={() => (versionsOpen ? closeVersions() : setSheet("versions"))}
+              >
+                Versiones
+              </button>
+            </>
+          )}
           <button className="action" onClick={() => void invoke("open_window")}>
             Otra ventana
           </button>
@@ -464,153 +566,205 @@ export function WritingView({
         </nav>
       </header>
 
-      {outlineOpen && (
-        <Outline
-          index={index}
-          currentId={shownId}
-          mode={mode}
-          origin={origin}
-          onOpen={setCurrentId}
-          onModeChange={(outline) => update({ outline })}
-          onClose={() => setOutlineOpen(false)}
-          onDeleted={setDeleted}
-          onProblem={setProblem}
-        />
-      )}
-
-      {paint && <div className="focus-backdrop" style={{ background: paint }} />}
-      {backdrop?.kind === "animated" && (
-        <AnimatedBackdrop scene={backdrop.scene} theme={preferences.theme} />
-      )}
-
-      <main className="writing-main">
-        {problem && (
-          <p className="writing-problem" role="alert">
-            {problem} <LogFolderButton />
-          </p>
-        )}
-        {isEmpty && (
-          <p className="writing-empty">
-            La obra está vacía. Crea un capítulo o un fragmento desde el índice.
-          </p>
-        )}
-        {shownViewing && (
-          <VersionView
-            key={shownViewing.version.id}
-            version={shownViewing.version}
-            content={shownViewing.content}
-            current={shownViewing.current}
-            onRestore={() => void restore(shownViewing.version)}
-            onBack={() => {
-              setViewing(null);
-              window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
-            }}
+      <div
+        className="workspace-writing"
+        id={panelId("writing")}
+        role="tabpanel"
+        aria-labelledby={tabId("writing")}
+        hidden={onBoard}
+      >
+        {outlineOpen && (
+          <Outline
+            index={index}
+            currentId={shownId}
+            mode={mode}
+            origin={origin}
+            onOpen={setCurrentId}
+            onModeChange={(outline) => update({ outline })}
+            onClose={() => setOutlineOpen(false)}
+            onDeleted={setDeleted}
+            onProblem={setProblem}
           />
         )}
-        {document && document.id === shownId && (
-          <div hidden={!!shownViewing}>
-            <BookEditor
-              key={`${document.id}:${document.revision}`}
-              document={document}
-              kind={kindOf(document.id)}
-              place={place?.documentId === document.id ? place : null}
-              origin={origin}
-              typewriterScrolling={preferences.typewriterScrolling}
-              onCounts={(statistics, total) => {
-                setCounts({ id: document.id, statistics });
-                setWork({ value: total, base: project.work });
-              }}
-              onSaveState={onSaveState}
-              onProblem={setProblem}
-            />
-          </div>
+
+        {paint && <div className="focus-backdrop" style={{ background: paint }} />}
+        {backdrop?.kind === "animated" && (
+          <AnimatedBackdrop scene={backdrop.scene} theme={preferences.theme} />
         )}
-      </main>
 
-      {pagesOpen && (
-        <PageView format={project.format} onClose={closePages} onProblem={setProblem} />
-      )}
+        <main className="writing-main">
+          {problem && (
+            <p className="writing-problem" role="alert">
+              {problem} <LogFolderButton />
+            </p>
+          )}
+          {isEmpty && (
+            <p className="writing-empty">
+              La obra está vacía. Crea un capítulo o un fragmento desde el índice.
+            </p>
+          )}
+          {shownViewing && (
+            <VersionView
+              key={shownViewing.version.id}
+              version={shownViewing.version}
+              content={shownViewing.content}
+              current={shownViewing.current}
+              onRestore={() => void restore(shownViewing.version)}
+              onBack={() => {
+                setViewing(null);
+                window.document.querySelector<HTMLElement>(".book-page .ProseMirror")?.focus();
+              }}
+            />
+          )}
+          {document && document.id === shownId && (
+            <div hidden={!!shownViewing}>
+              <BookEditor
+                key={`${document.id}:${document.revision}`}
+                document={document}
+                kind={kindOf(document.id)}
+                place={place?.documentId === document.id ? place : null}
+                origin={origin}
+                typewriterScrolling={preferences.typewriterScrolling}
+                onCounts={(statistics, total) => {
+                  setCounts({ id: document.id, statistics });
+                  setWork({ value: total, base: project.work });
+                }}
+                onSaveState={onSaveState}
+                onProblem={setProblem}
+                onCreateElement={(name) => void createElement(name)}
+              />
+            </div>
+          )}
+        </main>
 
-      {sheet === "format" && (
-        <FormatSheet
-          format={project.format}
-          title={project.title}
-          origin={origin}
-          onClose={closeSheet}
-          onProblem={setProblem}
-        />
-      )}
+        {pagesOpen && (
+          <PageView format={project.format} onClose={closePages} onProblem={setProblem} />
+        )}
 
-      {sheet === "ambience" && (
-        <AmbienceSheet
-          ambience={preferences.ambience}
-          backdrops={allBackdrops}
-          ambients={allAmbients}
-          playsAmbients={playsAmbients}
-          pickers={pickers}
-          theme={preferences.theme}
-          origin={origin}
-          onClose={closeSheet}
-          onProblem={setProblem}
-        />
-      )}
+        {elementsOpen && (
+          <ElementsPanel
+            board={board}
+            loaded={boardLoaded}
+            openId={openElement}
+            fresh={freshElement}
+            origin={origin}
+            searchRequest={searchRequest}
+            chooseImage={pickers.chooseElementImage}
+            onOpen={(id) => {
+              setOpenElement(id);
+              setFreshElement(null);
+            }}
+            onCreate={() => void createElement(null)}
+            onClose={closeSheet}
+            onProblem={setProblem}
+            onTrash={(id, name) => {
+              setOpenElement(null);
+              void elementTrash.trash(id, name);
+            }}
+            onRestore={(id) => void elementTrash.restore(id)}
+          />
+        )}
 
-      {versionsOpen && shownId && (
-        <Versions
-          documentId={shownId}
-          title={titleOf(shownId)}
-          origin={origin}
-          selectedId={shownViewing?.version.id ?? null}
-          nameRequest={nameRequest}
-          onSelect={(version) => void lookAt(version)}
-          onClose={closeVersions}
-          onProblem={setProblem}
-        />
-      )}
+        {sheet === "format" && (
+          <FormatSheet
+            format={project.format}
+            title={project.title}
+            origin={origin}
+            onClose={closeSheet}
+            onProblem={setProblem}
+          />
+        )}
 
-      {focus.focused && (
-        <FocusBar
-          words={counts && counts.id === shownId ? counts.statistics.words : 0}
-          onLeave={focus.leave}
-        >
-          {progress && <GoalMeter progress={progress} />}
-          <button
-            type="button"
-            className="action"
-            aria-expanded={sheet === "ambience"}
-            onClick={toggleAmbience}
+        {sheet === "ambience" && (
+          <AmbienceSheet
+            ambience={preferences.ambience}
+            backdrops={allBackdrops}
+            ambients={allAmbients}
+            playsAmbients={playsAmbients}
+            pickers={pickers}
+            theme={preferences.theme}
+            origin={origin}
+            onClose={closeSheet}
+            onProblem={setProblem}
+          />
+        )}
+
+        {versionsOpen && shownId && (
+          <Versions
+            documentId={shownId}
+            title={titleOf(shownId)}
+            origin={origin}
+            selectedId={shownViewing?.version.id ?? null}
+            nameRequest={nameRequest}
+            onSelect={(version) => void lookAt(version)}
+            onClose={closeVersions}
+            onProblem={setProblem}
+          />
+        )}
+
+        {focus.focused && (
+          <FocusBar
+            words={counts && counts.id === shownId ? counts.statistics.words : 0}
+            onLeave={focus.leave}
           >
-            Ambiente
-          </button>
-        </FocusBar>
-      )}
+            {progress && <GoalMeter progress={progress} />}
+            <button
+              type="button"
+              className="action"
+              aria-expanded={sheet === "ambience"}
+              onClick={toggleAmbience}
+            >
+              Ambiente
+            </button>
+          </FocusBar>
+        )}
 
-      {session && progress && <GoalReached session={session} progress={progress} />}
+        {session && progress && <GoalReached session={session} progress={progress} />}
 
-      <Counter
-        document={counts && counts.id === shownId ? counts.statistics : null}
-        kind={kindOf(shownId)}
-        work={workCounts}
-        chapters={index.chapters.length}
-        save={save}
-        visible={preferences.counterVisible}
-        onHide={() => update({ counterVisible: false })}
-      />
-
-      {deleted && (
-        <UndoNotice
-          key={deleted.id}
-          message={`«${deleted.title}» está en la papelera.`}
-          onUndo={() => {
-            const entry = deleted;
-            setDeleted(null);
-            // If it was the one being written, it comes back to the page: it is still current.
-            request("document.restore", { id: entry.id, origin }).catch((error: unknown) =>
-              setProblem(messageFor(error)),
-            );
-          }}
-          onDismiss={dismissDeleted}
+        <Counter
+          document={counts && counts.id === shownId ? counts.statistics : null}
+          kind={kindOf(shownId)}
+          work={workCounts}
+          chapters={index.chapters.length}
+          save={save}
+          visible={preferences.counterVisible}
+          onHide={() => update({ counterVisible: false })}
         />
+
+        {!deleted && elementTrash.notice}
+        {deleted && (
+          <UndoNotice
+            key={deleted.id}
+            message={`«${deleted.title}» está en la papelera.`}
+            onUndo={() => {
+              const entry = deleted;
+              setDeleted(null);
+              // If it was the one being written, it comes back to the page: it is still current.
+              request("document.restore", { id: entry.id, origin }).catch((error: unknown) =>
+                setProblem(messageFor(error)),
+              );
+            }}
+            onDismiss={dismissDeleted}
+          />
+        )}
+      </div>
+
+      {workspace.boardVisited && (
+        <div
+          id={panelId("board")}
+          role="tabpanel"
+          aria-labelledby={tabId("board")}
+          hidden={!onBoard}
+        >
+          <Suspense fallback={null}>
+            <BoardTab
+              board={board}
+              loaded={boardLoaded}
+              origin={origin}
+              chooseImage={pickers.chooseElementImage}
+            />
+          </Suspense>
+        </div>
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
+import { nameFromSelection } from "../elements/panel";
 
 interface Action {
   label: string;
@@ -67,10 +68,12 @@ interface BubbleToolbarProps {
   editor: Editor;
   onNote(): void;
   onFootnote(): void;
+  /** Makes a ficha named after the selection; without it the menu does not offer one. */
+  onCreateElement?(name: string): void;
 }
 
 /** A discreet row of formatting that appears over selected text and leaves when it is deselected. */
-export function BubbleToolbar({ editor, onNote, onFootnote }: BubbleToolbarProps) {
+export function BubbleToolbar({ editor, onNote, onFootnote, onCreateElement }: BubbleToolbarProps) {
   const list = actions(onNote, onFootnote);
   const active = useEditorState({
     editor,
@@ -98,6 +101,22 @@ export function BubbleToolbar({ editor, onNote, onFootnote }: BubbleToolbarProps
             {action.label}
           </button>
         ))}
+        {onCreateElement && (
+          <button
+            type="button"
+            className="bubble-button bubble-button-element"
+            aria-label="Crear ficha con este nombre"
+            title="Crear ficha con este nombre"
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => {
+              const { from, to } = editor.state.selection;
+              const name = nameFromSelection(editor.state.doc.textBetween(from, to, " "));
+              if (name !== "") onCreateElement(name);
+            }}
+          >
+            Crear ficha
+          </button>
+        )}
       </div>
     </BubbleMenu>
   );

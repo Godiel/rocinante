@@ -1,0 +1,77 @@
+{
+  "valid": [
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": {
+        "name": "Don Quijote",
+        "aliases": ["el Caballero de la Triste Figura", "Alonso Quijano"]
+      },
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": {
+        "kind": "other",
+        "otherKind": "Montura"
+      },
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": {
+        "attributes": [
+          {
+            "name": "Carácter",
+            "value": "Idealista"
+          }
+        ],
+        "description": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Hidalgo de los de lanza en astillero."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "origin": "window-1"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": {},
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": {
+        "name": ""
+      },
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": {
+        "position": {
+          "x": 1,
+          "y": 1
+        }
+      },
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": {
+        "aliases": [""]
+      },
+      "origin": "main"
+    }
+  ]
+}

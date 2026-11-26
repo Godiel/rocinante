@@ -1,0 +1,16 @@
+{
+  "valid": [
+    {
+      "path": "retratos/don-quijote.png"
+    },
+    {
+      "path": "C:\\Imágenes\\molinos.jpg"
+    }
+  ],
+  "invalid": [
+    {
+      "path": ""
+    },
+    {}
+  ]
+}

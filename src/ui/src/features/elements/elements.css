@@ -1,0 +1,530 @@
+/* The ficha of an element: a page of notes about someone or something of the work. */
+
+.element-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.element-picture {
+  display: block;
+  width: 100%;
+  max-height: 16rem;
+  object-fit: contain;
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: var(--radius);
+}
+
+.element-name {
+  width: 100%;
+  padding: 0 0 2px;
+  font-size: var(--text-title);
+  line-height: 1.15;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid transparent;
+  outline: none;
+}
+
+.element-name:focus,
+.element-sheet input:focus,
+.element-sheet textarea:focus,
+.element-sheet select:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.element-sheet [aria-invalid="true"] {
+  border-bottom-color: var(--color-rubric);
+}
+
+.element-label {
+  display: block;
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: var(--tracking-small-caps);
+  font-variant: small-caps;
+  color: var(--color-ink-faint);
+}
+
+.element-kind {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.element-sheet input,
+.element-sheet textarea,
+.element-sheet select {
+  padding: 0 0 1px;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  outline: none;
+}
+
+.element-problem {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-rubric);
+}
+
+.element-shared {
+  margin: 0;
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
+
+.element-shared .action {
+  font-style: normal;
+}
+
+.element-section {
+  margin-top: var(--space-3);
+}
+
+.element-aliases,
+.element-attributes {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.element-aliases li {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin-bottom: var(--space-1);
+}
+
+.element-aliases input,
+.element-add {
+  flex: 1;
+  width: 100%;
+  font-style: italic;
+}
+
+.element-attribute {
+  display: grid;
+  grid-template-columns: auto 7rem 1fr auto;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin-bottom: var(--space-1);
+  background: var(--color-paper-shade);
+}
+
+.element-attribute.is-dragging {
+  position: relative;
+  z-index: 1;
+  outline: var(--hairline) solid var(--color-rule);
+}
+
+.element-attribute-name {
+  min-width: 0;
+  color: var(--color-ink-soft);
+}
+
+.element-attribute-value {
+  min-width: 0;
+  resize: vertical;
+  field-sizing: content;
+}
+
+.element-handle {
+  cursor: grab;
+  color: var(--color-ink-faint);
+  touch-action: none;
+}
+
+.element-description .ProseMirror {
+  min-height: 6em;
+  padding: var(--space-1) 0;
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  outline: none;
+  border-bottom: var(--hairline) solid var(--color-rule);
+}
+
+.element-description .ProseMirror:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.element-description p {
+  margin: 0 0 var(--space-2);
+}
+
+.element-image-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* The panel beside the text: the list of fichas, or one of them. */
+
+.elements-back {
+  padding: 0;
+}
+
+.elements-tools {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin: var(--space-3) 0;
+}
+
+.elements-search {
+  flex: 1;
+}
+
+.elements-search input {
+  width: 100%;
+  padding: 2px 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  outline: none;
+}
+
+.elements-search input:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.elements-empty {
+  color: var(--color-ink-soft);
+}
+
+.elements-group {
+  margin-bottom: var(--space-3);
+}
+
+.elements-group-title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-caption);
+  font-weight: 400;
+}
+
+.elements-group-toggle {
+  padding: 0;
+  font: inherit;
+  letter-spacing: var(--tracking-small-caps);
+  color: var(--color-ink-faint);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.elements-group-toggle::before {
+  content: "▾ ";
+}
+
+.elements-group-toggle[aria-expanded="false"]::before {
+  content: "▸ ";
+}
+
+.elements-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.elements-item {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  width: 100%;
+  padding: var(--space-1) 0;
+  font: inherit;
+  color: var(--color-ink-soft);
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.elements-item:hover,
+.elements-item:focus-visible {
+  color: var(--color-ink);
+}
+
+.elements-thumbnail {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.elements-thumbnail-empty {
+  display: grid;
+  place-items: center;
+  font-variant: small-caps;
+  color: var(--color-ink-faint);
+  border: var(--hairline) solid var(--color-rule);
+}
+
+.elements-item-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.elements-item-name,
+.elements-item-detail {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.elements-item-detail {
+  font-size: var(--text-caption);
+  color: var(--color-ink-faint);
+}
+
+.elements-repeated {
+  color: var(--color-rubric);
+}
+
+/* Choosing how two fichas relate: a slip over everything, read from the first ficha. */
+
+.relation-backdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--color-ink) 12%, transparent);
+}
+
+.relation-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: min(26rem, calc(100vw - 2 * var(--space-4)));
+  max-height: min(36rem, calc(100vh - 2 * var(--space-4)));
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-ui);
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: var(--radius);
+}
+
+.relation-picker-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+  align-items: baseline;
+  margin: 0;
+  font-size: var(--text-ui);
+  font-weight: 400;
+}
+
+.relation-picker-name {
+  color: var(--color-ink);
+}
+
+.relation-picker-gap {
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-small-caps);
+  color: var(--color-ink-faint);
+}
+
+.relation-search input,
+.relation-new input {
+  width: 100%;
+  padding: 2px 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  outline: none;
+}
+
+.relation-search input:focus,
+.relation-new input:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.relation-lists {
+  overflow-y: auto;
+}
+
+.relation-group-title {
+  margin: var(--space-2) 0 var(--space-1);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  color: var(--color-ink-faint);
+}
+
+.relation-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.relation-option {
+  padding: 1px 6px;
+  font: inherit;
+  color: var(--color-ink-soft);
+  background: none;
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.relation-option:hover:not(:disabled),
+.relation-option:focus-visible {
+  color: var(--color-ink);
+  border-color: var(--color-ink-soft);
+}
+
+.relation-option:disabled {
+  color: var(--color-ink-faint);
+  text-decoration: line-through;
+  cursor: default;
+}
+
+.relation-option-current {
+  color: var(--color-rubric);
+  border-color: var(--color-rubric);
+}
+
+.relation-new {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.relation-hint {
+  margin: 0;
+  font-size: var(--text-caption);
+  font-style: italic;
+  color: var(--color-ink-faint);
+}
+
+.relation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: baseline;
+  margin-top: var(--space-1);
+}
+
+.relation-remove {
+  color: var(--color-rubric);
+}
+
+/* The relationships of a ficha. */
+
+.element-quiet {
+  margin: 0;
+  font-style: italic;
+  color: var(--color-ink-faint);
+}
+
+.element-relations-list,
+.element-relate-candidates {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.element-relation {
+  display: flex;
+  gap: var(--space-1);
+  align-items: baseline;
+  padding: 1px 0;
+}
+
+.element-relation-label {
+  color: var(--color-ink-soft);
+}
+
+.element-relation-other,
+.element-relate-candidates button {
+  padding: 0;
+  font: inherit;
+  color: var(--color-ink);
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  cursor: pointer;
+}
+
+.element-relation-change,
+.element-relation-remove {
+  margin-left: auto;
+  padding: 0 2px;
+  font: inherit;
+  color: var(--color-ink-faint);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.element-relation-remove {
+  margin-left: 0;
+}
+
+.element-relation-change:hover,
+.element-relation-remove:hover {
+  color: var(--color-rubric);
+}
+
+.element-relate input {
+  width: 100%;
+  margin-bottom: var(--space-1);
+}
+
+.element-relate input {
+  padding: 2px 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  outline: none;
+}
+
+.element-relate input:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+/* The trash of fichas, at the foot of the list. */
+.elements-trash {
+  margin-top: var(--space-4);
+}
+
+.elements-trash summary {
+  cursor: pointer;
+}
+
+.elements-trash-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.elements-trash-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-ink-faint);
+}
+
+.element-trash {
+  margin-top: var(--space-4);
+  font-size: var(--text-caption);
+}
+
+.element-trash .action {
+  color: var(--color-rubric);
+}

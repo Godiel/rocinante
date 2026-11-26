@@ -88,3 +88,46 @@ export async function fillWork(page: Page, chapterWords: number, workWords: numb
     },
   );
 }
+
+/**
+ * Fills the board of the open work through the core: `cards` fichas in a grid and `arrows` relationships
+ * between them, each pair joined once.
+ */
+export async function fillBoard(page: Page, cards: number, arrows: number) {
+  await page.evaluate(
+    async ({ count, joins }) => {
+      const ask = async (method: string, params: unknown) => {
+        const reply = await (
+          await fetch("/rpc", { method: "POST", body: JSON.stringify({ method, params }) })
+        ).json();
+        if ("error" in reply) throw new Error(JSON.stringify(reply.error));
+        return reply.result;
+      };
+      const kinds = ["character", "place", "plot"] as const;
+      const ids: string[] = [];
+      const columns = Math.ceil(Math.sqrt(count * 2));
+      for (let n = 0; n < count; n++) {
+        const created = await ask("element.create", {
+          kind: kinds[n % kinds.length],
+          name: `Ficha ${n + 1}`,
+          position: { x: (n % columns) * 260, y: Math.floor(n / columns) * 120 },
+          origin: "seed",
+        });
+        ids.push(created.id);
+      }
+      // Each card joined to the next one and to one further on: no pair twice.
+      const steps = [1, 17, 41];
+      for (let made = 0; made < joins; made++) {
+        const from = made % count;
+        const step = steps[Math.floor(made / count)]!;
+        await ask("relationship.create", {
+          from: ids[from],
+          to: ids[(from + step) % count],
+          kind: made % 2 === 0 ? "builtin:friend-of" : "builtin:child-of",
+          origin: "seed",
+        });
+      }
+    },
+    { count: cards, joins: arrows },
+  );
+}

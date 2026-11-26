@@ -40,6 +40,13 @@ export class Desk {
     return running;
   }
 
+  /** Opens another window of the same work, as «Otra ventana» does: same core, its own label. */
+  async openWindow(app: Running, label: string): Promise<Page> {
+    const page = await app.context.newPage();
+    await page.goto(`${app.relay.url}?window=${label}`);
+    return page;
+  }
+
   /** Closes the window the normal way: what is pending is saved, then the app ends. */
   async close(app: Running): Promise<void> {
     await app.page.evaluate(() => window.__rocinanteE2E.requestClose());

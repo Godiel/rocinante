@@ -1,4 +1,5 @@
 using System.Text;
+using Rocinante.Infrastructure.Files;
 using Rocinante.Infrastructure.Logging;
 using Rocinante.Infrastructure.Persistence;
 using Rocinante.Infrastructure.Settings;
@@ -37,7 +38,8 @@ var options = new CoreOptions(
     defaultFolder,
     arguments.OpenFile,
     new LoggedProblems(log),
-    new AmbienceFolder(dataDirectory));
+    new AmbienceFolder(dataDirectory),
+    new ChosenFiles());
 
 var contract = ProtocolContract.LoadEmbedded();
 using var core = new Core(output, new LogWriter(log, LogEventLevel.Error), options, contract);

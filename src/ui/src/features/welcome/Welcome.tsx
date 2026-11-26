@@ -18,6 +18,8 @@ export interface Pickers {
   chooseImage(): Promise<string | null>;
   /** Asks for a sound to use as an ambient; null if the writer cancels. */
   chooseSound(): Promise<string | null>;
+  /** Asks for the image of a ficha: a portrait, a map; null if the writer cancels. */
+  chooseElementImage(): Promise<string | null>;
 }
 
 export interface WelcomeProps {

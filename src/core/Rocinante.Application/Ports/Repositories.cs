@@ -1,6 +1,7 @@
 using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
+using Rocinante.Domain.Elements;
 using Rocinante.Domain.Notes;
 using Rocinante.Domain.Projects;
 using Rocinante.Domain.Versions;
@@ -46,6 +47,45 @@ public interface IVersionRepository
     IReadOnlyList<VersionSummary> List(DocumentId documentId);
 
     DocumentVersion Load(VersionId id);
+}
+
+/// <summary>An image as stored: its bytes and their media type (<c>image/webp</c> or <c>image/jpeg</c>).</summary>
+public sealed record StoredImage(ReadOnlyMemory<byte> Data, string MediaType);
+
+/// <summary>The image of an element, whole or as the thumbnail its card shows.</summary>
+public enum ImageSize
+{
+    Full,
+    Thumbnail,
+}
+
+/// <summary>The elements of the work, their relationships, the writer's kinds of relationship and the images.</summary>
+public interface IElementRepository
+{
+    /// <summary>Everything, in the work and in the trash.</summary>
+    ElementBoard LoadBoard();
+
+    /// <summary>Inserts a new element or updates one, with its aliases and attributes.</summary>
+    void Save(Element element);
+
+    /// <summary>Stores where the cards of <paramref name="elements"/> sit on the board, and nothing else.</summary>
+    void SavePositions(IEnumerable<Element> elements);
+
+    /// <summary>Stores the image of an element under its current <see cref="Element.ImageVersion"/>.</summary>
+    void SaveImage(Element element, StoredImage image, StoredImage thumbnail);
+
+    void RemoveImage(ElementId id);
+
+    /// <summary>The stored image of an element, or null if it has none.</summary>
+    StoredImage? LoadImage(ElementId id, ImageSize size);
+
+    /// <summary>Stores a kind of relationship the writer wrote; storing one already there changes nothing.</summary>
+    void Save(RelationshipKind kind);
+
+    /// <summary>Inserts a new relationship or updates its kind.</summary>
+    void Save(Relationship relationship);
+
+    void Delete(RelationshipId id);
 }
 
 public interface INoteRepository

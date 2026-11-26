@@ -2,6 +2,7 @@ using Rocinante.Application.Settings;
 using Rocinante.Domain;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
+using Rocinante.Domain.Elements;
 using Rocinante.Domain.Notes;
 
 namespace Rocinante.Application.Ports;
@@ -30,6 +31,24 @@ public interface IChangeNotifier
 
     void RecentChanged(IReadOnlyList<RecentProjectView> recent, string origin);
 
+    /// <summary>Elements, relationships or kinds of relationship of the open work changed.</summary>
+    void ElementsChanged(ElementsChange change, string origin);
+
     /// <summary>The writer added or removed one of their own images or sounds.</summary>
     void AmbienceChanged(IReadOnlyList<OwnAmbienceView> own, string origin);
+}
+
+/// <summary>
+/// What changed among the elements, and only that. <see cref="Elements"/> are now in the work and <see cref="Trash"/>
+/// went to the trash; <see cref="Details"/> carries whole elements when more than their summary changed.
+/// </summary>
+public sealed record ElementsChange(
+    IReadOnlyList<Element> Elements,
+    IReadOnlyList<Element> Trash,
+    IReadOnlyList<Element> Details,
+    IReadOnlyList<Relationship> Relationships,
+    IReadOnlyList<RelationshipId> RemovedRelationships,
+    IReadOnlyList<RelationshipKind> OwnKinds)
+{
+    public static ElementsChange None { get; } = new([], [], [], [], [], []);
 }

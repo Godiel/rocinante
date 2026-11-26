@@ -4,6 +4,7 @@ import {
   call,
   CHAPTER_WORDS,
   changeFormat,
+  fillBoard,
   fillWork,
   WORDS_PER_PARAGRAPH,
   WORK_WORDS,
@@ -19,6 +20,13 @@ const VIRTUAL_MAC = Boolean(process.env.CI) && process.platform === "darwin";
 
 /** "No delay when typing": 95 % of keystrokes are on screen within this time. */
 const MAX_P95_MS = VIRTUAL_MAC ? 150 : 50;
+/**
+ * None of GitHub's machines has a graphics card, so the browser paints in software. Typing keeps
+ * up, but moving a card repaints hundreds of arrows each frame, so there the board is only
+ * guarded against becoming several times slower. On a writer's computer it is held to the same
+ * 50 ms as typing.
+ */
+const MAX_BOARD_P95_MS = process.env.CI ? 150 : MAX_P95_MS;
 /** The page view of a work of 150 000 words opens within this time. */
 const MAX_PAGE_VIEW_MS = VIRTUAL_MAC ? 6000 : 2000;
 /**
@@ -242,5 +250,139 @@ test.describe("a long work", () => {
         { timeout: 5000 },
       )
       .toBe("on the page of the cursor");
+  });
+});
+
+/** Measures the time between frames while `act` runs: a slow frame is a jolt the hand feels. */
+async function framesDuring(page: Page, act: () => Promise<void>): Promise<number[]> {
+  await page.evaluate(() => {
+    const gaps: number[] = [];
+    const state = { gaps, running: true };
+    (window as unknown as { frames: typeof state }).frames = state;
+    let last = performance.now();
+    const tick = (now: number) => {
+      gaps.push(now - last);
+      last = now;
+      if (state.running) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame((now) => {
+      last = now;
+      requestAnimationFrame(tick);
+    });
+  });
+  await act();
+  return page.evaluate(() => {
+    const state = (window as unknown as { frames: { gaps: number[]; running: boolean } }).frames;
+    state.running = false;
+    return state.gaps.splice(0);
+  });
+}
+
+/** A point of the board where nothing is, to take hold of the board itself. */
+async function emptyPoint(page: Page): Promise<{ x: number; y: number }> {
+  return page.evaluate(() => {
+    const box = document.querySelector(".react-flow")!.getBoundingClientRect();
+    for (let y = box.top + 120; y < box.bottom - 40; y += 7)
+      for (let x = box.left + 40; x < box.right - 40; x += 7) {
+        if (document.elementFromPoint(x, y)?.classList.contains("react-flow__pane"))
+          return { x, y };
+      }
+    throw new Error("no empty place on the board");
+  });
+}
+
+const CARDS = 300;
+const ARROWS = 600;
+
+test.describe("a board full of fichas", () => {
+  test.setTimeout(240_000);
+
+  test(`with ${CARDS} cards and ${ARROWS} arrows, dragging a card, moving the board and zooming keep up`, async ({
+    desk,
+  }) => {
+    const app = await desk.open();
+    const { page } = app;
+    await createWork(desk, page, "Pizarra llena");
+    await fillBoard(page, CARDS, ARROWS);
+    await page.reload();
+    await expect(chapterText(page)).toBeVisible();
+    await page.keyboard.press("F2");
+    await expect(page.locator(".react-flow__node")).toHaveCount(CARDS, { timeout: 30_000 });
+    await expect(page.locator(".react-flow__edge")).toHaveCount(ARROWS);
+
+    const steps = 60;
+    const held = (await page.locator('.react-flow__node[aria-label^="Ficha 150,"]').boundingBox())!;
+    const dragging = await framesDuring(page, async () => {
+      await page.mouse.move(held.x + held.width / 2, held.y + held.height / 2);
+      await page.mouse.down();
+      for (let step = 1; step <= steps; step++) {
+        await page.mouse.move(
+          held.x + held.width / 2 + step * 4,
+          held.y + held.height / 2 + step * 2,
+        );
+      }
+      await page.mouse.up();
+    });
+
+    const start = await emptyPoint(page);
+    const panning = await framesDuring(page, async () => {
+      await page.mouse.move(start.x, start.y);
+      await page.mouse.down();
+      for (let step = 1; step <= steps; step++) {
+        await page.mouse.move(start.x - step * 5, start.y - step * 3);
+      }
+      await page.mouse.up();
+    });
+
+    const zooming = await framesDuring(page, async () => {
+      await page.mouse.move(start.x, start.y);
+      for (let step = 1; step <= steps; step++) {
+        await page.mouse.wheel(0, step <= steps / 2 ? -40 : 40);
+      }
+    });
+
+    for (const [name, gaps] of [
+      ["arrastrar una tarjeta", dragging],
+      ["desplazar la pizarra", panning],
+      ["acercar y alejar la vista", zooming],
+    ] as const) {
+      const p95 = percentile(gaps, 95);
+      report(
+        `pizarra de ${CARDS} tarjetas y ${ARROWS} flechas, ${name}: ${gaps.length} fotogramas · mediana ${percentile(gaps, 50).toFixed(1)} ms · p95 ${p95.toFixed(1)} ms · máx ${Math.max(...gaps).toFixed(1)} ms`,
+      );
+      expect(gaps.length, name).toBeGreaterThan(10);
+      expect(p95, name).toBeLessThan(MAX_BOARD_P95_MS);
+    }
+
+    // The card was kept where the hand left it.
+    await expect
+      .poll(async () => {
+        const board = await call<{ elements: { name: string; position: { x: number } }[] }>(
+          page,
+          "board.get",
+        );
+        return board.elements.find((element) => element.name === "Ficha 150")!.position.x;
+      })
+      .not.toBe(((150 - 1) % Math.ceil(Math.sqrt(CARDS * 2))) * 260);
+  });
+
+  test("typing with the fichas open beside the text keeps up", async ({ desk }) => {
+    const app = await longWork(desk);
+    await fillBoard(app.page, 120, 120);
+    await cursorInTheMiddle(app.page);
+    await app.page.keyboard.press("Control+Shift+E");
+    const panel = app.page.getByRole("complementary", { name: "Fichas de la obra" });
+    await expect(panel.getByRole("button", { name: "Ficha 1", exact: true })).toBeVisible();
+    await cursorInTheMiddle(app.page);
+
+    const sentence = " Y así, del poco dormir y del mucho leer, se le secó el celebro.";
+    const times = await typeAndMeasure(app.page, sentence.repeat(2));
+
+    const p95 = percentile(times, 95);
+    report(
+      `escribir con el panel de fichas abierto (120 fichas): ${times.length} pulsaciones · mediana ${percentile(times, 50).toFixed(1)} ms · p95 ${p95.toFixed(1)} ms`,
+    );
+    expect(p95).toBeLessThan(MAX_P95_MS);
+    await expect(panel).toBeVisible();
   });
 });

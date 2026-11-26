@@ -160,6 +160,19 @@ public sealed class ContractTests : IDisposable
     }
 
     [Fact]
+    public void An_element_with_a_blank_name_or_related_to_itself_is_a_broken_rule()
+    {
+        _harness.Call("project.create", Params(("path", _harness.PathOf("obra.rocinante")), ("title", "Obra"), ("origin", "main")));
+        var quixote = _harness.Call("element.create", Params(("kind", "character"), ("name", "Don Quijote"), ("origin", "main")))!["id"]!.GetValue<string>();
+
+        AssertError(_harness.Request("element.create", Params(("kind", "place"), ("name", "   "), ("origin", "main"))), -32002, "nameRequired");
+        AssertError(
+            _harness.Request("relationship.create", Params(("from", quixote), ("to", quixote), ("kind", "builtin:sibling-of"), ("origin", "main"))),
+            -32002,
+            "sameElement");
+    }
+
+    [Fact]
     public void A_file_that_is_not_a_project_is_reported_and_left_alone()
     {
         var path = _harness.PathOf("carta.rocinante");

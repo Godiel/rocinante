@@ -1,0 +1,29 @@
+{
+  "valid": [
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "image": "UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=",
+      "thumbnail": "UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=",
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "image": "",
+      "thumbnail": "UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=",
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "image": "no es base64!",
+      "thumbnail": "UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=",
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "image": "iVBORw0KGgo=",
+      "origin": "main"
+    }
+  ]
+}

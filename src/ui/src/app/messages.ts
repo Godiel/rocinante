@@ -33,6 +33,15 @@ export const messages: Record<ErrorReason, string> = {
     "Ese archivo no es un sonido que Rocinante pueda usar. Prueba con Ogg, MP3, WAV o FLAC.",
   fileTooLarge:
     "El archivo es demasiado grande: hasta 30 MB para una imagen y 100 MB para un sonido.",
+  nameRequired: "Escribe un nombre.",
+  otherKindRequired: "Escribe qué es: un objeto, una facción, una época.",
+  elementNotFound: "Esa ficha ya no está en la obra. Puede que se haya borrado en otra ventana.",
+  elementIsDeleted: "Esa ficha está en la papelera. Restáurala para cambiarla.",
+  elementIsNotDeleted: "Esa ficha no está en la papelera.",
+  relationshipNotFound: "Esa relación ya no existe. Puede que se haya quitado en otra ventana.",
+  relationshipKindNotFound: "Ese tipo de relación ya no existe en la obra.",
+  relationshipRepeated: "Esas dos fichas ya tienen esa relación.",
+  sameElement: "Una ficha no se puede relacionar consigo misma.",
   notFound: "No se encuentra el archivo. Puede que se haya movido o borrado.",
   alreadyExists:
     "Ya hay un archivo con ese nombre en esa carpeta. Elige otro título u otra carpeta.",

@@ -1,0 +1,319 @@
+/* The board takes the whole window under the bar. */
+.board-tab {
+  position: fixed;
+  top: var(--bar-height);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--color-paper);
+}
+
+.board-tab .react-flow {
+  background: transparent;
+}
+
+/* With a ficha open, the cards leave it room on the right. */
+.board-tab-sheet .react-flow {
+  width: calc(100% - 20rem);
+}
+
+.board-empty,
+.board-problem {
+  position: absolute;
+  top: var(--space-5);
+  left: 50%;
+  width: min(var(--measure), calc(100% - 2 * var(--space-4)));
+  margin: 0;
+  transform: translateX(-50%);
+  font-style: italic;
+  text-align: center;
+  pointer-events: none;
+}
+
+.board-empty {
+  top: var(--space-6);
+  font-size: var(--text-body);
+  color: var(--color-ink-soft);
+}
+
+.board-problem {
+  color: var(--color-rubric);
+}
+
+.board-tools {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  font-size: var(--text-caption);
+}
+
+/* A card: a slip of paper with the picture, the name and what it is. No shadows, no bright colours. */
+.board-card {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  width: 220px;
+  height: 88px;
+  padding: var(--space-2);
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  border-left: 3px solid var(--card-mark, var(--color-rule));
+  border-radius: var(--radius);
+  cursor: grab;
+}
+
+.board-card-character {
+  --card-mark: var(--color-rubric);
+}
+
+.board-card-place {
+  --card-mark: var(--color-ink-soft);
+}
+
+.board-card-plot {
+  --card-mark: var(--color-ink-faint);
+}
+
+/* Chosen: the edges darken, and the mark of the kind stays. */
+.board-card-selected {
+  border-top-color: var(--color-ink-soft);
+  border-right-color: var(--color-ink-soft);
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.react-flow__node:focus-visible {
+  outline: none;
+}
+
+.react-flow__node:focus-visible .board-card {
+  outline: 1px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.react-flow__node.dragging .board-card {
+  cursor: grabbing;
+}
+
+.board-card-image {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.board-card-initial {
+  display: grid;
+  place-items: center;
+  font-size: var(--text-title);
+  font-variant: small-caps;
+  color: var(--color-ink-faint);
+  border: var(--hairline) solid var(--color-rule);
+}
+
+.board-card-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.board-card-name {
+  overflow: hidden;
+  font-size: var(--text-ui);
+  line-height: 1.2;
+  color: var(--color-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.board-card-kind {
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-small-caps);
+  color: var(--color-ink-faint);
+}
+
+.react-flow__attribution {
+  font-size: 10px;
+  background: transparent;
+}
+
+.react-flow__attribution a {
+  color: var(--color-ink-faint);
+}
+
+/* The handle to relate two cards: a small ring on the right edge, shown when the card is near the hand. */
+.board-card {
+  position: relative;
+}
+
+.board-card-handle.react-flow__handle {
+  width: 12px;
+  height: 12px;
+  background: var(--color-paper);
+  border: 1px solid var(--color-ink-soft);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity var(--fade);
+}
+
+.react-flow__node:hover .board-card-handle,
+.react-flow__node:focus-visible .board-card-handle,
+.react-flow__node.selected .board-card-handle,
+.board-card-handle.connectingfrom {
+  opacity: 1;
+}
+
+.board-card-target.react-flow__handle {
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  border: 0;
+}
+
+/* The arrows: fine lines of ink, the words in small capitals on the paper. */
+.board-arrow {
+  stroke: var(--color-ink-soft);
+  stroke-width: 1;
+}
+
+.board-arrow-selected {
+  stroke: var(--color-rubric);
+  stroke-width: 1.5;
+}
+
+.react-flow__edge:focus-visible .board-arrow {
+  stroke: var(--color-ink);
+  stroke-width: 2;
+}
+
+.react-flow__edge:focus-visible {
+  outline: none;
+}
+
+.board-arrow-label {
+  position: absolute;
+  padding: 0 4px;
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-small-caps);
+  color: var(--color-ink-soft);
+  white-space: nowrap;
+  background: var(--color-paper);
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.board-arrow-label-selected {
+  color: var(--color-rubric);
+}
+
+.react-flow__connectionline path {
+  stroke: var(--color-ink-faint);
+  stroke-dasharray: 4 3;
+}
+
+.react-flow__arrowhead polyline {
+  stroke: var(--color-ink-soft) !important;
+  fill: var(--color-ink-soft) !important;
+}
+
+/* The tools along the top of the board. */
+.board-tools-top {
+  flex-wrap: wrap;
+  max-width: calc(100% - 2 * var(--space-4));
+  font-size: var(--text-ui);
+}
+
+.board-search {
+  position: relative;
+}
+
+.board-search input {
+  width: 14rem;
+  padding: 2px 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  outline: none;
+}
+
+.board-search input:focus {
+  border-bottom-color: var(--color-ink-soft);
+}
+
+.board-search-found {
+  position: absolute;
+  z-index: 6;
+  top: 100%;
+  left: 0;
+  min-width: 100%;
+  margin: 2px 0 0;
+  padding: var(--space-1) 0;
+  list-style: none;
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  border-radius: var(--radius);
+}
+
+.board-search-found button {
+  width: 100%;
+  padding: 2px var(--space-2);
+  font: inherit;
+  color: var(--color-ink);
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.board-search-found button:hover,
+.board-search-found button:focus-visible {
+  background: var(--color-paper-shade);
+}
+
+.board-search-kind {
+  font-size: var(--text-caption);
+  color: var(--color-ink-faint);
+}
+
+.board-search-none {
+  padding: 2px var(--space-2);
+  font-style: italic;
+  color: var(--color-ink-faint);
+}
+
+.board-kinds {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.board-kind {
+  padding: 0 0 1px;
+  font: inherit;
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-small-caps);
+  color: var(--color-ink-faint);
+  background: none;
+  border: 0;
+  border-bottom: var(--hairline) solid transparent;
+  cursor: pointer;
+  text-decoration: line-through;
+}
+
+.board-kind[aria-pressed="true"] {
+  color: var(--color-ink-soft);
+  border-bottom-color: var(--color-rule);
+  text-decoration: none;
+}
+
+/* With one card chosen, what is not hers steps back. */
+.react-flow__node.board-faded,
+.react-flow__edge.board-faded {
+  opacity: 0.25;
+  transition: opacity var(--fade);
+}

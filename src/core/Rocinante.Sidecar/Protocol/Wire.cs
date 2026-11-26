@@ -5,6 +5,7 @@ using Rocinante.Application.Ports;
 using Rocinante.Application.Settings;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
+using Rocinante.Domain.Elements;
 using Rocinante.Domain.Formats;
 using Rocinante.Domain.Notes;
 using Rocinante.Domain.Projects;
@@ -161,4 +162,71 @@ internal static class Wire
             state.DefaultFolder,
             Of(state.SuggestedFormat),
             Of(state.OwnAmbience));
+
+    public static ElementKind ParseElementKind(string kind) => Enum.Parse<ElementKind>(kind, ignoreCase: true);
+
+    public static BoardPositionDto Of(BoardPosition position) => new(position.X, position.Y);
+
+    public static ElementSummaryDto Summary(Element element) =>
+        new(
+            element.Id.Value,
+            Name(element.Kind),
+            element.OtherKind,
+            element.Name,
+            element.Aliases,
+            Of(element.Position),
+            element.ImageVersion is { } version ? new ElementImageInfoDto(version) : null);
+
+    public static ElementDto Of(Element element) =>
+        new(
+            element.Id.Value,
+            Name(element.Kind),
+            element.OtherKind,
+            element.Name,
+            element.Aliases,
+            [.. element.Attributes.Select(attribute => new ElementAttributeDto(attribute.Name, attribute.Value))],
+            Content(element.Description),
+            Of(element.Position),
+            element.ImageVersion is { } version ? new ElementImageInfoDto(version) : null);
+
+    public static RelationshipDto Of(Relationship relationship) =>
+        new(relationship.Id.Value, relationship.From.Value, relationship.To.Value, relationship.Kind.Value);
+
+    public static RelationshipKindDto Of(RelationshipKind kind) => new(kind.KindId.Value, kind.Forward, kind.Inverse);
+
+    public static BoardDto Of(ElementBoard board) =>
+        new(
+            [.. board.Elements.OrderBy(element => element.Id.Value).Select(Summary)],
+            [.. board.Relationships.Select(Of)],
+            [.. board.OwnKinds.Select(Of)],
+            [.. board.Trash.Select(Summary)]);
+
+    public static ElementsChangedNotification Of(ElementsChange change, string origin) =>
+        new(
+            [.. change.Elements.Select(Summary)],
+            [.. change.Trash.Select(Summary)],
+            [.. change.Details.Select(Of)],
+            [.. change.Relationships.Select(Of)],
+            [.. change.RemovedRelationships.Select(id => id.Value)],
+            [.. change.OwnKinds.Select(Of)],
+            origin);
+
+    public static ElementAttribute[]? ToAttributes(IReadOnlyList<ElementAttributeDto>? attributes) =>
+        attributes is null ? null : [.. attributes.Select(attribute => new ElementAttribute(attribute.Name, attribute.Value))];
+
+    public static ElementUpdate ToUpdate(ElementChangesDto changes) =>
+        new(
+            changes.Name,
+            changes.Kind is { } kind ? ParseElementKind(kind) : null,
+            changes.OtherKind,
+            changes.Aliases,
+            ToAttributes(changes.Attributes),
+            changes.Description is { } description ? DocumentContent.Parse(description.ToJsonString()) : null);
+
+    public static RelationshipKindChoice ToChoice(string? kind, NewRelationshipKindDto? newKind) =>
+        kind is not null
+            ? RelationshipKindChoice.Of(RelationshipKindId.Parse(kind))
+            : RelationshipKindChoice.New(newKind!.Forward, newKind.Inverse);
+
+    public static ImageDataDto Of(StoredImage image) => new(Convert.ToBase64String(image.Data.Span), image.MediaType);
 }

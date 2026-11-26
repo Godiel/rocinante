@@ -58,6 +58,8 @@ export interface BookEditorProps {
   onCounts(document: Statistics, work: Statistics): void;
   onSaveState(state: SaveState): void;
   onProblem(message: string | null): void;
+  /** Makes a ficha named after the selected text, from the floating menu. The text does not change. */
+  onCreateElement?(name: string): void;
 }
 
 /**
@@ -74,6 +76,7 @@ export function BookEditor({
   onCounts,
   onSaveState,
   onProblem,
+  onCreateElement,
 }: BookEditorProps) {
   const frame = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | undefined>(undefined);
@@ -374,6 +377,7 @@ export function BookEditor({
         editor={editor}
         onNote={() => callbacks.current.openNewNote()}
         onFootnote={() => callbacks.current.openNewFootnote()}
+        onCreateElement={onCreateElement}
       />
       <Footnotes
         editor={editor}

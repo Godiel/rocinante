@@ -3,7 +3,9 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization.Metadata;
 using Rocinante.Application;
+using Rocinante.Application.Ports;
 using Rocinante.Domain;
+using Rocinante.Domain.Elements;
 using Rocinante.Sidecar.Protocol;
 
 namespace Rocinante.Sidecar;
@@ -16,6 +18,7 @@ internal sealed record CoreServices(
     NoteUseCases Notes,
     SettingsUseCases Settings,
     AmbienceUseCases Ambience,
+    ElementUseCases Elements,
     IReportedProblems Problems);
 
 /// <summary>
@@ -96,6 +99,34 @@ internal static class CoreMethods
         table.On("note.delete", json.IdOriginParams, p => core.Notes.Delete(new NoteId(p.Id), p.Origin));
         table.On("note.list", json.DocumentReferenceParams, json.IReadOnlyListNoteDto, p =>
             [.. core.Notes.List(new DocumentId(p.DocumentId)).Select(Wire.Of)]);
+
+        table.On("board.get", json.BoardDto, () => Wire.Of(core.Elements.Board()));
+        table.On("board.move", json.MoveCardsParams, p => core.Elements.Move(
+            [.. p.Positions.Select(move => (new ElementId(move.Id), new BoardPosition(move.X, move.Y)))], p.Origin));
+        table.On("element.create", json.CreateElementParams, json.ElementDto, p => Wire.Of(core.Elements.Create(
+            Wire.ParseElementKind(p.Kind),
+            p.OtherKind,
+            p.Name,
+            Wire.ToAttributes(p.Attributes),
+            p.Position is { } position ? new BoardPosition(position.X, position.Y) : null,
+            p.Origin)));
+        table.On("element.get", json.IdParams, json.ElementDto, p => Wire.Of(core.Elements.Get(new ElementId(p.Id))));
+        table.On("element.update", json.UpdateElementParams, json.ElementDto, p =>
+            Wire.Of(core.Elements.Update(new ElementId(p.Id), Wire.ToUpdate(p.Changes), p.Origin)));
+        table.On("element.delete", json.IdOriginParams, p => core.Elements.Delete(new ElementId(p.Id), p.Origin));
+        table.On("element.restore", json.IdOriginParams, json.ElementDto, p => Wire.Of(core.Elements.Restore(new ElementId(p.Id), p.Origin)));
+        table.On("element.readImage", json.ImagePathParams, json.ImageDataDto, p => Wire.Of(core.Elements.ReadImage(p.Path)));
+        table.On("element.setImage", json.SetImageParams, json.ElementSummaryDto, p => Wire.Summary(core.Elements.SetImage(
+            new ElementId(p.Id), Convert.FromBase64String(p.Image), Convert.FromBase64String(p.Thumbnail), p.Origin)));
+        table.On("element.removeImage", json.IdOriginParams, json.ElementSummaryDto, p =>
+            Wire.Summary(core.Elements.RemoveImage(new ElementId(p.Id), p.Origin)));
+        table.On("element.image", json.ElementImageParams, json.ImageDataDto, p => Wire.Of(core.Elements.Image(
+            new ElementId(p.Id), p.Size == "thumbnail" ? ImageSize.Thumbnail : ImageSize.Full)));
+        table.On("relationship.create", json.RelateParams, json.RelationshipDto, p => Wire.Of(core.Elements.Relate(
+            new ElementId(p.From), new ElementId(p.To), Wire.ToChoice(p.Kind, p.NewKind), p.Origin)));
+        table.On("relationship.update", json.ChangeRelationshipParams, json.RelationshipDto, p => Wire.Of(core.Elements.ChangeRelationship(
+            new RelationshipId(p.Id), Wire.ToChoice(p.Kind, p.NewKind), p.Origin)));
+        table.On("relationship.delete", json.IdOriginParams, p => core.Elements.Unrelate(new RelationshipId(p.Id), p.Origin));
 
         return table.Handlers;
     }

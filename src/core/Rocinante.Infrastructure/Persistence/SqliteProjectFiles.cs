@@ -23,6 +23,7 @@ public sealed class SqliteProjectSession : IProjectSession
         Documents = new DocumentRepository(database);
         Versions = new VersionRepository(database);
         Notes = new NoteRepository(database);
+        Elements = new ElementRepository(database);
     }
 
     public string FilePath => _database.FilePath;
@@ -34,6 +35,8 @@ public sealed class SqliteProjectSession : IProjectSession
     public IVersionRepository Versions { get; }
 
     public INoteRepository Notes { get; }
+
+    public IElementRepository Elements { get; }
 
     public T InTransaction<T>(Func<T> work) => _database.InTransaction(work);
 

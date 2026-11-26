@@ -16,6 +16,15 @@ public static class FileSignature
     public static string? ExtensionOf(OwnAmbienceKind kind, ReadOnlySpan<byte> head) =>
         kind == OwnAmbienceKind.Image ? ImageExtension(head) : SoundExtension(head);
 
+    /// <summary>The media type of an image (<c>image/png</c>, <c>image/jpeg</c> or <c>image/webp</c>), or null if it is none of them.</summary>
+    public static string? ImageMediaType(ReadOnlySpan<byte> head) => ImageExtension(head) switch
+    {
+        ".png" => "image/png",
+        ".jpg" => "image/jpeg",
+        ".webp" => "image/webp",
+        _ => null,
+    };
+
     private static string? ImageExtension(ReadOnlySpan<byte> head) =>
         head.StartsWith(_png) ? ".png"
         : head.StartsWith(_jpeg) ? ".jpg"
