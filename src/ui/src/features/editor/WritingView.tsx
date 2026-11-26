@@ -53,6 +53,7 @@ import {
 import { useBoard } from "../elements/useBoard";
 import { notesOf } from "../notes/notes-list";
 import { useWorkNotes } from "../notes/useWorkNotes";
+import { mentionIndex } from "../mentions/find-mentions";
 import { useElementTrash } from "../elements/useElementTrash";
 import { backdropOf, backdrops, paintOf } from "../ambience/catalog";
 import { sheetColour } from "../ambience/sheet";
@@ -132,6 +133,22 @@ export function WritingView({
     if (sideTab) lastSideTab.current = sideTab;
   }, [sideTab]);
   const { board, loaded: boardLoaded } = useBoard(project.id);
+  // The names of the fichas, looked for in the text: worked out again only when a name changes.
+  const namesKey = JSON.stringify(
+    board.elements.map((element) => [element.id, element.name, element.aliases]),
+  );
+  const mentions = useMemo(
+    () =>
+      mentionIndex(
+        (JSON.parse(namesKey) as [string, string, string[]][]).map(([id, name, aliases]) => ({
+          id,
+          name,
+          aliases,
+        })),
+      ),
+    [namesKey],
+  );
+
   const { notes: workNotes, loaded: notesLoaded } = useWorkNotes(project.id);
   const [openNote, setOpenNote] = useState<OpenedNote | null>(null);
   // The note whose passage the writer asked to see; `at` tells one request from the next.
@@ -678,6 +695,8 @@ export function WritingView({
                 notes={documentNotes}
                 notesLoaded={notesLoaded}
                 reveal={reveal?.documentId === document.id ? reveal : null}
+                mentionIndex={mentions}
+                mentionsVisible={preferences.mentionsVisible && !focus.focused}
                 onOpenNote={(id) => {
                   setSheet("notes");
                   setOpenNote({ id });

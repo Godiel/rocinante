@@ -24,6 +24,8 @@ import { TextPopover } from "./TextPopover";
 import { TypewriterCaret } from "./TypewriterCaret";
 import { NoteSlip } from "../notes/NoteSlip";
 import { NoteStatesExtension } from "../../editor/extensions/note-states";
+import { mentionAt, Mentions } from "../../editor/extensions/mentions";
+import type { MentionIndex } from "../mentions/find-mentions";
 import "./book-editor.css";
 import { registerCursor, shownHead } from "../../editor/cursor";
 
@@ -75,6 +77,12 @@ export interface BookEditorProps {
   onDeleteNote?(id: string): void;
   /** A note whose passage the writer asked to see: it is selected and brought into view. */
   reveal?: { noteId: string; at: number } | null;
+  /** The names of the fichas, to mark their mentions; null marks nothing. */
+  mentionIndex?: MentionIndex | null;
+  /** Whether the marks of the mentions show. */
+  mentionsVisible?: boolean;
+  /** A mention the writer asked to see, by its number among those of its ficha here. */
+  revealMention?: { elementId: string; ordinal: number; at: number } | null;
 }
 
 /**
@@ -97,6 +105,9 @@ export function BookEditor({
   onOpenNote,
   onDeleteNote,
   reveal = null,
+  mentionIndex = null,
+  mentionsVisible = true,
+  revealMention = null,
 }: BookEditorProps) {
   const frame = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | undefined>(undefined);
@@ -133,6 +144,7 @@ export function BookEditor({
       TypingSounds.configure({ play: (stroke) => sounds.play(stroke) }),
       CurrentBlock,
       NoteStatesExtension,
+      Mentions,
     ],
     content: document.content,
     editorProps: {
@@ -264,6 +276,25 @@ export function BookEditor({
     if (!passage) return;
     editor.chain().focus().setTextSelection(passage).scrollIntoView().run();
   }, [editor, revealNote, revealAt]);
+
+  // The mentions of the fichas: looked for again when the names change, shown as the writer wants.
+  useEffect(() => {
+    editor?.commands.setMentionIndex(mentionIndex);
+  }, [editor, mentionIndex]);
+  useEffect(() => {
+    editor?.commands.setMentionsVisible(mentionsVisible);
+  }, [editor, mentionsVisible]);
+
+  // «En el texto» of a ficha: the mention is selected and brought into view, the panel still open.
+  const mentionAtRequest = revealMention?.at;
+  const mentionElement = revealMention?.elementId;
+  const mentionOrdinal = revealMention?.ordinal;
+  useEffect(() => {
+    if (!editor || !mentionIndex || mentionElement === undefined || mentionOrdinal === undefined)
+      return;
+    const range = mentionAt(editor.state.doc, mentionIndex, mentionElement, mentionOrdinal);
+    if (range) editor.chain().focus().setTextSelection(range).scrollIntoView().run();
+  }, [editor, mentionIndex, mentionElement, mentionOrdinal, mentionAtRequest]);
 
   // How each anchor looks: faded when its note is resolved, hidden when the note was set aside.
   const noteStates = useMemo(

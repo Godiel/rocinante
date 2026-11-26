@@ -29,9 +29,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Índice de nombres plegados, rehecho solo cuando cambian las fichas.
 
 ## 6. Marcas en el editor
-- [ ] Decoración de las menciones; al escribir solo se buscan los bloques tocados.
-- [ ] Se rehace al cambiar los nombres; se apaga con «Marcar menciones» y en el modo concentración.
-- [ ] Tests de comportamiento y comprobación en la app real.
+- [x] Decoración de las menciones; al escribir solo se buscan los bloques tocados.
+- [x] Se rehace al cambiar los nombres; se apaga con «Marcar menciones» y en el modo concentración.
+- [x] Tests de comportamiento y comprobación en la app real.
 
 ## 7. Ficha en pequeño
 - [ ] Aparece al pasar el ratón por una mención y se va al salir; varias fichas a la vez.
