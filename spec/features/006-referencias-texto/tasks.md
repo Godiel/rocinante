@@ -39,11 +39,11 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real.
 
 ## 8. «En el texto» en la ficha
-- [ ] Total, capítulos, primera aparición y menciones por capítulo con su trozo.
-- [ ] El salto abre el capítulo y selecciona la mención.
-- [ ] Se pone al día con los cambios del texto y de las fichas, también desde otra ventana.
-- [ ] «Marcar menciones» en la pestaña Fichas.
-- [ ] Tests de comportamiento y comprobación en la app real.
+- [x] Total, capítulos, primera aparición y menciones por capítulo con su trozo.
+- [x] El salto abre el capítulo y selecciona la mención.
+- [x] Se pone al día con los cambios del texto y de las fichas, también desde otra ventana.
+- [x] «Marcar menciones» en la pestaña Fichas.
+- [x] Tests de comportamiento y comprobación en la app real.
 
 ## 9. Pruebas de extremo a extremo y rendimiento
 - [ ] El recorrido de la spec.

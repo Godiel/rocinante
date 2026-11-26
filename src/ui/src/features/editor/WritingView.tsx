@@ -133,6 +133,13 @@ export function WritingView({
     if (sideTab) lastSideTab.current = sideTab;
   }, [sideTab]);
   const { board, loaded: boardLoaded } = useBoard(project.id);
+  // A mention the writer asked to see from «En el texto»; `at` tells one request from the next.
+  const [revealMention, setRevealMention] = useState<{
+    elementId: string;
+    documentId: string;
+    ordinal: number;
+    at: number;
+  } | null>(null);
   // The names of the fichas, looked for in the text: worked out again only when a name changes.
   const namesKey = JSON.stringify(
     board.elements.map((element) => [element.id, element.name, element.aliases]),
@@ -696,6 +703,7 @@ export function WritingView({
                 notesLoaded={notesLoaded}
                 reveal={reveal?.documentId === document.id ? reveal : null}
                 mentionIndex={mentions}
+                revealMention={revealMention?.documentId === document.id ? revealMention : null}
                 mentionElements={board.elements}
                 onOpenElement={(id) => {
                   setViewing(null);
@@ -748,6 +756,21 @@ export function WritingView({
             }}
             onRestore={(id) => void elementTrash.restore(id)}
             tabs={<SidePanelTabs tab="elements" onShow={(tab) => setSheet(tab)} />}
+            mentions={{
+              documents: noteDocuments,
+              onGoTo: (elementId, documentId, ordinal) => {
+                setViewing(null);
+                setCurrentId(documentId);
+                setRevealMention((last) => ({
+                  elementId,
+                  documentId,
+                  ordinal,
+                  at: (last?.at ?? 0) + 1,
+                }));
+              },
+            }}
+            mentionsVisible={preferences.mentionsVisible}
+            onMentionsVisible={(visible) => update({ mentionsVisible: visible })}
             notes={{
               all: workNotes,
               onOpen: (id) => {

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Board, Note } from "../../bridge/generated/protocol";
 import { ElementNotes } from "../notes/ElementNotes";
+import { ElementMentions } from "../mentions/ElementMentions";
 import { ElementRelations } from "./ElementRelations";
 import { ElementSheet } from "./ElementSheet";
 import { useElement } from "./useBoard";
@@ -16,6 +17,11 @@ export interface OpenElementSheetProps {
   onProblem(message: string | null): void;
   /** Sends the ficha to the trash, with its relationships. */
   onTrash(id: string, name: string): void;
+  /** Where the text is at hand: «En el texto» shows the mentions of the ficha and takes the text to each. */
+  mentions?: {
+    documents: readonly { id: string; title: string }[];
+    onGoTo(elementId: string, documentId: string, ordinal: number): void;
+  };
   /** The notes of the work, where the panel of notes is at hand: the ficha shows those about it. */
   notes?: {
     all: readonly Note[];
@@ -38,6 +44,7 @@ export function OpenElementSheet({
   onProblem,
   onTrash,
   notes,
+  mentions,
   ...props
 }: OpenElementSheetProps) {
   const element = useElement(id);
@@ -74,6 +81,13 @@ export function OpenElementSheet({
             onOpen={onOpen}
             onProblem={onProblem}
           />
+          {mentions && (
+            <ElementMentions
+              elementId={id}
+              documents={mentions.documents}
+              onGoTo={(documentId, ordinal) => mentions.onGoTo(id, documentId, ordinal)}
+            />
+          )}
           {notes && (
             <ElementNotes
               notes={notes.all.filter((note) => note.elements.includes(id))}

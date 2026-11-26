@@ -27,6 +27,11 @@ export interface ElementsPanelProps {
   tabs?: ReactNode;
   /** The notes of the work, so each ficha shows those about it. */
   notes?: OpenElementSheetProps["notes"];
+  /** The text of the work, so each ficha shows where it is mentioned. */
+  mentions?: OpenElementSheetProps["mentions"];
+  /** Whether the mentions are marked in the text, and the way to change it. */
+  mentionsVisible?: boolean;
+  onMentionsVisible?(visible: boolean): void;
 }
 
 /**
@@ -49,6 +54,9 @@ export function ElementsPanel({
   onRestore,
   tabs,
   notes,
+  mentions,
+  mentionsVisible,
+  onMentionsVisible,
 }: ElementsPanelProps) {
   // A ficha that went to the trash, here or in another window, gives its place back to the list.
   const shownId = openId && board.elements.some((element) => element.id === openId) ? openId : null;
@@ -100,6 +108,7 @@ export function ElementsPanel({
           onProblem={onProblem}
           onTrash={onTrash}
           notes={notes}
+          mentions={mentions}
         />
       ) : (
         <ElementList
@@ -114,6 +123,8 @@ export function ElementsPanel({
           }}
           onCreate={onCreate}
           onRestore={onRestore}
+          mentionsVisible={mentionsVisible}
+          onMentionsVisible={onMentionsVisible}
         />
       )}
     </aside>
@@ -121,6 +132,8 @@ export function ElementsPanel({
 }
 
 interface ElementListProps {
+  mentionsVisible?: boolean;
+  onMentionsVisible?(visible: boolean): void;
   elements: readonly ElementSummary[];
   trash: readonly ElementSummary[];
   loaded: boolean;
@@ -140,8 +153,14 @@ function ElementList({
   onOpen,
   onCreate,
   onRestore,
+  mentionsVisible,
+  onMentionsVisible,
 }: ElementListProps) {
   const [query, setQuery] = useState("");
+  // The box answers the click at once; the preference comes back from the core a moment later.
+  const stored = mentionsVisible ?? true;
+  const [marking, setMarking] = useState({ stored, shown: stored });
+  if (marking.stored !== stored) setMarking({ stored, shown: stored });
   const [folded, setFolded] = useState<ReadonlySet<ElementKind>>(() => new Set());
   const search = useRef<HTMLInputElement>(null);
 
@@ -194,6 +213,20 @@ function ElementList({
           Nueva ficha
         </button>
       </div>
+
+      {onMentionsVisible && (
+        <label className="elements-mentions-toggle">
+          <input
+            type="checkbox"
+            checked={marking.shown}
+            onChange={(event) => {
+              setMarking({ stored, shown: event.target.checked });
+              onMentionsVisible(event.target.checked);
+            }}
+          />{" "}
+          Marcar menciones en el texto
+        </label>
+      )}
 
       {loaded && elements.length === 0 && (
         <p className="elements-empty">
