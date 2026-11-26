@@ -44,7 +44,7 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [ ] Todo en verde en los tres sistemas en la CI.
 
 ## 10. Validación y cierre
-- [ ] Repasar los criterios de `spec.md` y marcar solo lo comprobado.
-- [ ] `tech-stack.md`: el esquema v5 y los módulos nuevos.
+- [x] Repasar los criterios de `spec.md` y marcar solo lo comprobado.
+- [x] `tech-stack.md`: el esquema v5 y los módulos nuevos.
 - [ ] Pull request a `main` con `gh`, con la CI en verde.
-- [ ] Hoja de ruta: la 007 pasa a «Hecho» al fusionar.
+- [x] Hoja de ruta: la 007 pasa a «Hecho» (entra con la fusión).

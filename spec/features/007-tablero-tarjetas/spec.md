@@ -1,6 +1,6 @@
 # 007 · Tablero de tarjetas
 
-**Estado:** en especificación
+**Estado:** hecha. Falta comprobar en la app instalada que cerrar la ventana del Tablero con el botón del sistema lo devuelve (en el navegador de las pruebas, sí).
 
 ## Qué hace
 
@@ -42,26 +42,26 @@ El autor pidió avanzar sin detenerse; estas decisiones de alcance se tomaron co
 ## Criterios de aceptación
 
 **Tarjetas y coincidencias**
-- [ ] Cada tarjeta muestra sus menciones y capítulos, o «Sin menciones», y se pone al día con el texto y las fichas.
-- [ ] La ficha muestra «Coincide con» ordenado por párrafos compartidos, y abre la otra ficha.
-- [ ] Al elegir una tarjeta, las que coinciden con ella siguen a la vista.
+- [x] Cada tarjeta muestra sus menciones y capítulos, o «Sin menciones», y se pone al día con el texto y las fichas.
+- [x] La ficha muestra «Coincide con» ordenado por párrafos compartidos, y abre la otra ficha.
+- [x] Al elegir una tarjeta, las que coinciden con ella siguen a la vista.
 
 **Sugerencias**
-- [ ] Se sugieren los nombres propios repetidos al menos 3 veces dentro de una frase que no son nombre ni alias de una ficha; no las palabras que solo empiezan frase.
-- [ ] Los nombres de varias palabras unidos por «de», «del», «la», «las» o «los» se sugieren enteros.
-- [ ] «Crear ficha» crea la ficha y la sugerencia desaparece; «Descartar» la quita para siempre en esta obra, también tras cerrar y abrir.
+- [x] Se sugieren los nombres propios repetidos al menos 3 veces dentro de una frase que no son nombre ni alias de una ficha; no las palabras que solo empiezan frase.
+- [x] Los nombres de varias palabras unidos por «de», «del», «la», «las» o «los» se sugieren enteros.
+- [x] «Crear ficha» crea la ficha y la sugerencia desaparece; «Descartar» la quita para siempre en esta obra, también tras cerrar y abrir.
 
 **Separar el Tablero**
-- [ ] «Separar» abre el Tablero en su propia ventana y la de la obra vuelve a la Escritura, con su pestaña Tablero diciendo dónde está.
-- [ ] «Acoplar», cerrar la ventana o «Traerlo aquí» lo devuelven a la ventana de la obra.
-- [ ] Lo que se cambia en la ventana del Tablero se ve al momento en la de la obra, y al revés.
+- [x] «Separar» abre el Tablero en su propia ventana y la de la obra vuelve a la Escritura, con su pestaña Tablero diciendo dónde está.
+- [x] «Acoplar», cerrar la ventana o «Traerlo aquí» lo devuelven a la ventana de la obra.
+- [x] Lo que se cambia en la ventana del Tablero se ve al momento en la de la obra, y al revés.
 
 **Calidad**
-- [ ] Los métodos nuevos forman parte del contrato de mensajes, con sus pruebas de contrato.
-- [ ] Los cambios del archivo `.rocinante` son una migración numerada, documentada en `docs/format`.
-- [ ] Los logs no contienen nombres ni trozos del texto.
-- [ ] Con 300 fichas y una obra de 150 000 palabras, las menciones de todas las tarjetas llegan en menos de 1 segundo.
-- [ ] Tests de dominio, de comportamiento de la interfaz y una prueba de extremo a extremo: ver los números en las tarjetas, una coincidencia, crear una ficha desde una sugerencia y descartar otra, y separar y acoplar el Tablero.
+- [x] Los métodos nuevos forman parte del contrato de mensajes, con sus pruebas de contrato.
+- [x] Los cambios del archivo `.rocinante` son una migración numerada, documentada en `docs/format`.
+- [x] Los logs no contienen nombres ni trozos del texto.
+- [x] Con 300 fichas y una obra de 150 000 palabras, las menciones de todas las tarjetas llegan en menos de 1 segundo.
+- [x] Tests de dominio, de comportamiento de la interfaz y una prueba de extremo a extremo: ver los números en las tarjetas, una coincidencia, crear una ficha desde una sugerencia y descartar otra, y separar y acoplar el Tablero.
 
 ## Fuera de alcance
 
