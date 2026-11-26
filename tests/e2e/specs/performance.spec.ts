@@ -544,6 +544,9 @@ test.describe("the threads of a long work", () => {
     await expect(chapterText(app.page).locator("p")).toHaveCount(
       CHAPTER_WORDS / WORDS_PER_PARAGRAPH,
     );
+    // As a writer would find it: the text open, with its mentions already marked.
+    const marks = chapterText(app.page).locator(".mention");
+    await expect.poll(() => marks.count()).toBeGreaterThan(1000);
 
     const started = Date.now();
     await app.page.keyboard.press("F8");

@@ -77,9 +77,8 @@ import "./writing-view.css";
 
 // The board brings React Flow with it: it is loaded the first time the writer opens it.
 const BoardTab = lazy(() => import("../board/BoardTab"));
-const ThreadsTab = lazy(() =>
-  import("../threads/ThreadsTab").then((module) => ({ default: module.ThreadsTab })),
-);
+const loadThreadsTab = () => import("../threads/ThreadsTab");
+const ThreadsTab = lazy(() => loadThreadsTab().then((module) => ({ default: module.ThreadsTab })));
 
 /** Gives the keyboard back to the text, where the cursor was. */
 function focusText() {
@@ -497,6 +496,11 @@ export function WritingView({
   // On the board or the threads, the text waits, hidden, with its shortcuts.
   const awayFromText = workspace.tab !== "writing";
   const threads = useThreads(project.id, workspace.tab === "threads");
+  // The threads are fetched ahead, once the work is open and the writer pauses, so F8 does not wait for them.
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadThreadsTab().catch(() => {}), 3000);
+    return () => window.clearTimeout(timer);
+  }, []);
   // The board may live in a window of its own; when it comes back, it shows here.
   const showBoard = workspace.show;
   const boardHome = useDetachedBoard(useCallback(() => showBoard("board"), [showBoard]));
