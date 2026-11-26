@@ -149,3 +149,38 @@
 .open-note-delete {
   margin-left: auto;
 }
+
+/* The fichas of a note, and the notes of a ficha. */
+.note-elements-list,
+.element-notes-list {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.note-element {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.element-note {
+  display: block;
+  width: 100%;
+  padding: 2px 0;
+  font: inherit;
+  color: var(--color-ink-soft);
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.element-note:hover,
+.element-note:focus-visible {
+  color: var(--color-ink);
+}
+
+.element-note-resolved {
+  color: var(--color-ink-faint);
+}

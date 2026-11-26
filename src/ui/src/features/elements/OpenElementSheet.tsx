@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import type { Board } from "../../bridge/generated/protocol";
+import type { Board, Note } from "../../bridge/generated/protocol";
+import { ElementNotes } from "../notes/ElementNotes";
 import { ElementRelations } from "./ElementRelations";
 import { ElementSheet } from "./ElementSheet";
 import { useElement } from "./useBoard";
@@ -15,6 +16,12 @@ export interface OpenElementSheetProps {
   onProblem(message: string | null): void;
   /** Sends the ficha to the trash, with its relationships. */
   onTrash(id: string, name: string): void;
+  /** The notes of the work, where the panel of notes is at hand: the ficha shows those about it. */
+  notes?: {
+    all: readonly Note[];
+    onOpen(id: string): void;
+    onNew(elementId: string): void;
+  };
 }
 
 /**
@@ -29,6 +36,7 @@ export function OpenElementSheet({
   onOpen,
   onProblem,
   onTrash,
+  notes,
   ...props
 }: OpenElementSheetProps) {
   const element = useElement(id);
@@ -65,6 +73,13 @@ export function OpenElementSheet({
             onOpen={onOpen}
             onProblem={onProblem}
           />
+          {notes && (
+            <ElementNotes
+              notes={notes.all.filter((note) => note.elements.includes(id))}
+              onOpen={notes.onOpen}
+              onNew={() => notes.onNew(id)}
+            />
+          )}
           <p className="element-section element-trash">
             <button
               type="button"

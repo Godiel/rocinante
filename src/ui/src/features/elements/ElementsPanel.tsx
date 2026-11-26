@@ -3,7 +3,7 @@ import type { Board, ElementKind, ElementSummary } from "../../bridge/generated/
 import { useElementImage } from "./images";
 import { KIND_NAMES, KINDS, kindLabel } from "./kinds";
 import { byName, matches, sharedNames } from "./search";
-import { OpenElementSheet } from "./OpenElementSheet";
+import { OpenElementSheet, type OpenElementSheetProps } from "./OpenElementSheet";
 import "./elements.css";
 
 export interface ElementsPanelProps {
@@ -25,6 +25,8 @@ export interface ElementsPanelProps {
   onRestore(id: string): void;
   /** The tabs of the panel, shown in place of its title. */
   tabs?: ReactNode;
+  /** The notes of the work, so each ficha shows those about it. */
+  notes?: OpenElementSheetProps["notes"];
 }
 
 /**
@@ -46,6 +48,7 @@ export function ElementsPanel({
   onTrash,
   onRestore,
   tabs,
+  notes,
 }: ElementsPanelProps) {
   // A ficha that went to the trash, here or in another window, gives its place back to the list.
   const shownId = openId && board.elements.some((element) => element.id === openId) ? openId : null;
@@ -96,6 +99,7 @@ export function ElementsPanel({
           onOpen={onOpen}
           onProblem={onProblem}
           onTrash={onTrash}
+          notes={notes}
         />
       ) : (
         <ElementList

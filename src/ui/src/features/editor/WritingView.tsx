@@ -711,6 +711,17 @@ export function WritingView({
             }}
             onRestore={(id) => void elementTrash.restore(id)}
             tabs={<SidePanelTabs tab="elements" onShow={(tab) => setSheet(tab)} />}
+            notes={{
+              all: workNotes,
+              onOpen: (id) => {
+                setSheet("notes");
+                setOpenNote({ id });
+              },
+              onNew: (elementId) => {
+                setSheet("notes");
+                setOpenNote({ draft: true, elements: [elementId] });
+              },
+            }}
           />
         )}
 

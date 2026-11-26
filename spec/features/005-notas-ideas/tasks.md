@@ -83,11 +83,11 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real.
 
 ## 9. Enlazar con fichas
-- [ ] «Enlazar con una ficha…» en la nota, con el buscador de fichas de la 004.
-- [ ] Cada ficha enlazada se quita con × y se abre en la pestaña Fichas.
-- [ ] La ficha tiene una sección Notas con las suyas y «Nueva nota», que crea una idea suelta ya enlazada.
-- [ ] Las fichas en la papelera no aparecen en las notas.
-- [ ] Tests de comportamiento y comprobación en la app real.
+- [x] «Enlazar con una ficha…» en la nota, con el buscador de fichas de la 004.
+- [x] Cada ficha enlazada se quita con × y se abre en la pestaña Fichas.
+- [x] La ficha tiene una sección Notas con las suyas y «Nueva nota», que crea una idea suelta ya enlazada.
+- [x] Las fichas en la papelera no aparecen en las notas.
+- [x] Tests de comportamiento y comprobación en la app real.
 
 ## 10. Borrar y deshacer
 - [ ] «Borrar» llama a `note.delete` y muestra el aviso con Deshacer, que llama a `note.restore`.
