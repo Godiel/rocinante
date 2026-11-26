@@ -12,6 +12,19 @@
         "inverse": "discípulo de"
       },
       "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "starts": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "ends": null,
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "kind": "builtin:sibling-of",
+      "starts": null,
+      "ends": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6c",
+      "origin": "main"
     }
   ],
   "invalid": [
@@ -22,6 +35,14 @@
     {
       "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
       "kind": "builtin:Hermano",
+      "origin": "main"
+    },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "kind": "builtin:sibling-of",
+      "newKind": {
+        "forward": "a"
+      },
       "origin": "main"
     }
   ]
