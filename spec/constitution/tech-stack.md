@@ -64,8 +64,8 @@ Rocinante es código abierto y portafolio profesional, así que la calidad es pa
 
 | Ruta | Qué hay |
 |---|---|
-| `src/contracts/protocol.json` | El contrato de mensajes entre interfaz y núcleo (JSON Schema, versionado). Cada método tiene ejemplos en `src/contracts/examples/`. |
-| `src/core/Rocinante.Domain` | Reglas de la obra sin dependencias: `Project` (índice de capítulos, fragmentos y papelera), `Document`, `DocumentContent` y `TextStatistics`, `DocumentVersion`, `Note` y los elementos de la obra (`Elements/`: `Element`, `ElementBoard`, `Relationship`, `RelationshipKind`). |
+| `src/contracts/protocol.json` | El contrato de mensajes entre interfaz y núcleo (JSON Schema, versionado). Cada método tiene ejemplos en `src/contracts/examples/`, y `mentions.json` fija las reglas de las menciones que cumplen los dos lados. |
+| `src/core/Rocinante.Domain` | Reglas de la obra sin dependencias: `Project` (índice de capítulos, fragmentos y papelera), `Document`, `DocumentContent` y `TextStatistics`, `DocumentVersion`, `Note` y los elementos de la obra (`Elements/`: `Element`, `ElementBoard`, `Relationship`, `RelationshipKind` y `MentionFinder`, que reconoce sus nombres en el texto). |
 | `src/core/Rocinante.Application` | Casos de uso (`ProjectUseCases`, `DocumentUseCases`, `VersionUseCases`, `NoteUseCases`, `ElementUseCases`, `SettingsUseCases`), el `Workspace` compartido por todas las ventanas y los puertos que implementa la infraestructura. |
 | `src/core/Rocinante.Application/Settings` | Preferencias del escritor, incluido el ambiente (`Ambience`: fondo, tecleo, ambientes, atenuar y meta), y los fondos y sonidos propios (`AmbienceUseCases`, `FileSignature`). |
 | `src/core/Rocinante.Infrastructure` | SQLite (`Persistence/`, con las migraciones en `Persistence/Migrations/`), `settings.json` de la app (`Settings/`) y el registro con Serilog (`Logging/`). |
@@ -77,6 +77,7 @@ Rocinante es código abierto y portafolio profesional, así que la calidad es pa
 | `src/ui/src/features/workspace` | Las pestañas Escritura y Tablero de la ventana de la obra (F2) y las pestañas Fichas y Notas del panel junto al texto. |
 | `src/ui/src/features/elements` | Las fichas: la ficha con sus atributos, alias, imagen y descripción, la pestaña Fichas del panel junto al texto (Ctrl+Mayús+E), las relaciones, la papelera y el estado compartido de la pizarra (`useBoard`). |
 | `src/ui/src/features/notes` | Las notas de la obra: su estado compartido (`useWorkNotes`), el editor con formato y la ventanita del texto, la pestaña Notas (Ctrl+Mayús+N) con filtros y búsqueda, los enlaces con fichas, «Ir al pasaje» y borrar con deshacer. |
+| `src/ui/src/features/mentions` | Las menciones de las fichas: reconocerlas en el texto (`findMentions`), la ficha en pequeño al pasar el ratón y «En el texto» en la ficha. Las marcas del editor viven en `editor/extensions/mentions.ts`. |
 | `src/ui/src/features/board` | La pizarra del Tablero con React Flow: tarjetas, flechas, colocación libre, buscador, filtro por tipo y orden automático con d3-force. |
 | `src/ui/src/features/focus`, `features/ambience` | Modo concentración (F11, barra mínima, meta de la sesión) y ambiente: fondos, hoja translúcida, fondos animados dibujados por código (`animated/`) y créditos. |
 | `src/ui/src/audio` | Motor de sonido con Web Audio: tecleo y ambientes en bucle con fundido. |

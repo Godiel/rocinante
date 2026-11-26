@@ -1,6 +1,6 @@
 # 006 · Referencias en el texto
 
-**Estado:** en especificación
+**Estado:** hecha.
 
 ## Qué hace
 
@@ -42,26 +42,26 @@ El autor pidió avanzar sin detenerse; estas decisiones de alcance se tomaron co
 ## Criterios de aceptación
 
 **Reconocimiento**
-- [ ] Se reconocen el nombre y los alias de las fichas en la obra, como palabras enteras, sin distinguir mayúsculas ni tildes; gana el más largo y no se buscan los de una letra.
-- [ ] Las fichas de la papelera no se reconocen; al restaurarlas, sí.
-- [ ] Interfaz y núcleo reconocen exactamente lo mismo: comparten un juego de casos de prueba.
+- [x] Se reconocen el nombre y los alias de las fichas en la obra, como palabras enteras, sin distinguir mayúsculas ni tildes; gana el más largo y no se buscan los de una letra.
+- [x] Las fichas de la papelera no se reconocen; al restaurarlas, sí.
+- [x] Interfaz y núcleo reconocen exactamente lo mismo: comparten un juego de casos de prueba.
 
 **Editor**
-- [ ] Las menciones se marcan con un subrayado fino que no cambia el texto, el contador ni el archivo.
-- [ ] Al pasar el ratón por una mención aparece la ficha en pequeño, y «Abrir la ficha» la abre en el panel. Una mención de varias fichas las muestra todas.
-- [ ] Un nombre tecleado se marca y uno borrado deja de estarlo, sin esperar a guardar.
-- [ ] «Marcar menciones» oculta y muestra las marcas, se recuerda y no hay marcas en el modo concentración.
-- [ ] Con 300 fichas y un capítulo de 20 000 palabras, escribir mantiene el p95 de la 001.
+- [x] Las menciones se marcan con un subrayado fino que no cambia el texto, el contador ni el archivo.
+- [x] Al pasar el ratón por una mención aparece la ficha en pequeño, y «Abrir la ficha» la abre en el panel. Una mención de varias fichas las muestra todas.
+- [x] Un nombre tecleado se marca y uno borrado deja de estarlo, sin esperar a guardar.
+- [x] «Marcar menciones» oculta y muestra las marcas, se recuerda y no hay marcas en el modo concentración.
+- [x] Con 300 fichas y un capítulo de 20 000 palabras, escribir mantiene el p95 de la 001.
 
 **Ficha**
-- [ ] «En el texto» muestra el total de menciones, el número de capítulos, la primera aparición y las menciones por capítulo con su trozo de texto.
-- [ ] Pulsar una mención abre su capítulo y la selecciona, con el panel abierto.
-- [ ] La sección se pone al día al guardar el texto o cambiar nombres y alias, también desde otra ventana.
+- [x] «En el texto» muestra el total de menciones, el número de capítulos, la primera aparición y las menciones por capítulo con su trozo de texto.
+- [x] Pulsar una mención abre su capítulo y la selecciona, con el panel abierto.
+- [x] La sección se pone al día al guardar el texto o cambiar nombres y alias, también desde otra ventana.
 
 **Calidad**
-- [ ] Los métodos nuevos forman parte del contrato de mensajes, con sus pruebas de contrato.
-- [ ] Los logs no contienen nombres, alias ni trozos del texto.
-- [ ] Tests de dominio en el núcleo, tests de comportamiento de la interfaz y una prueba de extremo a extremo: escribir un nombre y verlo marcado, ver la ficha al pasar el ratón, ver las menciones en la ficha y saltar a una.
+- [x] Los métodos nuevos forman parte del contrato de mensajes, con sus pruebas de contrato.
+- [x] Los logs no contienen nombres, alias ni trozos del texto.
+- [x] Tests de dominio en el núcleo, tests de comportamiento de la interfaz y una prueba de extremo a extremo: escribir un nombre y verlo marcado, ver la ficha al pasar el ratón, ver las menciones en la ficha y saltar a una.
 
 ## Fuera de alcance
 

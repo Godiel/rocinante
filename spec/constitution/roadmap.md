@@ -9,6 +9,7 @@ Orden y estado de las features. Cada entrada apunta a su carpeta en `features/`,
 - **003 · Modo concentración y ambiente** — [spec](../features/003-modo-concentracion/spec.md). Faltan las imágenes de fondo incluidas y la grabación del café, que descarga el autor, y comprobar la pantalla completa en macOS y Linux con los instaladores (012).
 - **004 · Elementos de la obra** — [spec](../features/004-elementos-obra/spec.md).
 - **005 · Notas e ideas** — [spec](../features/005-notas-ideas/spec.md).
+- **006 · Referencias en el texto** — [spec](../features/006-referencias-texto/spec.md).
 
 ## Versión 1 — «Primera salida» 🔜
 
@@ -26,7 +27,7 @@ Las pestañas se pueden arrastrar fuera de la ventana principal para convertirla
 3. **003 · Modo concentración y ambiente** — pantalla completa con solo el texto. Fondos relajantes y sonidos de tecleo opcionales: cada pulsación suena, por ejemplo, como una máquina de escribir. Se activan, se eligen y se ajusta su volumen. _(Hecha.)_
 4. **004 · Elementos de la obra** — fichas de personajes, lugares y tramas creadas a mano, con atributos, alias, imagen y relaciones entre ellas. Trae la pestaña Tablero como pizarra: las fichas son tarjetas que se colocan libremente y se unen con flechas que dicen cómo se relacionan. Un panel junto al texto permite consultarlas mientras se escribe. _(Hecha.)_
 5. **005 · Notas e ideas** — amplía las notas ancladas en el texto de la 001: ideas sueltas del proyecto, notas enlazadas a un elemento de la obra y una vista con todas las notas para consultarlas, filtrarlas y saltar a su pasaje sin salir de la escritura. _(Hecha.)_
-6. **006 · Referencias en el texto** — el vínculo entre el texto y las tarjetas, en ambos sentidos. En el editor, las menciones de un elemento se reconocen y, al pasar el cursor, muestran su ficha. En la tarjeta aparecen todas sus referencias en el texto (cada pasaje donde se menciona, con salto directo a él), sus metadatos (atributos, alias, primera aparición, capítulos) y sus notas.
+6. **006 · Referencias en el texto** — el vínculo entre el texto y las tarjetas, en ambos sentidos. En el editor, las menciones de un elemento se reconocen y, al pasar el cursor, muestran su ficha. En la tarjeta aparecen todas sus referencias en el texto (cada pasaje donde se menciona, con salto directo a él), sus metadatos (atributos, alias, primera aparición, capítulos) y sus notas. _(Hecha.)_
 7. **007 · Tablero de tarjetas** — completa la pizarra de la 004 con lo que sale del texto: número de menciones, capítulos y pasajes donde aparece cada elemento, coincidencias en un mismo párrafo y sugerencias de nombres propios sin ficha. La pestaña se puede separar en su propia ventana, llevar a otra pantalla y volver a acoplar. Todo funciona sin IA.
 8. **008 · Corrección** — ortografía, gramática y puntuación en local, sin reescribir el estilo del autor.
 9. **009 · Escudero** — conexión con un proveedor de IA en la nube (con la clave del usuario) o con un modelo local. Analiza cada párrafo en segundo plano al terminarlo y crea fichas, relaciones y atributos.
