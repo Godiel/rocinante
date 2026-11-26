@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 11,
+  "protocolVersion": 12,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -1210,6 +1210,243 @@
           "$ref": "#/$defs/DictionaryWord"
         }
       }
+    },
+    "squire.settings": {
+      "description": "How the squire is set up: provider, model, whether there is a key, whether it reads this work, and how it is doing.",
+      "params": null,
+      "result": {
+        "$ref": "#/$defs/SquireSettings"
+      }
+    },
+    "squire.configure": {
+      "description": "Chooses the provider and the model. Broadcasts squire.changed.",
+      "params": {
+        "type": "object",
+        "required": ["provider", "model", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "provider": {
+            "$ref": "#/$defs/SquireProvider"
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "endpoint": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+                "pattern": "^https?://"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/SquireSettings"
+      }
+    },
+    "squire.setKey": {
+      "description": "Keeps the API key of a provider in the system's credential store; it is never returned. Broadcasts squire.changed.",
+      "params": {
+        "type": "object",
+        "required": ["provider", "key", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "provider": {
+            "$ref": "#/$defs/SquireProvider"
+          },
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/SquireSettings"
+      }
+    },
+    "squire.forgetKey": {
+      "description": "Takes the API key of a provider out of the system's credential store. Broadcasts squire.changed.",
+      "params": {
+        "type": "object",
+        "required": ["provider", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "provider": {
+            "$ref": "#/$defs/SquireProvider"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/SquireSettings"
+      }
+    },
+    "squire.test": {
+      "description": "Asks the chosen provider something small, to see that the key and the model work.",
+      "params": null,
+      "result": {
+        "type": "object",
+        "required": ["ok", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ErrorReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "squire.models": {
+      "description": "The models of the local provider (Ollama) at an address; empty for the providers in the cloud.",
+      "params": {
+        "type": "object",
+        "required": ["provider"],
+        "additionalProperties": false,
+        "properties": {
+          "provider": {
+            "$ref": "#/$defs/SquireProvider"
+          },
+          "endpoint": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+                "pattern": "^https?://"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "result": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "squire.enable": {
+      "description": "Lets the squire read this work, or stops it. Broadcasts squire.changed.",
+      "params": {
+        "type": "object",
+        "required": ["enabled", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/SquireSettings"
+      }
+    },
+    "squire.analyze": {
+      "description": "Gives the squire a paragraph the writer has just finished; it reads it in the background if it is on and the paragraph changed.",
+      "params": {
+        "type": "object",
+        "required": ["documentId", "text", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "documentId": {
+            "$ref": "#/$defs/Id"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
+      }
+    },
+    "proposals.get": {
+      "description": "The squire's proposals waiting for the writer, the newest first.",
+      "params": null,
+      "result": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/Proposal"
+        }
+      }
+    },
+    "proposal.accept": {
+      "description": "Makes what a proposal says, with the writer's corrections if any. Broadcasts squire.changed and elements.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "changes": {
+            "$ref": "#/$defs/ProposalChanges"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
+      }
+    },
+    "proposal.dismiss": {
+      "description": "Drops a proposal; it is not proposed again for that paragraph. Broadcasts squire.changed.",
+      "params": {
+        "type": "object",
+        "required": ["id", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/Id"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "null"
+      }
     }
   },
   "notifications": {
@@ -1460,6 +1697,34 @@
           }
         }
       }
+    },
+    "squire.changed": {
+      "description": "The squire changed: its settings or state, new proposals (proposals) or proposals no longer waiting (removed).",
+      "params": {
+        "type": "object",
+        "required": ["settings", "proposals", "removed", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "settings": {
+            "$ref": "#/$defs/SquireSettings"
+          },
+          "proposals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Proposal"
+            }
+          },
+          "removed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Id"
+            }
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -1586,7 +1851,14 @@
         "alreadyExists",
         "notAProject",
         "newerVersion",
-        "corrupted"
+        "corrupted",
+        "squireNotConfigured",
+        "squireKeyMissing",
+        "squireRefused",
+        "squireUnavailable",
+        "secretStoreUnavailable",
+        "proposalNotFound",
+        "proposalElementMissing"
       ]
     },
     "ErrorData": {
@@ -2877,6 +3149,251 @@
       "minLength": 1,
       "maxLength": 60,
       "pattern": "^\\S+$"
+    },
+    "SquireProvider": {
+      "enum": ["anthropic", "openai", "gemini", "xai", "compatible", "ollama"]
+    },
+    "SquireSettings": {
+      "type": "object",
+      "required": [
+        "provider",
+        "model",
+        "endpoint",
+        "hasKey",
+        "enabled",
+        "status",
+        "problem",
+        "pending"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SquireProvider"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hasKey": {
+          "type": "boolean",
+          "description": "Whether the chosen provider has a key in the system's store."
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether the squire reads the open work."
+        },
+        "status": {
+          "enum": ["off", "idle", "working", "problem"]
+        },
+        "problem": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorReason"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Proposals waiting for the writer."
+        }
+      }
+    },
+    "Proposal": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "documentId",
+        "passage",
+        "createdAt",
+        "element",
+        "relationship",
+        "attribute"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "kind": {
+          "enum": ["element", "relationship", "attribute"]
+        },
+        "documentId": {
+          "$ref": "#/$defs/Id"
+        },
+        "passage": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "The paragraph it comes from."
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "element": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["name", "kind", "otherKind"],
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "$ref": "#/$defs/ElementName"
+                },
+                "kind": {
+                  "$ref": "#/$defs/ElementKind"
+                },
+                "otherKind": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/OtherKindName"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relationship": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["from", "to", "forward", "inverse"],
+              "additionalProperties": false,
+              "properties": {
+                "from": {
+                  "$ref": "#/$defs/ElementName"
+                },
+                "to": {
+                  "$ref": "#/$defs/ElementName"
+                },
+                "forward": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                },
+                "inverse": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 60
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attribute": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["element", "name", "value"],
+              "additionalProperties": false,
+              "properties": {
+                "element": {
+                  "$ref": "#/$defs/ElementName"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "value": {
+                  "type": "string",
+                  "maxLength": 1000
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "ProposalChanges": {
+      "description": "What the writer corrected before accepting; what is left out stays as proposed.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/ElementName"
+        },
+        "kind": {
+          "$ref": "#/$defs/ElementKind"
+        },
+        "otherKind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OtherKindName"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "forward": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "inverse": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
     }
   }
 }

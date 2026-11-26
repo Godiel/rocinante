@@ -1,0 +1,4 @@
+{
+  "valid": [{ "provider": "gemini", "origin": "main" }],
+  "invalid": [{ "origin": "main" }, { "provider": "gemini" }]
+}

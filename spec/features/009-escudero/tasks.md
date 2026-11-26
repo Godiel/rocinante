@@ -3,7 +3,7 @@
 Checklist derivada de [`plan.md`](plan.md). Rama: `feature/009-escudero`.
 
 ## 1. Contrato (versión 12)
-- [ ] Métodos `squire.*`, `proposals.get`, `proposal.*` y la notificación `squire.changed`, con ejemplos.
+- [x] Métodos `squire.*`, `proposals.get`, `proposal.*` y la notificación `squire.changed`, con ejemplos.
 
 ## 2. Dominio
 - [ ] `Proposal` y su ciclo, con tests.

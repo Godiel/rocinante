@@ -1,0 +1,4 @@
+{
+  "valid": [{ "enabled": true, "origin": "main" }],
+  "invalid": [{ "enabled": "sí", "origin": "main" }, { "origin": "main" }]
+}

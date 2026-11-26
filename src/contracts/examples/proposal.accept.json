@@ -1,0 +1,18 @@
+{
+  "valid": [
+    { "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b", "origin": "main" },
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": { "name": "Claudio", "kind": "character" },
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "0196a3b2-7c4d-7e8f-9a0b-1c2d3e4f5a6b",
+      "changes": { "color": "rojo" },
+      "origin": "main"
+    },
+    { "origin": "main" }
+  ]
+}
