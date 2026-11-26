@@ -52,6 +52,7 @@ function renderWelcome(
     chooseImage: vi.fn(() => Promise.resolve(null)),
     chooseSound: vi.fn(() => Promise.resolve(null)),
     chooseElementImage: vi.fn(() => Promise.resolve(null)),
+    chooseExportPath: vi.fn(() => Promise.resolve(null)),
     ...options.pickers,
   };
   render(

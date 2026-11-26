@@ -21,7 +21,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/011-exportacion`.
 - [x] Datos del libro, exportación con avance y escritura segura, en la sesión de escritura de los tests.
 
 ## 6. Interfaz
-- [ ] Diálogo Exportar con F9, formato, partes, autor, créditos, portada, guardar, avance y «Mostrar en la carpeta».
+- [x] Diálogo Exportar con F9, formato, partes, autor, créditos, portada, guardar, avance y «Mostrar en la carpeta».
 
 ## 7. Pruebas de extremo a extremo y de rendimiento
 - [ ] Una obra exportada a los cuatro formatos.

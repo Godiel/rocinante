@@ -1,4 +1,4 @@
-import { open } from "@tauri-apps/plugin-dialog";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import type { Pickers } from "../features/welcome/Welcome";
 
 /** The operating system's own dialogs, through the Tauri dialog plugin. */
@@ -30,6 +30,14 @@ export const systemPickers: Pickers = {
     const file = await open({
       title: "Imagen de la ficha",
       filters: [{ name: "Imagen", extensions: ["png", "jpg", "jpeg", "webp"] }],
+    });
+    return typeof file === "string" ? file : null;
+  },
+  async chooseExportPath(suggested, kind) {
+    const file = await save({
+      title: "Exportar la obra",
+      defaultPath: suggested,
+      filters: [{ name: kind.name, extensions: [kind.extension] }],
     });
     return typeof file === "string" ? file : null;
   },

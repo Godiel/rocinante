@@ -72,6 +72,8 @@ import { panelId, tabId } from "../workspace/tabs";
 import { useWorkspaceTab } from "../workspace/useWorkspaceTab";
 import { useThreads } from "../threads/useThreads";
 import { MilestoneSlip } from "../threads/MilestoneSlip";
+import { ExportDialog } from "../export/ExportDialog";
+import { isExportShortcut } from "../export/shortcuts";
 import { useDetachedBoard } from "../workspace/board-window";
 import "./writing-view.css";
 
@@ -194,6 +196,7 @@ export function WritingView({
     at: number;
   } | null>(null);
   const [openNote, setOpenNote] = useState<OpenedNote | null>(null);
+  const [exporting, setExporting] = useState(false);
   // The paragraph where the writer is marking a milestone, from the floating menu.
   const [marking, setMarking] = useState<{ paragraph: string; documentId: string } | null>(null);
   // The note whose passage the writer asked to see; `at` tells one request from the next.
@@ -352,6 +355,12 @@ export function WritingView({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (keepsItsOwnKeys(event.target)) return;
+      // The export is of the whole work: from the text, the board or the threads, but not in focus mode.
+      if (isExportShortcut(event)) {
+        event.preventDefault();
+        if (!focusedRef.current) setExporting(true);
+        return;
+      }
       if (onBoardRef.current) {
         // The shortcuts of the text wait for the writer to come back to it; F5 does not reload either.
         if (
@@ -636,6 +645,14 @@ export function WritingView({
               Separar
             </button>
           )}
+          <button
+            type="button"
+            className="action"
+            title="Exportar la obra (F9)"
+            onClick={() => setExporting(true)}
+          >
+            Exportar
+          </button>
           <button
             className="action"
             onClick={() =>
@@ -1041,6 +1058,20 @@ export function WritingView({
           />
         )}
       </div>
+
+      {exporting && (
+        <ExportDialog
+          title={project.title}
+          origin={origin}
+          beforeExport={savePendingNow}
+          chooseExportPath={pickers.chooseExportPath}
+          chooseImage={pickers.chooseElementImage}
+          onClose={() => {
+            setExporting(false);
+            if (workspace.tab === "writing") focusText();
+          }}
+        />
+      )}
 
       {marking && (
         <MilestoneSlip

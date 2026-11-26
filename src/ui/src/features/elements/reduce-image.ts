@@ -56,15 +56,16 @@ export function base64ToBytes(data: string): Uint8Array<ArrayBuffer> {
 }
 
 /**
- * The picture at one size: WebP if the system writes it, JPEG otherwise, at the best quality that keeps it
- * under `maxBytes`. Fails if not even the lowest quality fits.
+ * The picture at one size: WebP if the system writes it, JPEG otherwise (or JPEG when `jpeg` asks for it), at
+ * the best quality that keeps it under `maxBytes`. Fails if not even the lowest quality fits.
  */
 export async function encodeFitting(
   painter: Painter,
   size: { width: number; height: number },
   maxBytes: number,
+  jpeg = false,
 ): Promise<Reduced> {
-  let type: "image/webp" | "image/jpeg" = "image/webp";
+  let type: "image/webp" | "image/jpeg" = jpeg ? "image/jpeg" : "image/webp";
   for (const quality of QUALITIES) {
     let blob = await painter.encode(size.width, size.height, type, quality);
     if (blob.type !== type) {
@@ -125,6 +126,27 @@ export async function reduceImage(
         MAX_THUMBNAIL_BYTES,
       ),
     };
+  } finally {
+    picture.close();
+  }
+}
+
+/** The longest side of the cover of a book, as readers of EPUB recommend. */
+export const COVER_SIDE = 2560;
+
+/** Reduces the image the writer chose for the cover of the book: a JPEG, which every reader shows. */
+export async function reduceCover(
+  chosen: { data: string; mediaType: string },
+  decode: (blob: Blob) => Promise<ImageBitmap> = (blob) => createImageBitmap(blob),
+): Promise<Reduced> {
+  const picture = await decode(new Blob([base64ToBytes(chosen.data)], { type: chosen.mediaType }));
+  try {
+    return await encodeFitting(
+      canvasPainter(picture),
+      fitted(picture.width, picture.height, COVER_SIDE),
+      MAX_FULL_BYTES,
+      true,
+    );
   } finally {
     picture.close();
   }

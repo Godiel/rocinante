@@ -84,6 +84,7 @@ const pickers = {
   chooseImage: vi.fn(),
   chooseSound: vi.fn(),
   chooseElementImage: vi.fn(),
+  chooseExportPath: vi.fn(),
 };
 
 function announce<N extends keyof CoreNotifications>(method: N, params: CoreNotifications[N]) {

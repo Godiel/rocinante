@@ -20,6 +20,8 @@ export interface Pickers {
   chooseSound(): Promise<string | null>;
   /** Asks for the image of a ficha: a portrait, a map; null if the writer cancels. */
   chooseElementImage(): Promise<string | null>;
+  /** Asks where to save an exported book, suggesting a name; null if the writer cancels. */
+  chooseExportPath(suggested: string, kind: { name: string; extension: string }): Promise<string | null>;
 }
 
 export interface WelcomeProps {
