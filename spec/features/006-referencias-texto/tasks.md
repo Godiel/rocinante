@@ -34,9 +34,9 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Tests de comportamiento y comprobación en la app real.
 
 ## 7. Ficha en pequeño
-- [ ] Aparece al pasar el ratón por una mención y se va al salir; varias fichas a la vez.
-- [ ] «Abrir la ficha» la abre en el panel.
-- [ ] Tests de comportamiento y comprobación en la app real.
+- [x] Aparece al pasar el ratón por una mención y se va al salir; varias fichas a la vez.
+- [x] «Abrir la ficha» la abre en el panel.
+- [x] Tests de comportamiento y comprobación en la app real.
 
 ## 8. «En el texto» en la ficha
 - [ ] Total, capítulos, primera aparición y menciones por capítulo con su trozo.

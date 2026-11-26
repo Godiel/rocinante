@@ -6,6 +6,7 @@ import { toTipTapDocument } from "../../bridge/document";
 import type {
   DocumentKind,
   DocumentState,
+  ElementSummary,
   Note,
   Place,
   Statistics,
@@ -26,6 +27,7 @@ import { NoteSlip } from "../notes/NoteSlip";
 import { NoteStatesExtension } from "../../editor/extensions/note-states";
 import { mentionAt, Mentions } from "../../editor/extensions/mentions";
 import type { MentionIndex } from "../mentions/find-mentions";
+import { MentionCard } from "../mentions/MentionCard";
 import "./book-editor.css";
 import { registerCursor, shownHead } from "../../editor/cursor";
 
@@ -35,6 +37,10 @@ const RETRY_DELAY_MS = 5000;
 const MAX_UNSAVED_MS = 1000;
 const PLACE_DELAY_MS = 1000;
 const SLIP_WIDTH = 320;
+/** The card over a mention waits this long before it comes and before it goes. */
+const CARD_DELAY_MS = 300;
+const CARD_WIDTH = 288;
+const NO_ELEMENTS: readonly ElementSummary[] = [];
 
 /** What the slip next to the text is editing. */
 type Slip =
@@ -83,6 +89,10 @@ export interface BookEditorProps {
   mentionsVisible?: boolean;
   /** A mention the writer asked to see, by its number among those of its ficha here. */
   revealMention?: { elementId: string; ordinal: number; at: number } | null;
+  /** The fichas of the work, for the card that shows over a mention. */
+  mentionElements?: readonly ElementSummary[];
+  /** Opens a ficha in the panel beside the text. */
+  onOpenElement?(id: string): void;
 }
 
 /**
@@ -108,6 +118,8 @@ export function BookEditor({
   mentionIndex = null,
   mentionsVisible = true,
   revealMention = null,
+  mentionElements = NO_ELEMENTS,
+  onOpenElement,
 }: BookEditorProps) {
   const frame = useRef<HTMLDivElement>(null);
   const saveTimer = useRef<number | undefined>(undefined);
@@ -125,6 +137,9 @@ export function BookEditor({
   const platen = useRef(typewriterScrolling);
   platen.current = typewriterScrolling;
   const [slip, setSlip] = useState<Slip | null>(null);
+  // The ficha in small over a mention: it comes after a short pause and goes a little after the hand.
+  const [card, setCard] = useState<{ ids: string[]; top: number; left: number } | null>(null);
+  const cardTimer = useRef<number | undefined>(undefined);
   const notesById = useMemo(() => new Map(notes.map((note) => [note.id, note])), [notes]);
   const callbacks = useRef({
     onCounts,
@@ -374,6 +389,31 @@ export function BookEditor({
     }
   }
 
+  function onMouseOver(event: MouseEvent) {
+    const mark = (event.target as HTMLElement).closest<HTMLElement>(".book-page .mention");
+    if (!mark || !frame.current) return;
+    window.clearTimeout(cardTimer.current);
+    const ids = (mark.dataset.elements ?? "").split(" ").filter(Boolean);
+    cardTimer.current = window.setTimeout(() => {
+      const container = frame.current!.getBoundingClientRect();
+      const box = mark.getBoundingClientRect();
+      setCard({
+        ids,
+        top: Math.round(box.bottom - container.top + 6),
+        left: Math.round(
+          Math.max(0, Math.min(box.left - container.left, container.width - CARD_WIDTH)),
+        ),
+      });
+    }, CARD_DELAY_MS);
+  }
+
+  function onMouseOut(event: MouseEvent) {
+    const mark = (event.target as HTMLElement).closest(".book-page .mention");
+    if (!mark || mark.contains(event.relatedTarget as Node | null)) return;
+    window.clearTimeout(cardTimer.current);
+    cardTimer.current = window.setTimeout(() => setCard(null), CARD_DELAY_MS);
+  }
+
   async function act(action: () => Promise<unknown>) {
     try {
       await action();
@@ -448,6 +488,8 @@ export function BookEditor({
         pointer.current = true;
       }}
       onClick={onClick}
+      onMouseOver={onMouseOver}
+      onMouseOut={onMouseOut}
     >
       <EditorContent editor={editor} className={`book-page book-page-${kind}`} />
       <TypewriterCaret editor={editor} frame={frame} />
@@ -468,6 +510,21 @@ export function BookEditor({
         onOpen={(note, top) => setSlip({ kind: "note", note, top, left: 0 })}
         frame={frame}
       />
+      {card && mentionsVisible && (
+        <MentionCard
+          elements={mentionElements.filter((element) => card.ids.includes(element.id))}
+          top={card.top}
+          left={card.left}
+          onOpen={(id) => {
+            setCard(null);
+            onOpenElement?.(id);
+          }}
+          onEnter={() => window.clearTimeout(cardTimer.current)}
+          onLeave={() => {
+            cardTimer.current = window.setTimeout(() => setCard(null), CARD_DELAY_MS);
+          }}
+        />
+      )}
       {slip?.kind === "footnote" && (
         <TextPopover
           key={`${slip.kind}:${slip.top}:${slip.left}`}

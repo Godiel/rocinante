@@ -31,4 +31,17 @@ test("the names of the fichas are marked in the text as it is written", async ({
   await expect(chapterText(page)).toHaveText(
     "Alonso Quijano y el escudero llegaron. Sancho bebió.",
   );
+
+  // The hand over a name shows the ficha in small, and from there it opens whole.
+  await marks.first().hover();
+  const card = page.getByRole("dialog", { name: "Ficha de Alonso Quijano" });
+  await expect(card).toBeVisible();
+  await expect(card).toContainText("Personaje");
+  await expect(card).toContainText("cincuenta años");
+  await card.getByRole("button", { name: "Abrir la ficha" }).click();
+  const panel = page.getByRole("complementary", { name: "Fichas de la obra" });
+  await expect(panel.getByRole("textbox", { name: "Nombre", exact: true })).toHaveValue(
+    "Alonso Quijano",
+  );
+  await expect(card).toBeHidden();
 });

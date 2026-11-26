@@ -696,6 +696,13 @@ export function WritingView({
                 notesLoaded={notesLoaded}
                 reveal={reveal?.documentId === document.id ? reveal : null}
                 mentionIndex={mentions}
+                mentionElements={board.elements}
+                onOpenElement={(id) => {
+                  setViewing(null);
+                  setSheet("elements");
+                  setOpenElement(id);
+                  setFreshElement(null);
+                }}
                 mentionsVisible={preferences.mentionsVisible && !focus.focused}
                 onOpenNote={(id) => {
                   setSheet("notes");
