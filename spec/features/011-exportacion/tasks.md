@@ -26,7 +26,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/011-exportacion`.
 ## 7. Pruebas de extremo a extremo y de rendimiento
 - [x] Una obra exportada a los cuatro formatos.
 - [x] Una obra de 150 000 palabras a PDF y a los demás formatos.
-- [ ] Todo en verde en la CI.
+- [x] Todo en verde en la CI.
 
 ## 8. Validación y cierre
 - [x] Criterios, `tech-stack.md`, hoja de ruta y PR.
