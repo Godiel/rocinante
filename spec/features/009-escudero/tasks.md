@@ -34,4 +34,4 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/009-escudero`.
 - [ ] Todo en verde en la CI.
 
 ## 11. Validación y cierre
-- [ ] Criterios, `tech-stack.md`, hoja de ruta y PR.
+- [x] Criterios, `tech-stack.md`, hoja de ruta y PR.

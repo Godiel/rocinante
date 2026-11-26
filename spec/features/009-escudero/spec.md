@@ -1,6 +1,6 @@
 # 009 · Escudero
 
-**Estado:** en especificación
+**Estado:** hecha.
 
 ## Qué hace
 
@@ -43,21 +43,21 @@ Llevar las fichas a mano es trabajo que distrae de escribir. El escudero lo hace
 ## Criterios de aceptación
 
 **Conexión**
-- [ ] Se elige proveedor y modelo, se guarda la clave en el almacén del sistema y «Probar» dice si funciona, con un mensaje claro si no.
-- [ ] Con Ollama se listan los modelos instalados; si Ollama no responde, se explica cómo instalarlo y arrancarlo.
-- [ ] La clave nunca aparece en la obra, en `settings.json` ni en los registros.
-- [ ] El escudero está apagado por defecto y se enciende por obra, con el aviso de a dónde irá el texto.
+- [x] Se elige proveedor y modelo, se guarda la clave en el almacén del sistema y «Probar» dice si funciona, con un mensaje claro si no.
+- [x] Con Ollama se listan los modelos instalados; si Ollama no responde, se explica cómo instalarlo y arrancarlo.
+- [x] La clave nunca aparece en la obra, en `settings.json` ni en los registros.
+- [x] El escudero está apagado por defecto y se enciende por obra, con el aviso de a dónde irá el texto.
 
 **Propuestas**
-- [ ] Al terminar un párrafo, el escudero propone elementos, relaciones y atributos, cada uno con su pasaje, sin interrumpir.
-- [ ] Aceptar crea lo propuesto; corregir y aceptar crea lo corregido; descartar lo quita y no vuelve para ese pasaje.
-- [ ] Un párrafo sin cambios no se vuelve a mandar.
-- [ ] Si el proveedor falla o no hay conexión, se dice con calma en la pestaña Escudero y la escritura sigue igual.
+- [x] Al terminar un párrafo, el escudero propone elementos, relaciones y atributos, cada uno con su pasaje, sin interrumpir.
+- [x] Aceptar crea lo propuesto; corregir y aceptar crea lo corregido; descartar lo quita y no vuelve para ese pasaje.
+- [x] Un párrafo sin cambios no se vuelve a mandar.
+- [x] Si el proveedor falla o no hay conexión, se dice con calma en la pestaña Escudero y la escritura sigue igual.
 
 **Calidad**
-- [ ] Los métodos nuevos forman parte del contrato; las propuestas se guardan en el `.rocinante` con una migración documentada.
-- [ ] Los registros no contienen el texto, las propuestas ni la clave.
-- [ ] Tests del núcleo con un proveedor falso, tests de comportamiento y una prueba de extremo a extremo con un proveedor falso local: conectar, escribir un párrafo, aceptar, corregir y descartar propuestas.
+- [x] Los métodos nuevos forman parte del contrato; las propuestas se guardan en el `.rocinante` con una migración documentada.
+- [x] Los registros no contienen el texto, las propuestas ni la clave.
+- [x] Tests del núcleo con un proveedor falso, tests de comportamiento y una prueba de extremo a extremo con un proveedor falso local: conectar, escribir un párrafo, aceptar, corregir y descartar propuestas.
 
 ## Fuera de alcance
 
