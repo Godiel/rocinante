@@ -160,7 +160,8 @@ Las preferencias personales que no dependen de la obra (tema, ambiente y sonidos
 | Relación | `Relationship` |
 | Clase de relación («hijo de» / «padre de») | `RelationshipKind` |
 | Posición de una tarjeta en el tablero | `BoardPosition` |
-| Referencia (mención en el texto) | `Reference` |
+| Mención (el nombre o un alias de una ficha en el texto) | `Mention` |
+| Referencias de una ficha (todas sus menciones en la obra) | `ElementReferences` |
 | Nota o idea del autor (anclada en el texto o suelta) | `Note` |
 | Idea suelta (una nota de la obra, sin capítulo ni pasaje) | `Note` sin `DocumentId` |
 | Nota resuelta (ya atendida; se aparta de la lista) | `Note.IsResolved` |

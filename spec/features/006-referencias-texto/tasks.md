@@ -12,10 +12,10 @@ Checklist derivada de [`plan.md`](plan.md). Cada bloque se cierra con sus tests 
 - [x] Ejemplos válidos e inválidos; tipos de TypeScript regenerados.
 
 ## 3. Dominio
-- [ ] `MentionFinder` con las reglas compartidas.
-- [ ] `DocumentContent` da los textos de sus bloques en orden.
-- [ ] Glosario de `tech-stack.md`: mención.
-- [ ] Tests con los casos de `mentions.json`, con la cobertura de la constitución.
+- [x] `MentionFinder` con las reglas compartidas.
+- [x] `DocumentContent` da los textos de sus bloques en orden.
+- [x] Glosario de `tech-stack.md`: mención.
+- [x] Tests con los casos de `mentions.json`, con la cobertura de la constitución.
 
 ## 4. Casos de uso y sidecar
 - [ ] `ElementUseCases.References`, en el orden del índice, con trozos de texto.
