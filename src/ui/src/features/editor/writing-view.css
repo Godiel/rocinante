@@ -146,6 +146,63 @@
   gap: var(--space-3);
 }
 
+/* The actions take the room the start leaves, and what does not fit goes to «Más». */
+.writing-bar .bar-actions {
+  position: relative;
+  flex: 1;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.bar-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  gap: inherit;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.bar-more {
+  position: relative;
+}
+
+.bar-menu {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 13rem;
+  padding: var(--space-1) 0;
+  background: var(--color-paper);
+  border: var(--hairline) solid var(--color-rule);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 12%);
+}
+
+.bar-menu-item {
+  padding: 6px var(--space-3);
+  font: inherit;
+  text-align: left;
+  color: var(--color-ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.bar-menu-item:hover,
+.bar-menu-item:focus-visible {
+  background: var(--color-paper-shade);
+  outline: none;
+}
+
+.bar-menu-item[aria-checked="true"]::after {
+  content: " ✓";
+  color: var(--color-rubric);
+}
+
 .writing-bar .action,
 .workspace-tab {
   flex: none;
