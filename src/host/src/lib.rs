@@ -4,10 +4,12 @@ mod relay;
 
 use std::path::Path;
 use std::process::Command;
-use std::sync::OnceLock;
 use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::{Mutex, OnceLock};
 
 use serde_json::Value;
+#[cfg(target_os = "macos")]
+use tauri::Emitter;
 use tauri::{AppHandle, Manager, RunEvent, State, WebviewUrl, WebviewWindowBuilder};
 
 use crate::core::Supervisor;
@@ -17,6 +19,25 @@ static WINDOW_COUNTER: AtomicU32 = AtomicU32::new(1);
 
 /// The app, for the panic hook, which cannot be handed anything.
 static APP: OnceLock<AppHandle> = OnceLock::new();
+
+/// The event that tells the main window the system asked to open a work (macOS sends it with a double
+/// click on a `.rocinante`, after the app has started).
+pub const OPENED_EVENT: &str = "rocinante://opened";
+
+/// The works the system asked to open and the window has not yet taken.
+#[derive(Default)]
+struct OpenedFiles(Mutex<Vec<String>>);
+
+/// The works the system asked to open since the window last asked, the latest last.
+#[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri hands the state over by value.
+fn take_opened_files(opened: State<'_, OpenedFiles>) -> Vec<String> {
+    opened
+        .0
+        .lock()
+        .map(|mut files| std::mem::take(&mut *files))
+        .unwrap_or_default()
+}
 
 /// Forwards a request from any window to the core.
 #[tauri::command]
@@ -127,6 +148,7 @@ pub fn run() {
         )
         .manage(Relay::new())
         .manage(Supervisor::new())
+        .manage(OpenedFiles::default())
         .setup(|app| {
             let _ = APP.set(app.handle().clone());
             core::start(app.handle(), true)?;
@@ -136,11 +158,20 @@ pub fn run() {
             core_request,
             open_window,
             open_log_folder,
-            reveal_file
+            reveal_file,
+            take_opened_files
         ])
         .build(tauri::generate_context!())
         .expect("error while building Rocinante")
         .run(|app, event| {
+            #[cfg(target_os = "macos")]
+            if let RunEvent::Opened { urls } = &event {
+                let files = urls.iter().filter_map(|url| url.to_file_path().ok());
+                if let Ok(mut opened) = app.state::<OpenedFiles>().0.lock() {
+                    opened.extend(files.map(|file| file.display().to_string()));
+                }
+                let _ = app.emit_to("main", OPENED_EVENT, ());
+            }
             // From here on the core stopping is the app closing, not a fall.
             if matches!(event, RunEvent::ExitRequested { .. } | RunEvent::Exit) {
                 app.state::<Supervisor>().exiting();

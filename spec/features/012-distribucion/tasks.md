@@ -3,12 +3,12 @@
 Checklist derivada de [`plan.md`](plan.md). Rama: `feature/012-distribucion`.
 
 ## 1. Versión única
-- [ ] `scripts/version.mjs` con `--check`, en la CI.
+- [x] `scripts/version.mjs` con `--check`, en la CI.
 
 ## 2. Paquetes
-- [ ] NSIS por usuario, `.dmg` universal, AppImage y `.deb`.
-- [ ] Asociación `.rocinante` y apertura en macOS.
-- [ ] Núcleo universal para macOS.
+- [x] NSIS por usuario, `.dmg` universal, AppImage y `.deb`.
+- [x] Asociación `.rocinante` y apertura en macOS.
+- [x] Núcleo universal para macOS.
 
 ## 3. Actualizador
 - [ ] Plugins, permisos y clave pública.
