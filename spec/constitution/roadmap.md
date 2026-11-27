@@ -13,6 +13,7 @@ Orden y estado de las features. Cada entrada apunta a su carpeta en `features/`,
 - **007 · Tablero de tarjetas** — [spec](../features/007-tablero-tarjetas/spec.md). Cerrar la ventana separada del Tablero con el botón del sistema queda por comprobar en la app instalada.
 - **008 · Corrección** — [spec](../features/008-correccion/spec.md).
 - **009 · Escudero** — [spec](../features/009-escudero/spec.md). Las llamadas a cada proveedor real se prueban con respuestas grabadas; falta probarlas con claves reales del autor.
+- **012 · Distribución** — [spec](../features/012-distribucion/spec.md). Falta instalar los paquetes en cada sistema (y con ello el doble clic de la 001 y la pantalla completa de la 003), y que el autor genere la clave de las actualizaciones.
 - **011 · Exportación** — [spec](../features/011-exportacion/spec.md). Falta pasar EPUBCheck a un EPUB exportado y abrir un `.docx` en Word; en LibreOffice se abre bien.
 - **010 · Hilos del destino** — [spec](../features/010-hilos-destino/spec.md). Los hitos que propone el escudero con un proveedor real quedan por probar con las claves del autor, como el resto de la 009.
 
@@ -39,7 +40,7 @@ Las pestañas se pueden arrastrar fuera de la ventana principal para convertirla
 9. **009 · Escudero** — conexión con un proveedor de IA en la nube (con la clave del usuario) o con un modelo local. Analiza cada párrafo en segundo plano al terminarlo y propone fichas, relaciones y atributos, que el autor acepta, corrige o descarta. _(Hecha.)_
 10. **010 · Hilos del destino** — el recorrido de cada personaje a lo largo de la historia: dónde aparece, qué le ocurre y cómo cambian sus relaciones. _(Hecha.)_
 11. **011 · Exportación** — `.docx`, PDF, EPUB y `.md`, respetando el formato de hoja elegido. _(Hecha.)_
-12. **012 · Distribución** — instaladores para Windows, macOS y Linux. Instalar y escribir, sin nada más.
+12. **012 · Distribución** — instaladores para Windows, macOS y Linux. Instalar y escribir, sin nada más. _(Hecha.)_
 
 ## Backlog / ideas 💡
 

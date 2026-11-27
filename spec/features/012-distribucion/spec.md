@@ -1,6 +1,6 @@
 # 012 · Distribución
 
-**Estado:** propuesta.
+**Estado:** hecha. Falta probar los instaladores en cada sistema, y la clave del actualizador que guarda el autor (ver los criterios).
 
 ## Qué hace
 
@@ -61,21 +61,21 @@ Hay que descargarlas: piden la aprobación del autor.
 ## Criterios de aceptación
 
 **Instaladores**
-- [ ] La CI construye, a partir de una etiqueta `v*`, el `.exe` de Windows, el `.dmg` universal de macOS y el AppImage y el `.deb` de Linux, y los deja en una Release en borrador con su `latest.json`.
-- [ ] En Windows se instala sin permisos de administrador y se desinstala desde el sistema.
-- [ ] En los tres sistemas, un `.rocinante` se abre con doble clic en Rocinante y lleva su icono.
-- [ ] La app instalada abre, crea una obra, escribe y exporta sin nada más instalado ni conexión.
-- [ ] La página Instalar explica cómo abrir los instaladores sin firmar en cada sistema.
+- [x] La CI construye, a partir de una etiqueta `v*`, el `.exe` de Windows, el `.dmg` universal de macOS y el AppImage y el `.deb` de Linux, y los deja en una Release en borrador con su `latest.json`. _El empaquetado de las PR construye los cuatro paquetes en verde; la Release se probará con la primera etiqueta._
+- [ ] En Windows se instala sin permisos de administrador y se desinstala desde el sistema. _Configurado (NSIS por usuario); falta instalarlo a mano._
+- [ ] En los tres sistemas, un `.rocinante` se abre con doble clic en Rocinante y lleva su icono. _Configurado; falta probarlo instalado en cada sistema._
+- [ ] La app instalada abre, crea una obra, escribe y exporta sin nada más instalado ni conexión. _Falta probarlo instalado en cada sistema._
+- [x] La página Instalar explica cómo abrir los instaladores sin firmar en cada sistema.
 
 **Versiones**
-- [ ] Una orden cambia la versión en `tauri.conf.json`, los `package.json`, `Cargo.toml` y el núcleo. La CI comprueba que coinciden.
-- [ ] Al abrir, con conexión y una versión nueva publicada, aparece el aviso. «Actualizar y reiniciar» guarda, actualiza y vuelve a abrir la obra. «Ahora no» lo deja para la próxima vez.
-- [ ] Sin conexión, o con la búsqueda desactivada, no hay petición ni aviso, y nada cambia.
-- [ ] Una actualización con una firma que no coincide no se instala, y se dice con calma.
+- [x] Una orden cambia la versión en `tauri.conf.json`, los `package.json`, `Cargo.toml` y el núcleo. La CI comprueba que coinciden.
+- [ ] Al abrir, con conexión y una versión nueva publicada, aparece el aviso. «Actualizar y reiniciar» guarda, actualiza y vuelve a abrir la obra. «Ahora no» lo deja para la próxima vez. _Probado con el actualizador simulado; la prueba real necesita la clave del autor y dos Releases publicadas._
+- [x] Sin conexión, o con la búsqueda desactivada, no hay petición ni aviso, y nada cambia.
+- [x] Una actualización con una firma que no coincide no se instala, y se dice con calma. _El actualizador de Tauri la rechaza; probado el mensaje con el actualizador simulado._
 
 **Calidad**
-- [ ] Los registros no contienen rutas ni nada de la obra. La comprobación de versión no manda nada del escritor.
-- [ ] Tests de la interfaz para el aviso y el diálogo, con el actualizador simulado. La CI construye los instaladores en cada PR que toque el empaquetado.
+- [x] Los registros no contienen rutas ni nada de la obra. La comprobación de versión no manda nada del escritor.
+- [x] Tests de la interfaz para el aviso y el diálogo, con el actualizador simulado. La CI construye los instaladores en cada PR que toque el empaquetado.
 
 ## Fuera de alcance
 

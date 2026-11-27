@@ -47,7 +47,7 @@ Son dos procesos. Tauri abre las ventanas y aloja la interfaz. El núcleo .NET s
 - **Sonido:** Web Audio, el del propio WebView, sin bibliotecas. Los sonidos incluidos van en Opus, que suena igual en WebView2, WebKit y WebKitGTK. Se preparan una vez con `scripts/ambience.mjs` (ffmpeg en el equipo del autor, no en la app), y al repositorio solo suben los archivos convertidos.
 - **Fondos y sonidos propios:** el núcleo los copia a la carpeta `ambience/` de los datos de la app con un nombre `<uuid>.<ext>`. El anfitrión los sirve a la interfaz con un protocolo propio, `ambience://`, que solo entrega nombres con esa forma y de esa carpeta. Se usa en lugar del protocolo de archivos de Tauri porque su lista de rutas permitidas falla en Windows.
 - **Material incluido:** solo de dominio público (CC0). Su origen está en `features/ambience/credits.ts` y la compilación lo copia a `licenses/ambience.txt`, junto a las licencias de las tipografías. Todo el material incluido pesa como máximo 15 MB, y un test lo comprueba.
-- **Distribución:** instaladores para Windows, macOS y Linux (feature 012).
+- **Distribución:** Tauri construye un `.exe` NSIS por usuario, un `.dmg` universal (con el núcleo x64 y arm64 unido con `lipo`), un AppImage y un `.deb`. Una etiqueta `v*` los publica en una Release en borrador (`release.yml`, con `tauri-action`), y las PR que tocan el empaquetado los construyen (`package.yml`). La versión está en un solo sitio (`scripts/version.mjs`). Las actualizaciones usan `tauri-plugin-updater`, firmadas con la clave del proyecto. Los instaladores aún no van firmados.
 
 ## Licencia
 

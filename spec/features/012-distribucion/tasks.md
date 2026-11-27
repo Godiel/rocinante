@@ -16,9 +16,9 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/012-distribucion`.
 - [x] Aviso en la barra, diálogo y preferencia, con tests.
 
 ## 4. Publicar
-- [ ] `release.yml` con Release en borrador y `latest.json`.
-- [ ] Empaquetado en la CI para las PR que lo tocan.
+- [x] `release.yml` con Release en borrador y `latest.json`.
+- [x] Empaquetado en la CI para las PR que lo tocan.
 
 ## 5. Cierre
-- [ ] Página Instalar, README, criterios, `tech-stack.md`, hoja de ruta y PR.
-- [ ] Todo en verde en la CI.
+- [x] Página Instalar, README, criterios, `tech-stack.md`, hoja de ruta y PR.
+- [x] Todo en verde en la CI.
