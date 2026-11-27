@@ -250,6 +250,28 @@ internal sealed record RelateParams(Guid From, Guid To, string? Kind, NewRelatio
 
 internal sealed record ChangeRelationshipParams(Guid Id, string? Kind, NewRelationshipKindDto? NewKind, Guid? Starts, Guid? Ends, string Origin);
 
+internal sealed record CoverDto(int Version);
+
+internal sealed record BookDetailsDto(string Author, string? Credits, CoverDto? Cover);
+
+internal sealed record BookChangesDto(string? Author, string? Credits);
+
+internal sealed record UpdateBookParams(BookChangesDto Changes, string Origin);
+
+internal sealed record SetCoverParams(string Image, string Origin);
+
+internal sealed record ExportPartsDto(bool Cover, bool Credits, bool Contents);
+
+internal sealed record ExportParams(string Format, ExportPartsDto Parts, string Path, string Origin);
+
+internal sealed record ExportStartedResult(Guid ExportId);
+
+internal sealed record BookChangedNotification(BookDetailsDto Book, string Origin);
+
+internal sealed record ExportProgressNotification(Guid ExportId, int Done, int Total, string Origin);
+
+internal sealed record ExportFinishedNotification(Guid ExportId, string? Path, long Bytes, string? Reason, string Origin);
+
 internal sealed record ChooseThreadsParams(IReadOnlyList<Guid> Elements, string Origin);
 
 internal sealed record MarkMilestoneParams(Guid ElementId, Guid DocumentId, string Passage, string Text, string Origin);
@@ -399,6 +421,14 @@ internal sealed record ElementsChangedNotification(
 [JsonSerializable(typeof(RelateParams))]
 [JsonSerializable(typeof(ChangeRelationshipParams))]
 [JsonSerializable(typeof(ChooseThreadsParams))]
+[JsonSerializable(typeof(BookDetailsDto))]
+[JsonSerializable(typeof(UpdateBookParams))]
+[JsonSerializable(typeof(SetCoverParams))]
+[JsonSerializable(typeof(ExportParams))]
+[JsonSerializable(typeof(ExportStartedResult))]
+[JsonSerializable(typeof(BookChangedNotification))]
+[JsonSerializable(typeof(ExportProgressNotification))]
+[JsonSerializable(typeof(ExportFinishedNotification))]
 [JsonSerializable(typeof(MarkMilestoneParams))]
 [JsonSerializable(typeof(RenameMilestoneParams))]
 [JsonSerializable(typeof(MilestoneDto))]

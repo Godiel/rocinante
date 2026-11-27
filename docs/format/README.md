@@ -2,7 +2,7 @@
 
 Un proyecto de Rocinante es **un único archivo** que contiene la obra completa: capítulos, fragmentos, papelera, versiones y notas. Por dentro es una base de datos [SQLite 3](https://sqlite.org/fileformat.html), así que se puede abrir con cualquier herramienta de SQLite para inspeccionarla o recuperar el texto sin depender de la app.
 
-Este documento describe la **versión 7 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql), [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql), [`0003-elements.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0003-elements.sql) [`0004-notes.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0004-notes.sql) [`0005-dismissed-names.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0005-dismissed-names.sql), [`0006-squire.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0006-squire.sql) y [`0007-threads.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0007-threads.sql).
+Este documento describe la **versión 8 del esquema**. La fuente de verdad son las migraciones de [`Persistence/Migrations`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/): [`0001-initial.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0001-initial.sql), [`0002-work-format.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0002-work-format.sql), [`0003-elements.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0003-elements.sql) [`0004-notes.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0004-notes.sql) [`0005-dismissed-names.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0005-dismissed-names.sql), [`0006-squire.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0006-squire.sql) , [`0007-threads.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0007-threads.sql) y [`0008-book.sql`](../../src/core/Rocinante.Infrastructure/Persistence/Migrations/0008-book.sql).
 
 ## Cómo se reconoce
 
@@ -262,6 +262,19 @@ _Desde la versión 7._ Un hito: lo que le ocurre a una ficha en un párrafo de u
 
 ### `thread_choice`
 _Desde la versión 7._ Las fichas que se muestran en los hilos del destino, en orden (`position`). Se borran con su ficha. Mientras `project.threads_chosen` (0/1) es 0, el escritor no ha elegido y se muestran los cinco personajes más nombrados.
+
+### `book`
+_Desde la versión 8._ El libro con que se exporta la obra. Exactamente una fila (`singleton = 1`).
+
+| Columna | Tipo | |
+|---|---|---|
+| `author` | TEXT, hasta 200 | El autor como va en la portada: un nombre o un seudónimo. Puede estar vacío |
+| `credits` | TEXT, 1–2000, nulo | La página de créditos como la escribió el autor. Nulo: «© {año} {autor}. Todos los derechos reservados.» |
+| `cover` | BLOB, nulo | La imagen de portada para el EPUB, un JPEG ya reducido por la interfaz |
+| `cover_version` | INTEGER ≥ 1, nulo | La versión de la portada; nula si no hay imagen |
+| `last_cover_version` | INTEGER ≥ 0 | La mayor versión que ha habido, para que una portada nueva no repita ninguna |
+
+Los archivos exportados no se guardan en la obra.
 
 ## Qué no está en el archivo
 

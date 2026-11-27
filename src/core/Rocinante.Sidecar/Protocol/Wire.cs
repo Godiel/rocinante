@@ -5,6 +5,7 @@ using Rocinante.Application.Ports;
 using Rocinante.Application.Settings;
 using Rocinante.Application.Squire;
 using Rocinante.Domain;
+using Rocinante.Domain.Books;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
 using Rocinante.Domain.Elements;
@@ -276,6 +277,17 @@ internal static class Wire
             relationship.Kind.Value,
             relationship.Starts?.Value,
             relationship.Ends?.Value);
+
+    public static BookDetailsDto Of(BookDetails details) =>
+        new(details.Author, details.Credits, details.CoverVersion is { } version ? new CoverDto(version) : null);
+
+    public static ExportFormat ToExportFormat(string format) => format switch
+    {
+        "pdf" => ExportFormat.Pdf,
+        "epub" => ExportFormat.Epub,
+        "docx" => ExportFormat.Docx,
+        _ => ExportFormat.Markdown,
+    };
 
     public static MilestoneDto Of(Milestone milestone) =>
         new(

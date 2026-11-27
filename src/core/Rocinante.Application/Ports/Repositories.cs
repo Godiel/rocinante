@@ -1,4 +1,5 @@
 using Rocinante.Domain;
+using Rocinante.Domain.Books;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
 using Rocinante.Domain.Elements;
@@ -161,4 +162,18 @@ public interface IThreadRepository
     IReadOnlyList<ElementId>? Chosen();
 
     void Choose(IReadOnlyList<ElementId> elements);
+}
+
+/// <summary>The author, the credits and the cover of the book the work is exported as.</summary>
+public interface IBookRepository
+{
+    BookDetails Load();
+
+    /// <summary>Keeps the author, the credits and the cover version; the image itself goes with <see cref="SaveCover"/>.</summary>
+    void Save(BookDetails details);
+
+    /// <summary>Keeps the details with a new cover image, or with none when <paramref name="image"/> is null.</summary>
+    void SaveCover(BookDetails details, ReadOnlyMemory<byte>? image);
+
+    ReadOnlyMemory<byte>? LoadCover();
 }

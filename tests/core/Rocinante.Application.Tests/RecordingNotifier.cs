@@ -92,5 +92,22 @@ internal sealed class RecordingNotifier : IChangeNotifier
         Events.Add($"milestones.changed:{origin}");
     }
 
+    public List<(ExportId Id, int Done, int Total)> Progress { get; } = [];
+
+    public (ExportId Id, string? Path, long Bytes, Rocinante.Domain.DomainError? Problem)? LastExport { get; private set; }
+
+    public void BookChanged(Rocinante.Domain.Books.BookDetails details, string origin) => Events.Add($"book.changed:{origin}");
+
+    public void ExportProgress(ExportId id, int done, int total, string origin)
+    {
+        lock (Progress)
+        {
+            Progress.Add((id, done, total));
+        }
+    }
+
+    public void ExportFinished(ExportId id, string? path, long bytes, Rocinante.Domain.DomainError? problem, string origin) =>
+        LastExport = (id, path, bytes, problem);
+
     public void Clear() => Events.Clear();
 }

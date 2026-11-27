@@ -54,9 +54,14 @@ internal sealed class ServerHarness : IDisposable
     public FakeSquireClient SquireClient { get; } = new();
 
     /// <summary>Waits for the squire to read what it was given, and keeps what it announced meanwhile.</summary>
-    public void SettleSquire()
+    public void SettleSquire() => Settle(_core.WhenSquireIdle());
+
+    /// <summary>Waits for the exports started and keeps what they announced.</summary>
+    public void SettleExports() => Settle(_core.WhenExportIdle());
+
+    private void Settle(Task background)
     {
-        _core.WhenSquireIdle().GetAwaiter().GetResult();
+        background.GetAwaiter().GetResult();
         var messages = _output.ToString()
             .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Select(text => JsonNode.Parse(text)!.AsObject());

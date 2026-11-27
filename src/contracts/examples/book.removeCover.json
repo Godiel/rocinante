@@ -1,0 +1,14 @@
+{
+  "valid": [
+    {
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    {},
+    {
+      "origin": "main",
+      "image": "x"
+    }
+  ]
+}

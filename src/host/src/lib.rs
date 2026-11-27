@@ -65,6 +65,37 @@ async fn open_log_folder(app: AppHandle) -> Result<(), String> {
     show_folder(&folder).map_err(|error| error.to_string())
 }
 
+/// Shows an exported book in the system's file manager, selected where the system allows it. Only an
+/// existing file is shown: the command opens nothing else.
+#[tauri::command]
+async fn reveal_file(path: String) -> Result<(), String> {
+    let file = Path::new(&path);
+    if !file.is_file() {
+        return Err("not a file".into());
+    }
+    reveal(file).map_err(|error| error.to_string())
+}
+
+#[cfg(target_os = "windows")]
+fn reveal(file: &Path) -> std::io::Result<()> {
+    use std::os::windows::process::CommandExt;
+    // Explorer reads its own arguments: the path goes quoted after the comma, as it is.
+    Command::new("explorer")
+        .raw_arg(format!("/select,\"{}\"", file.display()))
+        .spawn()
+        .map(|_| ())
+}
+
+#[cfg(target_os = "macos")]
+fn reveal(file: &Path) -> std::io::Result<()> {
+    Command::new("open").arg("-R").arg(file).spawn().map(|_| ())
+}
+
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
+fn reveal(file: &Path) -> std::io::Result<()> {
+    show_folder(file.parent().unwrap_or(file))
+}
+
 fn show_folder(folder: &Path) -> std::io::Result<()> {
     let program = if cfg!(target_os = "windows") {
         "explorer"
@@ -104,7 +135,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             core_request,
             open_window,
-            open_log_folder
+            open_log_folder,
+            reveal_file
         ])
         .build(tauri::generate_context!())
         .expect("error while building Rocinante")

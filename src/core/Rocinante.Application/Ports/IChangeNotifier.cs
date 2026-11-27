@@ -1,6 +1,7 @@
 using Rocinante.Application.Settings;
 using Rocinante.Application.Squire;
 using Rocinante.Domain;
+using Rocinante.Domain.Books;
 using Rocinante.Domain.Content;
 using Rocinante.Domain.Documents;
 using Rocinante.Domain.Elements;
@@ -55,6 +56,15 @@ public interface IChangeNotifier
 
     /// <summary>Milestones were made, changed or followed their paragraph, or were removed.</summary>
     void MilestonesChanged(IReadOnlyList<Milestone> milestones, IReadOnlyList<MilestoneId> removed, string origin);
+
+    /// <summary>The author, the credits or the cover of the book changed.</summary>
+    void BookChanged(BookDetails details, string origin);
+
+    /// <summary>An export wrote <paramref name="done"/> chapters out of <paramref name="total"/>.</summary>
+    void ExportProgress(ExportId id, int done, int total, string origin);
+
+    /// <summary>An export ended: the book is at <paramref name="path"/>, or <paramref name="problem"/> says why it is not.</summary>
+    void ExportFinished(ExportId id, string? path, long bytes, DomainError? problem, string origin);
 
     /// <summary>The writer added or removed one of their own images or sounds.</summary>
     void AmbienceChanged(IReadOnlyList<OwnAmbienceView> own, string origin);

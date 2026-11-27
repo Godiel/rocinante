@@ -1,5 +1,6 @@
 using Rocinante.Application.Settings;
 using Rocinante.Application.Squire;
+using Rocinante.Infrastructure.Export;
 using Rocinante.Infrastructure.Files;
 using Rocinante.Infrastructure.Persistence;
 using Rocinante.Infrastructure.Settings;
@@ -26,6 +27,7 @@ internal sealed class AppFixture : IDisposable
         Ambience = new AmbienceUseCases(Settings, new AmbienceFolder(PathOf("datos")), Notifier);
         Elements = new ElementUseCases(_workspace, new ChosenFiles(), Notifier, Clock);
         Threads = new ThreadUseCases(_workspace, Elements, Notifier, Clock);
+        Export = new ExportUseCases(_workspace, [new PdfWriter(), new EpubWriter(), new DocxWriter(), new MarkdownWriter()], new ExportFiles(), Notifier, Clock);
         Squire = new SquireUseCases(_workspace, Settings, Secrets, SquireClient, Elements, Threads, Notifier, Clock, new ImmediateGate());
         App = new SettingsUseCases(_workspace, Projects, Ambience, Settings, Notifier, DefaultFolder, launchFile);
     }
@@ -63,6 +65,8 @@ internal sealed class AppFixture : IDisposable
     public SquireUseCases Squire { get; }
 
     public ThreadUseCases Threads { get; }
+
+    public ExportUseCases Export { get; }
 
     public string PathOf(string name) => System.IO.Path.Combine(Folder, name);
 

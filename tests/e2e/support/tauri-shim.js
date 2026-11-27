@@ -51,6 +51,7 @@
         return id;
       }
       case "plugin:dialog|open":
+      case "plugin:dialog|save":
         return picks.shift() ?? null;
       case "plugin:window|set_fullscreen":
         fullscreen = Boolean(args.value);

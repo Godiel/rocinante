@@ -29,6 +29,8 @@ public interface IProjectSession : IDisposable
 
     IThreadRepository Threads { get; }
 
+    IBookRepository Books { get; }
+
     IElementRepository Elements { get; }
 
     /// <summary>Runs <paramref name="work"/> so that every write inside it is kept, or none is.</summary>

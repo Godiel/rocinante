@@ -122,6 +122,19 @@ internal sealed class WritingSession(ServerHarness harness)
         harness.Call("threads.get");
         harness.Call("milestone.delete", Params(("id", milestone), ("origin", Main)));
 
+        // The book: its author, credits and cover, and the work exported as a PDF in the background.
+        harness.Call("book.get");
+        harness.Call("book.update", Params(("changes", new JsonObject { ["author"] = "Miguel de Cervantes", ["credits"] = "Primera edición." }), ("origin", Main)));
+        harness.Call("book.setCover", Params(("image", Convert.ToBase64String([0xFF, 0xD8, 0xFF, 0xE0, 0, 0x10, 0x4A, 0x46, 0x49, 0x46, 0, 1])), ("origin", Main)));
+        harness.Call("book.cover");
+        harness.Call("book.removeCover", Params(("origin", Other)));
+        harness.Call("export.run", Params(
+            ("format", "pdf"),
+            ("parts", new JsonObject { ["cover"] = true, ["credits"] = true, ["contents"] = true }),
+            ("path", harness.PathOf("La obra.pdf")),
+            ("origin", Main)));
+        harness.SettleExports();
+
         // The squire, with a local model, reads a paragraph and proposes; the writer takes one and drops another.
         harness.SquireClient.Answer =
             """{"elements":[{"name":"Dulcinea","kind":"character"},{"name":"El Toboso","kind":"place"}],"relationships":[],"attributes":[]}""";

@@ -2,6 +2,7 @@ using Rocinante.Application;
 using Rocinante.Application.Ports;
 using Rocinante.Application.Settings;
 using Rocinante.Application.Squire;
+using Rocinante.Infrastructure.Export;
 using Rocinante.Infrastructure.Secrets;
 using Rocinante.Infrastructure.Squire;
 
@@ -18,6 +19,7 @@ namespace Rocinante.Sidecar;
 /// <param name="ChosenFiles">Reads the files the writer chooses, such as the image of an element.</param>
 /// <param name="Secrets">Where the API keys of the squire are kept; the system's credential store if null.</param>
 /// <param name="SquireClient">How the squire talks to its providers; over HTTP if null.</param>
+/// <param name="ExportFiles">Where exported books are written; the disk by default.</param>
 internal sealed record CoreOptions(
     IProjectFiles Files,
     ISettingsStore Settings,
@@ -28,7 +30,8 @@ internal sealed record CoreOptions(
     IAmbienceFolder Ambience,
     IChosenFiles ChosenFiles,
     ISecretStore? Secrets = null,
-    ISquireClient? SquireClient = null);
+    ISquireClient? SquireClient = null,
+    IExportFiles? ExportFiles = null);
 
 /// <summary>
 /// Composition root: wires the use cases to the project files, the clock and the JSON-RPC
@@ -41,6 +44,7 @@ internal sealed class Core : IDisposable, IWorkGate
     private readonly object _gate = new();
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromMinutes(2) };
     private readonly SquireUseCases _squire;
+    private readonly ExportUseCases _export;
 
     public Core(TextWriter output, TextWriter log, CoreOptions options, ProtocolContract contract)
     {
@@ -73,13 +77,22 @@ internal sealed class Core : IDisposable, IWorkGate
                 notifier,
                 options.Clock,
                 this),
-            threads);
+            threads,
+            _export = new ExportUseCases(
+                _workspace,
+                [new PdfWriter(), new EpubWriter(), new DocxWriter(), new MarkdownWriter()],
+                options.ExportFiles ?? new ExportFiles(),
+                notifier,
+                options.Clock));
 
         _server = new JsonRpcServer(writer, contract, CoreMethods.Create(contract, services), log);
     }
 
     /// <summary>Waits until the squire has read every paragraph it was given; for the tests.</summary>
     internal Task WhenSquireIdle() => _squire.WhenIdle();
+
+    /// <summary>Waits until every export started has ended; for the tests.</summary>
+    internal Task WhenExportIdle() => _export.WhenIdle();
 
     /// <summary>One request at a time, and never at once with what the squire stores.</summary>
     public void Handle(string line)

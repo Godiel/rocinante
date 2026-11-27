@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 13,
+  "protocolVersion": 14,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -329,6 +329,126 @@
       },
       "result": {
         "$ref": "#/$defs/ProjectState"
+      }
+    },
+    "book.get": {
+      "description": "The author, the credits and the cover of the open work.",
+      "params": null,
+      "result": {
+        "$ref": "#/$defs/BookDetails"
+      }
+    },
+    "book.update": {
+      "description": "Changes the author or the credits; what is left out stays. A null credits goes back to the default. Broadcasts book.changed.",
+      "params": {
+        "type": "object",
+        "required": ["changes", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "changes": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": false,
+            "properties": {
+              "author": {
+                "$ref": "#/$defs/AuthorName"
+              },
+              "credits": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/CreditsText"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/BookDetails"
+      }
+    },
+    "book.setCover": {
+      "description": "Gives the book its cover image, a JPEG already reduced by the UI. Broadcasts book.changed.",
+      "params": {
+        "type": "object",
+        "required": ["image", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "image": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2796204,
+            "pattern": "^[A-Za-z0-9+/]*={0,2}$"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/BookDetails"
+      }
+    },
+    "book.removeCover": {
+      "description": "Takes the cover image away. Broadcasts book.changed.",
+      "params": {
+        "type": "object",
+        "required": ["origin"],
+        "additionalProperties": false,
+        "properties": {
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "$ref": "#/$defs/BookDetails"
+      }
+    },
+    "book.cover": {
+      "description": "The cover image of the book, to show it in the export dialog.",
+      "params": null,
+      "result": {
+        "$ref": "#/$defs/ImageData"
+      }
+    },
+    "export.run": {
+      "description": "Starts writing the chapters of the open work as a book at `path`, in the background: the work is read at once and written while other requests go on. Announces export.progress and, at the end, export.finished. Nothing is left at `path` if it fails.",
+      "params": {
+        "type": "object",
+        "required": ["format", "parts", "path", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "format": {
+            "$ref": "#/$defs/ExportFormat"
+          },
+          "parts": {
+            "$ref": "#/$defs/ExportParts"
+          },
+          "path": {
+            "$ref": "#/$defs/FilePath"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      },
+      "result": {
+        "type": "object",
+        "required": ["exportId"],
+        "additionalProperties": false,
+        "properties": {
+          "exportId": {
+            "$ref": "#/$defs/Id"
+          }
+        }
       }
     },
     "project.close": {
@@ -1996,6 +2116,86 @@
           }
         }
       }
+    },
+    "book.changed": {
+      "description": "The author, the credits or the cover of the book changed.",
+      "params": {
+        "type": "object",
+        "required": ["book", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "book": {
+            "$ref": "#/$defs/BookDetails"
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
+    },
+    "export.progress": {
+      "description": "How far an export has gone: chapters written out of all of them.",
+      "params": {
+        "type": "object",
+        "required": ["exportId", "done", "total", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "exportId": {
+            "$ref": "#/$defs/Id"
+          },
+          "done": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
+    },
+    "export.finished": {
+      "description": "An export ended: the file is at `path`, or `reason` says why there is none.",
+      "params": {
+        "type": "object",
+        "required": ["exportId", "path", "bytes", "reason", "origin"],
+        "additionalProperties": false,
+        "properties": {
+          "exportId": {
+            "$ref": "#/$defs/Id"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/FilePath"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ErrorReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "origin": {
+            "$ref": "#/$defs/WindowLabel"
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -2132,7 +2332,9 @@
         "proposalElementMissing",
         "milestoneNotFound",
         "milestoneTextRequired",
-        "relationshipBounds"
+        "relationshipBounds",
+        "exportFailed",
+        "exportNotFound"
       ]
     },
     "ErrorData": {
@@ -3852,6 +4054,80 @@
           "items": {
             "$ref": "#/$defs/Milestone"
           }
+        }
+      }
+    },
+    "AuthorName": {
+      "description": "The name of the author as it goes on the cover: a name or a pen name. Surrounding spaces are trimmed; it may be empty.",
+      "type": "string",
+      "maxLength": 200
+    },
+    "CreditsText": {
+      "description": "The text of the credits page, as the author writes it, in lines.",
+      "type": "string",
+      "maxLength": 2000
+    },
+    "BookDetails": {
+      "description": "What the book carries besides the text of the work: its author, its credits and, for EPUB, a cover image.",
+      "type": "object",
+      "required": ["author", "credits", "cover"],
+      "additionalProperties": false,
+      "properties": {
+        "author": {
+          "$ref": "#/$defs/AuthorName"
+        },
+        "credits": {
+          "description": "The credits as the author wrote them, or null for the default: «© {year} {author}. Todos los derechos reservados.».",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CreditsText"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cover": {
+          "description": "The cover image, a JPEG reduced by the UI, or null.",
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["version"],
+              "additionalProperties": false,
+              "properties": {
+                "version": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "ExportFormat": {
+      "enum": ["pdf", "epub", "docx", "md"]
+    },
+    "ExportParts": {
+      "description": "The parts the book carries besides the chapters.",
+      "type": "object",
+      "required": ["cover", "credits", "contents"],
+      "additionalProperties": false,
+      "properties": {
+        "cover": {
+          "type": "boolean",
+          "description": "The title page, with the title and the author; in EPUB also the cover image, if any."
+        },
+        "credits": {
+          "type": "boolean",
+          "description": "The credits page."
+        },
+        "contents": {
+          "type": "boolean",
+          "description": "The table of contents."
         }
       }
     }

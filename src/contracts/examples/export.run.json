@@ -1,0 +1,54 @@
+{
+  "valid": [
+    {
+      "format": "pdf",
+      "parts": {
+        "cover": true,
+        "credits": true,
+        "contents": true
+      },
+      "path": "/home/autor/La venta.pdf",
+      "origin": "main"
+    },
+    {
+      "format": "md",
+      "parts": {
+        "cover": false,
+        "credits": false,
+        "contents": false
+      },
+      "path": "La venta.md",
+      "origin": "main"
+    }
+  ],
+  "invalid": [
+    {
+      "format": "odt",
+      "parts": {
+        "cover": true,
+        "credits": true,
+        "contents": true
+      },
+      "path": "x.odt",
+      "origin": "main"
+    },
+    {
+      "format": "pdf",
+      "parts": {
+        "cover": true
+      },
+      "path": "x.pdf",
+      "origin": "main"
+    },
+    {
+      "format": "pdf",
+      "parts": {
+        "cover": true,
+        "credits": true,
+        "contents": true
+      },
+      "path": "",
+      "origin": "main"
+    }
+  ]
+}
