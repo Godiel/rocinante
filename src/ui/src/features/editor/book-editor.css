@@ -375,3 +375,13 @@
   border-bottom: 1px dotted var(--color-rubric);
   cursor: pointer;
 }
+
+/* The invitation of an empty chapter (the Placeholder extension): faint, and never part of the text. */
+.book-page .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  font-style: italic;
+  color: var(--color-ink-faint);
+  pointer-events: none;
+}

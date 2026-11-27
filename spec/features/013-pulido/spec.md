@@ -31,7 +31,7 @@ Corrige lo que el autor encontró al usar la 0.9.0 en una ventana normal. Es la 
 - En modo concentración y en pantalla completa desaparece, como hoy.
 
 **Escribir en un capítulo nuevo**
-- Un capítulo vacío muestra su título y, en la primera línea, una invitación tenue: «Empieza a escribir…».
+- Un capítulo vacío muestra en su primera línea una invitación tenue: «Empieza a escribir…».
 - **Un clic en cualquier parte de la hoja** lleva el cursor al texto: al final si se pulsa debajo del texto, o al principio si está vacío.
 - Al crear un capítulo, el cursor espera en su nombre. Si se sale de él sin escribirlo, conserva «Capítulo sin título» y el cursor pasa al texto.
 

@@ -28,6 +28,7 @@ import { Versions } from "../versions/Versions";
 import { VersionView } from "../versions/VersionView";
 import { isSaveVersionShortcut, isVersionsShortcut } from "../versions/shortcuts";
 import { BookEditor } from "./BookEditor";
+import { WRITE_AT_END } from "./write-at-end";
 import { FormatSheet } from "../format/FormatSheet";
 import { PageView } from "../pages/PageView";
 import { isPageViewShortcut } from "../pages/shortcuts";
@@ -92,6 +93,23 @@ function focusText() {
   window.document
     .querySelector<HTMLElement>(".book-page .ProseMirror")
     ?.focus({ preventScroll: true });
+}
+
+/**
+ * A click on the sheet that is not on the text, a control or a panel takes the cursor to the end of the text:
+ * an empty chapter, or the paper below a short one, is somewhere to write too.
+ */
+function writeWhereClicked(event: React.MouseEvent) {
+  const target = event.target as HTMLElement;
+  if (
+    target.closest(
+      ".ProseMirror, button, a, input, textarea, select, label, [role=dialog], [contenteditable]",
+    )
+  )
+    return;
+  if (!window.document.querySelector(".book-page .ProseMirror")) return;
+  event.preventDefault();
+  window.dispatchEvent(new Event(WRITE_AT_END));
 }
 
 /** A version shown in place of the page, with the text it is compared with. */
@@ -815,7 +833,7 @@ export function WritingView({
           <AnimatedBackdrop scene={backdrop.scene} theme={preferences.theme} />
         )}
 
-        <main className="writing-main">
+        <main className="writing-main" onMouseDown={writeWhereClicked}>
           {problem && (
             <p className="writing-problem" role="alert">
               {problem} <LogFolderButton />
