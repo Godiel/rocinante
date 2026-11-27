@@ -4,7 +4,7 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/013-pulido`.
 
 - [x] Tabla de atajos y diálogo de teclas rápidas (F1).
 - [x] Barra de la obra con menú «Más» según el ancho.
-- [ ] Letra legible: peso 500 y tinta más oscura, con contraste AA.
+- [x] Letra legible: peso 500 y tinta más oscura, con contraste AA.
 - [ ] Barra de ventana propia en Windows, Linux y macOS.
 - [ ] Escribir en un capítulo vacío.
 - [ ] Pruebas de extremo a extremo.

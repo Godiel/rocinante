@@ -18,6 +18,8 @@
 }
 
 .page-text {
+  /* The text of the work is not the interface: its weight is that of the book. */
+  font-weight: 400;
   color: var(--color-ink);
   hyphens: auto;
   font-kerning: normal;
