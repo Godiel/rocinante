@@ -1,15 +1,18 @@
 import type { Page } from "@playwright/test";
 import { chapterText, createWork, expect, test } from "../support/desk";
 
-/** The boxes of the visible actions of the bar of the work. */
-async function barBoxes(page: Page) {
-  const bar = page.getByRole("navigation", { name: "Proyecto" });
-  const boxes = [];
-  for (const button of await bar.locator(":scope > button, :scope > .bar-more > button").all()) {
-    const box = await button.boundingBox();
-    if (box) boxes.push({ name: (await button.innerText()).trim(), ...box });
-  }
-  return boxes;
+/** The boxes of the visible actions of the bar of the work, read at once, as they are now. */
+function barBoxes(page: Page) {
+  return page.evaluate(() =>
+    [
+      ...document.querySelectorAll<HTMLElement>(
+        ".bar-actions > button, .bar-actions > .bar-more > button",
+      ),
+    ].map((button) => {
+      const box = button.getBoundingClientRect();
+      return { name: button.innerText.trim(), x: box.x, width: box.width };
+    }),
+  );
 }
 
 test("in a narrow window nothing overlaps, and what does not fit is in «Más»", async ({ desk }) => {
@@ -19,6 +22,10 @@ test("in a narrow window nothing overlaps, and what does not fit is in «Más»"
   await page.setViewportSize({ width: 1024, height: 640 });
 
   await expect(page.getByRole("button", { name: "Más" })).toBeVisible();
+  // Once the bar has settled at its new width.
+  await page.evaluate(
+    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+  );
   const boxes = await barBoxes(page);
   for (let index = 1; index < boxes.length; index++) {
     const before = boxes[index - 1]!;
