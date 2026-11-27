@@ -1,0 +1,82 @@
+name: Release
+
+# A version tag (v1.2.0) builds the installers of the three systems and leaves them in a draft Release, with
+# the latest.json the updater reads. The author reviews the draft and publishes it.
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Instaladores (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            args: ""
+          - name: macOS universal
+            os: macos-latest
+            args: --target universal-apple-darwin
+          - name: Linux
+            # The oldest supported Ubuntu, so the AppImage runs on as many systems as possible.
+            os: ubuntu-22.04
+            args: ""
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencias de sistema (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ runner.os == 'macOS' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/host
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: La etiqueta es la versión
+        shell: bash
+        run: |
+          npm run version:check
+          test "v$(node scripts/version.mjs)" = "${GITHUB_REF_NAME}" || {
+            echo "La etiqueta ${GITHUB_REF_NAME} no es la versión $(node scripts/version.mjs): usa node scripts/version.mjs."
+            exit 1
+          }
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The updates are signed with the project's own key (npx tauri signer generate).
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # When there are certificates, the installers are signed too. Windows (Authenticode):
+          #   WINDOWS_CERTIFICATE / WINDOWS_CERTIFICATE_PASSWORD, read by bundle.windows.signCommand.
+          # macOS (Developer ID and notarization):
+          #   APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY,
+          #   APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID.
+        with:
+          tauriScript: npx tauri
+          tagName: ${{ github.ref_name }}
+          releaseName: Rocinante __VERSION__
+          releaseBody: |
+            Descarga el instalador de tu sistema. Si es la primera vez, la página
+            [Instalar](https://github.com/Godiel/rocinante/blob/main/docs/INSTALAR.md) explica cómo abrirlo:
+            los instaladores aún no están firmados.
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: true
+          # The updater artifacts are signed only here, where the key is: see src/host/tauri.release.conf.json.
+          args: ${{ matrix.args }} --config src/host/tauri.release.conf.json
