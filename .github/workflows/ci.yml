@@ -51,6 +51,8 @@ jobs:
       - run: npm ci
       - name: Contrato generado al día
         run: npm run contracts:check
+      - name: La misma versión en todas partes
+        run: npm run version:check
       - name: Formato
         run: npm run format:check -w @rocinante/ui
       - name: Lint
