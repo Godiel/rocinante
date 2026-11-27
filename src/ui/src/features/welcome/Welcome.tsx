@@ -38,6 +38,8 @@ export interface WelcomeProps {
   /** Label of this window, sent as the origin of every change. */
   origin: string;
   pickers: Pickers;
+  /** Whether Rocinante looks for new versions when a work opens; the writer may turn it off here. */
+  checkForUpdates?: boolean;
 }
 
 /**
@@ -51,6 +53,7 @@ export function Welcome({
   notice,
   origin,
   pickers,
+  checkForUpdates,
 }: WelcomeProps) {
   const [creating, setCreating] = useState(false);
   const [problem, setProblem] = useState<string | null>(notice);
@@ -144,6 +147,21 @@ export function Welcome({
           Abrir proyecto
         </button>
       </nav>
+      {checkForUpdates !== undefined && (
+        <label className="welcome-updates">
+          <input
+            type="checkbox"
+            checked={checkForUpdates}
+            onChange={() =>
+              void request("preferences.update", {
+                changes: { checkForUpdates: !checkForUpdates },
+                origin,
+              })
+            }
+          />{" "}
+          Buscar versiones nuevas de Rocinante al abrir una obra
+        </label>
+      )}
     </Page>
   );
 }

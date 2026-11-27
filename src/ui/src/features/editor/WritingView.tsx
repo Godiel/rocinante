@@ -73,6 +73,8 @@ import { useWorkspaceTab } from "../workspace/useWorkspaceTab";
 import { useThreads } from "../threads/useThreads";
 import { MilestoneSlip } from "../threads/MilestoneSlip";
 import { ExportDialog } from "../export/ExportDialog";
+import { UpdateDialog } from "../updates/UpdateDialog";
+import { useUpdate } from "../updates/useUpdate";
 import { isExportShortcut } from "../export/shortcuts";
 import { useDetachedBoard } from "../workspace/board-window";
 import "./writing-view.css";
@@ -197,6 +199,8 @@ export function WritingView({
   } | null>(null);
   const [openNote, setOpenNote] = useState<OpenedNote | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [updateLater, setUpdateLater] = useState(false);
   // The paragraph where the writer is marking a milestone, from the floating menu.
   const [marking, setMarking] = useState<{ paragraph: string; documentId: string } | null>(null);
   // The note whose passage the writer asked to see; `at` tells one request from the next.
@@ -505,6 +509,7 @@ export function WritingView({
   // On the board or the threads, the text waits, hidden, with its shortcuts.
   const awayFromText = workspace.tab !== "writing";
   const threads = useThreads(project.id, workspace.tab === "threads");
+  const available = useUpdate(preferences.checkForUpdates);
   // The threads are fetched ahead, once the work is open and the writer pauses, so F8 does not wait for them.
   useEffect(() => {
     const timer = window.setTimeout(() => void loadThreadsTab().catch(() => {}), 3000);
@@ -643,6 +648,15 @@ export function WritingView({
               onClick={separateBoard}
             >
               Separar
+            </button>
+          )}
+          {available && !updateLater && (
+            <button
+              type="button"
+              className="action update-notice"
+              onClick={() => setUpdateOpen(true)}
+            >
+              Versión {available.version} disponible
             </button>
           )}
           <button
@@ -1058,6 +1072,19 @@ export function WritingView({
           />
         )}
       </div>
+
+      {updateOpen && available && (
+        <UpdateDialog
+          update={available}
+          checking={preferences.checkForUpdates}
+          onChecking={(allowed) => update({ checkForUpdates: allowed })}
+          beforeRestart={savePendingNow}
+          onClose={() => {
+            setUpdateOpen(false);
+            setUpdateLater(true);
+          }}
+        />
+      )}
 
       {exporting && (
         <ExportDialog

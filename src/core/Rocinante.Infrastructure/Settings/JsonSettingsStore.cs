@@ -66,7 +66,8 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 settings.Preferences.TypewriterScrolling,
                 ToFile(settings.Preferences.Ambience),
                 settings.Preferences.MentionsVisible,
-                settings.Preferences.CorrectionVisible),
+                settings.Preferences.CorrectionVisible,
+                settings.Preferences.CheckForUpdates),
             settings.LastProject,
             [.. settings.Recent.Select(recent => new RecentFile(
                 recent.Path,
@@ -195,7 +196,8 @@ public sealed class JsonSettingsStore(string directory, TextWriter log) : ISetti
                 stored.TypewriterScrolling ?? defaults.TypewriterScrolling,
                 ToAmbience(stored.Ambience),
                 stored.MentionsVisible ?? defaults.MentionsVisible,
-                stored.CorrectionVisible ?? defaults.CorrectionVisible)
+                stored.CorrectionVisible ?? defaults.CorrectionVisible,
+                stored.CheckForUpdates ?? defaults.CheckForUpdates)
             : defaults;
 
         var recent = (file.Recent ?? [])
@@ -269,7 +271,8 @@ internal sealed record PreferencesFile(
     bool? TypewriterScrolling,
     AmbienceFile? Ambience,
     bool? MentionsVisible = null,
-    bool? CorrectionVisible = null);
+    bool? CorrectionVisible = null,
+    bool? CheckForUpdates = null);
 
 internal sealed record RecentFile(string Path, string Title, DateTimeOffset LastOpenedAt, PlaceFile? Place);
 

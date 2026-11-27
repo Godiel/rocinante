@@ -28,7 +28,8 @@ public sealed record Preferences(
     bool TypewriterScrolling,
     Ambience Ambience,
     bool MentionsVisible = true,
-    bool CorrectionVisible = true)
+    bool CorrectionVisible = true,
+    bool CheckForUpdates = true)
 {
     public static Preferences Default { get; } = new(Theme.Paper, OutlineMode.Docked, CounterVisible: true, TypewriterScrolling: true, Ambience.Default);
 }
@@ -41,7 +42,8 @@ public sealed record PreferencesChange(
     bool? TypewriterScrolling = null,
     Ambience? Ambience = null,
     bool? MentionsVisible = null,
-    bool? CorrectionVisible = null)
+    bool? CorrectionVisible = null,
+    bool? CheckForUpdates = null)
 {
     public Preferences ApplyTo(Preferences preferences)
     {
@@ -53,7 +55,8 @@ public sealed record PreferencesChange(
             TypewriterScrolling ?? preferences.TypewriterScrolling,
             Ambience ?? preferences.Ambience,
             MentionsVisible ?? preferences.MentionsVisible,
-            CorrectionVisible ?? preferences.CorrectionVisible);
+            CorrectionVisible ?? preferences.CorrectionVisible,
+            CheckForUpdates ?? preferences.CheckForUpdates);
     }
 }
 

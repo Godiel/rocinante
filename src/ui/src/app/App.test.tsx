@@ -74,6 +74,7 @@ const start = (overrides: Partial<StartState> = {}): StartState => ({
     typewriterScrolling: true,
     mentionsVisible: true,
     correctionVisible: true,
+    checkForUpdates: true,
     ambience: DEFAULT_AMBIENCE,
   },
   defaultFolder: "C:\\Users\\autor\\Documents\\Rocinante",

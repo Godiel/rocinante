@@ -37,6 +37,7 @@ const DEFAULT_PREFERENCES: Preferences = {
   typewriterScrolling: true,
   mentionsVisible: true,
   correctionVisible: true,
+  checkForUpdates: true,
   ambience: DEFAULT_AMBIENCE,
 };
 
@@ -186,6 +187,7 @@ export function App({ origin, pickers }: AppProps) {
             notice={screen.notice}
             origin={origin}
             pickers={pickers}
+            checkForUpdates={preferences?.checkForUpdates}
           />
         );
       case "writing":

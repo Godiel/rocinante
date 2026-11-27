@@ -1,6 +1,6 @@
 {
   "name": "rocinante-core",
-  "protocolVersion": 14,
+  "protocolVersion": 15,
   "description": "JSON-RPC 2.0 protocol between the Rocinante UI and the .NET core. Every params, result and notification payload is a JSON Schema (2020-12) that may reference the shared definitions in $defs. Every method that changes something takes the origin window and announces the change to every window with a notification.",
   "errorCodes": {
     "ParseError": -32700,
@@ -2364,7 +2364,8 @@
         "typewriterScrolling",
         "ambience",
         "mentionsVisible",
-        "correctionVisible"
+        "correctionVisible",
+        "checkForUpdates"
       ],
       "additionalProperties": false,
       "properties": {
@@ -2390,6 +2391,10 @@
         "correctionVisible": {
           "type": "boolean",
           "description": "Whether the spelling and punctuation marks show in the text."
+        },
+        "checkForUpdates": {
+          "type": "boolean",
+          "description": "Whether Rocinante looks on GitHub for a new version when a work opens. Off, it never connects on its own."
         }
       }
     },
@@ -2574,6 +2579,9 @@
           "type": "boolean"
         },
         "correctionVisible": {
+          "type": "boolean"
+        },
+        "checkForUpdates": {
           "type": "boolean"
         }
       }

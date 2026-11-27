@@ -11,9 +11,9 @@ Checklist derivada de [`plan.md`](plan.md). Rama: `feature/012-distribucion`.
 - [x] Núcleo universal para macOS.
 
 ## 3. Actualizador
-- [ ] Plugins, permisos y clave pública.
-- [ ] Contrato v15: `checkForUpdates`.
-- [ ] Aviso en la barra, diálogo y preferencia, con tests.
+- [x] Plugins, permisos y clave pública.
+- [x] Contrato v15: `checkForUpdates`.
+- [x] Aviso en la barra, diálogo y preferencia, con tests.
 
 ## 4. Publicar
 - [ ] `release.yml` con Release en borrador y `latest.json`.

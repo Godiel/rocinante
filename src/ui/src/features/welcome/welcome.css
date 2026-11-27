@@ -145,3 +145,11 @@
 .welcome-format .format-form {
   font-size: var(--text-ui);
 }
+
+/* Whether Rocinante looks for new versions: quietly, under the ways in. */
+.welcome-updates {
+  display: block;
+  margin-top: var(--space-5);
+  font-size: var(--text-caption);
+  color: var(--color-ink-soft);
+}
