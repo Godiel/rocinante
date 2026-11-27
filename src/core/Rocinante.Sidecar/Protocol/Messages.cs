@@ -62,7 +62,14 @@ internal sealed record AmbienceDto(
 internal sealed record OwnAmbienceDto(Guid Id, string Kind, string Name, string File);
 
 internal sealed record PreferencesDto(
-    string Theme, string Outline, bool CounterVisible, bool TypewriterScrolling, AmbienceDto Ambience, bool MentionsVisible, bool CorrectionVisible);
+    string Theme,
+    string Outline,
+    bool CounterVisible,
+    bool TypewriterScrolling,
+    AmbienceDto Ambience,
+    bool MentionsVisible,
+    bool CorrectionVisible,
+    bool CheckForUpdates);
 
 internal sealed record PreferencesChangeDto(
     string? Theme,
@@ -71,7 +78,8 @@ internal sealed record PreferencesChangeDto(
     bool? TypewriterScrolling,
     AmbienceDto? Ambience,
     bool? MentionsVisible,
-    bool? CorrectionVisible);
+    bool? CorrectionVisible,
+    bool? CheckForUpdates);
 
 internal sealed record PlaceDto(Guid DocumentId, int Anchor, int Head);
 

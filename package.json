@@ -1,5 +1,6 @@
 {
   "name": "rocinante",
+  "version": "0.9.0",
   "private": true,
   "license": "MIT",
   "workspaces": [
@@ -10,6 +11,8 @@
     "core:build": "node scripts/build-core.mjs",
     "contracts:generate": "node scripts/generate-contracts.mjs",
     "contracts:check": "node scripts/generate-contracts.mjs --check",
+    "version:set": "node scripts/version.mjs",
+    "version:check": "node scripts/version.mjs --check",
     "dev": "tauri dev",
     "build": "tauri build",
     "e2e": "npm run build -w @rocinante/ui && dotnet build src/core/Rocinante.slnx -c Release && npm test -w @rocinante/e2e"

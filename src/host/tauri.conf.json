@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Rocinante",
-  "version": "0.1.0",
+  "version": "0.9.0",
   "identifier": "app.rocinante.desktop",
   "build": {
     "beforeDevCommand": "npm run core:build && npm run dev --workspace @rocinante/ui",
@@ -26,8 +26,68 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
-    "externalBin": ["binaries/rocinante-core"],
-    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
+    "targets": [
+      "nsis",
+      "app",
+      "dmg",
+      "appimage",
+      "deb"
+    ],
+    "externalBin": [
+      "binaries/rocinante-core"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "publisher": "Rocinante",
+    "homepage": "https://github.com/Godiel/rocinante",
+    "license": "MIT",
+    "licenseFile": "../../LICENSE",
+    "category": "Productivity",
+    "shortDescription": "Escribir una novela, sin distracciones.",
+    "longDescription": "Rocinante es un programa para escribir novelas: papel sin bordes, la obra en capítulos, fichas de personajes y lugares, notas, corrección, un escudero de IA opcional y la exportación a PDF, EPUB, Word y Markdown. Sin cuenta y sin conexión obligatoria.",
+    "fileAssociations": [
+      {
+        "ext": [
+          "rocinante"
+        ],
+        "name": "Obra de Rocinante",
+        "description": "Una obra escrita con Rocinante",
+        "role": "Editor",
+        "mimeType": "application/x-rocinante"
+      }
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": [
+          "Spanish"
+        ],
+        "displayLanguageSelector": false
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "11.0"
+    },
+    "linux": {
+      "deb": {
+        "section": "editors"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDBBOEUzODQxRjQzNjI0REIKUldUYkpEYjBRVGlPQ2hFVU9zU0dyMllCSlNwL2JwdWNnNmZ4dVZHR0JJLzQyZ2dhZE5DV3ZTbmgK",
+      "endpoints": [
+        "https://github.com/Godiel/rocinante/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

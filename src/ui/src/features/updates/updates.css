@@ -1,0 +1,13 @@
+.update-notice {
+  color: var(--color-rubric);
+}
+
+.update-notes {
+  max-height: 12rem;
+  overflow-y: auto;
+  margin: var(--space-2) 0;
+  padding-left: var(--space-2);
+  font-size: var(--text-caption);
+  white-space: pre-wrap;
+  border-left: var(--hairline) solid var(--color-rule);
+}

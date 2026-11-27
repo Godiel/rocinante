@@ -25,6 +25,10 @@ vi.mock("../bridge/core", async (importOriginal) => ({
     return Promise.resolve(() => listeners.delete(name));
   },
 }));
+const invoke = vi.hoisted(() =>
+  vi.fn((..._args: unknown[]) => Promise.resolve<string[] | null>(null)),
+);
+vi.mock("@tauri-apps/api/core", () => ({ invoke }));
 const savePendingNow = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 vi.mock("../editor/pending-saves", () => ({ savePendingNow }));
 // The writing view has its own tests in block 9; here it only needs to say what it shows.
@@ -70,6 +74,7 @@ const start = (overrides: Partial<StartState> = {}): StartState => ({
     typewriterScrolling: true,
     mentionsVisible: true,
     correctionVisible: true,
+    checkForUpdates: true,
     ambience: DEFAULT_AMBIENCE,
   },
   defaultFolder: "C:\\Users\\autor\\Documents\\Rocinante",
@@ -101,12 +106,38 @@ function startWith(state: StartState) {
 describe("app window", () => {
   beforeEach(() => {
     request.mockReset();
+    invoke.mockReset();
+    invoke.mockResolvedValue(null);
     listeners.clear();
     delete document.documentElement.dataset.theme;
   });
 
   afterEach(() => {
     cleanup();
+  });
+
+  it("opens the work the system asked for, at the start and while running, saving first", async () => {
+    invoke.mockResolvedValueOnce(["/obras/Primera.rocinante", "/obras/La venta.rocinante"]);
+    startWith(start({ project }));
+
+    await screen.findByText("Escribiendo en Don Quijote");
+    await vi.waitFor(() =>
+      expect(request).toHaveBeenCalledWith("project.open", {
+        path: "/obras/La venta.rocinante",
+        origin: "main",
+      }),
+    );
+    expect(invoke).toHaveBeenCalledWith("take_opened_files");
+    expect(savePendingNow).toHaveBeenCalled();
+
+    invoke.mockResolvedValueOnce(["/obras/Otra.rocinante"]);
+    act(() => listeners.get("rocinante://opened")?.(undefined));
+    await vi.waitFor(() =>
+      expect(request).toHaveBeenCalledWith("project.open", {
+        path: "/obras/Otra.rocinante",
+        origin: "main",
+      }),
+    );
   });
 
   it("starts on the welcome screen when there is nothing to reopen", async () => {

@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import {
   CORE_FAILED,
@@ -36,6 +37,7 @@ const DEFAULT_PREFERENCES: Preferences = {
   typewriterScrolling: true,
   mentionsVisible: true,
   correctionVisible: true,
+  checkForUpdates: true,
   ambience: DEFAULT_AMBIENCE,
 };
 
@@ -63,6 +65,9 @@ function noticeOf(problem: StartProblem | null): string | null {
  * with, or the welcome screen) and then follows the core's announcements, so every window shows
  * the same project.
  */
+/** The host's word that the system asked to open a work (src/host/src/lib.rs). */
+const OPENED_EVENT = "rocinante://opened";
+
 export function App({ origin, pickers }: AppProps) {
   const [screen, setScreen] = useState<Screen>({ kind: "starting" });
   const [recent, setRecent] = useState<RecentProject[]>([]);
@@ -79,6 +84,28 @@ export function App({ origin, pickers }: AppProps) {
       applyTheme(next.theme);
     };
 
+    // A work the system asked to open once the app was running: macOS does so with a double click on a
+    // .rocinante. The main window opens the latest; Windows and Linux pass it at launch instead.
+    const openAsked = () => {
+      if (origin !== "main") return;
+      void invoke<string[] | null>("take_opened_files").then(
+        (files) => {
+          const path = files?.at(-1);
+          if (!path) return;
+          savePendingNow()
+            .then(() => request("project.open", { path, origin }))
+            .catch((error: unknown) =>
+              setScreen((current) =>
+                current.kind === "welcome"
+                  ? { kind: "welcome", notice: messageFor(error) }
+                  : current,
+              ),
+            );
+        },
+        () => {},
+      );
+    };
+
     ensureCompatibleCore()
       .then(() => request("app.start", { origin }))
       .then((start) => {
@@ -92,6 +119,7 @@ export function App({ origin, pickers }: AppProps) {
             ? { kind: "writing", project: start.project, place: start.place }
             : { kind: "welcome", notice: noticeOf(start.problem) },
         );
+        openAsked();
       })
       .catch((error: unknown) => setScreen({ kind: "failed", message: messageFor(error) }));
 
@@ -121,6 +149,7 @@ export function App({ origin, pickers }: AppProps) {
       }),
       // The page stays, so whatever could not be saved can still be copied.
       onHostEvent(CORE_FAILED, () => setHalted(HALTED)),
+      onHostEvent(OPENED_EVENT, openAsked),
     ];
 
     return () => {
@@ -158,6 +187,7 @@ export function App({ origin, pickers }: AppProps) {
             notice={screen.notice}
             origin={origin}
             pickers={pickers}
+            checkForUpdates={preferences?.checkForUpdates}
           />
         );
       case "writing":
