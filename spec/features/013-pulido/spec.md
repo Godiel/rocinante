@@ -1,6 +1,6 @@
 # 013 · Pulido de la primera salida
 
-**Estado:** propuesta.
+**Estado:** hecha. Se publica como 0.9.1; falta ver la barra propia en macOS y Linux instalados.
 
 ## Qué hace
 
@@ -60,12 +60,12 @@ La 0.9.0 se probó a pantalla completa. En una ventana normal la barra se pisaba
 
 ## Criterios de aceptación
 
-- [ ] A 1024 × 640, el tamaño mínimo de la ventana, y a cualquier tamaño mayor, nada de la barra se superpone y todo se alcanza, en la barra o en «Más». El menú funciona con el teclado.
-- [ ] Los textos de la interfaz usan tinta más oscura y grosor 500, y los dos temas pasan el test de contraste AA.
+- [x] A 1024 × 640, el tamaño mínimo de la ventana, y a cualquier tamaño mayor, nada de la barra se superpone y todo se alcanza, en la barra o en «Más». El menú funciona con el teclado.
+- [x] Los textos de la interfaz usan tinta más oscura y grosor 500, y los dos temas pasan el test de contraste AA.
 - [ ] La barra de ventana propia se arrastra, maximiza con doble clic, minimiza, maximiza y cierra, con el tono del tema. En macOS conserva los semáforos. En concentración no está.
-- [ ] En un capítulo nuevo y vacío, un clic en cualquier parte de la hoja deja escribir, y se ve dónde.
-- [ ] F1 abre las teclas rápidas, sacadas de la tabla de atajos de la app, con ⌘ en macOS.
-- [ ] Tests de comportamiento para cada punto y una prueba de extremo a extremo: ventana estrecha, capítulo nuevo sin nombre, F1.
+- [x] En un capítulo nuevo y vacío, un clic en cualquier parte de la hoja deja escribir, y se ve dónde.
+- [x] F1 abre las teclas rápidas, sacadas de la tabla de atajos de la app, con ⌘ en macOS.
+- [x] Tests de comportamiento para cada punto y una prueba de extremo a extremo: ventana estrecha, capítulo nuevo sin nombre, F1.
 - [ ] Se publica como 0.9.1 y la 0.9.0 instalada la recibe por el actualizador.
 
 ## Fuera de alcance
