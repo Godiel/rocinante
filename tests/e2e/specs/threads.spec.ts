@@ -161,6 +161,11 @@ test("the threads of fate: where each ficha goes, what happens to it and when it
       selection.removeAllRanges();
       selection.addRange(range);
     });
+    // The editor takes the new place on the next selectionchange: until then the paragraph marked with a
+    // triple click is still selected, and Intro would replace it.
+    await page.evaluate(
+      () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+    );
     await page.keyboard.press("Enter");
     await page.keyboard.type(JOURNEY);
     await page.keyboard.press("Enter");

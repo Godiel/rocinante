@@ -58,6 +58,9 @@ mkdirSync(binaries, { recursive: true });
 if (triple === UNIVERSAL) {
   const intel = publish(RUNTIMES["x86_64-apple-darwin"], "");
   const apple = publish(RUNTIMES["aarch64-apple-darwin"], "");
+  // Tauri builds each architecture on its own, and each asks for its own core, before joining them.
+  copyFileSync(intel, join(binaries, "rocinante-core-x86_64-apple-darwin"));
+  copyFileSync(apple, join(binaries, "rocinante-core-aarch64-apple-darwin"));
   execFileSync(
     "lipo",
     ["-create", "-output", join(binaries, `rocinante-core-${UNIVERSAL}`), intel, apple],
