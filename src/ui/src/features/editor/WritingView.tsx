@@ -107,8 +107,12 @@ function writeWhereClicked(event: React.MouseEvent) {
     )
   )
     return;
-  if (!window.document.querySelector(".book-page .ProseMirror")) return;
+  const page = window.document.querySelector<HTMLElement>(".book-page .ProseMirror");
+  if (!page) return;
   event.preventDefault();
+  // The keyboard goes to the text at once, so not even a quick first letter is lost; the editor then takes
+  // its cursor to the end.
+  page.focus({ preventScroll: true });
   window.dispatchEvent(new Event(WRITE_AT_END));
 }
 
