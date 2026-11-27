@@ -63,7 +63,12 @@ body,
   margin: 0;
 }
 
+:root {
+  --chrome: 0px;
+}
+
 body {
+  padding-top: var(--chrome);
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-book);
@@ -142,7 +147,7 @@ textarea {
 .halted {
   position: fixed;
   z-index: 10;
-  top: 0;
+  top: var(--chrome);
   left: 50%;
   max-width: min(40rem, calc(100% - 2 * var(--space-4)));
   margin-top: var(--space-2);

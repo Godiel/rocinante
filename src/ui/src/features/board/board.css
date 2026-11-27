@@ -1,7 +1,7 @@
 /* The board takes the whole window under the bar. */
 .board-tab {
   position: fixed;
-  top: var(--bar-height);
+  top: calc(var(--chrome) + var(--bar-height));
   right: 0;
   bottom: 0;
   left: 0;

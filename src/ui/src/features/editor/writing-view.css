@@ -12,7 +12,7 @@
 
 .writing-bar {
   position: sticky;
-  top: 0;
+  top: var(--chrome);
   z-index: 3;
   grid-column: 1 / -1;
   display: flex;
@@ -66,7 +66,7 @@
 .sheet {
   position: fixed;
   z-index: 4;
-  top: var(--bar-height);
+  top: calc(var(--chrome) + var(--bar-height));
   right: 0;
   bottom: 0;
   width: 20rem;
@@ -238,7 +238,7 @@
 /* The board in a window of its own: here, only where it went and the way to bring it back. */
 .board-elsewhere {
   position: fixed;
-  top: var(--bar-height);
+  top: calc(var(--chrome) + var(--bar-height));
   right: 0;
   bottom: 0;
   left: 0;

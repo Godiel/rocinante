@@ -22,6 +22,8 @@ export interface Palette {
   rubric: string;
   /** Background of selected text. */
   selection: string;
+  /** The bar of the window: the paper, darker by day and lighter by candlelight, so it stands apart. */
+  titlebar: string;
 }
 
 export const themes: Record<Theme, Palette> = {
@@ -34,6 +36,7 @@ export const themes: Record<Theme, Palette> = {
     rule: "#D8CEBC",
     rubric: "#9B2C24",
     selection: "#E9D2C6",
+    titlebar: "#E2D7C2",
   },
   candlelight: {
     paper: "#1E1913",
@@ -44,6 +47,7 @@ export const themes: Record<Theme, Palette> = {
     rule: "#3B3227",
     rubric: "#DA7262",
     selection: "#4B2F27",
+    titlebar: "#2F271E",
   },
 };
 
