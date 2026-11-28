@@ -84,3 +84,33 @@ test("F1 shows the shortcuts, and a new chapter without a name is somewhere to w
   await expect(chapterText(page)).toHaveText("Segundo capítulo.");
   await desk.close(app);
 });
+
+test("a long chapter scrolls inside the app, under its bar, and the scroll comes back with F2", async ({
+  desk,
+}) => {
+  const app = await desk.open();
+  const { page } = app;
+  await createWork(desk, page, "La venta");
+  await chapterText(page).click();
+  for (let line = 0; line < 60; line++) await page.keyboard.press("Enter");
+  await page.keyboard.type("Al final.");
+
+  const scroll = () =>
+    page.evaluate(() => ({
+      window: document.scrollingElement!.scrollTop,
+      root: document.getElementById("root")!.scrollTop,
+      overflows: document.scrollingElement!.scrollHeight > window.innerHeight,
+    }));
+  const deep = await scroll();
+  expect(deep.window).toBe(0);
+  expect(deep.overflows).toBe(false);
+  expect(deep.root).toBeGreaterThan(0);
+
+  await page.keyboard.press("F2");
+  await expect(page.getByRole("tab", { name: "Tablero" })).toHaveAttribute("aria-selected", "true");
+  expect((await scroll()).root).toBe(0);
+  await page.keyboard.press("F2");
+  await expect(chapterText(page)).toBeFocused();
+  expect((await scroll()).root).toBe(deep.root);
+  await desk.close(app);
+});

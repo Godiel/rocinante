@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { keepsItsOwnKeys } from "../../editor/own-keys";
 import { isTabShortcut, isThreadsShortcut } from "./shortcuts";
+import { pageScroller } from "../../app/scroller";
 
 export type WorkspaceTab = "writing" | "board" | "threads";
 
@@ -32,7 +33,7 @@ export function useWorkspaceTab({ focused, onBackToWriting }: WorkspaceTabOption
   const show = useCallback((next: WorkspaceTab) => {
     if (current.current === next) return;
     // The page itself scrolls; hiding the text would lose its place.
-    if (current.current === "writing") scrolled.current = window.scrollY;
+    if (current.current === "writing") scrolled.current = pageScroller().scrollTop;
     current.current = next;
     if (next === "board") setBoardVisited(true);
     if (next === "threads") setThreadsVisited(true);
@@ -54,10 +55,10 @@ export function useWorkspaceTab({ focused, onBackToWriting }: WorkspaceTabOption
     if (wasTab.current === tab) return;
     wasTab.current = tab;
     if (tab === "writing") {
-      window.scrollTo(0, scrolled.current);
+      pageScroller().scrollTop = scrolled.current;
       latest.current.onBackToWriting();
     } else {
-      window.scrollTo(0, 0);
+      pageScroller().scrollTop = 0;
     }
   }, [tab]);
 
