@@ -30,16 +30,26 @@ function pressF2(target: Element | Window = window) {
   return fireEvent.keyDown(target, { key: "F2" });
 }
 
-// jsdom does not scroll: the page only says where it was asked to go.
-const scrollTo = vi.fn();
+// jsdom does not scroll: the root of the app, which scrolls the page, only keeps where it was put.
+let root: HTMLElement;
 beforeEach(() => {
-  vi.spyOn(window, "scrollTo").mockImplementation(scrollTo);
+  root = document.createElement("div");
+  root.id = "root";
+  let top = 0;
+  Object.defineProperty(root, "scrollTop", {
+    get: () => top,
+    set: (value: number) => {
+      top = value;
+    },
+    configurable: true,
+  });
+  document.body.append(root);
 });
 
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
-  scrollTo.mockReset();
+  root.remove();
   onBackToWriting.mockReset();
 });
 
@@ -69,13 +79,13 @@ describe("the tabs of the work", () => {
 
   it("brings the page back to where it was scrolled", () => {
     render(<Workspace />);
-    Object.defineProperty(window, "scrollY", { value: 900, configurable: true });
+    root.scrollTop = 900;
 
     pressF2();
-    Object.defineProperty(window, "scrollY", { value: 0, configurable: true });
+    expect(root.scrollTop).toBe(0);
     pressF2();
 
-    expect(scrollTo).toHaveBeenLastCalledWith(0, 900);
+    expect(root.scrollTop).toBe(900);
   });
 
   it("does nothing with F2 in focus mode", () => {

@@ -13,6 +13,7 @@ import type {
   TipTapDocument,
 } from "../../bridge/generated/protocol";
 import { messageFor } from "../../app/messages";
+import { pageScroller } from "../../app/scroller";
 import { anchorsOf, bookExtensions, footnotesOf } from "../../editor/extensions";
 import { TypingSounds } from "../../editor/extensions/typing-sounds";
 import { CurrentBlock } from "../../editor/extensions/current-block";
@@ -263,7 +264,7 @@ export function BookEditor({
           current.view.coordsAtPos(current.state.selection.head),
           window.innerHeight,
         );
-        if (delta !== 0) window.scrollBy({ top: delta });
+        if (delta !== 0) pageScroller().scrollTop += delta;
       });
     },
   });

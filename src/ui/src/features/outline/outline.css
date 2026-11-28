@@ -10,7 +10,7 @@
 /* Docked: part of the window, beside the text. */
 .outline-docked {
   position: sticky;
-  top: calc(var(--chrome) + var(--bar-height));
+  top: var(--bar-height);
   align-self: start;
   height: calc(100vh - var(--chrome) - var(--bar-height));
   border-right: var(--hairline) solid var(--color-rule);
