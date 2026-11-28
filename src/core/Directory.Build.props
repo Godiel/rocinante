@@ -12,7 +12,7 @@
     <!-- Public API docs are required, but not on every private detail. -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <Deterministic>true</Deterministic>
-    <Version>0.9.1</Version>
+    <Version>0.9.2</Version>
     <Authors>Los autores de Rocinante</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
