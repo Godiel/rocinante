@@ -1,6 +1,6 @@
 [package]
 name = "rocinante-host"
-version = "0.9.1"
+version = "0.9.2"
 description = "Rocinante desktop host: windows and the relay to the .NET core"
 license = "MIT"
 edition = "2024"
