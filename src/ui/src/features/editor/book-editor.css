@@ -8,6 +8,8 @@
 
 .book-frame,
 .book-page {
+  /* The text of the work is not the interface: its weight is that of the book. */
+  font-weight: 400;
   font-family: var(--work-font, var(--font-book));
   font-size: var(--work-size, var(--text-body));
 }
@@ -372,4 +374,14 @@
 .book-page .punctuation-issue {
   border-bottom: 1px dotted var(--color-rubric);
   cursor: pointer;
+}
+
+/* The invitation of an empty chapter (the Placeholder extension): faint, and never part of the text. */
+.book-page .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  font-style: italic;
+  color: var(--color-ink-faint);
+  pointer-events: none;
 }

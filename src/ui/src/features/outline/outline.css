@@ -10,9 +10,9 @@
 /* Docked: part of the window, beside the text. */
 .outline-docked {
   position: sticky;
-  top: var(--bar-height);
+  top: calc(var(--chrome) + var(--bar-height));
   align-self: start;
-  height: calc(100vh - var(--bar-height));
+  height: calc(100vh - var(--chrome) - var(--bar-height));
   border-right: var(--hairline) solid var(--color-rule);
 }
 
@@ -20,9 +20,9 @@
 .outline-floating {
   position: fixed;
   z-index: 4;
-  top: calc(var(--bar-height) + var(--space-2));
+  top: calc(var(--chrome) + var(--bar-height) + var(--space-2));
   left: var(--space-3);
-  max-height: calc(100vh - var(--bar-height) - var(--space-4));
+  max-height: calc(100vh - var(--chrome) - var(--bar-height) - var(--space-4));
   background: var(--color-paper-shade);
   border: var(--hairline) solid var(--color-rule);
   border-radius: var(--radius);

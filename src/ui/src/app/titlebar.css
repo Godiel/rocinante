@@ -1,0 +1,86 @@
+/* The bar of the window: the page leaves room for it while it shows (--chrome in tokens.css). */
+:root.has-titlebar {
+  --chrome: 2rem;
+}
+
+/* In focus mode there is only the text: the bar gives way, as in full screen. */
+:root.has-titlebar:has(.writing-view-focus) {
+  --chrome: 0px;
+}
+
+:root:has(.writing-view-focus) .titlebar {
+  display: none;
+}
+
+.titlebar {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  height: var(--chrome);
+  padding-left: var(--space-4);
+  background: var(--color-titlebar);
+  border-bottom: var(--hairline) solid var(--color-rule);
+  user-select: none;
+}
+
+/* macOS draws its traffic lights over the left of the bar. */
+.titlebar-mac {
+  padding-left: 5rem;
+}
+
+.titlebar-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-caption);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-ink-soft);
+}
+
+.titlebar-mac .titlebar-title {
+  text-align: center;
+  padding-right: 5rem;
+}
+
+.titlebar-buttons {
+  display: flex;
+  height: 100%;
+}
+
+.titlebar-button {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 100%;
+  padding: 0;
+  color: var(--color-ink-soft);
+  background: none;
+  border: 0;
+  cursor: default;
+}
+
+.titlebar-button svg {
+  width: 0.7rem;
+  height: 0.7rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+}
+
+.titlebar-button:hover,
+.titlebar-button:focus-visible {
+  color: var(--color-ink);
+  background: var(--color-paper-shade);
+  outline: none;
+}
+
+.titlebar-close:hover,
+.titlebar-close:focus-visible {
+  color: var(--color-paper);
+  background: var(--color-rubric);
+}

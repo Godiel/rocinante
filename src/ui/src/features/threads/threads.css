@@ -1,7 +1,7 @@
 /* The threads of fate take the whole window under the bar, like the board. */
 .threads-tab {
   position: fixed;
-  top: var(--bar-height);
+  top: calc(var(--chrome) + var(--bar-height));
   right: 0;
   bottom: 0;
   left: 0;
@@ -228,7 +228,7 @@
 /* The slip to mark a milestone from the text, over it. */
 .milestone-slip {
   position: fixed;
-  top: calc(var(--bar-height) + var(--space-4));
+  top: calc(var(--chrome) + var(--bar-height) + var(--space-4));
   left: 50%;
   z-index: 30;
   width: min(26rem, calc(100% - 2 * var(--space-4)));

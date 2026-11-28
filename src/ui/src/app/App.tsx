@@ -24,6 +24,7 @@ import { isBoardWindow } from "../features/workspace/board-window";
 import { WritingView } from "../features/editor/WritingView";
 import { messageFor, messages } from "./messages";
 import { LogFolderButton, Trouble } from "./Trouble";
+import { TitleBar } from "./TitleBar";
 import { savePendingNow } from "../editor/pending-saves";
 import { DEFAULT_AMBIENCE } from "../features/ambience/defaults";
 
@@ -159,6 +160,7 @@ export function App({ origin, pickers }: AppProps) {
 
   return (
     <>
+      <TitleBar title={screen.kind === "writing" ? screen.project.title : null} />
       {halted && (
         <div className="halted" role="alert">
           <p>{halted}</p>

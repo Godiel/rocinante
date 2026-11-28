@@ -1,4 +1,5 @@
 import type { Extensions } from "@tiptap/core";
+import { Placeholder } from "@tiptap/extensions";
 import { StarterKit } from "@tiptap/starter-kit";
 import { Footnote } from "./footnote";
 import { Indent } from "./indent";
@@ -10,6 +11,9 @@ import { SceneBreak } from "./scene-break";
  * extensions. Code, strike-through, links and horizontal rules are left out: a novel has no use
  * for them, and the scene break replaces the rule.
  */
+/** What an empty chapter says on its first line. */
+export const EMPTY_INVITATION = "Empieza a escribir…";
+
 export function bookExtensions(): Extensions {
   return [
     StarterKit.configure({
@@ -26,6 +30,8 @@ export function bookExtensions(): Extensions {
     NoteAnchor,
     NotePoint,
     NoteAnchors,
+    // An empty chapter says where to write: a faint invitation on its first line.
+    Placeholder.configure({ placeholder: EMPTY_INVITATION, showOnlyCurrent: false }),
   ];
 }
 

@@ -9,7 +9,7 @@ const BODY_TEXT = 4.5;
 const LARGE_TEXT_AND_GRAPHICS = 3;
 
 const textColours: (keyof Palette)[] = ["ink", "inkSoft", "rubric"];
-const backgrounds: (keyof Palette)[] = ["paper", "paperShade"];
+const backgrounds: (keyof Palette)[] = ["paper", "paperShade", "titlebar"];
 
 describe.each(Object.entries(themes))("theme %s", (_, palette) => {
   it.each(textColours.flatMap((text) => backgrounds.map((background) => [text, background])))(

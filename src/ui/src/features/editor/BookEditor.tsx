@@ -32,6 +32,7 @@ import { Correction, type CorrectionSetup } from "../../editor/extensions/correc
 import { ParagraphDone, passageRange } from "../../editor/extensions/paragraph-done";
 import { CorrectionSlip, type CorrectionTarget } from "../correction/CorrectionSlip";
 import "./book-editor.css";
+import { WRITE_AT_END } from "./write-at-end";
 import { registerCursor, shownHead } from "../../editor/cursor";
 
 const SAVE_DELAY_MS = 300;
@@ -281,6 +282,16 @@ export function BookEditor({
           },
     );
   }, [editor, document.id]);
+
+  // A click on the sheet outside the text (WritingView) asks for the cursor at the end of the text.
+  useEffect(() => {
+    if (!editor) return;
+    const writeAtEnd = () => {
+      if (!editor.isDestroyed) editor.commands.focus("end", { scrollIntoView: false });
+    };
+    window.addEventListener(WRITE_AT_END, writeAtEnd);
+    return () => window.removeEventListener(WRITE_AT_END, writeAtEnd);
+  }, [editor]);
 
   // What is pending is saved when asked for, and when the editor leaves (another document).
   useEffect(() => {

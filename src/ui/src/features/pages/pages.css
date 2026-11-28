@@ -18,6 +18,8 @@
 }
 
 .page-text {
+  /* The text of the work is not the interface: its weight is that of the book. */
+  font-weight: 400;
   color: var(--color-ink);
   hyphens: auto;
   font-kerning: normal;
@@ -156,7 +158,7 @@
 .page-view {
   position: fixed;
   z-index: 6;
-  top: var(--bar-height);
+  top: calc(var(--chrome) + var(--bar-height));
   right: 0;
   bottom: 0;
   left: 0;

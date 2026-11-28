@@ -28,6 +28,7 @@ import { Versions } from "../versions/Versions";
 import { VersionView } from "../versions/VersionView";
 import { isSaveVersionShortcut, isVersionsShortcut } from "../versions/shortcuts";
 import { BookEditor } from "./BookEditor";
+import { WRITE_AT_END } from "./write-at-end";
 import { FormatSheet } from "../format/FormatSheet";
 import { PageView } from "../pages/PageView";
 import { isPageViewShortcut } from "../pages/shortcuts";
@@ -73,6 +74,9 @@ import { useWorkspaceTab } from "../workspace/useWorkspaceTab";
 import { useThreads } from "../threads/useThreads";
 import { MilestoneSlip } from "../threads/MilestoneSlip";
 import { ExportDialog } from "../export/ExportDialog";
+import { ShortcutsDialog } from "../shortcuts/ShortcutsDialog";
+import { isHelpShortcut } from "../shortcuts/table";
+import { BarActions } from "../workspace/BarActions";
 import { UpdateDialog } from "../updates/UpdateDialog";
 import { useUpdate } from "../updates/useUpdate";
 import { isExportShortcut } from "../export/shortcuts";
@@ -89,6 +93,27 @@ function focusText() {
   window.document
     .querySelector<HTMLElement>(".book-page .ProseMirror")
     ?.focus({ preventScroll: true });
+}
+
+/**
+ * A click on the sheet that is not on the text, a control or a panel takes the cursor to the end of the text:
+ * an empty chapter, or the paper below a short one, is somewhere to write too.
+ */
+function writeWhereClicked(event: React.MouseEvent) {
+  const target = event.target as HTMLElement;
+  if (
+    target.closest(
+      ".ProseMirror, button, a, input, textarea, select, label, [role=dialog], [contenteditable]",
+    )
+  )
+    return;
+  const page = window.document.querySelector<HTMLElement>(".book-page .ProseMirror");
+  if (!page) return;
+  event.preventDefault();
+  // The keyboard goes to the text at once, so not even a quick first letter is lost; the editor then takes
+  // its cursor to the end.
+  page.focus({ preventScroll: true });
+  window.dispatchEvent(new Event(WRITE_AT_END));
 }
 
 /** A version shown in place of the page, with the text it is compared with. */
@@ -199,6 +224,7 @@ export function WritingView({
   } | null>(null);
   const [openNote, setOpenNote] = useState<OpenedNote | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [updateOpen, setUpdateOpen] = useState(false);
   const [updateLater, setUpdateLater] = useState(false);
   // The paragraph where the writer is marking a milestone, from the floating menu.
@@ -360,6 +386,11 @@ export function WritingView({
     const onKeyDown = (event: KeyboardEvent) => {
       if (keepsItsOwnKeys(event.target)) return;
       // The export is of the whole work: from the text, the board or the threads, but not in focus mode.
+      if (isHelpShortcut(event)) {
+        event.preventDefault();
+        setHelpOpen((open) => !open);
+        return;
+      }
       if (isExportShortcut(event)) {
         event.preventDefault();
         if (!focusedRef.current) setExporting(true);
@@ -639,119 +670,145 @@ export function WritingView({
           <span className="writing-bar-title">{project.title}</span>
           {!focus.focused && <WorkspaceTabs tab={workspace.tab} onShow={workspace.show} />}
         </span>
-        <nav aria-label="Proyecto">
-          {onBoard && !boardHome.detached && (
-            <button
-              type="button"
-              className="action"
-              title="Abrir el Tablero en su propia ventana"
-              onClick={separateBoard}
-            >
-              Separar
-            </button>
-          )}
-          {available && !updateLater && (
-            <button
-              type="button"
-              className="action update-notice"
-              onClick={() => setUpdateOpen(true)}
-            >
-              Versión {available.version} disponible
-            </button>
-          )}
-          <button
-            type="button"
-            className="action"
-            title="Exportar la obra (F9)"
-            onClick={() => setExporting(true)}
-          >
-            Exportar
-          </button>
-          <button
-            className="action"
-            onClick={() =>
-              update({ theme: preferences.theme === "paper" ? "candlelight" : "paper" })
-            }
-          >
-            {preferences.theme === "paper" ? "Luz de vela" : "Papel"}
-          </button>
-          {!awayFromText && (
-            <>
-              <button
-                className="action"
-                aria-pressed={preferences.typewriterScrolling}
-                onClick={() => update({ typewriterScrolling: !preferences.typewriterScrolling })}
-              >
-                Rodillo {preferences.typewriterScrolling ? "sí" : "no"}
-              </button>
-              <button
-                className="action"
-                aria-pressed={preferences.counterVisible}
-                onClick={() => update({ counterVisible: !preferences.counterVisible })}
-              >
-                Contador {preferences.counterVisible ? "sí" : "no"}
-              </button>
-              <button
-                className="action"
-                aria-expanded={sideTab !== null}
-                title="Fichas (Ctrl+Mayús+E) y notas (Ctrl+Mayús+N)"
-                onClick={toggleSidePanel}
-              >
-                Fichas
-              </button>
-              <button
-                className="action"
-                aria-expanded={sheet === "squire"}
-                title="Escudero: propuestas y ajustes"
-                onClick={() => toggleSide("squire")}
-              >
-                {squire.settings.pending > 0 ? `Escudero · ${squire.settings.pending}` : "Escudero"}
-              </button>
-              <button
-                className="action"
-                aria-expanded={sheet === "ambience"}
-                onClick={toggleAmbience}
-              >
-                Ambiente
-              </button>
-              <button className="action" title="Modo concentración (F11)" onClick={focus.enter}>
-                Concentración
-              </button>
-              <button
-                className="action"
-                aria-pressed={pagesOpen}
-                title="Vista de página (F5)"
-                onClick={() => (pagesOpen ? closePages() : setPagesOpen(true))}
-              >
-                Páginas
-              </button>
-              <button
-                className="action"
-                aria-expanded={sheet === "format"}
-                onClick={() => (sheet === "format" ? closeSheet() : openSheet("format"))}
-              >
-                Formato
-              </button>
-              <button
-                className="action"
-                aria-expanded={versionsOpen}
-                title="Versiones (F6)"
-                onClick={() => (versionsOpen ? closeVersions() : setSheet("versions"))}
-              >
-                Versiones
-              </button>
-            </>
-          )}
-          <button className="action" onClick={() => void invoke("open_window")}>
-            Otra ventana
-          </button>
-          <button
-            className="action"
-            onClick={() => void savePendingNow().then(() => request("project.close", { origin }))}
-          >
-            Cerrar proyecto
-          </button>
-        </nav>
+        <BarActions
+          items={[
+            ...(available && !updateLater
+              ? [
+                  {
+                    id: "update",
+                    label: `Versión ${available.version} disponible`,
+                    className: "update-notice",
+                    priority: "bar" as const,
+                    onSelect: () => setUpdateOpen(true),
+                  },
+                ]
+              : []),
+            ...(onBoard && !boardHome.detached
+              ? [
+                  {
+                    id: "separate",
+                    label: "Separar",
+                    title: "Abrir el Tablero en su propia ventana",
+                    priority: "bar" as const,
+                    onSelect: separateBoard,
+                  },
+                ]
+              : []),
+            ...(!awayFromText
+              ? [
+                  {
+                    id: "ambience",
+                    label: "Ambiente",
+                    expanded: sheet === "ambience",
+                    priority: 6,
+                    onSelect: toggleAmbience,
+                  },
+                  {
+                    id: "focus",
+                    label: "Concentración",
+                    title: "Modo concentración (F11)",
+                    priority: 5,
+                    onSelect: focus.enter,
+                  },
+                  {
+                    id: "pages",
+                    label: "Páginas",
+                    title: "Vista de página (F5)",
+                    pressed: pagesOpen,
+                    priority: 9,
+                    onSelect: () => (pagesOpen ? closePages() : setPagesOpen(true)),
+                  },
+                  {
+                    id: "format",
+                    label: "Formato",
+                    expanded: sheet === "format",
+                    priority: 7,
+                    onSelect: () => (sheet === "format" ? closeSheet() : openSheet("format")),
+                  },
+                  {
+                    id: "versions",
+                    label: "Versiones",
+                    title: "Versiones (F6)",
+                    expanded: versionsOpen,
+                    priority: 8,
+                    onSelect: () => (versionsOpen ? closeVersions() : setSheet("versions")),
+                  },
+                ]
+              : []),
+            {
+              id: "window",
+              label: "Otra ventana",
+              priority: 1,
+              onSelect: () => void invoke("open_window"),
+            },
+            {
+              id: "theme",
+              label: preferences.theme === "paper" ? "Luz de vela" : "Papel",
+              priority: 4,
+              onSelect: () =>
+                update({ theme: preferences.theme === "paper" ? "candlelight" : "paper" }),
+            },
+            ...(!awayFromText
+              ? [
+                  {
+                    id: "typewriter",
+                    label: `Rodillo ${preferences.typewriterScrolling ? "sí" : "no"}`,
+                    pressed: preferences.typewriterScrolling,
+                    priority: 3,
+                    onSelect: () =>
+                      update({ typewriterScrolling: !preferences.typewriterScrolling }),
+                  },
+                  {
+                    id: "counter",
+                    label: `Contador ${preferences.counterVisible ? "sí" : "no"}`,
+                    pressed: preferences.counterVisible,
+                    priority: 2,
+                    onSelect: () => update({ counterVisible: !preferences.counterVisible }),
+                  },
+                  {
+                    id: "elements",
+                    label: "Fichas",
+                    title: "Fichas (Ctrl+Mayús+E) y notas (Ctrl+Mayús+N)",
+                    expanded: sideTab !== null,
+                    priority: "bar" as const,
+                    onSelect: toggleSidePanel,
+                  },
+                  {
+                    id: "squire",
+                    label:
+                      squire.settings.pending > 0
+                        ? `Escudero · ${squire.settings.pending}`
+                        : "Escudero",
+                    title: "Escudero: propuestas y ajustes",
+                    expanded: sheet === "squire",
+                    priority: "bar" as const,
+                    onSelect: () => toggleSide("squire"),
+                  },
+                ]
+              : []),
+            {
+              id: "export",
+              label: "Exportar",
+              title: "Exportar la obra (F9)",
+              priority: "bar",
+              onSelect: () => setExporting(true),
+            },
+            {
+              id: "shortcuts",
+              label: "Teclas rápidas",
+              title: "Teclas rápidas (F1)",
+              priority: "menu",
+              onSelect: () => setHelpOpen(true),
+            },
+            {
+              id: "close",
+              label: "Cerrar proyecto",
+              priority: "menu",
+              onSelect: () =>
+                void savePendingNow().then(() => request("project.close", { origin })),
+            },
+          ]}
+        />
       </header>
 
       <div
@@ -780,7 +837,7 @@ export function WritingView({
           <AnimatedBackdrop scene={backdrop.scene} theme={preferences.theme} />
         )}
 
-        <main className="writing-main">
+        <main className="writing-main" onMouseDown={writeWhereClicked}>
           {problem && (
             <p className="writing-problem" role="alert">
               {problem} <LogFolderButton />
@@ -1085,6 +1142,8 @@ export function WritingView({
           }}
         />
       )}
+
+      {helpOpen && <ShortcutsDialog onClose={() => setHelpOpen(false)} />}
 
       {exporting && (
         <ExportDialog

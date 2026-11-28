@@ -61,13 +61,21 @@ async fn open_window(app: AppHandle, board: Option<bool>) -> Result<(), String> 
         if board { "board" } else { "window" },
         WINDOW_COUNTER.fetch_add(1, Ordering::Relaxed)
     );
-    WebviewWindowBuilder::new(&app, &label, WebviewUrl::default())
+    let builder = WebviewWindowBuilder::new(&app, &label, WebviewUrl::default())
         .title(if board {
             "Rocinante · Tablero"
         } else {
             "Rocinante"
         })
-        .inner_size(if board { 1100.0 } else { 900.0 }, 700.0)
+        .inner_size(if board { 1100.0 } else { 900.0 }, 700.0);
+    // Rocinante draws its own bar (src/ui/src/app/TitleBar.tsx); macOS keeps its traffic lights over it.
+    #[cfg(target_os = "macos")]
+    let builder = builder
+        .title_bar_style(tauri::TitleBarStyle::Overlay)
+        .hidden_title(true);
+    #[cfg(not(target_os = "macos"))]
+    let builder = builder.decorations(false);
+    builder
         .build()
         .map(|_| ())
         .map_err(|error| error.to_string())

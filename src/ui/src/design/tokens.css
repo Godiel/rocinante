@@ -63,11 +63,19 @@ body,
   margin: 0;
 }
 
+:root {
+  --chrome: 0px;
+}
+
 body {
+  padding-top: var(--chrome);
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-book);
   font-size: var(--text-ui);
+  /* The interface in medium weight, so its small capitals read on paper and by candlelight; the text of
+     the work keeps its own weight (book-editor.css, pages.css). */
+  font-weight: 500;
   line-height: var(--leading-ui);
   font-feature-settings:
     "onum" 1,
@@ -139,7 +147,7 @@ textarea {
 .halted {
   position: fixed;
   z-index: 10;
-  top: 0;
+  top: var(--chrome);
   left: 50%;
   max-width: min(40rem, calc(100% - 2 * var(--space-4)));
   margin-top: var(--space-2);

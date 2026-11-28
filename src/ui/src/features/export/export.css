@@ -1,12 +1,12 @@
 /* The export, over the work: a sheet of paper in the middle of the window. */
 .export-backdrop {
   position: fixed;
-  inset: 0;
+  inset: var(--chrome) 0 0 0;
   z-index: 40;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: calc(var(--bar-height) + var(--space-5));
+  padding-top: calc(var(--chrome) + var(--bar-height) + var(--space-5));
   background: rgb(0 0 0 / 18%);
 }
 
